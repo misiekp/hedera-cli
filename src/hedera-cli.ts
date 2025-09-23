@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import commands from './commands';
 import { setColorEnabled } from './utils/color';
 import { installGlobalErrorHandlers } from './utils/errors';
 import { Logger } from './utils/logger';
 import { setGlobalOutputMode } from './utils/output';
+import { PluginManifest } from './core/interfaces';
+import { accountPlugin } from './core/plugins/account';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };
@@ -54,12 +55,24 @@ program.hook('preAction', () => {
   setGlobalOutputMode({ json: Boolean(opts.json) });
 });
 
-// Auto-register all exported command registrar functions
-Object.values(commands).forEach((register) => {
-  if (typeof register === 'function') {
-    register(program);
-  }
+const plugins: PluginManifest[] = [accountPlugin];
+
+plugins.forEach((plugin) => {
+  const pluginRootCommand = program.command(plugin.cliName);
+
+  plugin.commands.forEach((command) => {
+    pluginRootCommand.command(command.cliName).action(() => {
+      command.handler();
+    });
+  });
 });
+
+// // Auto-register all exported command registrar functions
+// Object.values(commands).forEach((register) => {
+//   if (typeof register === 'function') {
+//     register(program);
+//   }
+// });
 
 installGlobalErrorHandlers();
 
