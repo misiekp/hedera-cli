@@ -34,6 +34,8 @@ export function registerPlugin(program: Command, plugin: PluginManifest) {
   }
 
   for (const command of plugin.commands) {
+    // @TODO Type safety for register commands
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     registerCommand(root, command);
   }
 }

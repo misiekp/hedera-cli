@@ -1,3 +1,5 @@
+import { WrapConfig } from '../commands/shared/wrapAction';
+
 export interface PluginManifest {
   name: string;
   version: string;
@@ -5,7 +7,7 @@ export interface PluginManifest {
   description?: string;
   compatibility: { cli: string; core: string; api?: string };
   capabilities: string[];
-  commands: CommandSpec[];
+  commands: CommandSpec<any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   stateSchemas?: Array<{
     namespace: string;
     version: number;
@@ -29,6 +31,7 @@ export interface CommandSpec<Options extends AnyOptions = AnyOptions> {
   description?: string;
   options: Array<CommandOption>;
   handler: (options: Options) => void | Promise<void>; // path within plugin package
+  config?: WrapConfig<Options>;
 }
 
 export interface CommandHandlerArgs {

@@ -48,4 +48,7 @@ export const balanceCommand: CommandSpec<GetAccountBalanceOptions> = {
       });
     }
   },
+  config: {
+    log: (o) => `Getting balance for ${o.accountIdOrName}`,
+  },
 };
