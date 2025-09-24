@@ -1,0 +1,39 @@
+import { CommandOption, CommandSpec, PluginManifest } from './interfaces';
+import { Command } from 'commander';
+import { wrapAction } from '../commands/shared/wrapAction';
+
+function registerOption(cmd: Command, option: CommandOption) {
+  if (option.required) {
+    return cmd.requiredOption(option.flags, option.description);
+  }
+
+  return cmd.option(option.flags, option.description);
+}
+
+function registerCommand(root: Command, command: CommandSpec) {
+  let cmd = root.command(command.cliName);
+
+  if (command.description) {
+    cmd = cmd.description(command.description);
+  }
+
+  for (const option of command.options) {
+    cmd = registerOption(cmd, option);
+  }
+
+  cmd.action(wrapAction(command.handler));
+
+  return cmd;
+}
+
+export function registerPlugin(program: Command, plugin: PluginManifest) {
+  let root = program.command(plugin.cliName);
+
+  if (plugin.description) {
+    root = root.description(plugin.description);
+  }
+
+  for (const command of plugin.commands) {
+    registerCommand(root, command);
+  }
+}

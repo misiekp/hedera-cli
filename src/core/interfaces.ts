@@ -14,18 +14,21 @@ export interface PluginManifest {
   }>;
 }
 
-export interface CommandSpec {
-  name: string; // e.g., 'token create',
+export interface CommandOption {
+  flags: string;
+  description: string;
+  required?: boolean;
+}
+
+export type AnyOptions = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+export interface CommandSpec<Options extends AnyOptions = AnyOptions> {
+  name: string;
   cliName: string;
   summary?: string;
   description?: string;
-  options?: Array<{
-    name: string;
-    type: 'string' | 'number' | 'boolean' | 'array';
-    required?: boolean;
-    default?: unknown;
-  }>;
-  handler: () => void; // path within plugin package
+  options: Array<CommandOption>;
+  handler: (options: Options) => void | Promise<void>; // path within plugin package
 }
 
 export interface CommandHandlerArgs {

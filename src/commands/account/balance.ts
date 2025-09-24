@@ -1,8 +1,8 @@
-import accountUtils from '../../utils/account';
-import { DomainError } from '../../utils/errors';
-import { isJsonOutput, printOutput } from '../../utils/output';
+// import accountUtils from '../../utils/account';
+// import { DomainError } from '../../utils/errors';
+// import { isJsonOutput, printOutput } from '../../utils/output';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import { wrapAction } from '../shared/wrapAction';
+// import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
 
@@ -18,39 +18,39 @@ export default (program: Command) => {
       '(Required) Account ID or account name to retrieve balance for',
     )
     .option('-h, --only-hbar', 'Show only Hbar balance')
-    .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID')
-    .action(
-      wrapAction<GetAccountBalanceOptions>(
-        async (options) => {
-          if (options.onlyHbar && options.tokenId) {
-            throw new DomainError(
-              'You cannot use both --only-hbar and --token-id options at the same time.',
-            );
-          }
-          await accountUtils.getAccountBalance(
-            options.accountIdOrName,
-            options.onlyHbar,
-            options.tokenId,
-          );
-          if (isJsonOutput()) {
-            printOutput('accountBalance', {
-              target: options.accountIdOrName,
-              onlyHbar: options.onlyHbar || false,
-              tokenId: options.tokenId || null,
-            });
-          }
-        },
-        { log: (o) => `Getting balance for ${o.accountIdOrName}` },
-      ),
-    );
+    .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID');
+  // .action(
+  //   wrapAction<GetAccountBalanceOptions>(
+  //     async (options) => {
+  //       if (options.onlyHbar && options.tokenId) {
+  //         throw new DomainError(
+  //           'You cannot use both --only-hbar and --token-id options at the same time.',
+  //         );
+  //       }
+  //       await accountUtils.getAccountBalance(
+  //         options.accountIdOrName,
+  //         options.onlyHbar,
+  //         options.tokenId,
+  //       );
+  //       if (isJsonOutput()) {
+  //         printOutput('accountBalance', {
+  //           target: options.accountIdOrName,
+  //           onlyHbar: options.onlyHbar || false,
+  //           tokenId: options.tokenId || null,
+  //         });
+  //       }
+  //     },
+  //     { log: (o) => `Getting balance for ${o.accountIdOrName}` },
+  //   ),
+  // );
   program.addHelpText(
     'afterAll',
     '\nExamples:\n  $ hedera account balance -a 0.0.1234\n  $ hedera account balance -a alice -h --json',
   );
 };
 
-interface GetAccountBalanceOptions {
-  onlyHbar: boolean;
-  tokenId: string;
-  accountIdOrName: string;
-}
+// interface GetAccountBalanceOptions {
+//   onlyHbar: boolean;
+//   tokenId: string;
+//   accountIdOrName: string;
+// }

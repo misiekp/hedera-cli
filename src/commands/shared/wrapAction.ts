@@ -1,6 +1,7 @@
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
+import { AnyOptions } from '../../core/interfaces';
 
 const logger = Logger.getInstance();
 
@@ -15,7 +16,7 @@ export interface WrapConfig<T> {
  * 2. Emit a verbose log (optional)
  * 3. Apply standard error handling via exitOnError
  */
-export function wrapAction<T extends Record<string, any>>( // eslint-disable-line @typescript-eslint/no-explicit-any
+export function wrapAction<T extends AnyOptions>(
   handler: (opts: T) => Promise<void> | void,
   config?: WrapConfig<T>,
 ) {
