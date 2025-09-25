@@ -1,10 +1,10 @@
 import {
-  DomainError,
   exitOnError,
   installGlobalErrorHandlers,
 } from '../../src/utils/errors';
 import { Logger } from '../../src/utils/logger';
 import telemetryUtils from '../../src/utils/telemetry';
+import { DomainError } from '../../src/core/errors';
 
 jest.mock('../../src/utils/telemetry', () => ({
   __esModule: true,
