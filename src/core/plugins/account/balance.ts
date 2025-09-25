@@ -1,7 +1,4 @@
 import { CommandSpec } from '../../interfaces';
-import { DomainError } from '../../../utils/errors';
-import accountUtils from '../../../utils/account';
-import { isJsonOutput, printOutput } from '../../../utils/output';
 
 interface GetAccountBalanceOptions {
   accountIdOrName: string;
@@ -29,19 +26,21 @@ export const balanceCommand: CommandSpec<GetAccountBalanceOptions> = {
       description: 'Show balance for a specific token ID',
     },
   ],
-  async handler(options) {
+  async handler(options, { api, errors }) {
     if (options.onlyHbar && options.tokenId) {
-      throw new DomainError(
+      throw new errors.DomainError(
         'You cannot use both --only-hbar and --token-id options at the same time.',
       );
     }
-    await accountUtils.getAccountBalance(
+
+    await api.account.getAccountBalance(
       options.accountIdOrName,
       options.onlyHbar,
       options.tokenId,
     );
-    if (isJsonOutput()) {
-      printOutput('accountBalance', {
+
+    if (api.output.isJsonOutput()) {
+      api.output.printOutput('accountBalance', {
         target: options.accountIdOrName,
         onlyHbar: options.onlyHbar || false,
         tokenId: options.tokenId || null,

@@ -1,7 +1,7 @@
 import { Logger } from '../utils/logger';
-import { DomainError } from '../utils/errors';
 import type { Account, Token, Topic, Script } from '../../types';
 import { actions, getState } from './store';
+import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 

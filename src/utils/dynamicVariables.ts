@@ -3,7 +3,7 @@ import {
   saveKey as storeSaveKey,
   type StoreState,
 } from '../state/store';
-import { DomainError } from './errors';
+import { DomainError } from '../core/errors';
 
 interface CommandAction {
   action: string;

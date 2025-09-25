@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { saveKey as storeSaveKey } from '../state/store';
-import { DomainError } from '../utils/errors';
 import { Logger } from '../utils/logger';
 import { wrapAction } from './shared/wrapAction';
+import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 

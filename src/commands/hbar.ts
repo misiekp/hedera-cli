@@ -2,11 +2,11 @@ import { Command } from 'commander';
 import type { Account } from '../../types';
 import { getState } from '../state/store';
 import enquirerUtils from '../utils/enquirer';
-import { DomainError } from '../utils/errors';
 import hbarUtils from '../utils/hbar';
 import stateUtils from '../utils/state';
 import { telemetryPreAction } from './shared/telemetryHook';
 import { wrapAction } from './shared/wrapAction';
+import { DomainError } from '../core/errors';
 export default (program: Command) => {
   const hbar = program.command('hbar').alias('hb');
 

@@ -1,5 +1,5 @@
 import { Transaction, PrivateKey } from '@hashgraph/sdk';
-import { DomainError } from './errors';
+import { DomainError } from '../core/errors';
 
 interface SigningRequirements {
   [action: string]: {

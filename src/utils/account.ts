@@ -13,9 +13,9 @@ import { color, heading, warn } from '../utils/color';
 import { display } from '../utils/display';
 import { Logger } from '../utils/logger';
 import stateUtils from '../utils/state';
-import { DomainError } from './errors';
 
 import type { Account } from '../../types';
+import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 
@@ -264,7 +264,7 @@ function importAccountId(id: string, name: string): Account {
   return account;
 }
 
-async function getAccountBalance(
+export async function getAccountBalance(
   accountIdOrName: string,
   onlyHbar: boolean = false,
   tokenId?: string,

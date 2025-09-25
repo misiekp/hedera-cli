@@ -1,5 +1,5 @@
 import { PluginManifest } from '../../interfaces';
-import { balanceCommand } from './balance.command';
+import { balanceCommand } from './balance';
 
 export const accountPlugin: PluginManifest = {
   name: 'Account Plugin',

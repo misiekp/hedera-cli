@@ -9,12 +9,12 @@ import {
 } from '../state/store';
 import { addAccount, addToken, addScript } from '../state/mutations';
 import { Logger } from '../utils/logger';
-import { DomainError } from '../utils/errors';
 import { wrapAction } from './shared/wrapAction';
 
 import type { State, Account, Token, Script } from '../../types';
 import type { StoreState } from '../state/store';
 import type { Command as CommanderCommand } from 'commander';
+import { DomainError } from '../core/errors';
 
 // Local narrowed shapes for partial restores
 type AccountsOnly = Record<string, Account>;

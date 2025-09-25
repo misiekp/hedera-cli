@@ -2,8 +2,8 @@ import { TransferTransaction, Hbar, HbarUnit } from '@hashgraph/sdk';
 
 import stateUtils from './state';
 import { Logger } from '../utils/logger';
-import { DomainError } from './errors';
 import signUtils from './sign';
+import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 

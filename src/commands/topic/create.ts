@@ -4,13 +4,13 @@ import type { Topic } from '../../../types';
 import { addTopic } from '../../state/mutations';
 import { heading, success } from '../../utils/color';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { DomainError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import signUtils from '../../utils/sign';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
+import { DomainError } from '../../core/errors';
 
 const logger = Logger.getInstance();
 

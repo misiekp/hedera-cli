@@ -1,10 +1,10 @@
 import accountUtils from '../../utils/account';
-import { DomainError } from '../../utils/errors';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
+import { DomainError } from '../../core/errors';
 
 // logging handled via wrapAction config
 

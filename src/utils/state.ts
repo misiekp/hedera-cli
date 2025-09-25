@@ -15,7 +15,6 @@ import {
   saveState as storeSaveState,
   updateState as storeUpdateState,
 } from '../state/store';
-import { DomainError } from './errors';
 import { Logger } from './logger';
 
 import type {
@@ -27,6 +26,7 @@ import type {
   Token,
   Topic,
 } from '../../types';
+import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 

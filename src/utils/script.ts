@@ -1,9 +1,9 @@
 import { selectScripts } from '../state/selectors';
 import { updateState as storeUpdateState } from '../state/store';
 import { color, heading } from './color';
-import { DomainError } from './errors';
 import { Logger } from './logger';
 import { isJsonOutput, printOutput } from './output';
+import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 

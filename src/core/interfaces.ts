@@ -1,4 +1,6 @@
 import { WrapConfig } from '../commands/shared/wrapAction';
+import { CoreApi } from './core-api';
+import { Errors } from './errors';
 
 export interface PluginManifest {
   name: string;
@@ -30,13 +32,14 @@ export interface CommandSpec<Options extends AnyOptions = AnyOptions> {
   summary?: string;
   description?: string;
   options: Array<CommandOption>;
-  handler: (options: Options) => void | Promise<void>; // path within plugin package
+  handler: (options: Options, api: CommandHandlerArgs) => void | Promise<void>; // path within plugin package
   config?: WrapConfig<Options>;
 }
 
 export interface CommandHandlerArgs {
+  api: CoreApi;
+  errors: Errors;
   // args: Record<string, unknown>;
-  // api: CoreAPI; // injected instance per execution
   // state: StateManager; // namespaced access provided by Core
   // config: ConfigView;
   // telemetry: Telemetry;

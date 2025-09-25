@@ -5,10 +5,10 @@ import {
 } from '@hashgraph/sdk';
 
 import { Logger } from './logger';
-import { DomainError } from './errors';
 import api from '../api';
 import stateUtils from '../utils/state';
 import signUtils from '../utils/sign';
+import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 

@@ -1,15 +1,6 @@
 import telemetryUtils from './telemetry';
 import { Logger } from './logger';
-
-export class DomainError extends Error {
-  public code: number;
-
-  constructor(message: string, code = 1) {
-    super(message);
-    this.name = 'DomainError';
-    this.code = code;
-  }
-}
+import { DomainError } from '../core/errors';
 
 // Convenience helper to throw a DomainError (replaces scattered process.exit calls)
 export function fail(message: string, code = 1): never {

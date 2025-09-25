@@ -3,11 +3,11 @@ import type { Account } from '../../../types/state';
 import { getState } from '../../state/store';
 import accountUtils from '../../utils/account';
 import enquirerUtils from '../../utils/enquirer';
-import { DomainError } from '../../utils/errors';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
+import { DomainError } from '../../core/errors';
 
 export default (program: Command) => {
   program
