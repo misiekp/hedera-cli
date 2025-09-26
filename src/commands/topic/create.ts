@@ -8,7 +8,6 @@ import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import signUtils from '../../utils/sign';
 import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 import { DomainError } from '../../core/errors';
 
@@ -17,7 +16,6 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('create')
-    .hook('preAction', telemetryPreAction)
     .description('Create a new topic')
     .addHelpText(
       'afterAll',

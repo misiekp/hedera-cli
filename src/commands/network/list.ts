@@ -9,7 +9,6 @@ import {
 } from '../../utils/networkHealth';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 
@@ -18,7 +17,6 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   const cmd = program
     .command('list')
-    .hook('preAction', telemetryPreAction)
     .description('List all available networks')
     .action(
       exitOnError(async () => {

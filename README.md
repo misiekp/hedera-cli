@@ -16,7 +16,6 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 - [Video Guide](#video-guide)
 - [Commands](#commands)
   - [Setup Commands](#setup-commands)
-  - [Telemetry Commands](#telemetry-commands)
   - [Smart Contract Commands](#smart-contract-commands)
   - [Network Commands](#network-commands)
   - [Wait Command](#wait-command)
@@ -95,10 +94,10 @@ LOCALNET_OPERATOR_ID=0.0.2
 LOCALNET_OPERATOR_KEY=302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137
 ```
 
-Next, set up the CLI tool with the command. **The `--telemetry` flag is optional and enables telemetry. By default, telemetry is disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information. If you don't want us to collect telemetry data, run the command without the `--telemetry` flag.**
+Next, set up the CLI tool with the command.
 
 ```sh
-node dist/hedera-cli.js setup init --telemetry
+node dist/hedera-cli.js setup init
 ```
 
 The `setup init` command will also create the different operator accounts in your address book (persisted state file) so you can use them in your commands.
@@ -184,7 +183,6 @@ Learn how to use the Hedera CLI Tool by watching the video below.
 Let's explore the different commands, their options, and outputs.
 
 - [Setup Commands](#setup-commands): Instantiate or reset the Hedera CLI tool
-- [Telemetry Commands](#telemetry-commands): Enable or disable telemetry
 - [Network Commands](#network-commands): Switch Hedera networks
 - [Wait Command](#wait-command): Wait for a specified amount of seconds
 - [Account Commands](#account-commands): Create and manage accounts
@@ -221,12 +219,8 @@ setup reload
 Sets up the CLI with the operator key and ID.
 
 ```sh
-hcli setup init [--telemetry]
+hcli setup init
 ```
-
-Flags:
-
-- **Telemetry:** (optional) Enables telemetry. By default disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information.
 
 When executed, the setup command performs several key functions:
 
@@ -241,40 +235,7 @@ Once the localnet, previewnet, testnet, and mainnet operator key and ID are vali
 Reload the operator key and ID from the `.env` file. This command is useful when you add new networks to your `.env` file and want to update the state, so you can use the new networks.
 
 ```sh
-hcli setup reload [--telemetry]
-```
-
-Flags:
-
-- **Telemetry:** (optional) Enables telemetry. By default disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information.
-
-## Telemetry Commands
-
-### Overview
-
-The telemetry command in the Hedera CLI tool is designed to enable or disable telemetry. This feature allows users to opt-in or opt-out of telemetry data collection. Hedera **anonymizes data** and only records the command name, not the parameters or any other sensitive information. For example, it records `account create` but not the account name or ID. The data is used to improve the CLI tool and provide better features and functionality, by trying to understand how users use the CLI. However, the CLI tool uses a UUID to identify the user, so no personal information is collected. This allows us to better understand how users interact with the CLI tool.
-
-```sh
-telemetry enable
-telemetry disable
-```
-
-#### Usage
-
-**1. Enable telemetry:**
-
-This command enables telemetry and sets the `telemetry` variable in the state to `1`.
-
-```sh
-hcli telemetry enable
-```
-
-**2. Disable telemetry:**
-
-This command disables telemetry and sets the `telemetry` variable in the state to `0`.
-
-```sh
-hcli telemetry disable
+hcli setup reload
 ```
 
 ## Smart Contract Commands
@@ -1279,7 +1240,6 @@ Example contents:
 ```json
 {
   "network": "testnet",
-  "telemetry": 0,
   "networks": {
     "localnet": {
       "rpcUrl": "http://localhost:7546",
@@ -1322,20 +1282,17 @@ hcli config view --json   # machine-readable output
 
 ### User config validation
 
-User-provided configuration overlays are validated against a strict schema. If the file contains unknown keys, invalid URL fields, or out-of-range values (e.g. `telemetry: 2`), the entire overlay is ignored and a warning is printed. This prevents partially-applied ambiguous configuration.
+User-provided configuration overlays are validated against a strict schema. If the file contains unknown keys, invalid URL fields, or out-of-range values, the entire overlay is ignored and a warning is printed. This prevents partially-applied ambiguous configuration.
 
 Allowed keys:
 
 - `network` (string)
-- `telemetry` (0 or 1)
-- `telemetryServer` (valid URL)
 - `networks` (object mapping network name -> partial network config with `mirrorNodeUrl` (URL), `rpcUrl` (URL), `operatorKey`, `operatorId`, `hexKey` strings)
 
 Example warning:
 
 ```
 Invalid user config at /path/hedera-cli.config.json:
-telemetry: Number must be less than or equal to 1
 extraKey: Unrecognized key(s) in object
 ```
 
@@ -1345,7 +1302,7 @@ Fix the issues and re-run any command; the corrected file will be re-loaded auto
 
 1. Base defaults (`src/state/config.ts`)
 2. User config (cosmiconfig or `HCLI_CONFIG_FILE`)
-3. Persisted runtime state (accounts, tokens, topics, scripts, args, telemetry flag, selected network)
+3. Persisted runtime state (accounts, tokens, topics, scripts, args, selected network)
 
 ## Inspecting state
 
@@ -1634,7 +1591,7 @@ logger.verbose('Diagnostic detail');
 logger.error('Something failed');
 ```
 
-All command handlers are wrapped with a standard error guard (`wrapAction` or `exitOnError`) ensuring that domain-specific failures (thrown as `DomainError`) set `process.exitCode` instead of abruptly exiting. This guarantees consistent telemetry flushing and avoids duplicated `try/catch` blocks. A unit test (`wrappingConsistency.test.ts`) enforces that every `.action(` is wrapped.
+All command handlers are wrapped with a standard error guard (`wrapAction` or `exitOnError`) ensuring that domain-specific failures (thrown as `DomainError`) set `process.exitCode` instead of abruptly exiting. This avoids duplicated `try/catch` blocks. A unit test (`wrappingConsistency.test.ts`) enforces that every `.action(` is wrapped.
 
 When adding a new command:
 

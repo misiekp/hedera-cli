@@ -1,6 +1,5 @@
 {
   "network": "testnet",
-  "telemetry": 0,
   "debug": false,
   "networks": {
     "localnet": {

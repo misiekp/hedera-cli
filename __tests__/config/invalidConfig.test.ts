@@ -24,8 +24,6 @@ describe('invalid user config handling', () => {
 
     // Because file is invalid we should still have default base network (localnet) from baseConfig
     expect(state.network).toBe('localnet');
-    // Telemetry default is 0 from base config
-    expect(state.telemetry).toBe(0);
     // Ensure base networks present
     expect(state.networks.localnet).toBeDefined();
     expect(state.networks.testnet).toBeDefined();

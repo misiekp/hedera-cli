@@ -1,6 +1,5 @@
 {
   "network": "solo-local",
-  "telemetry": 0,
   "debug": false,
   "networks": {
     "localnet": {

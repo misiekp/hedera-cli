@@ -11,9 +11,9 @@ import {
   saveScriptArgument as storeSaveScriptArgument,
   saveState as storeSaveState,
 } from '../../src/state/store';
-import { DomainError } from '../../src/utils/errors';
 import type { Script, Token, Topic } from '../../types';
 import { alice, baseState } from '../helpers/state';
+import { DomainError } from '../../src/core/errors';
 
 describe('state mutations helpers', () => {
   beforeEach(() => {

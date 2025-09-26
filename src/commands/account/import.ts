@@ -2,13 +2,11 @@ import { Command } from 'commander';
 import accountUtils from '../../utils/account';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { isJsonOutput, printOutput } from '../../utils/output';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 export default (program: Command) => {
   program
     .command('import')
-    .hook('preAction', telemetryPreAction)
     .description(
       'Import an existing account using an account ID, name, type, and optional private key.',
     )

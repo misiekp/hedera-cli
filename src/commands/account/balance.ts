@@ -1,6 +1,5 @@
 import accountUtils from '../../utils/account';
 import { isJsonOutput, printOutput } from '../../utils/output';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
@@ -11,7 +10,6 @@ import { DomainError } from '../../core/errors';
 export default (program: Command) => {
   program
     .command('balance')
-    .hook('preAction', telemetryPreAction)
     .description('Retrieve the balance for an account ID or name')
     .requiredOption(
       '-a, --account-id-or-name <accountIdOrName>',

@@ -3,8 +3,6 @@ import { loadUserConfig, resolveStateFilePath } from '../config/loader';
 import { getState } from '../state/store';
 import { exitOnError } from '../utils/errors';
 import { Logger } from '../utils/logger';
-import stateUtils from '../utils/state';
-import telemetryUtils from '../utils/telemetry';
 
 const logger = Logger.getInstance();
 
@@ -17,13 +15,6 @@ export default (program: Command) => {
     .command('view')
     .option('--active', 'Show only the effective active network config')
     .option('--json', 'Output raw JSON (machine readable)')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
     .description('View merged configuration (base + user overrides + runtime)')
     .action(
       exitOnError((options: { active?: boolean; json?: boolean }) => {
@@ -50,8 +41,6 @@ export default (program: Command) => {
           stateFile: resolveStateFilePath(),
           activeNetwork,
           networks: state.networks,
-          telemetry: state.telemetry,
-          telemetryServer: state.telemetryServer,
           userOverridesKeys: Object.keys(user || {}),
         };
         if (options.json) {

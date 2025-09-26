@@ -3,7 +3,6 @@ import { isJsonOutput, printOutput } from '../../utils/output';
 import { myParseInt, parseIntOption } from '../../utils/verification';
 // Removed direct exitOnError usage; wrapAction handles error wrapping
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
@@ -13,7 +12,6 @@ import { Command } from 'commander';
 export default (program: Command) => {
   program
     .command('create')
-    .hook('preAction', telemetryPreAction)
     .description(
       'Create a new Hedera account using NEW recovery words and keypair. This is default.',
     )

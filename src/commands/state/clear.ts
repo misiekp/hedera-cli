@@ -4,7 +4,6 @@ import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 
@@ -38,7 +37,6 @@ function clear(
 export default (program: Command) => {
   program
     .command('clear')
-    .hook('preAction', telemetryPreAction)
     .description('Clear all state and reset to default')
     .option('-a, --skip-accounts', 'Skip resetting accounts', false)
     .option('-t, --skip-tokens', 'Skip resetting tokens', false)

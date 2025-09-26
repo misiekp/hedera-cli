@@ -10,7 +10,6 @@ import signUtils from '../../utils/sign';
 import stateUtils from '../../utils/state';
 import tokenUtils from '../../utils/token';
 import { myParseInt } from '../../utils/verification';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 import { DomainError } from '../../core/errors';
 
@@ -113,7 +112,6 @@ async function createFungibleToken(
 export default (program: Command) => {
   program
     .command('create')
-    .hook('preAction', telemetryPreAction)
     .description('Create a new fungible token')
     .addHelpText(
       'afterAll',

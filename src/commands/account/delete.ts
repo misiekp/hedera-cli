@@ -5,14 +5,12 @@ import accountUtils from '../../utils/account';
 import enquirerUtils from '../../utils/enquirer';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 import { DomainError } from '../../core/errors';
 
 export default (program: Command) => {
   program
     .command('delete')
-    .hook('preAction', telemetryPreAction)
     .description('Delete an account from the address book')
     .option('-n, --name <name>', 'account must have a name')
     .option('-i, --id <id>', 'Account ID')

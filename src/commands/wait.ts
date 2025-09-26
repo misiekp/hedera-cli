@@ -1,6 +1,5 @@
 import { exitOnError } from '../utils/errors';
 import { Logger } from '../utils/logger';
-import { telemetryPreAction } from './shared/telemetryHook';
 
 import { Command } from 'commander';
 
@@ -14,7 +13,6 @@ export default (program: Command) => {
   program
     .command('wait <seconds>')
     .alias('w')
-    .hook('preAction', telemetryPreAction)
     .description('Wait for a specified number of seconds')
     .action(
       exitOnError(async (seconds: string) => {

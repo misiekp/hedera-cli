@@ -1,4 +1,3 @@
-import telemetryUtils from './telemetry';
 import { Logger } from './logger';
 import { DomainError } from '../core/errors';
 
@@ -17,11 +16,6 @@ export function exitOnError<T extends (...args: any[]) => void | Promise<void>>(
     } catch (e: unknown) {
       if (e instanceof DomainError) {
         process.exitCode = e.code;
-        try {
-          await telemetryUtils.flush?.();
-        } catch {
-          /* ignore flush errors */
-        }
         return;
       }
       throw e;
@@ -32,14 +26,6 @@ export function exitOnError<T extends (...args: any[]) => void | Promise<void>>(
 // Install global handlers for unhandled rejections & uncaught exceptions (optional hardening)
 export function installGlobalErrorHandlers(): void {
   const logger = Logger.getInstance();
-
-  const flushTelemetry = async () => {
-    try {
-      await telemetryUtils.flush?.();
-    } catch {
-      /* ignore telemetry flush errors */
-    }
-  };
 
   const g = global as unknown as { _hcliGlobalHandlersInstalled?: boolean };
   if (!g._hcliGlobalHandlersInstalled) {
@@ -56,8 +42,6 @@ export function installGlobalErrorHandlers(): void {
         logger.error('Unhandled promise rejection', detail);
         if (process.exitCode == null) process.exitCode = 1;
       }
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      flushTelemetry();
     });
 
     process.on('uncaughtException', (err: unknown) => {
@@ -71,8 +55,6 @@ export function installGlobalErrorHandlers(): void {
         logger.error('Uncaught exception', detail);
         if (process.exitCode == null) process.exitCode = 1;
       }
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      flushTelemetry();
     });
   }
 }

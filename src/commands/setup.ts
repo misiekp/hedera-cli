@@ -1,27 +1,18 @@
 import { Command } from 'commander';
 import * as dotenv from 'dotenv';
 import config from '../state/config';
-import {
-  saveKey as storeSaveKey,
-  saveState as storeSaveState,
-} from '../state/store';
+import { saveState as storeSaveState } from '../state/store';
 import accountUtils from '../utils/account';
 import { Logger } from '../utils/logger';
 import setupUtils from '../utils/setup';
 import stateUtils from '../utils/state';
-import { telemetryPreAction } from './shared/telemetryHook';
 import { wrapAction } from './shared/wrapAction';
 import { DomainError } from '../core/errors';
 
 const logger = Logger.getInstance();
 
 interface SetupOptions {
-  telemetry: boolean;
   path?: string;
-}
-
-interface ReloadOptions {
-  telemetry: boolean;
 }
 
 /**
@@ -64,13 +55,8 @@ async function verifyOperatorBalance(
 /**
  * @description Setup the CLI with operator key and ID for different networks
  * @param action Action to perform (init or reload)
- * @param telemetry Flag to enable telemetry
  */
-async function setupCLI(
-  action: string,
-  telemetry: boolean = false,
-  envPath?: string,
-): Promise<void> {
+async function setupCLI(action: string, envPath?: string): Promise<void> {
   // Load environment variables from .env file (optional custom path)
   const envConfig = dotenv.config(envPath ? { path: envPath } : undefined);
   if (envConfig.error) {
@@ -84,9 +70,6 @@ async function setupCLI(
   }
 
   const networkNames = Object.keys(config.networks);
-
-  // // Extract operator key and ID from environment variables
-  const { TELEMETRY_URL } = process.env;
 
   // Only write a fresh state file if the user is running the init command
   if (action === 'init') {
@@ -103,12 +86,6 @@ async function setupCLI(
       await verifyOperatorBalance(envId, networkName);
     }
   }
-
-  // Set telemetry server URL
-  const telemetryServer =
-    TELEMETRY_URL || 'https://hedera-cli-telemetry.onrender.com/track';
-  storeSaveKey('telemetryServer', telemetryServer);
-  if (telemetry) storeSaveKey('telemetry', 1);
 }
 
 export default (program: Command) => {
@@ -119,22 +96,12 @@ export default (program: Command) => {
 
   setup
     .command('init')
-    .hook('preAction', telemetryPreAction)
     .description('Setup the CLI with operator key and ID')
-    .option(
-      '--telemetry',
-      'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
-    )
     .option('--path <path>', 'Specify a custom path for the .env file')
     .action(
       wrapAction<SetupOptions>(
         async (options) => {
-          if (!options.telemetry) {
-            logger.log(
-              'You don\'t have telmetry enabled. You can enable it by running "hcli setup init --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
-            );
-          }
-          await setupCLI('init', options.telemetry, options.path);
+          await setupCLI('init', options.path);
           stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
         },
         {
@@ -145,22 +112,12 @@ export default (program: Command) => {
 
   setup
     .command('reload')
-    .hook('preAction', telemetryPreAction)
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
-    .option(
-      '--telemetry',
-      'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
-    )
     .action(
-      wrapAction<ReloadOptions & { path?: string }>(
+      wrapAction<{ path?: string }>(
         async (options) => {
-          if (!options.telemetry) {
-            logger.log(
-              'You don\'t have telmetry enabled. You can enable it by running "hcli setup reload --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
-            );
-          }
-          await setupCLI('reload', options.telemetry, options.path);
+          await setupCLI('reload', options.path);
         },
         {
           log: 'Reloading the CLI tool with operator key and ID for different networks',

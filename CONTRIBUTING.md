@@ -56,7 +56,6 @@ test('missing user config falls back to defaults', () => {
     stateFile: path.join(os.tmpdir(), `hcli-state-${Date.now()}.json`),
   });
   const state = getState();
-  expect(state.telemetry).toBe(0);
   expect(state.networks['fixture-extra']).toBeUndefined();
 });
 ```
@@ -102,7 +101,7 @@ All Commander `.action` handlers must be wrapped by either:
 - `wrapAction` (preferred) – adds dynamic variable replacement, optional verbose pre-log, and standardized error handling via `exitOnError`.
 - `exitOnError` – if you only need the error mapping behavior.
 
-Why: This enforces consistent DomainError handling (setting `process.exitCode` instead of exiting), guarantees telemetry flushing, and keeps logging noise predictable. A test `wrappingConsistency.test.ts` fails the build if any unwrapped `.action(` is introduced.
+Why: This enforces consistent DomainError handling (setting `process.exitCode` instead of exiting), keeps logging noise predictable. A test `wrappingConsistency.test.ts` fails the build if any unwrapped `.action(` is introduced.
 
 When adding a new command:
 

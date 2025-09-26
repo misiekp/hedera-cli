@@ -1,13 +1,11 @@
 import { Command } from 'commander';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import tokenUtils from '../../utils/token';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 export default (program: Command) => {
   program
     .command('associate')
-    .hook('preAction', telemetryPreAction)
     .description('Associate a token with an account')
     .requiredOption(
       '-a, --account-id <accountId>', // name is also possible for --account-id

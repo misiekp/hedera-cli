@@ -4,7 +4,6 @@ import { Logger } from '../../utils/logger';
 import { isJsonOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
 import { outputState } from '../../utils/stateOutput';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
@@ -12,7 +11,6 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('view')
-    .hook('preAction', telemetryPreAction)
     .description('View state')
     .option('--accounts', 'View accounts', false)
     .option('--account-name <account-name>', 'View account by name')

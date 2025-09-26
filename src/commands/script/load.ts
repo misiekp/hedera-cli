@@ -6,7 +6,6 @@ import { heading, success } from '../../utils/color';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 import { DomainError } from '../../core/errors';
 
@@ -82,7 +81,6 @@ function loadScript(name: string): void {
 export default (program: Command) => {
   program
     .command('load')
-    .hook('preAction', telemetryPreAction)
     .description('Load and execute a script')
     .requiredOption('-n, --name <name>', 'Name of script to load and execute')
     .action(

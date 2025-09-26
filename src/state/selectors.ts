@@ -5,14 +5,6 @@ import type { StoreState } from './store';
 export const selectState = (): StoreState => getState();
 export const selectNetwork = (): StoreState['network'] => getState().network;
 export const selectNetworks = (): StoreState['networks'] => getState().networks;
-// Simple selectors (no custom memo layer) for clarity & idiomatic vanilla Zustand usage
-export const selectTelemetry = (): {
-  telemetry: number;
-  telemetryServer: string;
-} => {
-  const s = getState();
-  return { telemetry: s.telemetry, telemetryServer: s.telemetryServer };
-};
 
 export const selectAccounts = (): Record<string, Account> =>
   getState().accounts;

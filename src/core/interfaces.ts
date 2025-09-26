@@ -42,6 +42,5 @@ export interface CommandHandlerArgs {
   // args: Record<string, unknown>;
   // state: StateManager; // namespaced access provided by Core
   // config: ConfigView;
-  // telemetry: Telemetry;
   // logger: Logger;
 }

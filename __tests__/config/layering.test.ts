@@ -10,9 +10,6 @@ describe('config layering with test user config', () => {
     // Default network preserved as specified in fixture
     expect(state.network).toBe('localnet');
 
-    // Telemetry overridden to 1 by fixture (runtime file removed so user override surfaces)
-    expect(state.telemetry).toBe(1);
-
     // Base networks still present
     expect(state.networks.testnet).toBeDefined();
     expect(state.networks.mainnet).toBeDefined();

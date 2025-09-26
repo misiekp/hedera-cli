@@ -40,14 +40,6 @@ function createUUID(): void {
   }
 }
 
-/**
- * Returns the current telemetry setting
- * @returns {boolean} telemetry
- */
-function isTelemetryEnabled(): boolean {
-  return storeGet('telemetry') === 1;
-}
-
 function getNetworkFromState(network: string): NetworkConfig {
   const { networks } = getState();
   const cfg = networks[network];
@@ -456,7 +448,6 @@ function importState(
 
 const stateUtils = {
   createUUID,
-  isTelemetryEnabled,
   getMirrorNodeURL,
   getMirrorNodeURLByNetwork,
   getHederaClient,

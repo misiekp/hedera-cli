@@ -8,7 +8,6 @@ import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 import { DomainError } from '../../core/errors';
 
@@ -86,7 +85,6 @@ export default (program: Command) => {
 
   message
     .command('submit')
-    .hook('preAction', telemetryPreAction)
     .description('Submit a message to a topic')
     .requiredOption('-m, --message <message>', 'Submit a message to the topic')
     .requiredOption('-t, --topic-id <topicId>', 'The topic ID')
@@ -158,7 +156,6 @@ export default (program: Command) => {
 
   message
     .command('find')
-    .hook('preAction', telemetryPreAction)
     .description('Find a message by sequence number')
     .option('-s, --sequence-number <sequenceNumber>', 'The sequence number')
     .option('-t, --topic-id <topicId>', 'The topic ID')

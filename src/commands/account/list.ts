@@ -4,14 +4,12 @@ import accountUtils from '../../utils/account';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
-import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 
 export default (program: Command) => {
   program
     .command('list')
-    .hook('preAction', telemetryPreAction)
     .description('List all accounts in the address book')
     .option('-p, --private', 'Show private keys')
     .action(

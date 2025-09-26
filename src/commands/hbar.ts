@@ -4,7 +4,6 @@ import { getState } from '../state/store';
 import enquirerUtils from '../utils/enquirer';
 import hbarUtils from '../utils/hbar';
 import stateUtils from '../utils/state';
-import { telemetryPreAction } from './shared/telemetryHook';
 import { wrapAction } from './shared/wrapAction';
 import { DomainError } from '../core/errors';
 export default (program: Command) => {
@@ -12,7 +11,6 @@ export default (program: Command) => {
 
   hbar
     .command('transfer')
-    .hook('preAction', telemetryPreAction)
     .description('Transfer tinybars between accounts')
     .requiredOption('-b, --balance <balance>', 'Amount of tinybars to transfer')
     .option('-t, --to <to>', 'Account ID to transfer tinybars to')

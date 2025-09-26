@@ -8,7 +8,6 @@ import {
   checkMirrorNodeHealth,
   checkRpcHealth,
 } from '../../utils/networkHealth';
-import { telemetryPreAction } from '../shared/telemetryHook';
 
 interface Answers {
   name: string;
@@ -30,7 +29,6 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('add')
-    .hook('preAction', telemetryPreAction)
     .description('Interactively add a custom network')
     .action(
       exitOnError(async () => {

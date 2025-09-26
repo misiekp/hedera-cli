@@ -16,8 +16,6 @@ export const networkConfigSchema: z.ZodType<Partial<NetworkConfig>> = z
 export const userConfigSchema = z
   .object({
     network: z.string().optional(),
-    telemetry: z.number().int().min(0).max(1).optional(),
-    telemetryServer: z.string().url().optional(),
     debug: z.boolean().optional(),
     networks: z.record(z.string(), networkConfigSchema).optional(),
   })
@@ -53,9 +51,6 @@ export function mergeUserConfig<T extends State>(
 ): T {
   const merged: T = { ...base };
   if (overlay.network) merged.network = overlay.network;
-  if (typeof overlay.telemetry === 'number')
-    merged.telemetry = overlay.telemetry;
-  if (overlay.telemetryServer) merged.telemetryServer = overlay.telemetryServer;
   if (overlay.networks) {
     merged.networks = { ...merged.networks };
     for (const [k, v] of Object.entries(overlay.networks)) {

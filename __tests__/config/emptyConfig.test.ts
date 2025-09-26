@@ -16,7 +16,6 @@ const store = require('../../src/state/store');
         stateFile: path.join(os.tmpdir(), `hcli-state-${Date.now()}.json`),
       });
       const state = store.getState();
-      expect(state.telemetry).toBe(0);
       expect(state.networks['fixture-extra']).toBeUndefined();
     });
   });

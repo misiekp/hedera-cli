@@ -3,7 +3,6 @@ import api from '../../api';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
@@ -11,7 +10,6 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('view')
-    .hook('preAction', telemetryPreAction)
     .description(
       'View the detials of an account by accound ID. The account can be in the state or external.',
     )

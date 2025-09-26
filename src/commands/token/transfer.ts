@@ -1,6 +1,5 @@
 import stateUtils from '../../utils/state';
 import { myParseInt } from '../../utils/verification';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
@@ -12,7 +11,6 @@ import tokenUtils from '../../utils/token';
 export default (program: Command) => {
   program
     .command('transfer')
-    .hook('preAction', telemetryPreAction)
     .description('Transfer a fungible token')
     .requiredOption('-t, --token-id <tokenId>', 'Token ID to transfer')
     .requiredOption('--to <to>', 'Account ID to transfer token to')

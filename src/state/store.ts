@@ -104,8 +104,6 @@ let initialState = mergeInitial(loadFile(), basePlusUser);
 interface PersistedSlice {
   network: StoreState['network'];
   networks: StoreState['networks'];
-  telemetry: StoreState['telemetry'];
-  telemetryServer: StoreState['telemetryServer'];
   accounts: StoreState['accounts'];
   tokens: StoreState['tokens'];
   topics: StoreState['topics'];
@@ -121,8 +119,6 @@ interface PersistedSlice {
 const partialize = (s: StoreState): PersistedSlice => ({
   network: s.network,
   networks: s.networks,
-  telemetry: s.telemetry,
-  telemetryServer: s.telemetryServer,
   accounts: s.accounts,
   tokens: s.tokens,
   topics: s.topics,

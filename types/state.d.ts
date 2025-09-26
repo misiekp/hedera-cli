@@ -89,8 +89,6 @@ export interface NetworkConfig {
 export interface State {
   network: string;
   networks: Record<string, NetworkConfig>;
-  telemetryServer: string;
-  telemetry: number;
   debug?: boolean;
   // Script execution runtime status persisted as structured object
   scriptExecution: {

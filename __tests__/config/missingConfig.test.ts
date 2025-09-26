@@ -4,7 +4,7 @@ import * as path from 'path';
 const store = require('../../src/state/store');
 
 (() => {
-  // Edge case: HCLI_CONFIG_FILE points to a missing file -> should gracefully fallback to defaults (no fixture-added network, telemetry 0)
+  // Edge case: HCLI_CONFIG_FILE points to a missing file -> should gracefully fallback to defaults (no fixture-added network)
 
   describe('config edge case: missing user config file', () => {
     test('falls back to base defaults', () => {
@@ -17,7 +17,6 @@ const store = require('../../src/state/store');
         stateFile: path.join(os.tmpdir(), `hcli-state-${Date.now()}.json`),
       });
       const state = store.getState();
-      expect(state.telemetry).toBe(0);
       expect(state.networks['fixture-extra']).toBeUndefined();
     });
   });

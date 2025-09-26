@@ -25,7 +25,6 @@ import { isJsonOutput, printOutput } from '../../utils/output';
 import signUtils from '../../utils/sign';
 import stateUtils from '../../utils/state';
 import tokenUtils from '../../utils/token';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import {
   mapToTokenInput,
   TokenFileDefinition,
@@ -392,7 +391,6 @@ async function createToken(options: CreateTokenFromFileOptions) {
 export default (program: Command) => {
   program
     .command('create-from-file')
-    .hook('preAction', telemetryPreAction)
     .description('Create a new token from a file')
     .requiredOption(
       '-f, --file <filename>',
