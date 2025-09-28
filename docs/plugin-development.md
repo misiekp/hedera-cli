@@ -154,6 +154,7 @@ export const MY_PLUGIN_NAMESPACE = 'my-plugin-data';
 ```
 
 **Benefits of this approach:**
+
 - **Single Source of Truth**: Schema is defined once in Zod and automatically converted to JSON Schema
 - **Type Safety**: TypeScript types are automatically inferred from the Zod schema
 - **Runtime Validation**: Use Zod for runtime validation with detailed error messages
