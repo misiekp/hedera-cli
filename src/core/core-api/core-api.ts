@@ -3,6 +3,14 @@
  * Combines all services into a single Core API instance
  */
 import { CoreAPI } from './core-api.interface';
+import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
+import { SigningService } from '../services/signing/signing-service.interface';
+import { StateService } from '../services/state/state-service.interface';
+import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
+import { NetworkService } from '../services/network/network-service.interface';
+import { ConfigService } from '../services/config/config-service.interface';
+import { Logger } from '../services/logger/logger-service.interface';
+import { CredentialsService } from '../services/credentials/credentials-service.interface';
 import { AccountTransactionServiceImpl } from '../services/accounts/account-transaction-service';
 import { SigningServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
@@ -14,14 +22,14 @@ import { MockLoggerService } from '../services/logger/logger-service';
 import { CredentialsServiceImpl } from '../services/credentials/credentials-service';
 
 export class CoreAPIImplementation implements CoreAPI {
-  public accountTransactions: AccountTransactionServiceImpl;
-  public signing: SigningServiceImpl;
-  public state: ZustandGenericStateServiceImpl;
-  public mirror: HederaMirrornodeServiceDefaultImpl;
-  public network: MockNetworkService;
-  public config: MockConfigService;
-  public logger: MockLoggerService;
-  public credentials: CredentialsServiceImpl;
+  public accountTransactions: AccountTransactionService;
+  public signing: SigningService;
+  public state: StateService;
+  public mirror: HederaMirrornodeService;
+  public network: NetworkService;
+  public config: ConfigService;
+  public logger: Logger;
+  public credentials: CredentialsService;
 
   constructor() {
     // Initialize logger first
