@@ -1,0 +1,245 @@
+/**
+ * Zustand-based Account State Helper
+ * Provides rich state management with subscriptions and actions
+ */
+import { StateService } from '../../core/services/state/state-service.interface';
+import { Logger } from '../../core/services/logger/logger-service.interface';
+import { AccountData, ACCOUNT_NAMESPACE, safeParseAccountData } from './schema';
+
+export class ZustandAccountStateHelper {
+  private state: StateService;
+  private logger: Logger;
+  private namespace: string;
+  private unsubscribe?: () => void;
+
+  constructor(state: StateService, logger: Logger) {
+    this.state = state;
+    this.logger = logger;
+    this.namespace = ACCOUNT_NAMESPACE;
+  }
+
+  /**
+   * Save account with validation
+   */
+  async saveAccount(name: string, accountData: AccountData): Promise<void> {
+    this.logger.debug(`[ZUSTAND ACCOUNT STATE] Saving account: ${name}`);
+
+    const validation = safeParseAccountData(accountData);
+    if (!validation.success) {
+      const errors = validation.error.errors
+        .map((e) => `${e.path.join('.')}: ${e.message}`)
+        .join(', ');
+      throw new Error(`Invalid account data: ${errors}`);
+    }
+
+    this.state.set(this.namespace, name, accountData);
+    this.logger.debug(`[ZUSTAND ACCOUNT STATE] Account saved: ${name}`);
+  }
+
+  /**
+   * Load account with validation
+   */
+  async loadAccount(name: string): Promise<AccountData | null> {
+    this.logger.debug(`[ZUSTAND ACCOUNT STATE] Loading account: ${name}`);
+    const data = this.state.get<AccountData>(this.namespace, name);
+
+    if (data) {
+      const validation = safeParseAccountData(data);
+      if (!validation.success) {
+        this.logger.warn(
+          `[ZUSTAND ACCOUNT STATE] Invalid data for account: ${name}. Errors: ${validation.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+        );
+        return null;
+      }
+    }
+
+    return data || null;
+  }
+
+  /**
+   * List all accounts with validation
+   */
+  async listAccounts(): Promise<AccountData[]> {
+    this.logger.debug(`[ZUSTAND ACCOUNT STATE] Listing all accounts`);
+    const allData = this.state.list<AccountData>(this.namespace);
+    return allData.filter((data) => safeParseAccountData(data).success);
+  }
+
+  /**
+   * Delete account
+   */
+  async deleteAccount(name: string): Promise<void> {
+    this.logger.debug(`[ZUSTAND ACCOUNT STATE] Deleting account: ${name}`);
+    this.state.delete(this.namespace, name);
+  }
+
+  /**
+   * Clear all accounts
+   */
+  async clearAccounts(): Promise<void> {
+    this.logger.debug(`[ZUSTAND ACCOUNT STATE] Clearing all accounts`);
+    this.state.clear(this.namespace);
+  }
+
+  /**
+   * Check if account exists
+   */
+  async hasAccount(name: string): Promise<boolean> {
+    this.logger.debug(
+      `[ZUSTAND ACCOUNT STATE] Checking if account exists: ${name}`,
+    );
+    return this.state.has(this.namespace, name);
+  }
+
+  /**
+   * Get account count
+   */
+  async getAccountCount(): Promise<number> {
+    const accounts = await this.listAccounts();
+    return accounts.length;
+  }
+
+  /**
+   * Get accounts by network
+   */
+  async getAccountsByNetwork(network: string): Promise<AccountData[]> {
+    const accounts = await this.listAccounts();
+    return accounts.filter((account) => account.network === network);
+  }
+
+  /**
+   * Get accounts by type
+   */
+  async getAccountsByType(type: 'ECDSA' | 'ED25519'): Promise<AccountData[]> {
+    const accounts = await this.listAccounts();
+    return accounts.filter((account) => account.type === type);
+  }
+
+  /**
+   * Subscribe to account changes
+   */
+  subscribeToAccounts(callback: (accounts: AccountData[]) => void): () => void {
+    this.logger.debug(`[ZUSTAND ACCOUNT STATE] Subscribing to account changes`);
+
+    this.unsubscribe = this.state.subscribe<AccountData>(
+      this.namespace,
+      (data) => {
+        const validAccounts = data.filter(
+          (account) => safeParseAccountData(account).success,
+        );
+        callback(validAccounts);
+      },
+    );
+
+    return () => {
+      if (this.unsubscribe) {
+        this.unsubscribe();
+        this.logger.debug(
+          `[ZUSTAND ACCOUNT STATE] Unsubscribed from account changes`,
+        );
+      }
+    };
+  }
+
+  /**
+   * Get Zustand store actions for advanced usage
+   */
+  getStoreActions(): any {
+    return this.state.getActions(this.namespace);
+  }
+
+  /**
+   * Get Zustand store state for advanced usage
+   */
+  getStoreState(): any {
+    return this.state.getState(this.namespace);
+  }
+
+  /**
+   * Get all keys in the namespace
+   */
+  async getAccountNames(): Promise<string[]> {
+    return this.state.getKeys(this.namespace);
+  }
+
+  /**
+   * Batch operations
+   */
+  async batchSaveAccounts(
+    accounts: Array<{ name: string; data: AccountData }>,
+  ): Promise<void> {
+    this.logger.debug(
+      `[ZUSTAND ACCOUNT STATE] Batch saving ${accounts.length} accounts`,
+    );
+
+    for (const { name, data } of accounts) {
+      await this.saveAccount(name, data);
+    }
+  }
+
+  /**
+   * Batch delete accounts
+   */
+  async batchDeleteAccounts(names: string[]): Promise<void> {
+    this.logger.debug(
+      `[ZUSTAND ACCOUNT STATE] Batch deleting ${names.length} accounts`,
+    );
+
+    for (const name of names) {
+      await this.deleteAccount(name);
+    }
+  }
+
+  /**
+   * Search accounts by criteria
+   */
+  async searchAccounts(criteria: {
+    network?: string;
+    type?: 'ECDSA' | 'ED25519';
+    namePattern?: string;
+  }): Promise<AccountData[]> {
+    let accounts = await this.listAccounts();
+
+    if (criteria.network) {
+      accounts = accounts.filter(
+        (account) => account.network === criteria.network,
+      );
+    }
+
+    if (criteria.type) {
+      accounts = accounts.filter((account) => account.type === criteria.type);
+    }
+
+    if (criteria.namePattern) {
+      const pattern = new RegExp(criteria.namePattern, 'i');
+      accounts = accounts.filter((account) => pattern.test(account.name));
+    }
+
+    return accounts;
+  }
+
+  /**
+   * Get account statistics
+   */
+  async getAccountStats(): Promise<{
+    total: number;
+    byNetwork: Record<string, number>;
+    byType: Record<string, number>;
+  }> {
+    const accounts = await this.listAccounts();
+
+    const stats = {
+      total: accounts.length,
+      byNetwork: {} as Record<string, number>,
+      byType: {} as Record<string, number>,
+    };
+
+    for (const account of accounts) {
+      stats.byNetwork[account.network] =
+        (stats.byNetwork[account.network] || 0) + 1;
+      stats.byType[account.type] = (stats.byType[account.type] || 0) + 1;
+    }
+
+    return stats;
+  }
+}
