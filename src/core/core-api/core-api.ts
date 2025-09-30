@@ -4,6 +4,7 @@
  */
 import { CoreAPI } from './core-api.interface';
 import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
+import { TokenTransactionService } from '../services/tokens/token-transaction-service.interface';
 import { SigningService } from '../services/signing/signing-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
@@ -12,17 +13,19 @@ import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { CredentialsService } from '../services/credentials/credentials-service.interface';
 import { AccountTransactionServiceImpl } from '../services/accounts/account-transaction-service';
+import { TokenTransactionServiceImpl } from '../services/tokens/token-transaction-service';
 import { SigningServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
-import { MockNetworkService } from '../services/network/network-service';
+import { RealNetworkService } from '../services/network/network-service-real';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
 import { CredentialsServiceImpl } from '../services/credentials/credentials-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountTransactionService;
+  public tokenTransactions: TokenTransactionService;
   public signing: SigningService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
@@ -38,12 +41,17 @@ export class CoreAPIImplementation implements CoreAPI {
     // Initialize Zustand state service
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
-    // Initialize credentials service
-    this.credentials = new CredentialsServiceImpl(this.state, this.logger);
-
     // Initialize all services with dependencies
-    this.network = new MockNetworkService();
+    this.network = new RealNetworkService();
     this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
+    this.tokenTransactions = new TokenTransactionServiceImpl(this.logger);
+
+    // Initialize credentials service with network service
+    this.credentials = new CredentialsServiceImpl(
+      this.state,
+      this.logger,
+      this.network,
+    );
     this.signing = new SigningServiceImpl(this.logger, this.credentials);
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
@@ -57,6 +65,12 @@ export class CoreAPIImplementation implements CoreAPI {
         break;
       case 'previewnet':
         ledgerId = LedgerId.PREVIEWNET;
+        break;
+      case 'localnet':
+      case 'solo':
+      case 'solo-local':
+        // Custom networks (like local nodes) use testnet LedgerId
+        ledgerId = LedgerId.TESTNET;
         break;
       default:
         ledgerId = LedgerId.TESTNET; // Default to testnet

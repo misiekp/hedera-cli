@@ -5,15 +5,18 @@
 import { CredentialsService } from './credentials-service.interface';
 import { StateService } from '../state/state-service.interface';
 import { Logger } from '../logger/logger-service.interface';
+import { NetworkService } from '../network/network-service.interface';
 import { Credentials } from '../../types/shared.types';
 
 export class CredentialsServiceImpl implements CredentialsService {
   private state: StateService;
   private logger: Logger;
+  private network?: NetworkService;
 
-  constructor(state: StateService, logger: Logger) {
+  constructor(state: StateService, logger: Logger, network?: NetworkService) {
     this.state = state;
     this.logger = logger;
+    this.network = network;
   }
 
   /**
@@ -37,17 +40,17 @@ export class CredentialsServiceImpl implements CredentialsService {
     this.logger.debug(
       '[CREDENTIALS] No default credentials in state, trying environment',
     );
-    return await this.loadFromEnvironment();
+    return this.loadFromEnvironment();
   }
 
   /**
    * Set default operator credentials
    */
-  async setDefaultCredentials(
+  setDefaultCredentials(
     accountId: string,
     privateKey: string,
     network: string,
-  ): Promise<void> {
+  ): void {
     this.logger.debug(
       `[CREDENTIALS] Setting default credentials for account: ${accountId}`,
     );
@@ -79,7 +82,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Get credentials by account ID
    */
-  async getCredentials(accountId: string): Promise<Credentials | null> {
+  getCredentials(accountId: string): Credentials | null {
     this.logger.debug(
       `[CREDENTIALS] Getting credentials for account: ${accountId}`,
     );
@@ -89,12 +92,12 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Add new credentials
    */
-  async addCredentials(
+  addCredentials(
     accountId: string,
     privateKey: string,
     network: string,
     isDefault: boolean = false,
-  ): Promise<void> {
+  ): void {
     this.logger.debug(
       `[CREDENTIALS] Adding credentials for account: ${accountId}`,
     );
@@ -116,7 +119,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Remove credentials
    */
-  async removeCredentials(accountId: string): Promise<void> {
+  removeCredentials(accountId: string): void {
     this.logger.debug(
       `[CREDENTIALS] Removing credentials for account: ${accountId}`,
     );
@@ -129,38 +132,72 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * List all credentials
    */
-  async listCredentials(): Promise<Credentials[]> {
+  listCredentials(): Credentials[] {
     this.logger.debug('[CREDENTIALS] Listing all credentials');
     return this.state.list<Credentials>('credentials');
   }
 
   /**
-   * Load credentials from environment variables
+   * Load credentials from environment variables and network config
    */
-  async loadFromEnvironment(): Promise<Credentials | null> {
+  loadFromEnvironment(): Credentials | null {
     this.logger.debug(
       '[CREDENTIALS] Loading credentials from environment variables',
     );
 
-    const accountId = process.env.HEDERA_ACCOUNT_ID;
-    const privateKey = process.env.HEDERA_PRIVATE_KEY;
-    const network = process.env.HEDERA_NETWORK || 'testnet';
+    // First try environment variables
+    const envAccountId = process.env.HEDERA_ACCOUNT_ID;
+    const envPrivateKey = process.env.HEDERA_PRIVATE_KEY;
+    const envNetwork = process.env.HEDERA_NETWORK || 'testnet';
 
-    if (accountId && privateKey) {
+    if (envAccountId && envPrivateKey) {
       this.logger.debug(
-        `[CREDENTIALS] Found credentials in environment for account: ${accountId}`,
+        `[CREDENTIALS] Found credentials in environment for account: ${envAccountId}`,
       );
       return {
-        accountId,
-        privateKey,
-        network,
+        accountId: envAccountId,
+        privateKey: envPrivateKey,
+        network: envNetwork,
         isDefault: true,
         createdAt: new Date().toISOString(),
       };
     }
 
+    // Fallback to network config
+    if (this.network) {
+      const currentNetwork = this.network.getCurrentNetwork();
+
+      // Check if the network service has a method to get operator credentials
+      if ('getOperatorCredentials' in this.network) {
+        const operatorCreds = (
+          this.network as {
+            getOperatorCredentials(): {
+              operatorId?: string;
+              operatorKey?: string;
+            };
+          }
+        ).getOperatorCredentials();
+        if (
+          operatorCreds &&
+          operatorCreds.operatorId &&
+          operatorCreds.operatorKey
+        ) {
+          this.logger.debug(
+            `[CREDENTIALS] Found credentials in network config for account: ${operatorCreds.operatorId}`,
+          );
+          return {
+            accountId: operatorCreds.operatorId,
+            privateKey: operatorCreds.operatorKey,
+            network: currentNetwork,
+            isDefault: true,
+            createdAt: new Date().toISOString(),
+          };
+        }
+      }
+    }
+
     this.logger.debug(
-      '[CREDENTIALS] No credentials found in environment variables',
+      '[CREDENTIALS] No credentials found in environment variables or network config',
     );
     return null;
   }
