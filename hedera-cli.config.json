@@ -1,5 +1,5 @@
 {
-  "network": "solo-local",
+  "network": "testnet",
   "telemetry": 0,
   "debug": false,
   "networks": {
@@ -27,6 +27,13 @@
     "ap-test-vpn": {
       "rpcUrl": "https://REPLACE-WITH-VPN-RPC-ENDPOINT",
       "mirrorNodeUrl": "https://REPLACE-WITH-VPN-MIRROR-ENDPOINT/api/v1",
+      "operatorKey": "",
+      "operatorId": "",
+      "hexKey": ""
+    },
+    "testnet": {
+      "rpcUrl": "https://testnet.hashio.io/api",
+      "mirrorNodeUrl": "https://testnet.mirrornode.hedera.com/api/v1",
       "operatorKey": "",
       "operatorId": "",
       "hexKey": ""

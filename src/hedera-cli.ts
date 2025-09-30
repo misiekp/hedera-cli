@@ -49,6 +49,7 @@ async function initializeCLI() {
     // Set default plugins
     pluginManager.setDefaultPlugins([
       './dist/plugins/account', // Default account plugin
+      './dist/plugins/token', // Token management plugin
       './dist/plugins/plugin-management', // Plugin management plugin
       './dist/plugins/credentials', // Credentials management plugin
       './dist/plugins/state-management', // State management plugin

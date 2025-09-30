@@ -111,10 +111,17 @@ export class SigningServiceImpl implements SigningService {
         accountId = receipt.accountId.toString();
       }
 
+      // Extract token ID for token creation transactions
+      let tokenId: string | undefined;
+      if (receipt.tokenId) {
+        tokenId = receipt.tokenId.toString();
+      }
+
       return {
         transactionId: response.transactionId.toString(),
         success: receipt.status === Status.Success,
         accountId,
+        tokenId,
         receipt: {
           status: {
             status: receipt.status === Status.Success ? 'success' : 'failed',
