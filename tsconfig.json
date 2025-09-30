@@ -4,7 +4,7 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src/**/*", "hedera-cli.config.js"],
+  "include": ["src/**/*"],
   "exclude": [
     "hardhat.config.js",
     "node_modules",
