@@ -3,7 +3,7 @@
  * Defines the token plugin according to ADR-001
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
-import { TOKEN_JSON_SCHEMA, TOKEN_NAMESPACE } from './schema.js';
+import { TOKEN_JSON_SCHEMA, TOKEN_NAMESPACE } from './schema';
 
 export const tokenPluginManifest: PluginManifest = {
   name: 'token',

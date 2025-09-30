@@ -40,17 +40,17 @@ export class CredentialsServiceImpl implements CredentialsService {
     this.logger.debug(
       '[CREDENTIALS] No default credentials in state, trying environment',
     );
-    return this.loadFromEnvironment();
+    return await this.loadFromEnvironment();
   }
 
   /**
    * Set default operator credentials
    */
-  setDefaultCredentials(
+  async setDefaultCredentials(
     accountId: string,
     privateKey: string,
     network: string,
-  ): void {
+  ): Promise<void> {
     this.logger.debug(
       `[CREDENTIALS] Setting default credentials for account: ${accountId}`,
     );
@@ -82,7 +82,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Get credentials by account ID
    */
-  getCredentials(accountId: string): Credentials | null {
+  async getCredentials(accountId: string): Promise<Credentials | null> {
     this.logger.debug(
       `[CREDENTIALS] Getting credentials for account: ${accountId}`,
     );
@@ -92,12 +92,12 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Add new credentials
    */
-  addCredentials(
+  async addCredentials(
     accountId: string,
     privateKey: string,
     network: string,
     isDefault: boolean = false,
-  ): void {
+  ): Promise<void> {
     this.logger.debug(
       `[CREDENTIALS] Adding credentials for account: ${accountId}`,
     );
@@ -119,7 +119,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Remove credentials
    */
-  removeCredentials(accountId: string): void {
+  async removeCredentials(accountId: string): Promise<void> {
     this.logger.debug(
       `[CREDENTIALS] Removing credentials for account: ${accountId}`,
     );
@@ -132,7 +132,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * List all credentials
    */
-  listCredentials(): Credentials[] {
+  async listCredentials(): Promise<Credentials[]> {
     this.logger.debug('[CREDENTIALS] Listing all credentials');
     return this.state.list<Credentials>('credentials');
   }
@@ -140,7 +140,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Load credentials from environment variables and network config
    */
-  loadFromEnvironment(): Credentials | null {
+  async loadFromEnvironment(): Promise<Credentials | null> {
     this.logger.debug(
       '[CREDENTIALS] Loading credentials from environment variables',
     );
