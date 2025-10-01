@@ -6,7 +6,7 @@ import { setColorEnabled } from './utils/color';
 import { installGlobalErrorHandlers } from './utils/errors';
 import { Logger } from './utils/logger';
 import { setGlobalOutputMode } from './utils/output';
-
+// signing test
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };
 const logger = Logger.getInstance();
