@@ -2,11 +2,23 @@ import type { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interf
 import clearAccountsHandler from '../../../src/plugins/account/commands/clear';
 import { ZustandAccountStateHelper } from '../../../src/plugins/account/zustand-state-helper';
 
-// jest.mock('../../src/plugins/account/zustand-state-helper', () => ({
-//   ZustandAccountStateHelper: jest.fn(),
-// }));
+let exitSpy: jest.SpyInstance;
 
-describe.skip('account plugin - clear command (unit)', () => {
+jest.mock('../../../src/plugins/account/zustand-state-helper', () => ({
+  ZustandAccountStateHelper: jest.fn(),
+}));
+
+beforeAll(() => {
+  exitSpy = jest
+    .spyOn(process, 'exit')
+    .mockImplementation((() => undefined) as never);
+});
+
+afterAll(() => {
+  exitSpy.mockRestore();
+});
+
+describe('account plugin - clear command (unit)', () => {
   const makeLogger = () => ({
     log: jest.fn(),
     error: jest.fn(),
@@ -51,5 +63,6 @@ describe.skip('account plugin - clear command (unit)', () => {
     );
     expect(listAccountsMock).toHaveBeenCalledTimes(1);
     expect(clearAccountsMock).toHaveBeenCalledTimes(1);
+    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 });
