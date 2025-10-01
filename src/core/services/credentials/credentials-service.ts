@@ -142,8 +142,8 @@ export class CredentialsServiceImpl implements CredentialsService {
       '[CREDENTIALS] Loading credentials from environment variables',
     );
 
-    const accountId = process.env.HEDERA_ACCOUNT_ID;
-    const privateKey = process.env.HEDERA_PRIVATE_KEY;
+    const accountId = process.env.TESTNET_OPERATOR_ID;
+    const privateKey = process.env.TESTNET_OPERATOR_KEY;
     const network = process.env.HEDERA_NETWORK || 'testnet';
 
     if (accountId && privateKey) {
