@@ -1,7 +1,7 @@
-import type { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interface';
-import clearAccountsHandler from '../../../src/plugins/account/commands/clear';
-import { ZustandAccountStateHelper } from '../../../src/plugins/account/zustand-state-helper';
+import { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interface';
 import { Logger } from '../../../src/core/services/logger/logger-service.interface';
+import { ZustandAccountStateHelper } from '../../../src/plugins/account/zustand-state-helper';
+import clearAccountsHandler from '../../../src/plugins/account/commands/clear';
 
 let exitSpy: jest.SpyInstance;
 
@@ -29,7 +29,7 @@ afterAll(() => {
   exitSpy.mockRestore();
 });
 
-describe('account plugin - clear command (unit)', () => {
+describe('account plugin - clear command', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
