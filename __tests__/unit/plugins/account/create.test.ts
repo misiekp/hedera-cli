@@ -26,7 +26,6 @@ const makeLogger = (): jest.Mocked<Logger> => ({
   warn: jest.fn(),
 });
 
-// Helpers
 const makeApiMocks = ({
   createAccountImpl,
   signAndExecuteImpl,
