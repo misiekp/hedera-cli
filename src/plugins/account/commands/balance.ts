@@ -52,14 +52,7 @@ async function getAccountBalanceHandler(args: CommandHandlerArgs) {
             logger.log(`   No token balances found`);
           }
         } catch (error: unknown) {
-          const msg =
-            error instanceof Error
-              ? error.message
-              : typeof error === 'string'
-                ? error
-                : String(error);
-
-          logger.log(`   Could not fetch token balances: ${msg}`);
+          logger.log(formatError('   Could not fetch token balances', error));
           process.exit(1);
         }
       }
