@@ -6,14 +6,17 @@ import { CredentialsService } from './credentials-service.interface';
 import { StateService } from '../state/state-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { Credentials } from '../../types/shared.types';
+import { NetworkService } from './../network/network-service.interface';
 
 export class CredentialsServiceImpl implements CredentialsService {
   private state: StateService;
   private logger: Logger;
+  private network: NetworkService;
 
-  constructor(state: StateService, logger: Logger) {
+  constructor(state: StateService, logger: Logger, network: NetworkService) {
     this.state = state;
     this.logger = logger;
+    this.network = network;
   }
 
   /**
@@ -144,7 +147,7 @@ export class CredentialsServiceImpl implements CredentialsService {
 
     const accountId = process.env.TESTNET_OPERATOR_ID;
     const privateKey = process.env.TESTNET_OPERATOR_KEY;
-    const network = process.env.HEDERA_NETWORK || 'testnet';
+    const network = this.network.getCurrentNetwork();
 
     if (accountId && privateKey) {
       this.logger.debug(
