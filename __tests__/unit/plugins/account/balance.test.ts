@@ -1,14 +1,14 @@
-import type { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interface';
-import getAccountBalanceHandler from '../../../src/plugins/account/commands/balance';
-import { ZustandAccountStateHelper } from '../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../src/core/services/logger/logger-service.interface';
-import type { HederaMirrornodeService } from '../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { CoreAPI } from '../../../src/core/core-api/core-api.interface';
-import type { AccountData } from '../../../src/plugins/account/schema';
+import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
+import getAccountBalanceHandler from '../../../../src/plugins/account/commands/balance';
+import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
+import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
+import type { HederaMirrornodeService } from '../../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
+import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
+import type { AccountData } from '../../../../src/plugins/account/schema';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
