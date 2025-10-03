@@ -11,31 +11,25 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   // Initialize token state helper
   // const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
-  // Extract command arguments
+  // Extract command arguments (using camelCase as passed by the CLI)
   const tokenId = args.args['tokenId'] as string;
-  const toAccountIdOrName = args.args['to'] as string;
-  const fromAccountIdOrName = args.args['from'] as string;
+  const toAccountId = args.args['to'] as string;
+  const fromAccountId = args.args['from'] as string;
   const amount = args.args['balance'] as number;
+  const fromKey = args.args['fromKey'] as string;
 
-  // Debug: Log all arguments
-  logger.log(`[DEBUG] All args: ${JSON.stringify(args.args)}`);
-  logger.log(`[DEBUG] token-id: ${tokenId}`);
-  logger.log(`[DEBUG] to: ${toAccountIdOrName}`);
-  logger.log(`[DEBUG] from: ${fromAccountIdOrName}`);
-  logger.log(`[DEBUG] balance: ${amount}`);
+  // Validate required parameters
+  if (!fromKey) {
+    throw new Error('From account key is required for token transfer');
+  }
 
+  logger.log(`🔑 Using provided from account key for signing`);
   logger.log(
-    `Transferring ${amount} tokens of ${tokenId} from ${fromAccountIdOrName} to ${toAccountIdOrName}`,
+    `Transferring ${amount} tokens of ${tokenId} from ${fromAccountId} to ${toAccountId}`,
   );
 
   try {
-    // 1. Resolve account IDs from names if needed
-    // For now, we'll assume the input is already account IDs
-    // In a full implementation, you'd resolve names to IDs using the account state
-    const fromAccountId = fromAccountIdOrName;
-    const toAccountId = toAccountIdOrName;
-
-    // 2. Create transfer transaction using Core API
+    // 1. Create transfer transaction using Core API
     const transferTransaction =
       await api.tokenTransactions.createTransferTransaction({
         tokenId,
@@ -44,10 +38,12 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
         amount,
       });
 
-    // 3. Sign and execute transaction
-    // Note: In a real implementation, you'd need to get the private key for the from account
-    // For now, we'll use a placeholder signing process
-    const result = await api.signing.signAndExecute(transferTransaction);
+    // 2. Sign and execute transaction using the provided from account key
+    logger.debug(`Using from account key for signing transaction`);
+    const result = await api.signing.signAndExecuteWithKey(
+      transferTransaction,
+      fromKey,
+    );
 
     if (result.success) {
       logger.log(`✅ Token transfer successful!`);
@@ -57,7 +53,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
       logger.log(`   Amount: ${amount}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
-      // 4. Optionally update token state if needed
+      // 3. Optionally update token state if needed
       // (e.g., update associations, balances, etc.)
 
       process.exit(0);

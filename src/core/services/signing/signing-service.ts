@@ -136,6 +136,72 @@ export class SigningServiceImpl implements SigningService {
   }
 
   /**
+   * Sign and execute a transaction using a specific private key
+   */
+  async signAndExecuteWithKey(
+    transaction: any,
+    privateKey: string,
+  ): Promise<TransactionResult> {
+    this.logger.debug(
+      `[SIGNING] Signing and executing transaction with custom key`,
+    );
+
+    try {
+      // Parse the private key
+      const customKey = PrivateKey.fromString(privateKey);
+
+      // Freeze the transaction first
+      transaction.freezeWith(this.client);
+
+      // Sign with the custom key
+      transaction.sign(customKey);
+
+      // Execute the signed transaction
+      const response: TransactionResponse = await transaction.execute(
+        this.client,
+      );
+      const receipt: TransactionReceipt = await response.getReceipt(
+        this.client,
+      );
+
+      this.logger.debug(
+        `[SIGNING] Transaction executed successfully with custom key: ${response.transactionId}`,
+      );
+
+      // Extract account ID for account creation transactions
+      let accountId: string | undefined;
+      if (receipt.accountId) {
+        accountId = receipt.accountId.toString();
+      }
+
+      // Extract token ID for token creation transactions
+      let tokenId: string | undefined;
+      if (receipt.tokenId) {
+        tokenId = receipt.tokenId.toString();
+      }
+
+      return {
+        transactionId: response.transactionId.toString(),
+        success: receipt.status === Status.Success,
+        accountId,
+        tokenId,
+        receipt: {
+          status: {
+            status: receipt.status === Status.Success ? 'success' : 'failed',
+            transactionId: response.transactionId.toString(),
+          },
+        },
+      };
+    } catch (error) {
+      console.error(
+        `[SIGNING] Transaction execution with custom key failed:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Sign a transaction without executing it
    */
   async sign(transaction: any): Promise<SignedTransaction> {
@@ -153,6 +219,37 @@ export class SigningServiceImpl implements SigningService {
       };
     } catch (error) {
       console.error(`[SIGNING] Transaction signing failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sign a transaction using a specific private key without executing it
+   */
+  async signWithKey(
+    transaction: any,
+    privateKey: string,
+  ): Promise<SignedTransaction> {
+    this.logger.debug(`[SIGNING] Signing transaction with custom key`);
+
+    try {
+      // Parse the private key
+      const customKey = PrivateKey.fromString(privateKey);
+
+      // Freeze the transaction first
+      transaction.freezeWith(this.client);
+
+      // Sign the transaction with the custom key
+      const signedTransaction = await transaction.sign(customKey);
+
+      return {
+        transactionId: `signed-${Date.now()}`,
+      };
+    } catch (error) {
+      console.error(
+        `[SIGNING] Transaction signing with custom key failed:`,
+        error,
+      );
       throw error;
     }
   }

@@ -14,25 +14,21 @@ const accountIdRegex = /^\d+\.\d+\.\d+$/;
 
 const keysSchema = z
   .object({
-    adminKey: z.string(),
-    supplyKey: z.string(),
-    wipeKey: z.string(),
-    kycKey: z.string(),
-    freezeKey: z.string(),
-    pauseKey: z.string(),
-    feeScheduleKey: z.string(),
-    treasuryKey: z
-      .string()
-      .min(1, 'treasuryKey is required (can reference <name:...>)'),
+    adminKey: z.string().min(1, 'adminKey is required'),
+    supplyKey: z.string().min(1).optional(),
+    wipeKey: z.string().min(1).optional(),
+    kycKey: z.string().min(1).optional(),
+    freezeKey: z.string().min(1).optional(),
+    pauseKey: z.string().min(1).optional(),
+    feeScheduleKey: z.string().min(1).optional(),
   })
   .strict();
 
 const fixedFeeSchema = z
   .object({
     type: z.literal('fixed'),
-    amount: z.number().int().positive(),
-    unitType: z.string(),
-    denom: z.string().optional(),
+    amount: z.number().int().positive('Amount must be positive'),
+    unitType: z.literal('HBAR').optional().default('HBAR'),
     collectorId: z
       .string()
       .regex(accountIdRegex, 'collectorId must be a valid account id')
@@ -41,22 +37,16 @@ const fixedFeeSchema = z
   })
   .strict();
 
-const fractionalFeeSchema = z
+const customFeeSchema = fixedFeeSchema; // Only fixed fees supported
+
+const accountSchema = z
   .object({
-    type: z.literal('fractional'),
-    numerator: z.number().int().positive(),
-    denominator: z.number().int().positive(),
-    min: z.number().int().nonnegative().optional(),
-    max: z.number().int().nonnegative().optional(),
-    collectorId: z
+    accountId: z
       .string()
-      .regex(accountIdRegex, 'collectorId must be a valid account id')
-      .optional(),
-    exempt: z.boolean().optional(),
+      .regex(accountIdRegex, 'accountId must be a valid account id'),
+    key: z.string().min(1, 'account key is required'),
   })
   .strict();
-
-const customFeeSchema = z.union([fixedFeeSchema, fractionalFeeSchema]);
 
 const tokenFileSchema = z
   .object({
@@ -66,7 +56,9 @@ const tokenFileSchema = z
     supplyType: z.union([z.literal('finite'), z.literal('infinite')]),
     initialSupply: z.number().int().nonnegative(),
     maxSupply: z.number().int().nonnegative().default(0),
+    treasury: accountSchema,
     keys: keysSchema,
+    associations: z.array(accountSchema).default([]),
     customFees: z.array(customFeeSchema).default([]),
     memo: z.string().max(100).optional().default(''),
   })
@@ -135,20 +127,30 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
       await api.tokenTransactions.createTokenTransaction({
         name: tokenDefinition.name,
         symbol: tokenDefinition.symbol,
-        treasuryId: '', // Will be resolved from treasury key
+        treasuryId: tokenDefinition.treasury.accountId,
         decimals: tokenDefinition.decimals,
         initialSupply: tokenDefinition.initialSupply,
         supplyType: tokenDefinition.supplyType.toUpperCase() as
           | 'FINITE'
           | 'INFINITE',
+        maxSupply: tokenDefinition.maxSupply,
         adminKey: tokenDefinition.keys.adminKey,
-        treasuryKey: tokenDefinition.keys.treasuryKey,
+        treasuryKey: tokenDefinition.treasury.key,
+        customFees: tokenDefinition.customFees.map((fee) => ({
+          type: fee.type,
+          amount: fee.amount,
+          unitType: fee.unitType,
+          collectorId: fee.collectorId,
+          exempt: fee.exempt,
+        })),
       });
 
-    // 3. Sign and execute transaction
-    // Note: In a real implementation, you'd need proper key management
-    // For now, we'll use a placeholder signing process
-    const result = await api.signing.signAndExecute(tokenCreateTransaction);
+    // 3. Sign and execute transaction using the treasury key
+    logger.log(`🔑 Using treasury key for signing transaction`);
+    const result = await api.signing.signAndExecuteWithKey(
+      tokenCreateTransaction,
+      tokenDefinition.treasury.key,
+    );
 
     if (result.success && result.tokenId) {
       logger.log(`✅ Token created successfully from file!`);
@@ -166,7 +168,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
         tokenId: result.tokenId,
         name: tokenDefinition.name,
         symbol: tokenDefinition.symbol,
-        treasuryId: '', // Will be resolved later
+        treasuryId: tokenDefinition.treasury.accountId,
         decimals: tokenDefinition.decimals,
         initialSupply: tokenDefinition.initialSupply,
         supplyType: tokenDefinition.supplyType.toUpperCase() as
@@ -175,13 +177,13 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
         maxSupply: tokenDefinition.maxSupply,
         keys: {
           adminKey: tokenDefinition.keys.adminKey,
-          supplyKey: tokenDefinition.keys.supplyKey,
-          wipeKey: tokenDefinition.keys.wipeKey,
-          kycKey: tokenDefinition.keys.kycKey,
-          freezeKey: tokenDefinition.keys.freezeKey,
-          pauseKey: tokenDefinition.keys.pauseKey,
-          feeScheduleKey: tokenDefinition.keys.feeScheduleKey,
-          treasuryKey: tokenDefinition.keys.treasuryKey,
+          supplyKey: tokenDefinition.keys.supplyKey || '',
+          wipeKey: tokenDefinition.keys.wipeKey || '',
+          kycKey: tokenDefinition.keys.kycKey || '',
+          freezeKey: tokenDefinition.keys.freezeKey || '',
+          pauseKey: tokenDefinition.keys.pauseKey || '',
+          feeScheduleKey: tokenDefinition.keys.feeScheduleKey || '',
+          treasuryKey: tokenDefinition.treasury.key,
         },
         network: api.network.getCurrentNetwork() as
           | 'mainnet'
@@ -190,17 +192,55 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
         associations: [],
         customFees: tokenDefinition.customFees.map((fee) => ({
           type: fee.type,
-          amount: fee.type === 'fixed' ? fee.amount : undefined,
-          unitType: fee.type === 'fixed' ? fee.unitType : undefined,
-          denom: fee.type === 'fixed' ? fee.denom : undefined,
-          numerator: fee.type === 'fractional' ? fee.numerator : undefined,
-          denominator: fee.type === 'fractional' ? fee.denominator : undefined,
-          min: fee.type === 'fractional' ? fee.min : undefined,
-          max: fee.type === 'fractional' ? fee.max : undefined,
+          amount: fee.amount,
+          unitType: fee.unitType,
           collectorId: fee.collectorId,
           exempt: fee.exempt,
         })),
       };
+
+      // 5. Create associations if specified
+      if (tokenDefinition.associations.length > 0) {
+        logger.log(
+          `   Creating ${tokenDefinition.associations.length} token associations...`,
+        );
+
+        for (const association of tokenDefinition.associations) {
+          try {
+            // Create association transaction
+            const associateTransaction =
+              await api.tokenTransactions.createTokenAssociationTransaction({
+                tokenId: result.tokenId,
+                accountId: association.accountId,
+              });
+
+            // Sign and execute with the account's key
+            const associateResult = await api.signing.signAndExecuteWithKey(
+              associateTransaction,
+              association.key,
+            );
+
+            if (associateResult.success) {
+              logger.log(
+                `   ✅ Associated account ${association.accountId} with token`,
+              );
+              // Add to token data associations
+              tokenData.associations.push({
+                name: association.accountId, // Using accountId as name for now
+                accountId: association.accountId,
+              });
+            } else {
+              logger.warn(
+                `   ⚠️  Failed to associate account ${association.accountId}`,
+              );
+            }
+          } catch (error) {
+            logger.warn(
+              `   ⚠️  Failed to associate account ${association.accountId}: ${error}`,
+            );
+          }
+        }
+      }
 
       await tokenState.saveToken(result.tokenId, tokenData);
       logger.log(`   Token data saved to state`);

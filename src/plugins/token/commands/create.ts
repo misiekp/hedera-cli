@@ -4,21 +4,32 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import { TokenData } from '../schema';
+import { TokenData, safeValidateTokenCreateParams } from '../schema';
 
 export async function createTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
+  // Validate command parameters
+  const validationResult = safeValidateTokenCreateParams(args.args);
+  if (!validationResult.success) {
+    logger.error('❌ Invalid command parameters:');
+    validationResult.error.errors.forEach((error) => {
+      logger.error(`   - ${error.path.join('.')}: ${error.message}`);
+    });
+    process.exit(1);
+  }
+
   // Initialize token state helper
   const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
-  // Extract command arguments with defaults
-  const name = args.args['name'] as string;
-  const symbol = args.args['symbol'] as string;
-  const decimals = (args.args['decimals'] as number) || 0;
-  const initialSupply = (args.args['initial-supply'] as number) || 1000000;
-  const supplyType =
-    (args.args['supply-type'] as string | undefined) || 'INFINITE';
+  // Use validated parameters with defaults
+  const validatedParams = validationResult.data;
+  const name = validatedParams.name;
+  const symbol = validatedParams.symbol;
+  const decimals = validatedParams.decimals || 0;
+  const initialSupply = validatedParams.initialSupply || 1000000;
+  const supplyType = validatedParams.supplyType || 'INFINITE';
+  const maxSupply = validatedParams.maxSupply;
 
   // Get current account credentials for treasury
   const credentials = await api.credentials.getDefaultCredentials();
@@ -28,31 +39,76 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
     );
   }
 
-  const treasuryId =
-    (args.args['treasury-id'] as string) || credentials.accountId;
-  const treasuryKey =
-    (args.args['treasury-key'] as string) || credentials.privateKey;
+  // Use provided treasury ID and key or default to operator credentials
+  const treasuryId = validatedParams.treasuryId || credentials.accountId;
+  const treasuryKey = validatedParams.treasuryKey || credentials.privateKey;
+
+  // Log treasury information
+  logger.debug(`Using treasury account: ${treasuryId}`);
+  if (treasuryId !== credentials.accountId) {
+    logger.log(`🏦 Using custom treasury account: ${treasuryId}`);
+    logger.log(`🔑 Will sign with treasury key (not operator key)`);
+  } else {
+    logger.log(`🏦 Using operator account as treasury: ${treasuryId}`);
+  }
+
+  // Validate and determine maxSupply
+  let finalMaxSupply: number | undefined = undefined;
+  if (supplyType.toUpperCase() === 'FINITE') {
+    if (maxSupply !== undefined) {
+      finalMaxSupply = maxSupply;
+      if (finalMaxSupply < initialSupply) {
+        throw new Error(
+          `Max supply (${finalMaxSupply}) cannot be less than initial supply (${initialSupply})`,
+        );
+      }
+    } else {
+      // Default to initial supply if no max supply specified for finite tokens
+      finalMaxSupply = initialSupply;
+    }
+  } else if (maxSupply !== undefined) {
+    logger.warn(
+      `Max supply specified for INFINITE supply type - ignoring max supply parameter`,
+    );
+  }
 
   logger.log(`Creating token: ${name} (${symbol})`);
+  if (finalMaxSupply !== undefined) {
+    logger.log(`Max supply: ${finalMaxSupply}`);
+  }
 
   try {
     // 1. Create token transaction using Core API
+    const adminKey = validatedParams.adminKey || treasuryKey;
+
+    const tokenCreateParams = {
+      name,
+      symbol,
+      treasuryId,
+      decimals,
+      initialSupply,
+      supplyType: supplyType.toUpperCase() as 'FINITE' | 'INFINITE',
+      maxSupply: finalMaxSupply,
+      adminKey,
+      treasuryKey,
+    };
+
     const tokenCreateTransaction =
-      await api.tokenTransactions.createTokenTransaction({
-        name,
-        symbol,
-        treasuryId,
-        decimals,
-        initialSupply,
-        supplyType: supplyType.toUpperCase() as 'FINITE' | 'INFINITE',
-        adminKey: treasuryKey, // Using treasury key as admin key for simplicity
-        treasuryKey,
-      });
+      await api.tokenTransactions.createTokenTransaction(tokenCreateParams);
 
     // 2. Sign and execute transaction
-    // Note: In a real implementation, you'd need proper key management
-    // For now, we'll use a placeholder signing process
-    const result = await api.signing.signAndExecute(tokenCreateTransaction);
+    // Use treasury key for signing if provided, otherwise use operator key
+    let result;
+    if (treasuryKey !== credentials.privateKey) {
+      logger.debug(`Using treasury key for signing transaction`);
+      result = await api.signing.signAndExecuteWithKey(
+        tokenCreateTransaction,
+        treasuryKey,
+      );
+    } else {
+      logger.debug(`Using operator key for signing transaction`);
+      result = await api.signing.signAndExecute(tokenCreateTransaction);
+    }
 
     if (result.success && result.tokenId) {
       logger.log(`✅ Token created successfully!`);

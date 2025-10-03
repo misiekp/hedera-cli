@@ -10,6 +10,11 @@ import {
   TokenId,
   PrivateKey,
   TokenSupplyType,
+  CustomFee,
+  CustomFixedFee,
+  CustomFractionalFee,
+  Hbar,
+  TokenId as HederaTokenId,
 } from '@hashgraph/sdk';
 import { Logger } from '../logger/logger-service.interface';
 import {
@@ -75,8 +80,10 @@ export class TokenTransactionServiceImpl implements TokenTransactionService {
       decimals,
       initialSupply,
       supplyType,
+      maxSupply,
       adminKey,
       treasuryKey,
+      customFees,
     } = params;
 
     // Convert supply type string to enum
@@ -94,6 +101,61 @@ export class TokenTransactionServiceImpl implements TokenTransactionService {
       .setSupplyType(tokenSupplyType)
       .setTreasuryAccountId(AccountId.fromString(treasuryId))
       .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey);
+
+    // Set max supply for finite supply tokens
+    if (supplyType === 'FINITE' && maxSupply !== undefined) {
+      tokenCreateTx.setMaxSupply(maxSupply);
+      this.logger.debug(
+        `[TOKEN TX] Set max supply to ${maxSupply} for finite supply token`,
+      );
+    }
+
+    // Set custom fees if provided
+    if (customFees && customFees.length > 0) {
+      const hederaCustomFees: CustomFee[] = [];
+
+      for (const fee of customFees) {
+        if (fee.type === 'fixed') {
+          // Only support HBAR fixed fees
+          if (fee.unitType && fee.unitType !== 'HBAR') {
+            throw new Error(
+              `Only HBAR fixed fees are supported. Got unitType: ${fee.unitType}`,
+            );
+          }
+
+          const fixedFee = new CustomFixedFee();
+
+          // Set HBAR amount (default unitType is HBAR)
+          fixedFee.setHbarAmount(Hbar.fromTinybars(fee.amount || 0));
+          this.logger.debug(
+            `[TOKEN TX] Added fixed HBAR fee: ${fee.amount} tinybars`,
+          );
+
+          if (fee.collectorId) {
+            fixedFee.setFeeCollectorAccountId(
+              AccountId.fromString(fee.collectorId),
+            );
+          }
+
+          if (fee.exempt !== undefined) {
+            fixedFee.setAllCollectorsAreExempt(fee.exempt);
+          }
+
+          hederaCustomFees.push(fixedFee);
+        } else {
+          throw new Error(
+            `Only fixed fees are supported. Got fee type: ${fee.type}`,
+          );
+        }
+      }
+
+      if (hederaCustomFees.length > 0) {
+        tokenCreateTx.setCustomFees(hederaCustomFees);
+        this.logger.debug(
+          `[TOKEN TX] Set ${hederaCustomFees.length} custom fees`,
+        );
+      }
+    }
 
     this.logger.debug(
       `[TOKEN TX] Created token creation transaction for ${name}`,

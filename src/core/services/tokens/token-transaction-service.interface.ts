@@ -38,6 +38,14 @@ export interface TokenTransferParams {
   amount: number;
 }
 
+export interface CustomFee {
+  type: 'fixed'; // Only fixed fees supported
+  amount: number; // Required for fixed fees
+  unitType?: 'HBAR'; // Only HBAR supported, defaults to HBAR
+  collectorId?: string;
+  exempt?: boolean;
+}
+
 export interface TokenCreateParams {
   name: string;
   symbol: string;
@@ -45,8 +53,10 @@ export interface TokenCreateParams {
   decimals: number;
   initialSupply: number;
   supplyType: 'FINITE' | 'INFINITE';
+  maxSupply?: number; // Required for FINITE supply type
   adminKey: string;
   treasuryKey: string;
+  customFees?: CustomFee[];
 }
 
 export interface TokenAssociationParams {

@@ -37,7 +37,7 @@ async function testCoreAPI() {
     privateKey: 'mock-private-key',
     network: 'testnet',
   });
-  const account = api.state.get('accounts', 'test-account') as any;
+  const account = api.state.get('accounts', 'test-account');
   console.log(`✅ Account stored and retrieved: ${account?.name}\n`);
 
   // Test 4: Mirror Node Service
