@@ -2,10 +2,7 @@
  * Real implementation of Network Service
  * Reads network configuration from hedera-cli.config.json
  */
-import {
-  NetworkService,
-  NetworkConfig,
-} from './network-service.interface';
+import { NetworkService, NetworkConfig } from './network-service.interface';
 import { loadUserConfig } from '../../../config/loader';
 import { mergeUserConfig } from '../../../config/schema';
 import baseConfig from '../../../state/config';

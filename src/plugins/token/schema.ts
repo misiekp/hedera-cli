@@ -131,3 +131,68 @@ export function parseTokenData(data: unknown): TokenData {
 export function safeParseTokenData(data: unknown) {
   return TokenDataSchema.safeParse(data);
 }
+
+// Command parameter validation schemas
+export const TokenCreateCommandSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Token name is required')
+    .max(100, 'Token name must be 100 characters or less'),
+
+  symbol: z
+    .string()
+    .min(1, 'Token symbol is required')
+    .max(10, 'Token symbol must be 10 characters or less'),
+
+  treasuryId: z
+    .string()
+    .regex(/^0\.0\.[0-9]+$/, 'Treasury ID must be in format 0.0.123456')
+    .optional(),
+
+  treasuryKey: z.string().min(1, 'Treasury key is required').optional(),
+
+  decimals: z
+    .number()
+    .int('Decimals must be an integer')
+    .min(0, 'Decimals must be non-negative')
+    .max(255, 'Decimals must be 255 or less')
+    .optional(),
+
+  initialSupply: z
+    .number()
+    .int('Initial supply must be an integer')
+    .min(0, 'Initial supply must be non-negative')
+    .optional(),
+
+  supplyType: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(z.enum(['FINITE', 'INFINITE']))
+    .optional(),
+
+  maxSupply: z
+    .number()
+    .int('Max supply must be an integer')
+    .min(0, 'Max supply must be non-negative')
+    .optional(),
+
+  adminKey: z.string().min(1, 'Admin key is required').optional(),
+});
+
+export type TokenCreateCommandParams = z.infer<typeof TokenCreateCommandSchema>;
+
+/**
+ * Validate token create command parameters
+ */
+export function validateTokenCreateParams(
+  data: unknown,
+): TokenCreateCommandParams {
+  return TokenCreateCommandSchema.parse(data);
+}
+
+/**
+ * Safe validate token create command parameters
+ */
+export function safeValidateTokenCreateParams(data: unknown) {
+  return TokenCreateCommandSchema.safeParse(data);
+}

@@ -9,9 +9,22 @@ export interface SigningService {
   signAndExecute(transaction: any): Promise<TransactionResult>;
 
   /**
+   * Sign and execute a transaction using a specific private key
+   */
+  signAndExecuteWithKey(
+    transaction: any,
+    privateKey: string,
+  ): Promise<TransactionResult>;
+
+  /**
    * Sign a transaction without executing it
    */
   sign(transaction: any): Promise<SignedTransaction>;
+
+  /**
+   * Sign a transaction using a specific private key without executing it
+   */
+  signWithKey(transaction: any, privateKey: string): Promise<SignedTransaction>;
 
   /**
    * Execute a pre-signed transaction

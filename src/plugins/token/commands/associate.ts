@@ -11,29 +11,34 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
   // Initialize token state helper
   const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
-  // Extract command arguments
-  const tokenId = args.args['token-id'] as string;
-  const accountIdOrName = args.args['account-id'] as string;
+  // Extract command arguments (using camelCase as passed by the CLI)
+  const tokenId = args.args['tokenId'] as string;
+  const accountId = args.args['accountId'] as string;
+  const accountKey = args.args['accountKey'] as string;
 
-  logger.log(`Associating token ${tokenId} with account ${accountIdOrName}`);
+  // Validate required parameters
+  if (!accountKey) {
+    throw new Error('Account key is required for token association');
+  }
+
+  logger.log(`🔑 Using provided account key for signing`);
+
+  logger.log(`Associating token ${tokenId} with account ${accountId}`);
 
   try {
-    // 1. Resolve account ID from name if needed
-    // For now, we'll assume the input is already an account ID
-    // In a full implementation, you'd resolve names to IDs using the account state
-    const accountId = accountIdOrName;
-
-    // 2. Create association transaction using Core API
+    // 1. Create association transaction using Core API
     const associateTransaction =
       await api.tokenTransactions.createTokenAssociationTransaction({
         tokenId,
         accountId,
       });
 
-    // 3. Sign and execute transaction
-    // Note: In a real implementation, you'd need to get the private key for the account
-    // For now, we'll use a placeholder signing process
-    const result = await api.signing.signAndExecute(associateTransaction);
+    // 2. Sign and execute transaction using the provided account key
+    logger.debug(`Using account key for signing transaction`);
+    const result = await api.signing.signAndExecuteWithKey(
+      associateTransaction,
+      accountKey,
+    );
 
     if (result.success) {
       logger.log(`✅ Token association successful!`);
@@ -41,7 +46,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
       logger.log(`   Account ID: ${accountId}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
-      // 4. Update token state with association
+      // 3. Update token state with association
       // Note: In a real implementation, you'd need to resolve the account name
       // For now, we'll use the account ID as the name
       await tokenState.addTokenAssociation(tokenId, accountId, accountId);
