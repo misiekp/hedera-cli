@@ -15,6 +15,7 @@ import {
   PrivateKey,
   AccountId,
 } from '@hashgraph/sdk';
+import { createHash } from 'crypto';
 
 export class AccountTransactionServiceImpl
   implements AccountTransactionService
@@ -67,10 +68,7 @@ export class AccountTransactionServiceImpl
     // This is a simplified EVM address generation
     // In a real implementation, you'd use proper cryptographic methods
     const keyString = publicKey.toString();
-    const hash = require('crypto')
-      .createHash('sha256')
-      .update(keyString)
-      .digest('hex');
+    const hash = createHash('sha256').update(keyString).digest('hex');
     return '0x' + hash.substring(0, 40);
   }
 
