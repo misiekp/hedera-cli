@@ -28,14 +28,21 @@ export class CredentialsServiceImpl implements CredentialsService {
     // First try to get from state
     const credentials = this.state
       .list<Credentials>('credentials')
-      .find((cred) => cred.isDefault);
+      .find(
+        (cred) =>
+          !!cred &&
+          cred.isDefault === true &&
+          typeof cred.accountId === 'string' &&
+          !!cred.accountId &&
+          typeof cred.privateKey === 'string' &&
+          !!cred.privateKey,
+      );
     if (credentials) {
       this.logger.debug(
         `[CREDENTIALS] Found default credentials in state: ${credentials.accountId}`,
       );
       return credentials;
     }
-
     // Fallback to environment variables
     this.logger.debug(
       '[CREDENTIALS] No default credentials in state, trying environment',
