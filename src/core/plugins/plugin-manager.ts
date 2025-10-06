@@ -106,7 +106,7 @@ export class PluginManager {
         status: 'loaded',
       };
 
-      this.loadedPlugins.set(manifest.name, loadedPlugin);
+      this.loadedPlugins.set(String(manifest.name), loadedPlugin);
       return loadedPlugin;
     } catch (error) {
       throw new Error(`Failed to load plugin from ${pluginPath}: ${error}`);
@@ -143,46 +143,51 @@ export class PluginManager {
     plugin: LoadedPlugin,
     commandSpec: any,
   ): void {
-    const commandName = commandSpec.name;
+    const commandName = String(commandSpec.name);
     const command = pluginCommand
       .command(commandName)
       .description(
-        commandSpec.description ||
-          commandSpec.summary ||
-          `Execute ${commandName}`,
+        String(
+          commandSpec.description ||
+            commandSpec.summary ||
+            `Execute ${commandName}`,
+        ),
       );
 
     // Add options
     if (commandSpec.options) {
       for (const option of commandSpec.options) {
-        const optionName = option.name;
+        const optionName = String(option.name);
         const optionFlag = `--${optionName}`;
 
         if (option.type === 'boolean') {
-          command.option(optionFlag, option.description || `Set ${optionName}`);
+          command.option(
+            optionFlag,
+            String(option.description || `Set ${optionName}`),
+          );
         } else if (option.type === 'number') {
           command.option(
             `${optionFlag} <value>`,
-            option.description || `Set ${optionName}`,
+            String(option.description || `Set ${optionName}`),
             parseFloat,
           );
         } else if (option.type === 'array') {
           command.option(
             `${optionFlag} <values>`,
-            option.description || `Set ${optionName}`,
-            (value: string) => value.split(','),
+            String(option.description || `Set ${optionName}`),
+            (value: unknown) => String(value).split(','),
           );
         } else {
           command.option(
             `${optionFlag} <value>`,
-            option.description || `Set ${optionName}`,
+            String(option.description || `Set ${optionName}`),
           );
         }
       }
     }
 
     // Set up action handler
-    command.action(async (...args: any[]) => {
+    command.action(async (...args: unknown[]) => {
       try {
         await this.executePluginCommand(plugin, commandSpec, args);
       } catch (error) {
@@ -201,9 +206,9 @@ export class PluginManager {
   private async executePluginCommand(
     plugin: LoadedPlugin,
     commandSpec: any,
-    args: any[],
+    args: unknown[],
   ): Promise<void> {
-    const command = args[args.length - 1];
+    const command = args[args.length - 1] as Command;
     const options = command.opts();
     const commandArgs = command.args;
 
