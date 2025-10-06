@@ -2,7 +2,9 @@
  * Account Balance Command Handler
  * Handles account balance retrieval using the Core API
  */
+import { TokenBalance } from '../../../../types';
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
 export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
@@ -43,23 +45,22 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
             await api.mirror.getAccountTokenBalances(accountId);
           if (tokenBalances.tokens && tokenBalances.tokens.length > 0) {
             logger.log(`🪙 Token Balances:`);
-            tokenBalances.tokens.forEach((token: any) => {
+            tokenBalances.tokens.forEach((token: TokenBalance) => {
               logger.log(`   ${token.token_id}: ${token.balance}`);
             });
           } else {
             logger.log(`   No token balances found`);
           }
-        } catch (error) {
-          logger.log(`   Could not fetch token balances: ${error}`);
+        } catch (error: unknown) {
+          logger.log(formatError('   Could not fetch token balances', error));
+          process.exit(1);
         }
       }
     }
 
     process.exit(0);
-  } catch (error) {
-    logger.error(`❌ Failed to get account balance: ${error}`);
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to get account balance', error));
     process.exit(1);
   }
 }
-
-export default getAccountBalanceHandler;

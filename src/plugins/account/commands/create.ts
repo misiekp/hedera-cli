@@ -3,6 +3,7 @@
  * Handles account creation using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
 export async function createAccountHandler(args: CommandHandlerArgs) {
@@ -61,10 +62,8 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
     } else {
       throw new Error('Failed to create account');
     }
-  } catch (error) {
-    logger.error(`❌ Failed to create account: ${error}`);
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to create account', error));
     process.exit(1);
   }
 }
-
-export default createAccountHandler;
