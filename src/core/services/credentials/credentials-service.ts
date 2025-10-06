@@ -6,14 +6,17 @@ import { CredentialsService } from './credentials-service.interface';
 import { StateService } from '../state/state-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { Credentials } from '../../types/shared.types';
+import { NetworkService } from './../network/network-service.interface';
 
 export class CredentialsServiceImpl implements CredentialsService {
   private state: StateService;
   private logger: Logger;
+  private network: NetworkService;
 
-  constructor(state: StateService, logger: Logger) {
+  constructor(state: StateService, logger: Logger, network: NetworkService) {
     this.state = state;
     this.logger = logger;
+    this.network = network;
   }
 
   /**
@@ -25,14 +28,21 @@ export class CredentialsServiceImpl implements CredentialsService {
     // First try to get from state
     const credentials = this.state
       .list<Credentials>('credentials')
-      .find((cred) => cred.isDefault);
+      .find(
+        (cred) =>
+          !!cred &&
+          cred.isDefault === true &&
+          typeof cred.accountId === 'string' &&
+          !!cred.accountId &&
+          typeof cred.privateKey === 'string' &&
+          !!cred.privateKey,
+      );
     if (credentials) {
       this.logger.debug(
         `[CREDENTIALS] Found default credentials in state: ${credentials.accountId}`,
       );
       return credentials;
     }
-
     // Fallback to environment variables
     this.logger.debug(
       '[CREDENTIALS] No default credentials in state, trying environment',
@@ -142,9 +152,9 @@ export class CredentialsServiceImpl implements CredentialsService {
       '[CREDENTIALS] Loading credentials from environment variables',
     );
 
-    const accountId = process.env.HEDERA_ACCOUNT_ID;
-    const privateKey = process.env.HEDERA_PRIVATE_KEY;
-    const network = process.env.HEDERA_NETWORK || 'testnet';
+    const accountId = process.env.TESTNET_OPERATOR_ID;
+    const privateKey = process.env.TESTNET_OPERATOR_KEY;
+    const network = this.network.getCurrentNetwork();
 
     if (accountId && privateKey) {
       this.logger.debug(

@@ -3,6 +3,7 @@
  * Handles viewing account details using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
 export async function viewAccountHandler(args: CommandHandlerArgs) {
@@ -19,7 +20,7 @@ export async function viewAccountHandler(args: CommandHandlerArgs) {
   try {
     // Check if it's a name (stored in state) or account ID
     let accountId = accountIdOrName;
-    let account = await accountState.loadAccount(accountIdOrName);
+    const account = await accountState.loadAccount(accountIdOrName);
 
     if (account) {
       accountId = account.accountId;
@@ -37,10 +38,8 @@ export async function viewAccountHandler(args: CommandHandlerArgs) {
     logger.log(`   Balance Timestamp: ${accountInfo.balance.timestamp}`);
 
     process.exit(0);
-  } catch (error) {
-    logger.error(`❌ Failed to view account: ${error}`);
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to view account', error));
     process.exit(1);
   }
 }
-
-export default viewAccountHandler;
