@@ -50,25 +50,26 @@ export class AccountTransactionServiceImpl
     }
 
     // Generate EVM address from the public key
-    const evmAddress = this.generateEvmAddress(newAccountPublicKey);
+    const evmAddress = this.generateEvmAddress(
+      newAccountPublicKey.toStringRaw(),
+    );
 
     this.logger.debug(
-      `[ACCOUNT TX] Created transaction for account with key: ${newAccountPublicKey.toString()}`,
+      `[ACCOUNT TX] Created transaction for account with key: ${newAccountPublicKey.toStringRaw()}`,
     );
 
     return {
       transaction,
-      privateKey: newAccountPrivateKey.toString(),
-      publicKey: newAccountPublicKey.toString(),
+      privateKey: newAccountPrivateKey.toStringRaw(),
+      publicKey: newAccountPublicKey.toStringRaw(),
       evmAddress,
     };
   }
 
-  private generateEvmAddress(publicKey: any): string {
+  private generateEvmAddress(publicKeyString: string): string {
     // This is a simplified EVM address generation
     // In a real implementation, you'd use proper cryptographic methods
-    const keyString = publicKey.toString();
-    const hash = createHash('sha256').update(keyString).digest('hex');
+    const hash = createHash('sha256').update(publicKeyString).digest('hex');
     return '0x' + hash.substring(0, 40);
   }
 
