@@ -2,21 +2,21 @@
  * Token Lifecycle Integration Tests
  * Tests the complete token lifecycle: create → associate → transfer
  */
-import type { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interface';
-import { createTokenHandler } from '../../../src/plugins/token/commands/create';
-import { associateTokenHandler } from '../../../src/plugins/token/commands/associate';
-import { transferTokenHandler } from '../../../src/plugins/token/commands/transfer';
-import { ZustandTokenStateHelper } from '../../../src/plugins/token/zustand-state-helper';
-import { Logger } from '../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../src/core/core-api/core-api.interface';
-import type { CredentialsService } from '../../../src/core/services/credentials/credentials-service.interface';
-import type { SigningService } from '../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../src/core/services/state/state-service.interface';
+import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
+import { createTokenHandler } from '../../../../src/plugins/token/commands/create';
+import { associateTokenHandler } from '../../../../src/plugins/token/commands/associate';
+import { transferTokenHandler } from '../../../../src/plugins/token/commands/transfer';
+import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
+import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
+import type { CredentialsService } from '../../../../src/core/services/credentials/credentials-service.interface';
+import type { SigningService } from '../../../../src/core/services/signing/signing-service.interface';
+import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
+import type { StateService } from '../../../../src/core/services/state/state-service.interface';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../src/plugins/token/zustand-state-helper', () => ({
+jest.mock('../../../../src/plugins/token/zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
 }));
 

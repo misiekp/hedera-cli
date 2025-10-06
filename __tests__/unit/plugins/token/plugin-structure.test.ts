@@ -2,13 +2,13 @@
  * Token Plugin Structure Tests
  * Validates the plugin structure and exports
  */
-import { tokenPluginManifest } from '../../../src/plugins/token/manifest';
+import { tokenPluginManifest } from '../../../../src/plugins/token/manifest';
 import {
   transferTokenHandler,
   createTokenHandler,
   associateTokenHandler,
   createTokenFromFileHandler,
-} from '../../../src/plugins/token/index';
+} from '../../../../src/plugins/token/index';
 
 describe('Token Plugin Structure', () => {
   test('manifest should be properly defined', () => {

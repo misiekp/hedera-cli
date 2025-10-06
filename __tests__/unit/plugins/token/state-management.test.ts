@@ -3,14 +3,14 @@
  * Tests the ZustandTokenStateHelper functionality
  */
 
-import { ZustandTokenStateHelper } from '../../../src/plugins/token/zustand-state-helper';
-import { StateService } from '../../../src/core/services/state/state-service.interface';
-import { Logger } from '../../../src/core/services/logger/logger-service.interface';
-import { TokenData } from '../../../src/plugins/token/schema';
+import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
+import { StateService } from '../../../../src/core/services/state/state-service.interface';
+import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
+import { TokenData } from '../../../../src/plugins/token/schema';
 
 // Mock the dependencies
-jest.mock('../../../src/core/services/state/state-service.interface');
-jest.mock('../../../src/core/services/logger/logger-service.interface');
+jest.mock('../../../../src/core/services/state/state-service.interface');
+jest.mock('../../../../src/core/services/logger/logger-service.interface');
 
 describe('Token State Management', () => {
   let stateHelper: ZustandTokenStateHelper;
@@ -379,12 +379,6 @@ describe('Token State Management', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         '[TOKEN STATE] Failed to add association to token 0.0.123456: Error: Token 0.0.123456 not found',
       );
-    });
-
-    test.skip('should handle save error', async () => {
-      // This test is skipped due to mock complexity with Jest spies
-      // The functionality is covered by the saveToken error handling test above
-      expect(true).toBe(true);
     });
   });
 });
