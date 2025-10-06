@@ -2,19 +2,19 @@
  * Token Associate Handler Unit Tests
  * Tests the token association functionality of the token plugin
  */
-import type { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interface';
-import { associateTokenHandler } from '../../../src/plugins/token/commands/associate';
-import { ZustandTokenStateHelper } from '../../../src/plugins/token/zustand-state-helper';
-import { Logger } from '../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../src/core/core-api/core-api.interface';
+import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
+import { associateTokenHandler } from '../../../../src/plugins/token/commands/associate';
+import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
+import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
 import type {
   SigningService,
   TransactionResult,
-} from '../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../src/core/services/state/state-service.interface';
+} from '../../../../src/core/services/signing/signing-service.interface';
+import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
+import type { StateService } from '../../../../src/core/services/state/state-service.interface';
 
-jest.mock('../../../src/plugins/token/zustand-state-helper', () => ({
+jest.mock('../../../../src/plugins/token/zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
 }));
 

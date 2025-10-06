@@ -2,22 +2,22 @@
  * Token Create Handler Unit Tests
  * Tests the token creation functionality of the token plugin
  */
-import type { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interface';
-import { createTokenHandler } from '../../../src/plugins/token/commands/create';
-import { ZustandTokenStateHelper } from '../../../src/plugins/token/zustand-state-helper';
-import { Logger } from '../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../src/core/core-api/core-api.interface';
-import type { CredentialsService } from '../../../src/core/services/credentials/credentials-service.interface';
+import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
+import { createTokenHandler } from '../../../../src/plugins/token/commands/create';
+import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
+import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
+import type { CredentialsService } from '../../../../src/core/services/credentials/credentials-service.interface';
 import type {
   SigningService,
   TransactionResult,
-} from '../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../src/core/services/state/state-service.interface';
+} from '../../../../src/core/services/signing/signing-service.interface';
+import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
+import type { StateService } from '../../../../src/core/services/state/state-service.interface';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../src/plugins/token/zustand-state-helper', () => ({
+jest.mock('../../../../src/plugins/token/zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
 }));
 

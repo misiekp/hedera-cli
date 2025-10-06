@@ -9,7 +9,7 @@ import {
   CustomFeeSchema,
   safeValidateTokenCreateParams,
   validateTokenData,
-} from '../../../src/plugins/token/schema';
+} from '../../../../src/plugins/token/schema';
 
 describe('Token Schema Validation', () => {
   describe('TokenDataSchema', () => {
@@ -395,15 +395,6 @@ describe('Token Schema Validation', () => {
           'Token name is required',
         );
       }
-    });
-  });
-
-  // safeValidateTokenFile function does not exist in the schema
-  describe.skip('safeValidateTokenFile', () => {
-    test('should be implemented when function exists', () => {
-      // This test suite is skipped because safeValidateTokenFile does not exist
-      // in the current schema implementation
-      expect(true).toBe(true);
     });
   });
 

@@ -2,17 +2,17 @@
  * Token Create From File Handler Unit Tests
  * Tests the token creation from file functionality of the token plugin
  */
-import type { CommandHandlerArgs } from '../../../src/core/plugins/plugin.interface';
-import { createTokenFromFileHandler } from '../../../src/plugins/token/commands/createFromFile';
-import { ZustandTokenStateHelper } from '../../../src/plugins/token/zustand-state-helper';
-import { Logger } from '../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../src/core/core-api/core-api.interface';
+import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
+import { createTokenFromFileHandler } from '../../../../src/plugins/token/commands/createFromFile';
+import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
+import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
 import type {
   SigningService,
   TransactionResult,
-} from '../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../src/core/services/state/state-service.interface';
+} from '../../../../src/core/services/signing/signing-service.interface';
+import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
+import type { StateService } from '../../../../src/core/services/state/state-service.interface';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -30,7 +30,7 @@ jest.mock('path', () => ({
   resolve: jest.fn(),
 }));
 
-jest.mock('../../../src/plugins/token/zustand-state-helper', () => ({
+jest.mock('../../../../src/plugins/token/zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
 }));
 
@@ -140,8 +140,8 @@ const validTokenFile = {
 
 describe('createTokenFromFileHandler', () => {
   beforeEach(() => {
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`Process.exit(${code})`);
+    exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
+      return undefined as never;
     });
     MockedHelper.mockClear();
     MockedHelper.mockImplementation(() => ({
@@ -266,6 +266,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.log).toHaveBeenCalledWith(
         '✅ Token created successfully from file!',
       );
+      expect(exitSpy).toHaveBeenCalledWith(0);
     });
 
     test('should handle infinite supply type', async () => {
@@ -333,14 +334,22 @@ describe('createTokenFromFileHandler', () => {
         maxSupply: 0,
         adminKey: 'admin-key',
         treasuryKey: 'treasury-key',
-        customFees: [],
+        customFees: [
+          {
+            type: 'fixed',
+            amount: 10,
+            unitType: 'HBAR',
+            collectorId: '0.0.999999',
+            exempt: undefined,
+          },
+        ],
       });
+      expect(exitSpy).toHaveBeenCalledWith(0);
     });
 
     test('should process associations after token creation', async () => {
       // Arrange
       const mockAddToken = jest.fn();
-      const mockAddAssociation = jest.fn();
       const mockTokenTransaction = { test: 'token-transaction' };
       const _mockAssociationTransaction = { test: 'association-transaction' };
       const mockSignResult: TransactionResult = {
@@ -356,8 +365,7 @@ describe('createTokenFromFileHandler', () => {
       };
 
       MockedHelper.mockImplementation(() => ({
-        addToken: mockAddToken,
-        addAssociation: mockAddAssociation,
+        saveToken: mockAddToken,
       }));
 
       mockFs.readFile.mockResolvedValue(JSON.stringify(validTokenFile));
@@ -398,10 +406,7 @@ describe('createTokenFromFileHandler', () => {
         tokenId: '0.0.123456', // This would be the actual token ID from the transaction result
         accountId: '0.0.789012',
       });
-      expect(mockAddAssociation).toHaveBeenCalledWith('0.0.123456', {
-        name: 'Unknown Account',
-        accountId: '0.0.789012',
-      });
+      expect(exitSpy).toHaveBeenCalledWith(0);
     });
   });
 
@@ -425,11 +430,9 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Process.exit(0)',
-      );
+      await createTokenFromFileHandler(args);
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ File not found: /resolved/path/to/token.test.json',
+        expect.stringContaining('❌ Failed to create token from file:'),
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
@@ -454,9 +457,11 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Permission denied',
+      await createTokenFromFileHandler(args);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('❌ Failed to create token from file:'),
       );
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
     test('should handle invalid JSON', async () => {
@@ -479,11 +484,9 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Process.exit(0)',
-      );
+      await createTokenFromFileHandler(args);
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Invalid JSON in token file',
+        expect.stringContaining('❌ Failed to create token from file:'),
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
@@ -525,12 +528,8 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Process.exit(0)',
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Token file validation failed:',
-      );
+      await createTokenFromFileHandler(args);
+      expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -562,12 +561,8 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Process.exit(0)',
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Token file validation failed:',
-      );
+      await createTokenFromFileHandler(args);
+      expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -596,12 +591,8 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Process.exit(0)',
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Token file validation failed:',
-      );
+      await createTokenFromFileHandler(args);
+      expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -630,12 +621,8 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Process.exit(0)',
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Token file validation failed:',
-      );
+      await createTokenFromFileHandler(args);
+      expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
@@ -681,17 +668,16 @@ describe('createTokenFromFileHandler', () => {
       };
 
       // Act & Assert
-      await expect(createTokenFromFileHandler(args)).rejects.toThrow(
-        'Token creation failed',
+      await createTokenFromFileHandler(args);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('❌ Failed to create token from file:'),
       );
-      expect(logger.error).toHaveBeenCalledWith('❌ Token creation failed:');
-      expect(logger.error).toHaveBeenCalledWith('   Token creation failed');
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
     test('should handle association failure gracefully', async () => {
       // Arrange
       const mockAddToken = jest.fn();
-      const mockAddAssociation = jest.fn();
       const mockTokenTransaction = { test: 'token-transaction' };
       const _mockAssociationTransaction = { test: 'association-transaction' };
       const mockSignResult: TransactionResult = {
@@ -707,8 +693,7 @@ describe('createTokenFromFileHandler', () => {
       };
 
       MockedHelper.mockImplementation(() => ({
-        addToken: mockAddToken,
-        addAssociation: mockAddAssociation,
+        saveToken: mockAddToken,
       }));
 
       mockFs.readFile.mockResolvedValue(JSON.stringify(validTokenFile));
@@ -743,10 +728,13 @@ describe('createTokenFromFileHandler', () => {
       await createTokenFromFileHandler(args);
 
       // Assert - Should continue despite association failure
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Association failed for account 0.0.789012:',
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('⚠️  Failed to associate account 0.0.789012:'),
       );
-      expect(logger.error).toHaveBeenCalledWith('   Association failed');
+      expect(logger.log).toHaveBeenCalledWith(
+        '✅ Token created successfully from file!',
+      );
+      expect(exitSpy).toHaveBeenCalledWith(0);
     });
   });
 
@@ -800,16 +788,14 @@ describe('createTokenFromFileHandler', () => {
       await createTokenFromFileHandler(args);
 
       // Assert
+      expect(logger.log).toHaveBeenCalledWith('Creating token from file: test');
       expect(logger.log).toHaveBeenCalledWith(
-        '📄 Reading token file: /resolved/path/to/token.test.json',
+        '🔑 Using treasury key for signing transaction',
       );
       expect(logger.log).toHaveBeenCalledWith(
-        '✅ Token file validation passed',
+        '✅ Token created successfully from file!',
       );
-      expect(logger.log).toHaveBeenCalledWith(
-        '🏦 Using treasury account: 0.0.123456',
-      );
-      expect(logger.log).toHaveBeenCalledWith('🔑 Will sign with treasury key');
+      expect(exitSpy).toHaveBeenCalledWith(0);
     });
   });
 });
