@@ -4,7 +4,6 @@
  */
 import {
   SigningService,
-  Transaction,
   SignedTransaction,
   TransactionResult,
   TransactionStatus,
@@ -32,7 +31,7 @@ export class SigningServiceImpl implements SigningService {
     this.credentialsService = credentialsService;
 
     // Initialize with credentials from state or environment
-    this.initializeCredentials();
+    void this.initializeCredentials();
   }
 
   private async initializeCredentials(): Promise<void> {
