@@ -46,11 +46,11 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Set default operator credentials
    */
-  async setDefaultCredentials(
+  setDefaultCredentials(
     accountId: string,
     privateKey: string,
     network: string,
-  ): Promise<void> {
+  ): void {
     this.logger.debug(
       `[CREDENTIALS] Setting default credentials for account: ${accountId}`,
     );
@@ -82,7 +82,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Get credentials by account ID
    */
-  async getCredentials(accountId: string): Promise<Credentials | null> {
+  getCredentials(accountId: string): Credentials | null {
     this.logger.debug(
       `[CREDENTIALS] Getting credentials for account: ${accountId}`,
     );
@@ -92,12 +92,12 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Add new credentials
    */
-  async addCredentials(
+  addCredentials(
     accountId: string,
     privateKey: string,
     network: string,
     isDefault: boolean = false,
-  ): Promise<void> {
+  ): void {
     this.logger.debug(
       `[CREDENTIALS] Adding credentials for account: ${accountId}`,
     );
@@ -119,7 +119,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Remove credentials
    */
-  async removeCredentials(accountId: string): Promise<void> {
+  removeCredentials(accountId: string): void {
     this.logger.debug(
       `[CREDENTIALS] Removing credentials for account: ${accountId}`,
     );
@@ -132,7 +132,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * List all credentials
    */
-  async listCredentials(): Promise<Credentials[]> {
+  listCredentials(): Credentials[] {
     this.logger.debug('[CREDENTIALS] Listing all credentials');
     return this.state.list<Credentials>('credentials');
   }
@@ -140,7 +140,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Load credentials from environment variables
    */
-  async loadFromEnvironment(): Promise<Credentials | null> {
+  loadFromEnvironment(): Credentials | null {
     this.logger.debug(
       '[CREDENTIALS] Loading credentials from environment variables',
     );

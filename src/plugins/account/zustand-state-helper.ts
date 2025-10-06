@@ -21,7 +21,7 @@ export class ZustandAccountStateHelper {
   /**
    * Save account with validation
    */
-  async saveAccount(name: string, accountData: AccountData): Promise<void> {
+  saveAccount(name: string, accountData: AccountData): void {
     this.logger.debug(`[ZUSTAND ACCOUNT STATE] Saving account: ${name}`);
 
     const validation = safeParseAccountData(accountData);
@@ -39,7 +39,7 @@ export class ZustandAccountStateHelper {
   /**
    * Load account with validation
    */
-  async loadAccount(name: string): Promise<AccountData | null> {
+  loadAccount(name: string): AccountData | null {
     this.logger.debug(`[ZUSTAND ACCOUNT STATE] Loading account: ${name}`);
     const data = this.state.get<AccountData>(this.namespace, name);
 
@@ -59,7 +59,7 @@ export class ZustandAccountStateHelper {
   /**
    * List all accounts with validation
    */
-  async listAccounts(): Promise<AccountData[]> {
+  listAccounts(): AccountData[] {
     this.logger.debug(`[ZUSTAND ACCOUNT STATE] Listing all accounts`);
     const allData = this.state.list<AccountData>(this.namespace);
     return allData.filter((data) => safeParseAccountData(data).success);
@@ -68,7 +68,7 @@ export class ZustandAccountStateHelper {
   /**
    * Delete account
    */
-  async deleteAccount(name: string): Promise<void> {
+  deleteAccount(name: string): void {
     this.logger.debug(`[ZUSTAND ACCOUNT STATE] Deleting account: ${name}`);
     this.state.delete(this.namespace, name);
   }
@@ -76,7 +76,7 @@ export class ZustandAccountStateHelper {
   /**
    * Clear all accounts
    */
-  async clearAccounts(): Promise<void> {
+  clearAccounts(): void {
     this.logger.debug(`[ZUSTAND ACCOUNT STATE] Clearing all accounts`);
     this.state.clear(this.namespace);
   }
@@ -84,7 +84,7 @@ export class ZustandAccountStateHelper {
   /**
    * Check if account exists
    */
-  async hasAccount(name: string): Promise<boolean> {
+  hasAccount(name: string): boolean {
     this.logger.debug(
       `[ZUSTAND ACCOUNT STATE] Checking if account exists: ${name}`,
     );
@@ -94,24 +94,24 @@ export class ZustandAccountStateHelper {
   /**
    * Get account count
    */
-  async getAccountCount(): Promise<number> {
-    const accounts = await this.listAccounts();
+  getAccountCount(): number {
+    const accounts = this.listAccounts();
     return accounts.length;
   }
 
   /**
    * Get accounts by network
    */
-  async getAccountsByNetwork(network: string): Promise<AccountData[]> {
-    const accounts = await this.listAccounts();
+  getAccountsByNetwork(network: string): AccountData[] {
+    const accounts = this.listAccounts();
     return accounts.filter((account) => account.network === network);
   }
 
   /**
    * Get accounts by type
    */
-  async getAccountsByType(type: 'ECDSA' | 'ED25519'): Promise<AccountData[]> {
-    const accounts = await this.listAccounts();
+  getAccountsByType(type: 'ECDSA' | 'ED25519'): AccountData[] {
+    const accounts = this.listAccounts();
     return accounts.filter((account) => account.type === type);
   }
 
@@ -158,47 +158,47 @@ export class ZustandAccountStateHelper {
   /**
    * Get all keys in the namespace
    */
-  async getAccountNames(): Promise<string[]> {
+  getAccountNames(): string[] {
     return this.state.getKeys(this.namespace);
   }
 
   /**
    * Batch operations
    */
-  async batchSaveAccounts(
+  batchSaveAccounts(
     accounts: Array<{ name: string; data: AccountData }>,
-  ): Promise<void> {
+  ): void {
     this.logger.debug(
       `[ZUSTAND ACCOUNT STATE] Batch saving ${accounts.length} accounts`,
     );
 
     for (const { name, data } of accounts) {
-      await this.saveAccount(name, data);
+      this.saveAccount(name, data);
     }
   }
 
   /**
    * Batch delete accounts
    */
-  async batchDeleteAccounts(names: string[]): Promise<void> {
+  batchDeleteAccounts(names: string[]): void {
     this.logger.debug(
       `[ZUSTAND ACCOUNT STATE] Batch deleting ${names.length} accounts`,
     );
 
     for (const name of names) {
-      await this.deleteAccount(name);
+      this.deleteAccount(name);
     }
   }
 
   /**
    * Search accounts by criteria
    */
-  async searchAccounts(criteria: {
+  searchAccounts(criteria: {
     network?: string;
     type?: 'ECDSA' | 'ED25519';
     namePattern?: string;
-  }): Promise<AccountData[]> {
-    let accounts = await this.listAccounts();
+  }): AccountData[] {
+    let accounts = this.listAccounts();
 
     if (criteria.network) {
       accounts = accounts.filter(
@@ -221,12 +221,12 @@ export class ZustandAccountStateHelper {
   /**
    * Get account statistics
    */
-  async getAccountStats(): Promise<{
+  getAccountStats(): {
     total: number;
     byNetwork: Record<string, number>;
     byType: Record<string, number>;
-  }> {
-    const accounts = await this.listAccounts();
+  } {
+    const accounts = this.listAccounts();
 
     const stats = {
       total: accounts.length,

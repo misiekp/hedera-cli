@@ -3,7 +3,7 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 
-export async function infoHandler(args: CommandHandlerArgs): Promise<void> {
+export function infoHandler(args: CommandHandlerArgs): void {
   const { logger } = args;
   const { name } = args.args as { name: string };
 

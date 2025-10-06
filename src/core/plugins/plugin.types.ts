@@ -19,8 +19,8 @@ export interface PluginManifest {
   capabilities: string[];
   commands: CommandSpec[];
   stateSchemas?: PluginStateSchema[];
-  init?: (context: PluginContext) => Promise<void>;
-  teardown?: (context: PluginContext) => Promise<void>;
+  init?: (context?: PluginContext) => void | Promise<void>;
+  teardown?: (context?: PluginContext) => void | Promise<void>;
 }
 
 /**

@@ -2,8 +2,9 @@
  * State List Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 
-export async function listHandler(args: CommandHandlerArgs): Promise<void> {
+export function listHandler(args: CommandHandlerArgs): Promise<void> {
   const { logger, api } = args;
   const { namespace } = args.args as { namespace?: string };
 
@@ -49,7 +50,7 @@ export async function listHandler(args: CommandHandlerArgs): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error(`❌ Failed to list state data: ${error}`);
+    logger.error(formatError('❌ Failed to list state data: ', error));
     process.exit(1);
   }
 }

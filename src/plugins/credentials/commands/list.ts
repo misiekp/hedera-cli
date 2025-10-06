@@ -2,6 +2,7 @@
  * List Credentials Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 
 export async function listHandler(args: CommandHandlerArgs): Promise<void> {
   const { logger, api } = args;

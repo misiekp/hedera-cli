@@ -2,8 +2,9 @@
  * State Clear Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 
-export async function clearHandler(args: CommandHandlerArgs): Promise<void> {
+export function clearHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
   const { namespace, confirm } = args.args as {
     namespace?: string;
@@ -54,7 +55,7 @@ export async function clearHandler(args: CommandHandlerArgs): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error(`❌ Failed to clear state data: ${error}`);
+    logger.error(formatError('❌ Failed to clear state data: ', error));
     process.exit(1);
   }
 }

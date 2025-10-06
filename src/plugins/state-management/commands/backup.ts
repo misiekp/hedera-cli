@@ -4,8 +4,9 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import * as fs from 'fs';
 import * as path from 'path';
+import { formatError } from '../../../utils/errors';
 
-export async function backupHandler(args: CommandHandlerArgs): Promise<void> {
+export function backupHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
   const { output } = args.args as { output?: string };
 
@@ -42,7 +43,7 @@ export async function backupHandler(args: CommandHandlerArgs): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error(`❌ Failed to create backup: ${error}`);
+    logger.error(formatError('❌ Failed to create backup: ', error));
     process.exit(1);
   }
 }
