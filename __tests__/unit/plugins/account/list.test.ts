@@ -67,7 +67,7 @@ describe('account plugin - list command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockResolvedValue([]),
+      listAccounts: jest.fn().mockReturnValue([]),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
@@ -89,7 +89,7 @@ describe('account plugin - list command', () => {
     ];
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockResolvedValue(accounts),
+      listAccounts: jest.fn().mockReturnValue(accounts),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
@@ -111,7 +111,7 @@ describe('account plugin - list command', () => {
     const accounts = [makeAccountData({ name: 'acc3', accountId: '0.0.3333' })];
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockResolvedValue(accounts),
+      listAccounts: jest.fn().mockReturnValue(accounts),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
@@ -128,7 +128,9 @@ describe('account plugin - list command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockRejectedValue(new Error('db error')),
+      listAccounts: jest.fn().mockImplementation(() => {
+        throw new Error('db error');
+      }),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };

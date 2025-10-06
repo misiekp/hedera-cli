@@ -40,7 +40,7 @@ export class CredentialsServiceImpl implements CredentialsService {
     this.logger.debug(
       '[CREDENTIALS] No default credentials in state, trying environment',
     );
-    return await this.loadFromEnvironment();
+    return this.loadFromEnvironment();
   }
 
   /**

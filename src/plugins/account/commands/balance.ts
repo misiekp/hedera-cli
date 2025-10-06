@@ -23,7 +23,7 @@ async function getAccountBalanceHandler(args: CommandHandlerArgs) {
   try {
     // Check if it's a name (stored in state) or account ID
     let accountId = accountIdOrName;
-    const account = await accountState.loadAccount(accountIdOrName);
+    const account = accountState.loadAccount(accountIdOrName);
 
     if (account) {
       accountId = account.accountId;

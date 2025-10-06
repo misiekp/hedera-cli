@@ -23,12 +23,12 @@ async function deleteAccountHandler(args: CommandHandlerArgs) {
 
     // Find account by name or ID
     if (name) {
-      accountToDelete = await accountState.loadAccount(name);
+      accountToDelete = accountState.loadAccount(name);
       if (!accountToDelete) {
         throw new Error(`Account with name '${name}' not found`);
       }
     } else if (accountId) {
-      const accounts = await accountState.listAccounts();
+      const accounts = accountState.listAccounts();
       accountToDelete = accounts.find((acc) => acc.accountId === accountId);
       if (!accountToDelete) {
         throw new Error(`Account with ID '${accountId}' not found`);
@@ -38,7 +38,7 @@ async function deleteAccountHandler(args: CommandHandlerArgs) {
     }
 
     // Delete account from state
-    await accountState.deleteAccount(accountToDelete.name);
+    accountState.deleteAccount(accountToDelete.name);
 
     logger.log(
       `✅ Account deleted successfully: ${accountToDelete.name} (${accountToDelete.accountId})`,

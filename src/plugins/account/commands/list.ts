@@ -18,7 +18,7 @@ async function listAccountsHandler(args: CommandHandlerArgs) {
   logger.log('Listing all accounts...');
 
   try {
-    const accounts = await accountState.listAccounts();
+    const accounts = accountState.listAccounts();
 
     if (accounts.length === 0) {
       logger.log('📝 No accounts found in the address book');

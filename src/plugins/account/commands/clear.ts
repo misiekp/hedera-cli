@@ -15,11 +15,11 @@ async function clearAccountsHandler(args: CommandHandlerArgs) {
   logger.log('Clearing all accounts...');
 
   try {
-    const accounts = await accountState.listAccounts();
+    const accounts = accountState.listAccounts();
     const count = accounts.length;
 
     // Clear all accounts
-    await accountState.clearAccounts();
+    accountState.clearAccounts();
 
     logger.log(`✅ Cleared ${count} account(s) from the address book`);
 

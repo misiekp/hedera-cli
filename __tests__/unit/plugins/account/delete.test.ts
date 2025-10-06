@@ -67,9 +67,9 @@ describe('account plugin - delete command', () => {
     const logger = makeLogger();
     const account = makeAccountData({ name: 'acc1', accountId: '0.0.1111' });
 
-    const deleteAccountMock = jest.fn().mockResolvedValue(undefined);
+    const deleteAccountMock = jest.fn().mockReturnValue(undefined);
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockResolvedValue(account),
+      loadAccount: jest.fn().mockReturnValue(account),
       listAccounts: jest.fn(),
       deleteAccount: deleteAccountMock,
     }));
@@ -90,10 +90,10 @@ describe('account plugin - delete command', () => {
     const logger = makeLogger();
     const account = makeAccountData({ name: 'acc2', accountId: '0.0.2222' });
 
-    const deleteAccountMock = jest.fn().mockResolvedValue(undefined);
+    const deleteAccountMock = jest.fn().mockReturnValue(undefined);
     MockedHelper.mockImplementation(() => ({
       loadAccount: jest.fn(),
-      listAccounts: jest.fn().mockResolvedValue([account]),
+      listAccounts: jest.fn().mockReturnValue([account]),
       deleteAccount: deleteAccountMock,
     }));
 
@@ -133,7 +133,7 @@ describe('account plugin - delete command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockResolvedValue(null),
+      loadAccount: jest.fn().mockReturnValue(null),
       listAccounts: jest.fn(),
       deleteAccount: jest.fn(),
     }));
@@ -156,7 +156,7 @@ describe('account plugin - delete command', () => {
       loadAccount: jest.fn(),
       listAccounts: jest
         .fn()
-        .mockResolvedValue([makeAccountData({ accountId: '0.0.3333' })]),
+        .mockReturnValue([makeAccountData({ accountId: '0.0.3333' })]),
       deleteAccount: jest.fn(),
     }));
 
@@ -176,9 +176,11 @@ describe('account plugin - delete command', () => {
     const account = makeAccountData({ name: 'acc5', accountId: '0.0.5555' });
 
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockResolvedValue(account),
+      loadAccount: jest.fn().mockReturnValue(account),
       listAccounts: jest.fn(),
-      deleteAccount: jest.fn().mockRejectedValue(new Error('db error')),
+      deleteAccount: jest.fn().mockImplementation(() => {
+        throw new Error('db error');
+      }),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };

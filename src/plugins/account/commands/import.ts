@@ -21,7 +21,7 @@ async function importAccountHandler(args: CommandHandlerArgs) {
 
   try {
     // Check if account name already exists
-    if (await accountState.hasAccount(name)) {
+    if (accountState.hasAccount(name)) {
       throw new Error(`Account with name '${name}' already exists`);
     }
 
@@ -46,7 +46,7 @@ async function importAccountHandler(args: CommandHandlerArgs) {
     };
 
     // Store account in state using the helper
-    await accountState.saveAccount(name, account);
+    accountState.saveAccount(name, account);
 
     logger.log(`✅ Account imported successfully: ${accountId}`);
     logger.log(`   Name: ${account.name}`);
