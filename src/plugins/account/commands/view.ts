@@ -3,9 +3,10 @@
  * Handles viewing account details using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-export async function viewAccountHandler(args: CommandHandlerArgs) {
+async function viewAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -37,8 +38,8 @@ export async function viewAccountHandler(args: CommandHandlerArgs) {
     logger.log(`   Balance Timestamp: ${accountInfo.balance.timestamp}`);
 
     process.exit(0);
-  } catch (error) {
-    logger.error(`❌ Failed to view account: ${error}`);
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to view account', error));
     process.exit(1);
   }
 }

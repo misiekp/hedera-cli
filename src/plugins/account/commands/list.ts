@@ -3,9 +3,10 @@
  * Handles listing all accounts using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-export async function listAccountsHandler(args: CommandHandlerArgs) {
+async function listAccountsHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -42,8 +43,8 @@ export async function listAccountsHandler(args: CommandHandlerArgs) {
     });
 
     process.exit(0);
-  } catch (error) {
-    logger.error(`❌ Failed to list accounts: ${error}`);
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to list accounts', error));
     process.exit(1);
   }
 }

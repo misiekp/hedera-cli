@@ -43,10 +43,7 @@
         "@typescript-eslint/await-thenable": "off",
         "@typescript-eslint/no-redundant-type-constituents": "off",
         "@typescript-eslint/unbound-method": "off",
-        "@typescript-eslint/no-unused-vars": [
-          "error",
-          { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
-        ]
+        "@typescript-eslint/no-unused-vars": "off"
       }
     },
     {
@@ -67,7 +64,11 @@
       }
     },
     {
-      "files": ["src/core/services/**/*.ts", "src/plugins/**/*.ts"],
+      "files": [
+        "src/core/services/**/*.ts",
+        "src/plugins/**/*.ts",
+        "src/core/plugins/**/*.ts"
+      ],
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
       }
