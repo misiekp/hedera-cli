@@ -18,20 +18,20 @@ import * as path from 'path';
  * Namespace Store Interface
  */
 interface NamespaceStore {
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   loading: boolean;
   error: string | null;
 
   // Actions
-  setItem: (key: string, value: any) => void;
-  getItem: (key: string) => any;
+  setItem: (key: string, value: unknown) => void;
+  getItem: (key: string) => unknown;
   removeItem: (key: string) => void;
   clear: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
   // Selectors
-  list: () => any[];
+  list: () => unknown[];
   has: (key: string) => boolean;
   count: () => number;
   getKeys: () => string[];
@@ -53,7 +53,7 @@ function createNamespaceStore(
           loading: false,
           error: null,
 
-          setItem: (key: string, value: any) => {
+          setItem: (key: string, value: unknown) => {
             logger.debug(`[ZUSTAND:${namespace}] Setting key: ${key}`);
             set((state) => ({
               data: { ...state.data, [key]: value },
@@ -170,7 +170,7 @@ export class ZustandGenericStateServiceImpl implements StateService {
 
   get<T>(namespace: string, key: string): T | undefined {
     const store = this.getOrCreateStore(namespace);
-    return store.getState().getItem(key);
+    return store.getState().getItem(key) as T | undefined;
   }
 
   set<T>(namespace: string, key: string, value: T): void {
@@ -185,7 +185,7 @@ export class ZustandGenericStateServiceImpl implements StateService {
 
   list<T>(namespace: string): T[] {
     const store = this.getOrCreateStore(namespace);
-    return store.getState().list();
+    return store.getState().list() as T[];
   }
 
   clear(namespace: string): void {
@@ -210,7 +210,7 @@ export class ZustandGenericStateServiceImpl implements StateService {
   subscribe<T>(namespace: string, callback: (data: T[]) => void): () => void {
     const store = this.getOrCreateStore(namespace);
     return store.subscribe((state) => {
-      callback(Object.values(state.data));
+      callback(Object.values(state.data) as T[]);
     });
   }
 

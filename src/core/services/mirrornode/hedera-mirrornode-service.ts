@@ -83,7 +83,8 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    return await response.json();
+    const data = (await response.json()) as TokenBalancesResponse;
+    return data;
   }
 
   async getTopicMessages(
@@ -147,7 +148,8 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    return await response.json();
+    const data = (await response.json()) as TokenInfo;
+    return data;
   }
 
   async getTopicInfo(topicId: string): Promise<TopicInfo> {
@@ -160,7 +162,8 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    return await response.json();
+    const data = (await response.json()) as TopicInfo;
+    return data;
   }
 
   async getTransactionRecord(
@@ -180,7 +183,8 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    return await response.json();
+    const data = (await response.json()) as TransactionDetailsResponse;
+    return data;
   }
 
   async getContractInfo(contractId: string): Promise<ContractInfo> {
@@ -193,7 +197,8 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    return await response.json();
+    const data = (await response.json()) as ContractInfo;
+    return data;
   }
 
   async getPendingAirdrops(accountId: string): Promise<TokenAirdropsResponse> {
@@ -206,7 +211,8 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    return await response.json();
+    const data = (await response.json()) as TokenAirdropsResponse;
+    return data;
   }
 
   async getOutstandingAirdrops(
@@ -221,7 +227,8 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    return await response.json();
+    const data = (await response.json()) as TokenAirdropsResponse;
+    return data;
   }
 
   async getExchangeRate(timestamp?: string): Promise<ExchangeRateResponse> {
@@ -235,6 +242,7 @@ export class HederaMirrornodeServiceDefaultImpl
         `HTTP error! status: ${response.status}. Message: ${response.statusText}`,
       );
     }
-    return await response.json();
+    const data = (await response.json()) as ExchangeRateResponse;
+    return data;
   }
 }
