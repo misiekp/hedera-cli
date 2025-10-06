@@ -126,6 +126,9 @@ junit*.xml
 hedera-cli/state.json
 **/state.json
 
+# Ignore .hedera-cli state directory
+.hedera-cli/state/
+
 # Exclude semantic-release version info
 VERSION
 

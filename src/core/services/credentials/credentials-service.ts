@@ -11,9 +11,9 @@ import { Credentials } from '../../types/shared.types';
 export class CredentialsServiceImpl implements CredentialsService {
   private state: StateService;
   private logger: Logger;
-  private network?: NetworkService;
+  private network: NetworkService;
 
-  constructor(state: StateService, logger: Logger, network?: NetworkService) {
+  constructor(state: StateService, logger: Logger, network: NetworkService) {
     this.state = state;
     this.logger = logger;
     this.network = network;
@@ -145,54 +145,51 @@ export class CredentialsServiceImpl implements CredentialsService {
       '[CREDENTIALS] Loading credentials from environment variables',
     );
 
-    // First try environment variables
-    const envAccountId = process.env.HEDERA_ACCOUNT_ID;
-    const envPrivateKey = process.env.HEDERA_PRIVATE_KEY;
-    const envNetwork = process.env.HEDERA_NETWORK || 'testnet';
+    const accountId = process.env.TESTNET_OPERATOR_ID;
+    const privateKey = process.env.TESTNET_OPERATOR_KEY;
+    const network = this.network.getCurrentNetwork();
 
-    if (envAccountId && envPrivateKey) {
+    if (accountId && privateKey) {
       this.logger.debug(
-        `[CREDENTIALS] Found credentials in environment for account: ${envAccountId}`,
+        `[CREDENTIALS] Found credentials in environment for account: ${accountId}`,
       );
       return {
-        accountId: envAccountId,
-        privateKey: envPrivateKey,
-        network: envNetwork,
+        accountId,
+        privateKey,
+        network,
         isDefault: true,
         createdAt: new Date().toISOString(),
       };
     }
 
     // Fallback to network config
-    if (this.network) {
-      const currentNetwork = this.network.getCurrentNetwork();
+    const currentNetwork = this.network.getCurrentNetwork();
 
-      // Check if the network service has a method to get operator credentials
-      if ('getOperatorCredentials' in this.network) {
-        const operatorCreds = (
-          this.network as {
-            getOperatorCredentials(): {
-              operatorId?: string;
-              operatorKey?: string;
-            };
-          }
-        ).getOperatorCredentials();
-        if (
-          operatorCreds &&
-          operatorCreds.operatorId &&
-          operatorCreds.operatorKey
-        ) {
-          this.logger.debug(
-            `[CREDENTIALS] Found credentials in network config for account: ${operatorCreds.operatorId}`,
-          );
-          return {
-            accountId: operatorCreds.operatorId,
-            privateKey: operatorCreds.operatorKey,
-            network: currentNetwork,
-            isDefault: true,
-            createdAt: new Date().toISOString(),
+    // Check if the network service has a method to get operator credentials
+    if ('getOperatorCredentials' in this.network) {
+      const operatorCreds = (
+        this.network as {
+          getOperatorCredentials(): {
+            operatorId?: string;
+            operatorKey?: string;
           };
         }
+      ).getOperatorCredentials();
+      if (
+        operatorCreds &&
+        operatorCreds.operatorId &&
+        operatorCreds.operatorKey
+      ) {
+        this.logger.debug(
+          `[CREDENTIALS] Found credentials in network config for account: ${operatorCreds.operatorId}`,
+        );
+        return {
+          accountId: operatorCreds.operatorId,
+          privateKey: operatorCreds.operatorKey,
+          network: currentNetwork,
+          isDefault: true,
+          createdAt: new Date().toISOString(),
+        };
       }
     }
 

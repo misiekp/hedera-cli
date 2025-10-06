@@ -3,9 +3,10 @@
  * Handles importing existing accounts using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-export async function importAccountHandler(args: CommandHandlerArgs) {
+async function importAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -54,8 +55,10 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
     logger.log(`   Balance: ${accountInfo.balance.balance} tinybars`);
 
     process.exit(0);
-  } catch (error) {
-    logger.error(`❌ Failed to import account: ${error}`);
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to import account', error));
     process.exit(1);
   }
 }
+
+export default importAccountHandler;

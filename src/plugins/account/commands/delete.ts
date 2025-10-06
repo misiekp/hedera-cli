@@ -3,9 +3,10 @@
  * Handles deleting accounts using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-export async function deleteAccountHandler(args: CommandHandlerArgs) {
+async function deleteAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -28,9 +29,7 @@ export async function deleteAccountHandler(args: CommandHandlerArgs) {
       }
     } else if (accountId) {
       const accounts = await accountState.listAccounts();
-      accountToDelete = accounts.find(
-        (acc: any) => acc.accountId === accountId,
-      );
+      accountToDelete = accounts.find((acc) => acc.accountId === accountId);
       if (!accountToDelete) {
         throw new Error(`Account with ID '${accountId}' not found`);
       }
@@ -46,8 +45,10 @@ export async function deleteAccountHandler(args: CommandHandlerArgs) {
     );
 
     process.exit(0);
-  } catch (error) {
-    logger.error(`❌ Failed to delete account: ${error}`);
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to delete account', error));
     process.exit(1);
   }
 }
+
+export default deleteAccountHandler;
