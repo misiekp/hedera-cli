@@ -3,6 +3,8 @@
  * Common data structures used across the Hedera CLI
  */
 
+import { CustomFee } from '@hashgraph/sdk';
+
 /**
  * Account data structure
  */
@@ -35,7 +37,7 @@ export interface Token {
   kycKey?: string;
   pauseKey?: string;
   feeScheduleKey?: string;
-  customFees: any[];
+  customFees: CustomFee[];
   network: 'mainnet' | 'testnet' | 'previewnet';
 }
 
