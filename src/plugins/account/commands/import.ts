@@ -6,7 +6,7 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-async function importAccountHandler(args: CommandHandlerArgs) {
+export async function importAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -60,5 +60,3 @@ async function importAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
-
-export default importAccountHandler;

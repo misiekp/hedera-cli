@@ -1,5 +1,5 @@
 import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import importAccountHandler from '../../../../src/plugins/account/commands/import';
+import { importAccountHandler } from '../../../../src/plugins/account/commands/import';
 import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
 import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
