@@ -2,12 +2,7 @@
  * Real implementation of Account Transaction Service
  * Uses Hedera SDK to create actual transactions and queries
  */
-import {
-  AccountTransactionService,
-  CreateAccountParams,
-  AccountCreateResult,
-} from './account-transaction-service.interface';
-import { Logger } from '../logger/logger-service.interface';
+import { createHash } from 'crypto';
 import {
   AccountCreateTransaction,
   AccountInfoQuery,
@@ -15,6 +10,12 @@ import {
   PrivateKey,
   AccountId,
 } from '@hashgraph/sdk';
+import {
+  AccountTransactionService,
+  CreateAccountParams,
+  AccountCreateResult,
+} from './account-transaction-service.interface';
+import { Logger } from '../logger/logger-service.interface';
 
 export class AccountTransactionServiceImpl
   implements AccountTransactionService
@@ -27,9 +28,7 @@ export class AccountTransactionServiceImpl
   /**
    * Create a new Hedera account
    */
-  async createAccount(
-    params: CreateAccountParams,
-  ): Promise<AccountCreateResult> {
+  createAccount(params: CreateAccountParams): Promise<AccountCreateResult> {
     this.logger.debug(
       `[ACCOUNT TX] Creating account with params: ${JSON.stringify(params)}`,
     );
@@ -49,35 +48,33 @@ export class AccountTransactionServiceImpl
     }
 
     // Generate EVM address from the public key
-    const evmAddress = this.generateEvmAddress(newAccountPublicKey);
-
-    this.logger.debug(
-      `[ACCOUNT TX] Created transaction for account with key: ${newAccountPublicKey.toString()}`,
+    const evmAddress = this.generateEvmAddress(
+      newAccountPublicKey.toStringRaw(),
     );
 
-    return {
+    this.logger.debug(
+      `[ACCOUNT TX] Created transaction for account with key: ${newAccountPublicKey.toStringRaw()}`,
+    );
+
+    return Promise.resolve({
       transaction,
-      privateKey: newAccountPrivateKey.toString(),
-      publicKey: newAccountPublicKey.toString(),
+      privateKey: newAccountPrivateKey.toStringRaw(),
+      publicKey: newAccountPublicKey.toStringRaw(),
       evmAddress,
-    };
+    });
   }
 
-  private generateEvmAddress(publicKey: any): string {
+  private generateEvmAddress(publicKeyString: string): string {
     // This is a simplified EVM address generation
     // In a real implementation, you'd use proper cryptographic methods
-    const keyString = publicKey.toString();
-    const hash = require('crypto')
-      .createHash('sha256')
-      .update(keyString)
-      .digest('hex');
+    const hash = createHash('sha256').update(publicKeyString).digest('hex');
     return '0x' + hash.substring(0, 40);
   }
 
   /**
    * Get account information
    */
-  async getAccountInfo(accountId: string): Promise<AccountInfoQuery> {
+  getAccountInfo(accountId: string): Promise<AccountInfoQuery> {
     this.logger.debug(`[ACCOUNT TX] Getting account info for: ${accountId}`);
 
     // Create account info query
@@ -88,13 +85,13 @@ export class AccountTransactionServiceImpl
     this.logger.debug(
       `[ACCOUNT TX] Created account info query for: ${accountId}`,
     );
-    return query;
+    return Promise.resolve(query);
   }
 
   /**
    * Get account balance
    */
-  async getAccountBalance(
+  getAccountBalance(
     accountId: string,
     tokenId?: string,
   ): Promise<AccountBalanceQuery> {
@@ -118,6 +115,6 @@ export class AccountTransactionServiceImpl
     this.logger.debug(
       `[ACCOUNT TX] Created account balance query for: ${accountId}`,
     );
-    return query;
+    return Promise.resolve(query);
   }
 }

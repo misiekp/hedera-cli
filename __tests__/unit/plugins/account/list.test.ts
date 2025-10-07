@@ -67,13 +67,13 @@ describe('account plugin - list command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockResolvedValue([]),
+      listAccounts: jest.fn().mockReturnValue([]),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith(
       '📝 No accounts found in the address book',
@@ -89,13 +89,13 @@ describe('account plugin - list command', () => {
     ];
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockResolvedValue(accounts),
+      listAccounts: jest.fn().mockReturnValue(accounts),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('📝 Found 2 account(s):');
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc1');
@@ -111,13 +111,13 @@ describe('account plugin - list command', () => {
     const accounts = [makeAccountData({ name: 'acc3', accountId: '0.0.3333' })];
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockResolvedValue(accounts),
+      listAccounts: jest.fn().mockReturnValue(accounts),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { private: true });
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc3');
     expect(logger.log).toHaveBeenCalledWith('   Private Key: priv');
@@ -128,13 +128,15 @@ describe('account plugin - list command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockRejectedValue(new Error('db error')),
+      listAccounts: jest.fn().mockImplementation(() => {
+        throw new Error('db error');
+      }),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('❌ Failed to list accounts'),

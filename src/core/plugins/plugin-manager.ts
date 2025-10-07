@@ -3,10 +3,13 @@
  *
  * Direct plugin management without unnecessary layers
  */
+import * as path from 'path';
 import { Command } from 'commander';
 import { CoreAPI } from '../core-api/core-api.interface';
 import { CommandHandlerArgs, PluginManifest } from './plugin.interface';
-import * as path from 'path';
+import { CommandSpec, CommandHandler } from './plugin.types';
+import { formatError } from '../../utils/errors';
+import { logger } from '../../utils/logger';
 
 interface LoadedPlugin {
   manifest: PluginManifest;
@@ -34,18 +37,18 @@ export class PluginManager {
    * Initialize and load default plugins
    */
   async initialize(): Promise<void> {
-    console.log('🔌 Loading plugins...');
+    logger.log('🔌 Loading plugins...');
 
     for (const pluginPath of this.defaultPlugins) {
       try {
         await this.loadPluginFromPath(pluginPath);
-        console.log(`✅ Loaded: ${pluginPath}`);
+        logger.log(`✅ Loaded: ${pluginPath}`);
       } catch (error) {
-        console.log(`ℹ️  Plugin not available: ${pluginPath}`);
+        logger.log(`ℹ️  Plugin not available: ${pluginPath}`);
       }
     }
 
-    console.log(`✅ Plugin system ready`);
+    logger.log(`✅ Plugin system ready`);
   }
 
   /**
@@ -61,18 +64,18 @@ export class PluginManager {
    * Add a plugin dynamically
    */
   async addPlugin(pluginPath: string): Promise<void> {
-    console.log(`➕ Adding plugin: ${pluginPath}`);
+    logger.log(`➕ Adding plugin: ${pluginPath}`);
     await this.loadPluginFromPath(pluginPath);
-    console.log(`✅ Plugin added: ${pluginPath}`);
+    logger.log(`✅ Plugin added: ${pluginPath}`);
   }
 
   /**
    * Remove a plugin
    */
-  async removePlugin(pluginName: string): Promise<void> {
-    console.log(`➖ Removing plugin: ${pluginName}`);
+  removePlugin(pluginName: string): void {
+    logger.log(`➖ Removing plugin: ${pluginName}`);
     this.loadedPlugins.delete(pluginName);
-    console.log(`✅ Plugin removed: ${pluginName}`);
+    logger.log(`✅ Plugin removed: ${pluginName}`);
   }
 
   /**
@@ -93,7 +96,9 @@ export class PluginManager {
     try {
       // Load manifest
       const manifestPath = path.resolve(pluginPath, 'manifest.js');
-      const manifestModule = await import(manifestPath);
+      const manifestModule = (await import(manifestPath)) as {
+        default: PluginManifest;
+      };
       const manifest = manifestModule.default;
 
       if (!manifest) {
@@ -106,10 +111,12 @@ export class PluginManager {
         status: 'loaded',
       };
 
-      this.loadedPlugins.set(manifest.name, loadedPlugin);
+      this.loadedPlugins.set(String(manifest.name), loadedPlugin);
       return loadedPlugin;
     } catch (error) {
-      throw new Error(`Failed to load plugin from ${pluginPath}: ${error}`);
+      throw new Error(
+        formatError(`Failed to load plugin from ${pluginPath}: `, error),
+      );
     }
   }
 
@@ -132,7 +139,7 @@ export class PluginManager {
       this.registerSingleCommand(pluginCommand, plugin, commandSpec);
     }
 
-    console.log(`✅ Registered commands for: ${pluginName}`);
+    logger.log(`✅ Registered commands for: ${pluginName}`);
   }
 
   /**
@@ -141,48 +148,53 @@ export class PluginManager {
   private registerSingleCommand(
     pluginCommand: Command,
     plugin: LoadedPlugin,
-    commandSpec: any,
+    commandSpec: CommandSpec,
   ): void {
-    const commandName = commandSpec.name;
+    const commandName = String(commandSpec.name);
     const command = pluginCommand
       .command(commandName)
       .description(
-        commandSpec.description ||
-          commandSpec.summary ||
-          `Execute ${commandName}`,
+        String(
+          commandSpec.description ||
+            commandSpec.summary ||
+            `Execute ${commandName}`,
+        ),
       );
 
     // Add options
     if (commandSpec.options) {
       for (const option of commandSpec.options) {
-        const optionName = option.name;
+        const optionName = String(option.name);
         const optionFlag = `--${optionName}`;
 
         if (option.type === 'boolean') {
-          command.option(optionFlag, option.description || `Set ${optionName}`);
+          command.option(
+            optionFlag,
+            String(option.description || `Set ${optionName}`),
+          );
         } else if (option.type === 'number') {
           command.option(
             `${optionFlag} <value>`,
-            option.description || `Set ${optionName}`,
+            String(option.description || `Set ${optionName}`),
             parseFloat,
           );
         } else if (option.type === 'array') {
           command.option(
             `${optionFlag} <values>`,
-            option.description || `Set ${optionName}`,
-            (value: string) => value.split(','),
+            String(option.description || `Set ${optionName}`),
+            (value: unknown) => String(value).split(','),
           );
         } else {
           command.option(
             `${optionFlag} <value>`,
-            option.description || `Set ${optionName}`,
+            String(option.description || `Set ${optionName}`),
           );
         }
       }
     }
 
     // Set up action handler
-    command.action(async (...args: any[]) => {
+    command.action(async (...args: unknown[]) => {
       try {
         await this.executePluginCommand(plugin, commandSpec, args);
       } catch (error) {
@@ -200,10 +212,10 @@ export class PluginManager {
    */
   private async executePluginCommand(
     plugin: LoadedPlugin,
-    commandSpec: any,
-    args: any[],
+    commandSpec: CommandSpec,
+    args: unknown[],
   ): Promise<void> {
-    const command = args[args.length - 1];
+    const command = args[args.length - 1] as Command;
     const options = command.opts();
     const commandArgs = command.args;
 
@@ -224,9 +236,13 @@ export class PluginManager {
     }
 
     const fullHandlerPath = path.resolve(plugin.path, handlerPath + '.js');
-    const handlerModule = await import(fullHandlerPath);
+    const handlerModule = (await import(fullHandlerPath)) as Record<
+      string,
+      unknown
+    >;
     const handler =
-      handlerModule.default || handlerModule[commandSpec.name + 'Handler'];
+      (handlerModule.default as CommandHandler) ||
+      (handlerModule[commandSpec.name + 'Handler'] as CommandHandler);
 
     if (typeof handler !== 'function') {
       throw new Error(`Handler for ${commandSpec.name} is not a function`);

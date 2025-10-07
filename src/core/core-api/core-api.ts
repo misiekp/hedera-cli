@@ -32,10 +32,7 @@ export class CoreAPIImplementation implements CoreAPI {
   public credentials: CredentialsService;
 
   constructor() {
-    // Initialize logger first
     this.logger = new MockLoggerService();
-
-    // Initialize Zustand state service
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
     this.network = new MockNetworkService();
@@ -64,7 +61,7 @@ export class CoreAPIImplementation implements CoreAPI {
         ledgerId = LedgerId.PREVIEWNET;
         break;
       default:
-        ledgerId = LedgerId.TESTNET; // Default to testnet
+        ledgerId = LedgerId.TESTNET;
     }
 
     this.mirror = new HederaMirrornodeServiceDefaultImpl(ledgerId);

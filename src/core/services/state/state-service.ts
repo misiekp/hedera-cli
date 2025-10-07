@@ -13,25 +13,26 @@ import {
 import { Logger } from '../logger/logger-service.interface';
 import * as fs from 'fs';
 import * as path from 'path';
+import { formatError } from '../../../utils/errors';
 
 /**
  * Namespace Store Interface
  */
 interface NamespaceStore {
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   loading: boolean;
   error: string | null;
 
   // Actions
-  setItem: (key: string, value: any) => void;
-  getItem: (key: string) => any;
+  setItem: (key: string, value: unknown) => void;
+  getItem: (key: string) => unknown;
   removeItem: (key: string) => void;
   clear: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
   // Selectors
-  list: () => any[];
+  list: () => unknown[];
   has: (key: string) => boolean;
   count: () => number;
   getKeys: () => string[];
@@ -53,7 +54,7 @@ function createNamespaceStore(
           loading: false,
           error: null,
 
-          setItem: (key: string, value: any) => {
+          setItem: (key: string, value: unknown) => {
             logger.debug(`[ZUSTAND:${namespace}] Setting key: ${key}`);
             set((state) => ({
               data: { ...state.data, [key]: value },
@@ -69,7 +70,8 @@ function createNamespaceStore(
           removeItem: (key: string) => {
             logger.debug(`[ZUSTAND:${namespace}] Removing key: ${key}`);
             set((state) => {
-              const { [key]: removed, ...rest } = state.data;
+              const rest = { ...state.data } as Record<string, unknown>;
+              delete rest[key];
               return { data: rest };
             });
           },
@@ -115,7 +117,12 @@ function createNamespaceStore(
                 }
                 return null;
               } catch (error) {
-                logger.error(`[ZUSTAND:${namespace}] Failed to load: ${error}`);
+                logger.error(
+                  formatError(
+                    '[ZUSTAND:${namespace}] Failed to load: ${error}',
+                    error,
+                  ),
+                );
                 return null;
               }
             },
@@ -128,7 +135,12 @@ function createNamespaceStore(
                 fs.writeFileSync(filePath, value);
                 logger.debug(`[ZUSTAND:${namespace}] Saved to: ${filePath}`);
               } catch (error) {
-                logger.error(`[ZUSTAND:${namespace}] Failed to save: ${error}`);
+                logger.error(
+                  formatError(
+                    '[ZUSTAND:${namespace}] Failed to save: ${error}',
+                    error,
+                  ),
+                );
               }
             },
             removeItem: (name) => {
@@ -140,7 +152,10 @@ function createNamespaceStore(
                 }
               } catch (error) {
                 logger.error(
-                  `[ZUSTAND:${namespace}] Failed to remove: ${error}`,
+                  formatError(
+                    '[ZUSTAND:${namespace}] Failed to remove: ${error}',
+                    error,
+                  ),
                 );
               }
             },
@@ -170,7 +185,7 @@ export class ZustandGenericStateServiceImpl implements StateService {
 
   get<T>(namespace: string, key: string): T | undefined {
     const store = this.getOrCreateStore(namespace);
-    return store.getState().getItem(key);
+    return store.getState().getItem(key) as T | undefined;
   }
 
   set<T>(namespace: string, key: string, value: T): void {
@@ -185,7 +200,7 @@ export class ZustandGenericStateServiceImpl implements StateService {
 
   list<T>(namespace: string): T[] {
     const store = this.getOrCreateStore(namespace);
-    return store.getState().list();
+    return store.getState().list() as T[];
   }
 
   clear(namespace: string): void {
@@ -210,16 +225,16 @@ export class ZustandGenericStateServiceImpl implements StateService {
   subscribe<T>(namespace: string, callback: (data: T[]) => void): () => void {
     const store = this.getOrCreateStore(namespace);
     return store.subscribe((state) => {
-      callback(Object.values(state.data));
+      callback(Object.values(state.data) as T[]);
     });
   }
 
-  getActions(namespace: string): any {
+  getActions(namespace: string): unknown {
     const store = this.getOrCreateStore(namespace);
     return store.getState();
   }
 
-  getState(namespace: string): any {
+  getState(namespace: string): unknown {
     const store = this.getOrCreateStore(namespace);
     return store.getState();
   }
@@ -304,11 +319,11 @@ export class ZustandPluginStateManagerImpl implements PluginStateManager {
     return this.stateService.subscribe<T>(this.namespace, callback);
   }
 
-  getActions(): any {
+  getActions(): unknown {
     return this.stateService.getActions(this.namespace);
   }
 
-  getState(): any {
+  getState(): unknown {
     return this.stateService.getState(this.namespace);
   }
 }
