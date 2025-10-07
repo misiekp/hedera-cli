@@ -10,6 +10,7 @@ import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { CredentialsService } from '../services/credentials/credentials-service.interface';
+import { HbarService } from '../services/hbar/hbar-service.interface';
 
 export interface CoreAPI {
   /**
@@ -51,4 +52,9 @@ export interface CoreAPI {
    * Credentials management
    */
   credentials: CredentialsService;
+
+  /**
+   * HBAR operations
+   */
+  hbar?: HbarService;
 }

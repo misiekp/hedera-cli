@@ -20,6 +20,8 @@ import { MockNetworkService } from '../services/network/network-service';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
 import { CredentialsServiceImpl } from '../services/credentials/credentials-service';
+import { HbarService } from '../services/hbar/hbar-service.interface';
+import { HbarServiceImpl } from '../services/hbar/hbar-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountTransactionService;
@@ -30,6 +32,7 @@ export class CoreAPIImplementation implements CoreAPI {
   public config: ConfigService;
   public logger: Logger;
   public credentials: CredentialsService;
+  public hbar?: HbarService;
 
   constructor() {
     this.logger = new MockLoggerService();
@@ -66,6 +69,8 @@ export class CoreAPIImplementation implements CoreAPI {
 
     this.mirror = new HederaMirrornodeServiceDefaultImpl(ledgerId);
     this.config = new MockConfigService();
+
+    this.hbar = new HbarServiceImpl(this.logger, this.signing);
   }
 }
 

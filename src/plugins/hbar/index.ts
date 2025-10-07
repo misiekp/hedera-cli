@@ -1,0 +1,1 @@
+export { hbarPluginManifest } from './manifest';
