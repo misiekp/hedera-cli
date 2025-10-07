@@ -34,13 +34,17 @@ export class CoreAPIImplementation implements CoreAPI {
   constructor() {
     this.logger = new MockLoggerService();
     this.state = new ZustandGenericStateServiceImpl(this.logger);
+
     this.network = new MockNetworkService();
+
+    // Initialize credentials service
     this.credentials = new CredentialsServiceImpl(
       this.state,
       this.logger,
       this.network,
     );
 
+    // Initialize all services with dependencies
     this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
     this.signing = new SigningServiceImpl(this.logger, this.credentials);
     // Convert network string to LedgerId

@@ -1,9 +1,9 @@
-import listAccountsHandler from '../../../../src/plugins/account/commands/list';
+import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
+import { listAccountsHandler } from '../../../../src/plugins/account/commands/list';
 import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
 import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
 import type { AccountData } from '../../../../src/plugins/account/schema';
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
 
 let exitSpy: jest.SpyInstance;
 

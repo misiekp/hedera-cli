@@ -6,7 +6,7 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-function deleteAccountHandler(args: CommandHandlerArgs) {
+export function deleteAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -50,5 +50,3 @@ function deleteAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
-
-export default deleteAccountHandler;

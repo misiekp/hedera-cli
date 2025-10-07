@@ -1,5 +1,5 @@
 import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import getAccountBalanceHandler from '../../../../src/plugins/account/commands/balance';
+import { getAccountBalanceHandler } from '../../../../src/plugins/account/commands/balance';
 import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
 import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
 import type { HederaMirrornodeService } from '../../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
