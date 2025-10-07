@@ -2,6 +2,11 @@
  * Plugin System Type Definitions
  * Types specific to the plugin architecture
  */
+import { CoreAPI } from '../core-api/core-api.interface';
+import { StateService } from '../services/state/state-service.interface';
+import { ConfigService } from '../services/config/config-service.interface';
+import { Logger } from '../services/logger/logger-service.interface';
+import { CommandHandlerArgs } from './plugin.interface';
 
 /**
  * Plugin manifest structure
@@ -39,9 +44,9 @@ export interface CommandSpec {
  */
 export interface CommandOption {
   name: string;
-  type: 'string' | 'number' | 'boolean';
+  type: 'string' | 'number' | 'boolean' | 'array';
   required: boolean;
-  default?: any;
+  default?: unknown;
   description?: string;
 }
 
@@ -49,11 +54,16 @@ export interface CommandOption {
  * Plugin context
  */
 export interface PluginContext {
-  api: any; // CoreAPI
-  state: any; // StateManager
-  config: any; // ConfigView
-  logger: any; // Logger
+  api: CoreAPI;
+  state: StateService;
+  config: ConfigService;
+  logger: Logger;
 }
+
+/**
+ * Command handler function type
+ */
+export type CommandHandler = (args: CommandHandlerArgs) => void | Promise<void>;
 
 /**
  * Plugin state schema

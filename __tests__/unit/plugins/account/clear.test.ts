@@ -53,7 +53,7 @@ describe('account plugin - clear command', () => {
       args: {},
     };
 
-    await clearAccountsHandler(args as CommandHandlerArgs);
+    clearAccountsHandler(args as CommandHandlerArgs);
 
     expect(MockedHelper).toHaveBeenCalledWith(args.api!.state, logger);
     expect(listAccountsMock).toHaveBeenCalledTimes(1);
@@ -81,7 +81,7 @@ describe('account plugin - clear command', () => {
       args: {},
     };
 
-    await clearAccountsHandler(args as CommandHandlerArgs);
+    clearAccountsHandler(args as CommandHandlerArgs);
 
     expect(logger.error).toHaveBeenCalled();
     expect(exitSpy).toHaveBeenCalledWith(1);

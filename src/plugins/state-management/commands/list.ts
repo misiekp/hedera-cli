@@ -13,12 +13,18 @@ export function listHandler(args: CommandHandlerArgs): Promise<void> {
   try {
     if (namespace) {
       // List specific namespace
-      const data = api.state.list(namespace);
+      const data = api.state.list<unknown>(namespace);
       logger.log(`   ${namespace}: ${data.length} entries`);
-      data.forEach((item: any, index: number) => {
-        if (typeof item === 'object' && item.name) {
+      data.forEach((item: unknown, index: number) => {
+        if (item && typeof item === 'object' && 'name' in item) {
+          const rec = item as {
+            name?: string;
+            accountId?: string;
+            tokenId?: string;
+            topicId?: string;
+          };
           logger.log(
-            `     ${index + 1}. ${item.name} (${item.accountId || item.tokenId || item.topicId || 'unknown'})`,
+            `     ${index + 1}. ${rec.name} (${rec.accountId ?? rec.tokenId ?? rec.topicId})`,
           );
         } else {
           logger.log(`     ${index + 1}. ${JSON.stringify(item)}`);

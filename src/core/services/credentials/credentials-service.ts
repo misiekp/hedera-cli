@@ -22,7 +22,7 @@ export class CredentialsServiceImpl implements CredentialsService {
   /**
    * Get the default operator credentials
    */
-  async getDefaultCredentials(): Promise<Credentials | null> {
+  getDefaultCredentials(): Promise<Credentials | null> {
     this.logger.debug('[CREDENTIALS] Getting default credentials');
 
     // First try to get from state
@@ -33,14 +33,14 @@ export class CredentialsServiceImpl implements CredentialsService {
       this.logger.debug(
         `[CREDENTIALS] Found default credentials in state: ${credentials.accountId}`,
       );
-      return credentials;
+      return Promise.resolve(credentials);
     }
 
     // Fallback to environment variables
     this.logger.debug(
       '[CREDENTIALS] No default credentials in state, trying environment',
     );
-    return this.loadFromEnvironment();
+    return Promise.resolve(this.loadFromEnvironment());
   }
 
   /**

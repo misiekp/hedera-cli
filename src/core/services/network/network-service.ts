@@ -2,11 +2,7 @@
  * Mock implementation of Network Service
  * This is a placeholder implementation for testing the architecture
  */
-import {
-  NetworkService,
-  NetworkConfig,
-  NetworkInfo,
-} from './network-service.interface';
+import { NetworkService, NetworkConfig } from './network-service.interface';
 
 export class MockNetworkService implements NetworkService {
   private currentNetwork: string = 'testnet';

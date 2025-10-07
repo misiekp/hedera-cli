@@ -91,3 +91,12 @@ export interface NetworkConfig {
   chainId: string;
   explorerUrl?: string;
 }
+
+export type BackupPayload = {
+  timestamp: string;
+  namespaces: Record<string, unknown[]>;
+  metadata: {
+    totalNamespaces: number;
+    totalSize: number;
+  };
+};

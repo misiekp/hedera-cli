@@ -144,14 +144,14 @@ export class ZustandAccountStateHelper {
   /**
    * Get Zustand store actions for advanced usage
    */
-  getStoreActions(): any {
+  getStoreActions(): unknown {
     return this.state.getActions(this.namespace);
   }
 
   /**
    * Get Zustand store state for advanced usage
    */
-  getStoreState(): any {
+  getStoreState(): unknown {
     return this.state.getState(this.namespace);
   }
 

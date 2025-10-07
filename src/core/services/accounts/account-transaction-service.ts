@@ -2,12 +2,7 @@
  * Real implementation of Account Transaction Service
  * Uses Hedera SDK to create actual transactions and queries
  */
-import {
-  AccountTransactionService,
-  CreateAccountParams,
-  AccountCreateResult,
-} from './account-transaction-service.interface';
-import { Logger } from '../logger/logger-service.interface';
+import { createHash } from 'crypto';
 import {
   AccountCreateTransaction,
   AccountInfoQuery,
@@ -15,7 +10,12 @@ import {
   PrivateKey,
   AccountId,
 } from '@hashgraph/sdk';
-import { createHash } from 'crypto';
+import {
+  AccountTransactionService,
+  CreateAccountParams,
+  AccountCreateResult,
+} from './account-transaction-service.interface';
+import { Logger } from '../logger/logger-service.interface';
 
 export class AccountTransactionServiceImpl
   implements AccountTransactionService
@@ -28,9 +28,7 @@ export class AccountTransactionServiceImpl
   /**
    * Create a new Hedera account
    */
-  async createAccount(
-    params: CreateAccountParams,
-  ): Promise<AccountCreateResult> {
+  createAccount(params: CreateAccountParams): Promise<AccountCreateResult> {
     this.logger.debug(
       `[ACCOUNT TX] Creating account with params: ${JSON.stringify(params)}`,
     );
@@ -58,12 +56,12 @@ export class AccountTransactionServiceImpl
       `[ACCOUNT TX] Created transaction for account with key: ${newAccountPublicKey.toStringRaw()}`,
     );
 
-    return {
+    return Promise.resolve({
       transaction,
       privateKey: newAccountPrivateKey.toStringRaw(),
       publicKey: newAccountPublicKey.toStringRaw(),
       evmAddress,
-    };
+    });
   }
 
   private generateEvmAddress(publicKeyString: string): string {
@@ -76,7 +74,7 @@ export class AccountTransactionServiceImpl
   /**
    * Get account information
    */
-  async getAccountInfo(accountId: string): Promise<AccountInfoQuery> {
+  getAccountInfo(accountId: string): Promise<AccountInfoQuery> {
     this.logger.debug(`[ACCOUNT TX] Getting account info for: ${accountId}`);
 
     // Create account info query
@@ -87,13 +85,13 @@ export class AccountTransactionServiceImpl
     this.logger.debug(
       `[ACCOUNT TX] Created account info query for: ${accountId}`,
     );
-    return query;
+    return Promise.resolve(query);
   }
 
   /**
    * Get account balance
    */
-  async getAccountBalance(
+  getAccountBalance(
     accountId: string,
     tokenId?: string,
   ): Promise<AccountBalanceQuery> {
@@ -117,6 +115,6 @@ export class AccountTransactionServiceImpl
     this.logger.debug(
       `[ACCOUNT TX] Created account balance query for: ${accountId}`,
     );
-    return query;
+    return Promise.resolve(query);
   }
 }

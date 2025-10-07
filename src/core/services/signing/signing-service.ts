@@ -17,7 +17,9 @@ import {
   TransactionResponse,
   TransactionReceipt,
   Status,
+  Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
+import { formatError } from '../../../utils/errors';
 
 export class SigningServiceImpl implements SigningService {
   private client!: Client;
@@ -74,7 +76,9 @@ export class SigningServiceImpl implements SigningService {
         );
       }
     } catch (error) {
-      this.logger.error(`[SIGNING] Failed to initialize credentials: ${error}`);
+      this.logger.error(
+        formatError('[SIGNING] Failed to initialize credentials: ', error),
+      );
       // Fallback to mock credentials
       this.operatorKey = PrivateKey.generate();
       this.operatorId = AccountId.fromString('0.0.123456');
@@ -88,7 +92,9 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Sign and execute a transaction in one operation
    */
-  async signAndExecute(transaction: any): Promise<TransactionResult> {
+  async signAndExecute(
+    transaction: HederaTransaction,
+  ): Promise<TransactionResult> {
     this.logger.debug(`[SIGNING] Signing and executing transaction`);
 
     try {
@@ -101,7 +107,7 @@ export class SigningServiceImpl implements SigningService {
       );
 
       this.logger.debug(
-        `[SIGNING] Transaction executed successfully: ${response.transactionId}`,
+        `[SIGNING] Transaction executed successfully: ${response.transactionId.toString()}`,
       );
 
       // Extract account ID for account creation transactions
@@ -130,7 +136,7 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Sign a transaction without executing it
    */
-  async sign(transaction: any): Promise<SignedTransaction> {
+  async sign(transaction: HederaTransaction): Promise<SignedTransaction> {
     this.logger.debug(`[SIGNING] Signing transaction`);
 
     try {
@@ -138,7 +144,7 @@ export class SigningServiceImpl implements SigningService {
       transaction.freezeWith(this.client);
 
       // Sign the transaction
-      const signedTransaction = await transaction.sign(this.operatorKey);
+      await transaction.sign(this.operatorKey);
 
       return {
         transactionId: `signed-${Date.now()}`,
@@ -152,9 +158,7 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Execute a pre-signed transaction
    */
-  async execute(
-    signedTransaction: SignedTransaction,
-  ): Promise<TransactionResult> {
+  execute(signedTransaction: SignedTransaction): Promise<TransactionResult> {
     this.logger.debug(
       `[SIGNING] Executing signed transaction: ${signedTransaction.transactionId}`,
     );
@@ -175,7 +179,7 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Get the status of a transaction
    */
-  async getStatus(transactionId: string): Promise<TransactionStatus> {
+  getStatus(transactionId: string): Promise<TransactionStatus> {
     this.logger.debug(
       `[SIGNING] Getting status for transaction: ${transactionId}`,
     );
@@ -183,10 +187,10 @@ export class SigningServiceImpl implements SigningService {
     try {
       // In a real implementation, you would query the network for transaction status
       // For now, we'll return a mock status
-      return {
+      return Promise.resolve({
         status: 'success',
         transactionId,
-      };
+      });
     } catch (error) {
       console.error(`[SIGNING] Failed to get transaction status:`, error);
       throw error;

@@ -77,7 +77,7 @@ describe('account plugin - delete command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { name: 'acc1' });
 
-    await deleteAccountHandler(args);
+    deleteAccountHandler(args);
 
     expect(deleteAccountMock).toHaveBeenCalledWith('acc1');
     expect(logger.log).toHaveBeenCalledWith(
@@ -100,7 +100,7 @@ describe('account plugin - delete command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { id: '0.0.2222' });
 
-    await deleteAccountHandler(args);
+    deleteAccountHandler(args);
 
     expect(deleteAccountMock).toHaveBeenCalledWith('acc2');
     expect(logger.log).toHaveBeenCalledWith(
@@ -121,7 +121,7 @@ describe('account plugin - delete command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    await deleteAccountHandler(args);
+    deleteAccountHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('❌ Failed to delete account'),
@@ -141,7 +141,7 @@ describe('account plugin - delete command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { name: 'missingAcc' });
 
-    await deleteAccountHandler(args);
+    deleteAccountHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('❌ Failed to delete account'),
@@ -163,7 +163,7 @@ describe('account plugin - delete command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { id: '0.0.4444' });
 
-    await deleteAccountHandler(args);
+    deleteAccountHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('❌ Failed to delete account'),
@@ -186,7 +186,7 @@ describe('account plugin - delete command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { name: 'acc5' });
 
-    await deleteAccountHandler(args);
+    deleteAccountHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('❌ Failed to delete account'),

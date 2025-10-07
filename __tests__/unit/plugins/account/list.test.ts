@@ -1,9 +1,9 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
 import listAccountsHandler from '../../../../src/plugins/account/commands/list';
 import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
 import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
 import type { AccountData } from '../../../../src/plugins/account/schema';
+import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
 
 let exitSpy: jest.SpyInstance;
 
@@ -73,7 +73,7 @@ describe('account plugin - list command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith(
       '📝 No accounts found in the address book',
@@ -95,7 +95,7 @@ describe('account plugin - list command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('📝 Found 2 account(s):');
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc1');
@@ -117,7 +117,7 @@ describe('account plugin - list command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { private: true });
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc3');
     expect(logger.log).toHaveBeenCalledWith('   Private Key: priv');
@@ -136,7 +136,7 @@ describe('account plugin - list command', () => {
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    await listAccountsHandler(args);
+    listAccountsHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('❌ Failed to list accounts'),

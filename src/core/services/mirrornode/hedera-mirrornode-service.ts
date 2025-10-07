@@ -21,6 +21,7 @@ import {
   ExchangeRateResponse,
 } from './types';
 import BigNumber from 'bignumber.js';
+import { formatError } from '../../../utils/errors';
 
 export class HederaMirrornodeServiceDefaultImpl
   implements HederaMirrornodeService
@@ -29,7 +30,7 @@ export class HederaMirrornodeServiceDefaultImpl
 
   constructor(private readonly ledgerId: LedgerId) {
     if (!LedgerIdToBaseUrl.has(ledgerId.toString())) {
-      throw new Error(`Network type ${ledgerId} not supported`);
+      throw new Error(`Network type ${ledgerId.toString()} not supported`);
     }
     this.baseUrl = LedgerIdToBaseUrl.get(ledgerId.toString())!;
   }
@@ -44,7 +45,7 @@ export class HederaMirrornodeServiceDefaultImpl
       );
     }
 
-    const data: AccountAPIResponse = await response.json();
+    const data = (await response.json()) as AccountAPIResponse;
 
     // Check if the response is empty (no account found)
     if (!data.account) {
@@ -64,7 +65,9 @@ export class HederaMirrornodeServiceDefaultImpl
     try {
       account = await this.getAccount(accountId);
     } catch (error) {
-      throw Error(`Failed to fetch hbar balance for ${accountId}: ${error}`);
+      throw Error(
+        formatError(`Failed to fetch hbar balance for ${accountId}: `, error),
+      );
     }
     return new BigNumber(account.balance.balance);
   }
@@ -114,7 +117,7 @@ export class HederaMirrornodeServiceDefaultImpl
           );
         }
 
-        const data: TopicMessagesAPIResponse = await response.json();
+        const data = (await response.json()) as TopicMessagesAPIResponse;
 
         arrayOfMessages.push(...data.messages);
         if (fetchedMessages >= 100) {

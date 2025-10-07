@@ -1,10 +1,11 @@
 /**
  * State Backup Command Handler
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import * as fs from 'fs';
 import * as path from 'path';
+import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
+import { BackupPayload } from '../../../core/types/shared.types';
 
 export function backupHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
@@ -15,7 +16,8 @@ export function backupHandler(args: CommandHandlerArgs): void {
   try {
     // Create backup data from all namespaces
     const namespaces = api.state.getNamespaces();
-    const backup: any = {
+
+    const backup: BackupPayload = {
       timestamp: new Date().toISOString(),
       namespaces: {},
       metadata: {
@@ -25,7 +27,7 @@ export function backupHandler(args: CommandHandlerArgs): void {
     };
 
     for (const namespace of namespaces) {
-      const data = api.state.list(namespace);
+      const data = api.state.list<unknown>(namespace);
       backup.namespaces[namespace] = data;
       backup.metadata.totalSize += JSON.stringify(data).length;
     }

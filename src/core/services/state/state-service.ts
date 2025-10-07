@@ -13,6 +13,7 @@ import {
 import { Logger } from '../logger/logger-service.interface';
 import * as fs from 'fs';
 import * as path from 'path';
+import { formatError } from '../../../utils/errors';
 
 /**
  * Namespace Store Interface
@@ -69,7 +70,8 @@ function createNamespaceStore(
           removeItem: (key: string) => {
             logger.debug(`[ZUSTAND:${namespace}] Removing key: ${key}`);
             set((state) => {
-              const { [key]: removed, ...rest } = state.data;
+              const rest = { ...state.data } as Record<string, unknown>;
+              delete rest[key];
               return { data: rest };
             });
           },
@@ -115,7 +117,12 @@ function createNamespaceStore(
                 }
                 return null;
               } catch (error) {
-                logger.error(`[ZUSTAND:${namespace}] Failed to load: ${error}`);
+                logger.error(
+                  formatError(
+                    '[ZUSTAND:${namespace}] Failed to load: ${error}',
+                    error,
+                  ),
+                );
                 return null;
               }
             },
@@ -128,7 +135,12 @@ function createNamespaceStore(
                 fs.writeFileSync(filePath, value);
                 logger.debug(`[ZUSTAND:${namespace}] Saved to: ${filePath}`);
               } catch (error) {
-                logger.error(`[ZUSTAND:${namespace}] Failed to save: ${error}`);
+                logger.error(
+                  formatError(
+                    '[ZUSTAND:${namespace}] Failed to save: ${error}',
+                    error,
+                  ),
+                );
               }
             },
             removeItem: (name) => {
@@ -140,7 +152,10 @@ function createNamespaceStore(
                 }
               } catch (error) {
                 logger.error(
-                  `[ZUSTAND:${namespace}] Failed to remove: ${error}`,
+                  formatError(
+                    '[ZUSTAND:${namespace}] Failed to remove: ${error}',
+                    error,
+                  ),
                 );
               }
             },
@@ -214,12 +229,12 @@ export class ZustandGenericStateServiceImpl implements StateService {
     });
   }
 
-  getActions(namespace: string): any {
+  getActions(namespace: string): unknown {
     const store = this.getOrCreateStore(namespace);
     return store.getState();
   }
 
-  getState(namespace: string): any {
+  getState(namespace: string): unknown {
     const store = this.getOrCreateStore(namespace);
     return store.getState();
   }
@@ -304,11 +319,11 @@ export class ZustandPluginStateManagerImpl implements PluginStateManager {
     return this.stateService.subscribe<T>(this.namespace, callback);
   }
 
-  getActions(): any {
+  getActions(): unknown {
     return this.stateService.getActions(this.namespace);
   }
 
-  getState(): any {
+  getState(): unknown {
     return this.stateService.getState(this.namespace);
   }
 }
