@@ -19,15 +19,7 @@
   "rules": {
     "no-console": "off",
     "@typescript-eslint/no-floating-promises": "off",
-    "no-restricted-syntax": "off",
-    "@typescript-eslint/no-unsafe-argument": "off",
-    "@typescript-eslint/no-unsafe-return": "off",
-    "@typescript-eslint/no-unsafe-assignment": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-base-to-string": "off",
-    "@typescript-eslint/no-var-requires": "off",
-    "@typescript-eslint/no-unnecessary-type-assertion": "off"
+    "no-restricted-syntax": "off"
   },
   "overrides": [
     {
@@ -66,22 +58,6 @@
         "@typescript-eslint/no-unsafe-member-access": "off",
         "no-undef": "off",
         "@typescript-eslint/no-var-requires": "off"
-      }
-    },
-    {
-      "files": [
-        "src/core/services/**/*.ts",
-        "src/plugins/**/*.ts",
-        "src/core/plugins/**/*.ts"
-      ],
-      "rules": {
-        "@typescript-eslint/no-unsafe-assignment": "off",
-        "@typescript-eslint/no-unsafe-call": "off",
-        "@typescript-eslint/no-unsafe-member-access": "off",
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/require-await": "off",
-        "@typescript-eslint/no-unused-vars": "off",
-        "@typescript-eslint/restrict-template-expressions": "off"
       }
     }
   ]
