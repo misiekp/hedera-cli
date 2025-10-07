@@ -2,14 +2,15 @@
  * List Credentials Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 
-export async function listHandler(args: CommandHandlerArgs): Promise<void> {
+export function listHandler(args: CommandHandlerArgs): Promise<void> {
   const { logger, api } = args;
 
   logger.log('🔐 Stored Credentials:');
 
   try {
-    const credentials = await api.credentials.listCredentials();
+    const credentials = api.credentials.listCredentials();
 
     if (credentials.length === 0) {
       logger.log('   No credentials stored');
@@ -27,7 +28,7 @@ export async function listHandler(args: CommandHandlerArgs): Promise<void> {
       });
     }
   } catch (error) {
-    logger.error(`❌ Failed to list credentials: ${error}`);
+    logger.error(formatError('❌ Failed to list credentials: ${error}', error));
     throw error;
   }
 

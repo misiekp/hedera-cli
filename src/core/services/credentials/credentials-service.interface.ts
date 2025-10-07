@@ -17,12 +17,12 @@ export interface CredentialsService {
     accountId: string,
     privateKey: string,
     network: string,
-  ): Promise<void>;
+  ): void;
 
   /**
    * Get credentials by account ID
    */
-  getCredentials(accountId: string): Promise<Credentials | null>;
+  getCredentials(accountId: string): Credentials | null;
 
   /**
    * Add new credentials
@@ -32,20 +32,20 @@ export interface CredentialsService {
     privateKey: string,
     network: string,
     isDefault?: boolean,
-  ): Promise<void>;
+  ): void;
 
   /**
    * Remove credentials
    */
-  removeCredentials(accountId: string): Promise<void>;
+  removeCredentials(accountId: string): void;
 
   /**
    * List all credentials
    */
-  listCredentials(): Promise<Credentials[]>;
+  listCredentials(): Credentials[];
 
   /**
    * Load credentials from environment variables
    */
-  loadFromEnvironment(): Promise<Credentials | null>;
+  loadFromEnvironment(): Credentials | null;
 }

@@ -3,7 +3,7 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 
-export async function listHandler(args: CommandHandlerArgs): Promise<void> {
+export function listHandler(args: CommandHandlerArgs): void {
   const { logger } = args;
 
   logger.log('📋 Available Plugins:');

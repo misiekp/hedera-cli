@@ -19,7 +19,7 @@ export type TopicMessageResponse = {
 };
 
 export interface TopicMessagesResponse {
-  messages: TopicResponse[];
+  messages: TopicMessageResponse[];
   links: {
     next: string | null;
   };

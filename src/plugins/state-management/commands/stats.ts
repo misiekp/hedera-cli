@@ -2,8 +2,9 @@
  * State Statistics Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 
-export async function statsHandler(args: CommandHandlerArgs): Promise<void> {
+export function statsHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
 
   logger.log('📊 State Statistics:');
@@ -39,7 +40,7 @@ export async function statsHandler(args: CommandHandlerArgs): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error(`❌ Failed to get statistics: ${error}`);
+    logger.error(formatError('❌ Failed to get statistics: ', error));
     process.exit(1);
   }
 }

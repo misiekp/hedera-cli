@@ -50,7 +50,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
           | 'previewnet',
       };
 
-      await accountState.saveAccount(name, accountData);
+      accountState.saveAccount(name, accountData);
 
       logger.log(`✅ Account created successfully: ${accountData.accountId}`);
       logger.log(`   Name: ${accountData.name}`);
