@@ -7,6 +7,7 @@ import { StateService } from '../state/state-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { NetworkService } from '../network/network-service.interface';
 import { Credentials } from '../../types/shared.types';
+import { NetworkService } from './../network/network-service.interface';
 
 export class CredentialsServiceImpl implements CredentialsService {
   private state: StateService;
