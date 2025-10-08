@@ -17,6 +17,8 @@ export { NetworkService } from '../services/network/network-service.interface';
 export { ConfigService } from '../services/config/config-service.interface';
 export { Logger } from '../services/logger/logger-service.interface';
 export { HbarService } from '../services/hbar/hbar-service.interface';
+export { AliasManagementService } from '../services/alias/alias-service.interface';
+export { CredentialsStateService } from '../services/credentials-state/credentials-state-service.interface';
 
 // Plugin interfaces (ADR-001 compliant)
 export { CommandHandlerArgs } from '../plugins/plugin.interface';

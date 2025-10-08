@@ -1,77 +1,87 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { ZustandAccountStateHelper } from '../../account/zustand-state-helper';
-import enquirerUtils from '../../../utils/enquirer';
 
-export default async function transferHandler({
-  args,
-  api,
-  logger,
-}: CommandHandlerArgs): Promise<void> {
-  const amount = Number(args.balance);
-  let to = String(args.to || '');
-  let from = String(args.from || '');
-  const memo = String(args.memo || '');
+export default async function transferHandler(
+  args: CommandHandlerArgs,
+): Promise<void> {
+  const { api, logger } = args;
+
+  const amount = Number(args.args.balance);
+  const to = args.args.toIdOrNameOrAlias
+    ? (args.args.toIdOrNameOrAlias as string)
+    : '';
+  const from = args.args.fromIdOrNameOrAlias
+    ? (args.args.fromIdOrNameOrAlias as string)
+    : '';
+  const memo = args.args.memo ? (args.args.memo as string) : '';
 
   logger.log('[HBAR] Transfer command invoked');
+
   // Basic validation
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('Invalid balance: provide a positive number of tinybars');
   }
 
-  // Prepare account selection when needed
-  const helper = new ZustandAccountStateHelper(api.state, api.logger);
-  const network = api.network.getCurrentNetwork();
-  const accounts = helper.getAccountsByNetwork(network);
-
-  if (!from) {
-    // Fallback: default credentials as sender if available
-    const creds = await api.credentials.getDefaultCredentials();
-    if (creds && creds.accountId) {
-      from = creds.accountId;
-    }
-
-    if (accounts.length === 0) {
-      if (!from) {
-        throw new Error(
-          'No accounts found to transfer from. Provide --from or create/import an account.',
-        );
-      }
-    }
-    if (!from && accounts.length > 0) {
-      const selection = await enquirerUtils.createPrompt(
-        accounts.map((a) => a.name),
-        'Choose account to transfer hbar from:',
-      );
-      from = selection;
-    }
-  }
-
-  if (!to) {
-    if (accounts.length === 0) {
-      throw new Error(
-        'No accounts found to transfer to. Create or import an account first.',
-      );
-    }
-    const selection = await enquirerUtils.createPrompt(
-      accounts.map((a) => a.name),
-      'Choose account to transfer hbar to:',
+  if (!from || !to) {
+    throw new Error(
+      'Both --from-id-or-name-or-alias and --to-id-or-name-or-alias are required',
     );
-    to = selection;
   }
 
   if (from === to) {
     throw new Error('Cannot transfer to the same account');
   }
 
-  if (!from || !to) {
-    throw new Error(
-      'Both --from and --to must be provided or selected interactively',
-    );
+  // Resolve from/to using alias service
+  let fromAccountId = from;
+  let toAccountId = to;
+
+  // Resolve from account
+  const fromAlias = api.alias.resolve(from, 'account');
+  if (fromAlias) {
+    fromAccountId = fromAlias.entityId || from;
+    logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);
+  } else {
+    logger.log(`[HBAR] Using from as account ID: ${from}`);
   }
 
+  // Resolve to account
+  const toAlias = api.alias.resolve(to, 'account');
+  if (toAlias) {
+    toAccountId = toAlias.entityId || to;
+    logger.log(`[HBAR] Resolved to alias: ${to} -> ${toAccountId}`);
+  } else {
+    logger.log(`[HBAR] Using to as account ID: ${to}`);
+  }
+
+  logger.log(
+    `[HBAR] Transferring ${amount} tinybars from ${fromAccountId} to ${toAccountId}`,
+  );
+
   if (api.hbar) {
-    const result = await api.hbar.transferTinybar({ amount, from, to, memo });
-    logger.log(`[HBAR] Submitted transfer, txId=${result.transactionId}`);
+    // Create the transfer transaction
+    const transferResult = await api.hbar.transferTinybar({
+      amount,
+      from: fromAccountId,
+      to: toAccountId,
+      memo,
+    });
+
+    // Sign and execute the transaction
+    // If we have a fromAlias with keyRefId, use it; otherwise use default operator
+    const result = fromAlias?.keyRefId
+      ? await api.signing.signAndExecuteWith(transferResult.transaction, {
+          keyRefId: fromAlias.keyRefId,
+        })
+      : await api.signing.signAndExecute(transferResult.transaction);
+
+    if (result.success) {
+      logger.log(
+        `[HBAR] Transfer submitted successfully, txId=${result.transactionId}`,
+      );
+    } else {
+      logger.error(`[HBAR] Transfer failed: ${result.receipt?.status.status}`);
+      process.exit(1);
+    }
   } else {
     logger.log('[HBAR] Core API hbar module not available yet');
   }

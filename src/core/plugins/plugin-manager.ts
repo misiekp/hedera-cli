@@ -43,7 +43,7 @@ export class PluginManager {
       try {
         await this.loadPluginFromPath(pluginPath);
         logger.log(`✅ Loaded: ${pluginPath}`);
-      } catch (error) {
+      } catch {
         logger.log(`ℹ️  Plugin not available: ${pluginPath}`);
       }
     }

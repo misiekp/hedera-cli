@@ -5,6 +5,8 @@ import { Logger } from '../../../../src/core/services/logger/logger-service.inte
 import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { NetworkService } from '../../../../src/core/services/network/network-service.interface';
+import type { CredentialsStateService } from '../../../../src/core/services/credentials-state/credentials-state-service.interface';
+import type { AliasManagementService } from '../../../../src/core/services/alias/alias-service.interface';
 
 let exitSpy: jest.SpyInstance;
 
@@ -36,6 +38,33 @@ const makeMirrorMock = (overrides?: {
 
 const makeNetworkMock = (): Partial<NetworkService> => ({
   getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
+});
+
+const makeCredentialsStateMock = (): jest.Mocked<CredentialsStateService> => ({
+  createLocalPrivateKey: jest.fn(),
+  importPrivateKey: jest.fn().mockReturnValue({
+    keyRefId: 'kr_test123',
+    publicKey: 'pub-key-test',
+  }),
+  getPublicKey: jest.fn(),
+  getPrivateKeyString: jest.fn(),
+  getSignerHandle: jest.fn(),
+  findByPublicKey: jest.fn(),
+  list: jest.fn(),
+  remove: jest.fn(),
+  setDefaultOperator: jest.fn(),
+  getDefaultOperator: jest.fn(),
+  ensureDefaultFromEnv: jest.fn(),
+  createClient: jest.fn(),
+  signTransaction: jest.fn(),
+});
+
+const makeAliasMock = (): jest.Mocked<AliasManagementService> => ({
+  register: jest.fn(),
+  resolve: jest.fn(),
+  list: jest.fn(),
+  remove: jest.fn(),
+  parseRef: jest.fn(),
 });
 
 const makeArgs = (
@@ -76,28 +105,46 @@ describe('account plugin - import command', () => {
 
     const mirrorMock = makeMirrorMock();
     const networkMock = makeNetworkMock();
+    const credentialsState = makeCredentialsStateMock();
+    const alias = makeAliasMock();
 
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
+      credentialsState,
+      alias,
       logger,
     };
 
     const args = makeArgs(api, logger, {
-      name: 'imported',
       id: '0.0.9999',
       key: 'privKey',
+      alias: 'imported',
     });
 
     await importAccountHandler(args);
 
+    expect(credentialsState.importPrivateKey).toHaveBeenCalledWith('privKey', [
+      'account:imported',
+    ]);
     expect(mirrorMock.getAccount).toHaveBeenCalledWith('0.0.9999');
+    expect(alias.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alias: 'imported',
+        type: 'account',
+        network: 'testnet',
+        entityId: '0.0.9999',
+        publicKey: 'pub-key-test',
+        keyRefId: 'kr_test123',
+      }),
+    );
     expect(saveAccountMock).toHaveBeenCalledWith(
       'imported',
       expect.objectContaining({
         name: 'imported',
         accountId: '0.0.9999',
         network: 'testnet',
+        keyRefId: 'kr_test123',
       }),
     );
     expect(logger.log).toHaveBeenCalledWith(

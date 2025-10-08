@@ -24,6 +24,18 @@ export interface SigningService {
    * Get the status of a transaction
    */
   getStatus(transactionId: string): Promise<TransactionStatus>;
+
+  // New explicit signer entrypoints
+  signAndExecuteWith(
+    tx: HederaTransaction,
+    signer: SignerRef,
+  ): Promise<TransactionResult>;
+
+  signWith(
+    tx: HederaTransaction,
+    signer: SignerRef,
+  ): Promise<SignedTransaction>;
+  setDefaultSigner(signer: SignerRef): void;
 }
 
 // Result types
@@ -67,3 +79,13 @@ export interface TransactionResponse {
   transactionId: string;
   getReceipt(): Promise<TransactionReceipt>;
 }
+
+export type SupportedNetwork = 'mainnet' | 'testnet' | 'previewnet';
+
+export type SignerRef = {
+  alias?: string;
+  keyRefId?: string;
+  publicKey?: string;
+  accountId?: string;
+  network?: SupportedNetwork;
+};

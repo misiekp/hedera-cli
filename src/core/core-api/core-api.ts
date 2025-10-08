@@ -10,7 +10,6 @@ import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornod
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
-import { CredentialsService } from '../services/credentials/credentials-service.interface';
 import { AccountTransactionServiceImpl } from '../services/accounts/account-transaction-service';
 import { SigningServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
@@ -19,9 +18,12 @@ import { LedgerId } from '@hashgraph/sdk';
 import { MockNetworkService } from '../services/network/network-service';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
-import { CredentialsServiceImpl } from '../services/credentials/credentials-service';
 import { HbarService } from '../services/hbar/hbar-service.interface';
 import { HbarServiceImpl } from '../services/hbar/hbar-service';
+import { AliasManagementService } from '../services/alias/alias-service.interface';
+import { AliasManagementServiceImpl } from '../services/alias/alias-service';
+import { CredentialsStateService } from '../services/credentials-state/credentials-state-service.interface';
+import { CredentialsStateServiceImpl } from '../services/credentials-state/credentials-state-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountTransactionService;
@@ -31,7 +33,8 @@ export class CoreAPIImplementation implements CoreAPI {
   public network: NetworkService;
   public config: ConfigService;
   public logger: Logger;
-  public credentials: CredentialsService;
+  public alias: AliasManagementService;
+  public credentialsState: CredentialsStateService;
   public hbar?: HbarService;
 
   constructor() {
@@ -40,16 +43,23 @@ export class CoreAPIImplementation implements CoreAPI {
 
     this.network = new MockNetworkService();
 
-    // Initialize credentials service
-    this.credentials = new CredentialsServiceImpl(
+    // Initialize all services with dependencies
+    this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
+    // Initialize new services
+    this.alias = new AliasManagementServiceImpl(
       this.state,
       this.logger,
       this.network,
     );
-
-    // Initialize all services with dependencies
-    this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
-    this.signing = new SigningServiceImpl(this.logger, this.credentials);
+    this.credentialsState = new CredentialsStateServiceImpl(
+      this.logger,
+      this.state,
+    );
+    this.signing = new SigningServiceImpl(
+      this.logger,
+      this.credentialsState,
+      this.network,
+    );
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
     let ledgerId: LedgerId;
@@ -70,7 +80,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.mirror = new HederaMirrornodeServiceDefaultImpl(ledgerId);
     this.config = new MockConfigService();
 
-    this.hbar = new HbarServiceImpl(this.logger, this.signing);
+    this.hbar = new HbarServiceImpl(this.logger);
   }
 }
 

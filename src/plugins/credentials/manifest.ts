@@ -62,8 +62,8 @@ const credentialsManifest: PluginManifest = {
     {
       name: 'remove',
       summary: 'Remove credentials',
-      description: 'Remove credentials for a specific account',
-      options: [{ name: 'accountId', type: 'string', required: true }],
+      description: 'Remove credentials for a specific keyRefId',
+      options: [{ name: 'keyRefId', type: 'string', required: true }],
       handler: 'commands/remove',
     },
   ],

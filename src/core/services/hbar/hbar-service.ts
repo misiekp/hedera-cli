@@ -1,26 +1,24 @@
 /**
  * Real implementation of HBAR Service
  */
-import { HbarService } from './hbar-service.interface';
+import {
+  HbarService,
+  TransferTinybarParams,
+  TransferTinybarResult,
+} from './hbar-service.interface';
 import { Logger } from '../logger/logger-service.interface';
-import { SigningService } from '../signing/signing-service.interface';
 import { TransferTransaction, Hbar, HbarUnit, AccountId } from '@hashgraph/sdk';
 
 export class HbarServiceImpl implements HbarService {
   private logger: Logger;
-  private signing: SigningService;
 
-  constructor(logger: Logger, signing: SigningService) {
+  constructor(logger: Logger) {
     this.logger = logger;
-    this.signing = signing;
   }
 
-  async transferTinybar(params: {
-    amount: number;
-    from: string;
-    to: string;
-    memo?: string;
-  }): Promise<{ transactionId: string }> {
+  transferTinybar(
+    params: TransferTinybarParams,
+  ): Promise<TransferTinybarResult> {
     const { amount, from, to, memo } = params;
 
     this.logger.debug(
@@ -38,15 +36,12 @@ export class HbarServiceImpl implements HbarService {
       tx.setTransactionMemo(memo);
     }
 
-    const result = await this.signing.signAndExecute(tx);
-
-    if (!result.success) {
-      throw new Error(`HBAR transfer failed: ${result.receipt?.status.status}`);
-    }
-
-    this.logger.log(
-      `[HBAR SERVICE] Transfer submitted. txId=${result.transactionId}`,
+    this.logger.debug(
+      `[HBAR SERVICE] Created transfer transaction: from=${from} to=${to} amount=${amount}`,
     );
-    return { transactionId: result.transactionId };
+
+    return {
+      transaction: tx,
+    };
   }
 }

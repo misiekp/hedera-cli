@@ -31,7 +31,7 @@ const makeAccountData = (
   evmAddress: '0x0000000000000000000000000000000000000000',
   solidityAddress: 'sa',
   solidityAddressFull: 'safull',
-  privateKey: 'priv',
+  keyRefId: 'kr_test123',
   network: 'testnet',
   ...overrides,
 });
@@ -120,7 +120,7 @@ describe('account plugin - list command', () => {
     listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc3');
-    expect(logger.log).toHaveBeenCalledWith('   Private Key: priv');
+    expect(logger.log).toHaveBeenCalledWith('   Key Reference ID: kr_test123');
     expect(exitSpy).toHaveBeenCalledWith(0);
   });
 

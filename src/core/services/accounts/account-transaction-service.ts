@@ -7,8 +7,8 @@ import {
   AccountCreateTransaction,
   AccountInfoQuery,
   AccountBalanceQuery,
-  PrivateKey,
   AccountId,
+  PublicKey,
 } from '@hashgraph/sdk';
 import {
   AccountTransactionService,
@@ -33,13 +33,9 @@ export class AccountTransactionServiceImpl
       `[ACCOUNT TX] Creating account with params: ${JSON.stringify(params)}`,
     );
 
-    // Generate a new key pair for the account
-    const newAccountPrivateKey = PrivateKey.generate();
-    const newAccountPublicKey = newAccountPrivateKey.publicKey;
-
     // Create the account creation transaction
     const transaction = new AccountCreateTransaction()
-      .setKey(newAccountPublicKey)
+      .setECDSAKeyWithAlias(PublicKey.fromString(params.publicKey))
       .setInitialBalance(params.balance || 0);
 
     // Set max automatic token associations if specified
@@ -48,18 +44,15 @@ export class AccountTransactionServiceImpl
     }
 
     // Generate EVM address from the public key
-    const evmAddress = this.generateEvmAddress(
-      newAccountPublicKey.toStringRaw(),
-    );
+    const evmAddress = this.generateEvmAddress(params.publicKey);
 
     this.logger.debug(
-      `[ACCOUNT TX] Created transaction for account with key: ${newAccountPublicKey.toStringRaw()}`,
+      `[ACCOUNT TX] Created transaction for account with key: ${params.publicKey}`,
     );
 
     return Promise.resolve({
       transaction,
-      privateKey: newAccountPrivateKey.toStringRaw(),
-      publicKey: newAccountPublicKey.toStringRaw(),
+      publicKey: params.publicKey,
       evmAddress,
     });
   }

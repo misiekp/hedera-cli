@@ -32,7 +32,7 @@ const makeAccountData = (
   evmAddress: '0x0000000000000000000000000000000000000000',
   solidityAddress: 'sa',
   solidityAddressFull: 'safull',
-  privateKey: 'priv',
+  keyRefId: 'kr_test123',
   network: 'testnet',
   ...overrides,
 });
@@ -90,7 +90,7 @@ describe('account plugin - view command', () => {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrName: 'acc1' });
+    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: 'acc1' });
 
     await viewAccountHandler(args);
 
@@ -113,7 +113,7 @@ describe('account plugin - view command', () => {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrName: '0.0.2222' });
+    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: '0.0.2222' });
 
     await viewAccountHandler(args);
 
