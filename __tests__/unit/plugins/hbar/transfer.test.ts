@@ -83,39 +83,59 @@ const makeArgs = (
   args,
 });
 
+// Common test accounts
+const SENDER_ACCOUNT = makeAccountData({
+  name: 'sender',
+  accountId: '0.0.1001',
+  network: 'testnet',
+});
+
+const RECEIVER_ACCOUNT = makeAccountData({
+  name: 'receiver',
+  accountId: '0.0.2002',
+  network: 'testnet',
+});
+
+const setupTransferTest = (options: {
+  transferImpl?: jest.Mock;
+  accounts?: AccountData[];
+  defaultCredentials?: any;
+}) => {
+  const logger = makeLogger();
+  const { hbar, networkMock, credentials } = makeApiMocks({
+    transferImpl: options.transferImpl,
+    accounts: options.accounts || [],
+  });
+
+  if (options.defaultCredentials) {
+    (credentials.getDefaultCredentials as jest.Mock).mockResolvedValue(
+      options.defaultCredentials,
+    );
+  }
+
+  const api: Partial<CoreAPI> = {
+    hbar,
+    network: networkMock,
+    credentials: credentials as CredentialsService,
+    logger,
+    state: {} as StateService,
+  };
+
+  return { api, logger, hbar, credentials };
+};
+
 describe('hbar plugin - transfer command (unit)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('transfers HBAR successfully when all params provided', async () => {
-    const logger = makeLogger();
-
-    const accountFrom = makeAccountData({
-      name: 'sender',
-      accountId: '0.0.1001',
-      network: 'testnet',
-    });
-    const accountTo = makeAccountData({
-      name: 'receiver',
-      accountId: '0.0.2002',
-      network: 'testnet',
-    });
-
-    const { hbar, networkMock, credentials } = makeApiMocks({
+    const { api, logger, hbar } = setupTransferTest({
       transferImpl: jest.fn().mockResolvedValue({
         transactionId: '0.0.1001@1234567890.123456789',
       }),
-      accounts: [accountFrom, accountTo],
+      accounts: [SENDER_ACCOUNT, RECEIVER_ACCOUNT],
     });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
@@ -139,19 +159,7 @@ describe('hbar plugin - transfer command (unit)', () => {
   });
 
   test('throws error when balance is invalid', async () => {
-    const logger = makeLogger();
-
-    const { hbar, networkMock, credentials } = makeApiMocks({
-      accounts: [],
-    });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
+    const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
       balance: NaN,
@@ -165,19 +173,7 @@ describe('hbar plugin - transfer command (unit)', () => {
   });
 
   test('throws error when balance is negative', async () => {
-    const logger = makeLogger();
-
-    const { hbar, networkMock, credentials } = makeApiMocks({
-      accounts: [],
-    });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
+    const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
       balance: -100,
@@ -191,19 +187,7 @@ describe('hbar plugin - transfer command (unit)', () => {
   });
 
   test('throws error when balance is zero', async () => {
-    const logger = makeLogger();
-
-    const { hbar, networkMock, credentials } = makeApiMocks({
-      accounts: [],
-    });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
+    const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
       balance: 0,
@@ -217,19 +201,7 @@ describe('hbar plugin - transfer command (unit)', () => {
   });
 
   test('throws error when no accounts available and from/to missing', async () => {
-    const logger = makeLogger();
-
-    const { hbar, networkMock, credentials } = makeApiMocks({
-      accounts: [],
-    });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
+    const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
       balance: 100,
@@ -241,25 +213,13 @@ describe('hbar plugin - transfer command (unit)', () => {
   });
 
   test('throws error when from equals to', async () => {
-    const logger = makeLogger();
-
-    const account = makeAccountData({
+    const sameAccount = makeAccountData({
       name: 'same-account',
       accountId: '0.0.1001',
       network: 'testnet',
     });
 
-    const { hbar, networkMock, credentials } = makeApiMocks({
-      accounts: [account],
-    });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
+    const { api, logger } = setupTransferTest({ accounts: [sameAccount] });
 
     const args = makeArgs(api, logger, {
       balance: 100,
@@ -273,33 +233,12 @@ describe('hbar plugin - transfer command (unit)', () => {
   });
 
   test('throws error when transferTinybar fails', async () => {
-    const logger = makeLogger();
-
-    const accountFrom = makeAccountData({
-      name: 'sender',
-      accountId: '0.0.1001',
-      network: 'testnet',
-    });
-    const accountTo = makeAccountData({
-      name: 'receiver',
-      accountId: '0.0.2002',
-      network: 'testnet',
-    });
-
-    const { hbar, networkMock, credentials } = makeApiMocks({
+    const { api, logger } = setupTransferTest({
       transferImpl: jest
         .fn()
         .mockRejectedValue(new Error('Network connection failed')),
-      accounts: [accountFrom, accountTo],
+      accounts: [SENDER_ACCOUNT, RECEIVER_ACCOUNT],
     });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
@@ -314,36 +253,18 @@ describe('hbar plugin - transfer command (unit)', () => {
   });
 
   test('uses default credentials as from when not provided', async () => {
-    const logger = makeLogger();
-
-    const accountTo = makeAccountData({
-      name: 'receiver',
-      accountId: '0.0.2002',
-      network: 'testnet',
-    });
-
-    const { hbar, networkMock, credentials } = makeApiMocks({
+    const { api, logger, hbar, credentials } = setupTransferTest({
       transferImpl: jest.fn().mockResolvedValue({
         transactionId: '0.0.3000@1234567890.987654321',
       }),
-      accounts: [accountTo],
+      accounts: [RECEIVER_ACCOUNT],
+      defaultCredentials: {
+        accountId: '0.0.3000',
+        privateKey: 'default-key',
+        network: 'testnet',
+        isDefault: true,
+      },
     });
-
-    // Mock default credentials
-    (credentials.getDefaultCredentials as jest.Mock).mockResolvedValue({
-      accountId: '0.0.3000',
-      privateKey: 'default-key',
-      network: 'testnet',
-      isDefault: true,
-    });
-
-    const api: Partial<CoreAPI> = {
-      hbar,
-      network: networkMock,
-      credentials: credentials as CredentialsService,
-      logger,
-      state: {} as StateService,
-    };
 
     const args = makeArgs(api, logger, {
       balance: 50000000,
