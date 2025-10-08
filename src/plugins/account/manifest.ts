@@ -103,13 +103,11 @@ export const accountPluginManifest: PluginManifest = {
       scope: 'profile',
     },
   ],
-  init: async (context) => {
+  init: () => {
     console.log('[ACCOUNT PLUGIN] Initializing account plugin...');
-    // Plugin initialization logic
   },
-  teardown: async (context) => {
+  teardown: () => {
     console.log('[ACCOUNT PLUGIN] Tearing down account plugin...');
-    // Plugin cleanup logic
   },
 };
 

@@ -2,97 +2,32 @@
  * Token Associate Handler Unit Tests
  * Tests the token association functionality of the token plugin
  */
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { associateTokenHandler } from '../../../../src/plugins/token/commands/associate';
-import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type {
-  SigningService,
-  TransactionResult,
-} from '../../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../../src/core/services/state/state-service.interface';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { associateTokenHandler } from '../../commands/associate';
+import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
+import {
+  makeLogger,
+  makeApiMocks,
+  mockProcessExitThrows,
+  mockZustandTokenStateHelper,
+} from './helpers/mocks';
 
-jest.mock('../../../../src/plugins/token/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
 }));
 
 const MockedHelper = ZustandTokenStateHelper as jest.Mock;
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
-const makeApiMocks = ({
-  createAssociationImpl,
-  signAndExecuteImpl,
-}: {
-  createAssociationImpl?: jest.Mock;
-  signAndExecuteImpl?: jest.Mock;
-}) => {
-  const tokenTransactions: jest.Mocked<TokenTransactionService> = {
-    createTokenTransaction: jest.fn(),
-    createTokenAssociationTransaction: createAssociationImpl || jest.fn(),
-    createTransferTransaction: jest.fn(),
-  };
-
-  const signing: jest.Mocked<SigningService> = {
-    signAndExecute: jest.fn(),
-    signAndExecuteWithKey: signAndExecuteImpl || jest.fn(),
-    signWithKey: jest.fn(),
-    sign: jest.fn(),
-    execute: jest.fn(),
-    getStatus: jest.fn(),
-  };
-
-  const state: jest.Mocked<StateService> = {
-    get: jest.fn(),
-    set: jest.fn(),
-    delete: jest.fn(),
-    list: jest.fn(),
-    clear: jest.fn(),
-    has: jest.fn(),
-    getNamespaces: jest.fn(),
-    getKeys: jest.fn(),
-    subscribe: jest.fn(),
-    getActions: jest.fn(),
-    getState: jest.fn(),
-  };
-
-  const api: jest.Mocked<CoreAPI> = {
-    accountTransactions: {} as any,
-    tokenTransactions,
-    signing,
-    credentials: {} as any,
-    state,
-    mirror: {} as any,
-    network: {
-      getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-    } as any,
-    config: {} as any,
-    logger: {} as any,
-  };
-
-  return { api, tokenTransactions, signing, state };
-};
-
-let exitSpy: jest.SpyInstance;
+const { setupExit, cleanupExit, getExitSpy } = mockProcessExitThrows();
 
 describe('associateTokenHandler', () => {
   beforeEach(() => {
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`Process.exit(${code})`);
-    });
-    MockedHelper.mockClear();
+    setupExit();
+    mockZustandTokenStateHelper(MockedHelper);
   });
 
   afterEach(() => {
-    exitSpy.mockRestore();
+    cleanupExit();
   });
 
   describe('success scenarios', () => {
@@ -106,19 +41,23 @@ describe('associateTokenHandler', () => {
         receipt: {} as any,
       };
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addAssociation: mockAddAssociation,
-      }));
+      });
 
       const {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
       } = makeApiMocks({
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -161,19 +100,23 @@ describe('associateTokenHandler', () => {
         receipt: {} as any,
       };
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addAssociation: mockAddAssociation,
-      }));
+      });
 
       const {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
       } = makeApiMocks({
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -199,7 +142,7 @@ describe('associateTokenHandler', () => {
   describe('validation scenarios', () => {
     test('should throw error when account key is missing', async () => {
       // Arrange
-      const { api } = makeApiMocks({});
+      const { api } = makeApiMocks();
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
@@ -221,7 +164,7 @@ describe('associateTokenHandler', () => {
 
     test('should throw error when tokenId is missing', async () => {
       // Arrange
-      const { api } = makeApiMocks({});
+      const { api } = makeApiMocks();
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
@@ -241,7 +184,7 @@ describe('associateTokenHandler', () => {
 
     test('should throw error when accountId is missing', async () => {
       // Arrange
-      const { api } = makeApiMocks({});
+      const { api } = makeApiMocks();
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
@@ -271,19 +214,23 @@ describe('associateTokenHandler', () => {
         receipt: { status: { status: 'failed', transactionId: '' } },
       };
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addAssociation: mockAddAssociation,
-      }));
+      });
 
       const {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
       } = makeApiMocks({
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -311,9 +258,11 @@ describe('associateTokenHandler', () => {
     test('should handle token transaction service error', async () => {
       // Arrange
       const { api, tokenTransactions: tokenTransactions } = makeApiMocks({
-        createAssociationImpl: jest
-          .fn()
-          .mockRejectedValue(new Error('Service unavailable')),
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockRejectedValue(new Error('Service unavailable')),
+        },
       });
 
       const logger = makeLogger();
@@ -344,12 +293,16 @@ describe('associateTokenHandler', () => {
         tokenTransactions: tokenTransactions,
         signing: signing,
       } = makeApiMocks({
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest
-          .fn()
-          .mockRejectedValue(new Error('Signing failed')),
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest
+            .fn()
+            .mockRejectedValue(new Error('Signing failed')),
+        },
       });
 
       const logger = makeLogger();
@@ -383,19 +336,23 @@ describe('associateTokenHandler', () => {
         receipt: {} as any,
       };
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addAssociation: mockAddAssociation,
-      }));
+      });
 
       const {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
       } = makeApiMocks({
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -429,19 +386,23 @@ describe('associateTokenHandler', () => {
         receipt: {} as any,
       };
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addAssociation: mockAddAssociation,
-      }));
+      });
 
       const {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
       } = makeApiMocks({
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();

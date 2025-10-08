@@ -6,7 +6,7 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-async function listAccountsHandler(args: CommandHandlerArgs) {
+export function listAccountsHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -18,7 +18,7 @@ async function listAccountsHandler(args: CommandHandlerArgs) {
   logger.log('Listing all accounts...');
 
   try {
-    const accounts = await accountState.listAccounts();
+    const accounts = accountState.listAccounts();
 
     if (accounts.length === 0) {
       logger.log('📝 No accounts found in the address book');
@@ -48,5 +48,3 @@ async function listAccountsHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
-
-export default listAccountsHandler;

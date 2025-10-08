@@ -3,7 +3,7 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 
-export async function removeHandler(args: CommandHandlerArgs): Promise<void> {
+export function removeHandler(args: CommandHandlerArgs): void {
   const { logger } = args;
   const { name } = args.args as { name: string };
 

@@ -1,3 +1,5 @@
+import type { Transaction as HederaTransaction } from '@hashgraph/sdk';
+
 /**
  * Interface for transaction signing and execution
  * All signing services must implement this interface
@@ -6,7 +8,7 @@ export interface SigningService {
   /**
    * Sign and execute a transaction in one operation
    */
-  signAndExecute(transaction: any): Promise<TransactionResult>;
+  signAndExecute(transaction: HederaTransaction): Promise<TransactionResult>;
 
   /**
    * Sign and execute a transaction using a specific private key
@@ -19,7 +21,7 @@ export interface SigningService {
   /**
    * Sign a transaction without executing it
    */
-  sign(transaction: any): Promise<SignedTransaction>;
+  sign(transaction: HederaTransaction): Promise<SignedTransaction>;
 
   /**
    * Sign a transaction using a specific private key without executing it

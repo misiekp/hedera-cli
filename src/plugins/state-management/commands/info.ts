@@ -4,8 +4,9 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import * as fs from 'fs';
 import * as path from 'path';
+import { formatError } from '../../../utils/errors';
 
-export async function infoHandler(args: CommandHandlerArgs): Promise<void> {
+export function infoHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
 
   logger.log('ℹ️  State Information:');
@@ -25,7 +26,7 @@ export async function infoHandler(args: CommandHandlerArgs): Promise<void> {
     logger.log('');
 
     for (const ns of namespaces) {
-      const data = (api.state as any)[ns]?.list() || [];
+      const data = api.state.list<unknown>(ns) || [];
       const entryCount = data.length;
       totalEntries += entryCount;
 
@@ -39,14 +40,26 @@ export async function infoHandler(args: CommandHandlerArgs): Promise<void> {
 
         // Show sample entries
         if (data.length <= 3) {
-          data.forEach((item: any, index: number) => {
-            if (typeof item === 'object' && item.name) {
-              logger.log(`     ${index + 1}. ${item.name}`);
+          data.forEach((item: unknown, index: number) => {
+            if (typeof item === 'object' && item !== null && 'name' in item) {
+              logger.log(
+                `     ${index + 1}. ${(item as { name?: string }).name}`,
+              );
             }
           });
         } else {
+          const first = data[0];
+          const second = data[1];
           logger.log(
-            `     Sample: ${data[0]?.name || 'entry 1'}, ${data[1]?.name || 'entry 2'}, ...`,
+            `     Sample: ${
+              typeof first === 'object' && first !== null && 'name' in first
+                ? (first as { name?: string }).name
+                : 'entry 1'
+            }, ${
+              typeof second === 'object' && second !== null && 'name' in second
+                ? (second as { name?: string }).name
+                : 'entry 2'
+            }, ...`,
           );
         }
         logger.log('');
@@ -65,7 +78,7 @@ export async function infoHandler(args: CommandHandlerArgs): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error(`❌ Failed to get state info: ${error}`);
+    logger.error(formatError('❌ Failed to get state info: ', error));
     process.exit(1);
   }
 }

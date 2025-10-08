@@ -2,119 +2,33 @@
  * Token Lifecycle Integration Tests
  * Tests the complete token lifecycle: create → associate → transfer
  */
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { createTokenHandler } from '../../../../src/plugins/token/commands/create';
-import { associateTokenHandler } from '../../../../src/plugins/token/commands/associate';
-import { transferTokenHandler } from '../../../../src/plugins/token/commands/transfer';
-import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { CredentialsService } from '../../../../src/core/services/credentials/credentials-service.interface';
-import type { SigningService } from '../../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../../src/core/services/state/state-service.interface';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { createTokenHandler } from '../../commands/create';
+import { associateTokenHandler } from '../../commands/associate';
+import { transferTokenHandler } from '../../commands/transfer';
+import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import {
+  makeLogger,
+  makeApiMocks,
+  mockProcessExitThrows,
+  mockZustandTokenStateHelper,
+} from './helpers/mocks';
 
-let exitSpy: jest.SpyInstance;
-
-jest.mock('../../../../src/plugins/token/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
 }));
 
 const MockedHelper = ZustandTokenStateHelper as jest.Mock;
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
-const makeApiMocks = ({
-  createTokenImpl,
-  createAssociationImpl,
-  createTransferImpl,
-  signAndExecuteImpl,
-  getDefaultCredentialsImpl,
-}: {
-  createTokenImpl?: jest.Mock;
-  createAssociationImpl?: jest.Mock;
-  createTransferImpl?: jest.Mock;
-  signAndExecuteImpl?: jest.Mock;
-  getDefaultCredentialsImpl?: jest.Mock;
-}) => {
-  const tokenTransactions: jest.Mocked<TokenTransactionService> = {
-    createTokenTransaction: createTokenImpl || jest.fn(),
-    createTokenAssociationTransaction: createAssociationImpl || jest.fn(),
-    createTransferTransaction: createTransferImpl || jest.fn(),
-  };
-
-  const signing: jest.Mocked<SigningService> = {
-    signAndExecute: jest.fn(),
-    signAndExecuteWithKey: signAndExecuteImpl || jest.fn(),
-    signWithKey: jest.fn(),
-    sign: jest.fn(),
-    execute: jest.fn(),
-    getStatus: jest.fn(),
-  };
-
-  const credentials: jest.Mocked<CredentialsService> = {
-    getDefaultCredentials: getDefaultCredentialsImpl || jest.fn(),
-    setDefaultCredentials: jest.fn(),
-    getCredentials: jest.fn(),
-    addCredentials: jest.fn(),
-    removeCredentials: jest.fn(),
-    listCredentials: jest.fn(),
-    loadFromEnvironment: jest.fn(),
-  };
-
-  const state: jest.Mocked<StateService> = {
-    get: jest.fn(),
-    set: jest.fn(),
-    delete: jest.fn(),
-    list: jest.fn(),
-    clear: jest.fn(),
-    has: jest.fn(),
-    getNamespaces: jest.fn(),
-    getKeys: jest.fn(),
-    subscribe: jest.fn(),
-    getActions: jest.fn(),
-    getState: jest.fn(),
-  };
-
-  const api: jest.Mocked<CoreAPI> = {
-    accountTransactions: {} as any,
-    tokenTransactions: tokenTransactions,
-    signing: signing,
-    credentials: credentials,
-    state,
-    mirror: {} as any,
-    network: {
-      getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-    } as any,
-    config: {} as any,
-    logger: {} as any,
-  };
-
-  return {
-    api,
-    tokenTransactions: tokenTransactions,
-    signing: signing,
-    credentials: credentials,
-    state,
-  };
-};
+const { setupExit, cleanupExit, getExitSpy } = mockProcessExitThrows();
 
 describe('Token Lifecycle Integration', () => {
   beforeEach(() => {
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`Process.exit(${code})`);
-    });
-    MockedHelper.mockClear();
+    setupExit();
+    mockZustandTokenStateHelper(MockedHelper);
   });
 
   afterEach(() => {
-    exitSpy.mockRestore();
+    cleanupExit();
   });
 
   describe('complete token lifecycle', () => {
@@ -128,10 +42,10 @@ describe('Token Lifecycle Integration', () => {
       const treasuryKey = 'treasury-key';
       const userKey = 'user-key';
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addToken: mockAddToken,
         addAssociation: mockAddAssociation,
-      }));
+      });
 
       const mockTokenTransaction = { type: 'token-create' };
       const mockAssociationTransaction = { type: 'association' };
@@ -143,62 +57,72 @@ describe('Token Lifecycle Integration', () => {
         signing: signing,
         credentials,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        createTransferImpl: jest
-          .fn()
-          .mockResolvedValue(mockTransferTransaction),
-        signAndExecuteImpl: jest.fn().mockImplementation((transaction, key) => {
-          // Mock different responses based on transaction type
-          if (transaction === mockTokenTransaction) {
-            return Promise.resolve({
-              success: true,
-              transactionId: `${tokenId}@1234567890.123456789`,
-              tokenId: tokenId,
-              receipt: {
-                status: {
-                  status: 'success',
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+          createTransferTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTransferTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest
+            .fn()
+            .mockImplementation((transaction, key) => {
+              // Mock different responses based on transaction type
+              if (transaction === mockTokenTransaction) {
+                return Promise.resolve({
+                  success: true,
                   transactionId: `${tokenId}@1234567890.123456789`,
-                },
-              },
-            });
-          }
-          if (transaction === mockAssociationTransaction) {
-            return Promise.resolve({
-              success: true,
-              transactionId: '0.0.123@1234567890.123456790',
-              receipt: {
-                status: {
-                  status: 'success',
+                  tokenId: tokenId,
+                  receipt: {
+                    status: {
+                      status: 'success',
+                      transactionId: `${tokenId}@1234567890.123456789`,
+                    },
+                  },
+                });
+              }
+              if (transaction === mockAssociationTransaction) {
+                return Promise.resolve({
+                  success: true,
                   transactionId: '0.0.123@1234567890.123456790',
-                },
-              },
-            });
-          }
-          if (transaction === mockTransferTransaction) {
-            return Promise.resolve({
-              success: true,
-              transactionId: '0.0.123@1234567890.123456791',
-              receipt: {
-                status: {
-                  status: 'success',
+                  receipt: {
+                    status: {
+                      status: 'success',
+                      transactionId: '0.0.123@1234567890.123456790',
+                    },
+                  },
+                });
+              }
+              if (transaction === mockTransferTransaction) {
+                return Promise.resolve({
+                  success: true,
                   transactionId: '0.0.123@1234567890.123456791',
-                },
-              },
-            });
-          }
-          return Promise.resolve({
-            success: false,
-            transactionId: '',
-            receipt: { status: { status: 'failed', transactionId: '' } },
-          });
-        }),
-        getDefaultCredentialsImpl: jest.fn().mockResolvedValue({
-          accountId: treasuryAccountId,
-          privateKey: treasuryKey,
-        }),
+                  receipt: {
+                    status: {
+                      status: 'success',
+                      transactionId: '0.0.123@1234567890.123456791',
+                    },
+                  },
+                });
+              }
+              return Promise.resolve({
+                success: false,
+                transactionId: '',
+                receipt: { status: { status: 'failed', transactionId: '' } },
+              });
+            }),
+        },
+        credentials: {
+          getDefaultCredentials: jest.fn().mockResolvedValue({
+            accountId: treasuryAccountId,
+            privateKey: treasuryKey,
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -305,10 +229,10 @@ describe('Token Lifecycle Integration', () => {
       const treasuryKey = 'treasury-key';
       const userKey = 'user-key';
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addToken: mockAddToken,
         addAssociation: jest.fn(),
-      }));
+      });
 
       const mockTokenTransaction = { type: 'token-create' };
       const mockAssociationTransaction = { type: 'association' };
@@ -319,41 +243,51 @@ describe('Token Lifecycle Integration', () => {
         signing: signing,
         credentials,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest.fn().mockImplementation((transaction, key) => {
-          if (transaction === mockTokenTransaction) {
-            return Promise.resolve({
-              success: true,
-              transactionId: `${tokenId}@1234567890.123456789`,
-              tokenId: tokenId,
-              receipt: {
-                status: {
-                  status: 'success',
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest
+            .fn()
+            .mockImplementation((transaction, key) => {
+              if (transaction === mockTokenTransaction) {
+                return Promise.resolve({
+                  success: true,
                   transactionId: `${tokenId}@1234567890.123456789`,
-                },
-              },
-            });
-          }
-          if (transaction === mockAssociationTransaction) {
-            return Promise.resolve({
-              success: false,
-              transactionId: '',
-              receipt: { status: { status: 'failed', transactionId: '' } },
-            });
-          }
-          return Promise.resolve({
-            success: false,
-            transactionId: '',
-            receipt: { status: { status: 'failed', transactionId: '' } },
-          });
-        }),
-        getDefaultCredentialsImpl: jest.fn().mockResolvedValue({
-          accountId: treasuryAccountId,
-          privateKey: treasuryKey,
-        }),
+                  tokenId: tokenId,
+                  receipt: {
+                    status: {
+                      status: 'success',
+                      transactionId: `${tokenId}@1234567890.123456789`,
+                    },
+                  },
+                });
+              }
+              if (transaction === mockAssociationTransaction) {
+                return Promise.resolve({
+                  success: false,
+                  transactionId: '',
+                  receipt: { status: { status: 'failed', transactionId: '' } },
+                });
+              }
+              return Promise.resolve({
+                success: false,
+                transactionId: '',
+                receipt: { status: { status: 'failed', transactionId: '' } },
+              });
+            }),
+        },
+        credentials: {
+          getDefaultCredentials: jest.fn().mockResolvedValue({
+            accountId: treasuryAccountId,
+            privateKey: treasuryKey,
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -412,10 +346,10 @@ describe('Token Lifecycle Integration', () => {
       const userKey1 = 'user-key-1';
       const userKey2 = 'user-key-2';
 
-      MockedHelper.mockImplementation(() => ({
+      mockZustandTokenStateHelper(MockedHelper, {
         addToken: mockAddToken,
         addAssociation: mockAddAssociation,
-      }));
+      });
 
       const mockTokenTransaction = { type: 'token-create' };
       const mockAssociationTransaction1 = { type: 'association-1' };
@@ -427,36 +361,46 @@ describe('Token Lifecycle Integration', () => {
         signing: signing,
         credentials,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        createAssociationImpl: jest.fn().mockImplementation(({ accountId }) => {
-          if (accountId === userAccountId1) {
-            return Promise.resolve(mockAssociationTransaction1);
-          }
-          return Promise.resolve(mockAssociationTransaction2);
-        }),
-        signAndExecuteImpl: jest.fn().mockImplementation((transaction) => {
-          if (
-            transaction === mockTokenTransaction ||
-            transaction === mockAssociationTransaction1 ||
-            transaction === mockAssociationTransaction2
-          ) {
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockImplementation(({ accountId }) => {
+              if (accountId === userAccountId1) {
+                return Promise.resolve(mockAssociationTransaction1);
+              }
+              return Promise.resolve(mockAssociationTransaction2);
+            }),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockImplementation((transaction) => {
+            if (
+              transaction === mockTokenTransaction ||
+              transaction === mockAssociationTransaction1 ||
+              transaction === mockAssociationTransaction2
+            ) {
+              return Promise.resolve({
+                success: true,
+                transactionId: '0.0.123@1234567890.123456789',
+                receipt: {},
+              });
+            }
             return Promise.resolve({
-              success: true,
-              transactionId: '0.0.123@1234567890.123456789',
-              receipt: {},
+              success: false,
+              error: 'Unknown transaction',
+              transactionId: '',
+              receipt: null,
             });
-          }
-          return Promise.resolve({
-            success: false,
-            error: 'Unknown transaction',
-            transactionId: '',
-            receipt: null,
-          });
-        }),
-        getDefaultCredentialsImpl: jest.fn().mockResolvedValue({
-          accountId: treasuryAccountId,
-          privateKey: treasuryKey,
-        }),
+          }),
+        },
+        credentials: {
+          getDefaultCredentials: jest.fn().mockResolvedValue({
+            accountId: treasuryAccountId,
+            privateKey: treasuryKey,
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -543,17 +487,23 @@ describe('Token Lifecycle Integration', () => {
         signing: signing,
         credentials,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue({}),
-        createAssociationImpl: jest.fn().mockResolvedValue({}),
-        signAndExecuteImpl: jest.fn().mockResolvedValue({
-          success: true,
-          transactionId: '0.0.123@1234567890.123456789',
-          receipt: {},
-        }),
-        getDefaultCredentialsImpl: jest.fn().mockResolvedValue({
-          accountId: treasuryAccountId,
-          privateKey: 'treasury-key',
-        }),
+        tokenTransactions: {
+          createTokenTransaction: jest.fn().mockResolvedValue({}),
+          createTokenAssociationTransaction: jest.fn().mockResolvedValue({}),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue({
+            success: true,
+            transactionId: '0.0.123@1234567890.123456789',
+            receipt: {},
+          }),
+        },
+        credentials: {
+          getDefaultCredentials: jest.fn().mockResolvedValue({
+            accountId: treasuryAccountId,
+            privateKey: 'treasury-key',
+          }),
+        },
       });
 
       const logger = makeLogger();

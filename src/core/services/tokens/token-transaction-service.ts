@@ -17,12 +17,14 @@ import {
   TokenId as HederaTokenId,
 } from '@hashgraph/sdk';
 import { Logger } from '../logger/logger-service.interface';
-import {
-  TokenTransactionService,
+import { TokenTransactionService } from './token-transaction-service.interface';
+import type {
   TokenTransferParams,
   TokenCreateParams,
   TokenAssociationParams,
-} from './token-transaction-service.interface';
+  CustomFee as CustomFeeParams,
+} from '../../types/token.types';
+import { parsePrivateKey } from '../../../utils/keys';
 
 export class TokenTransactionServiceImpl implements TokenTransactionService {
   private logger: Logger;
@@ -100,7 +102,7 @@ export class TokenTransactionServiceImpl implements TokenTransactionService {
       .setInitialSupply(initialSupply)
       .setSupplyType(tokenSupplyType)
       .setTreasuryAccountId(AccountId.fromString(treasuryId))
-      .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey);
+      .setAdminKey(parsePrivateKey(adminKey).publicKey);
 
     // Set max supply for finite supply tokens
     if (supplyType === 'FINITE' && maxSupply !== undefined) {
@@ -111,50 +113,12 @@ export class TokenTransactionServiceImpl implements TokenTransactionService {
     }
 
     // Set custom fees if provided
-    if (customFees && customFees.length > 0) {
-      const hederaCustomFees: CustomFee[] = [];
-
-      for (const fee of customFees) {
-        if (fee.type === 'fixed') {
-          // Only support HBAR fixed fees
-          if (fee.unitType && fee.unitType !== 'HBAR') {
-            throw new Error(
-              `Only HBAR fixed fees are supported. Got unitType: ${fee.unitType}`,
-            );
-          }
-
-          const fixedFee = new CustomFixedFee();
-
-          // Set HBAR amount (default unitType is HBAR)
-          fixedFee.setHbarAmount(Hbar.fromTinybars(fee.amount || 0));
-          this.logger.debug(
-            `[TOKEN TX] Added fixed HBAR fee: ${fee.amount} tinybars`,
-          );
-
-          if (fee.collectorId) {
-            fixedFee.setFeeCollectorAccountId(
-              AccountId.fromString(fee.collectorId),
-            );
-          }
-
-          if (fee.exempt !== undefined) {
-            fixedFee.setAllCollectorsAreExempt(fee.exempt);
-          }
-
-          hederaCustomFees.push(fixedFee);
-        } else {
-          throw new Error(
-            `Only fixed fees are supported. Got fee type: ${fee.type}`,
-          );
-        }
-      }
-
-      if (hederaCustomFees.length > 0) {
-        tokenCreateTx.setCustomFees(hederaCustomFees);
-        this.logger.debug(
-          `[TOKEN TX] Set ${hederaCustomFees.length} custom fees`,
-        );
-      }
+    const hederaCustomFees = this.processCustomFees(customFees);
+    if (hederaCustomFees.length > 0) {
+      tokenCreateTx.setCustomFees(hederaCustomFees);
+      this.logger.debug(
+        `[TOKEN TX] Set ${hederaCustomFees.length} custom fees`,
+      );
     }
 
     this.logger.debug(
@@ -186,5 +150,53 @@ export class TokenTransactionServiceImpl implements TokenTransactionService {
     );
 
     return associateTx;
+  }
+
+  /**
+   * Process custom fees and convert them to Hedera CustomFee objects
+   */
+  private processCustomFees(customFees?: CustomFeeParams[]): CustomFee[] {
+    if (!customFees || customFees.length === 0) {
+      return [];
+    }
+
+    const hederaCustomFees: CustomFee[] = [];
+
+    for (const fee of customFees) {
+      if (fee.type === 'fixed') {
+        // Only support HBAR fixed fees
+        if (fee.unitType && fee.unitType !== 'HBAR') {
+          throw new Error(
+            `Only HBAR fixed fees are supported. Got unitType: ${fee.unitType}`,
+          );
+        }
+
+        const fixedFee = new CustomFixedFee();
+
+        // Set HBAR amount (default unitType is HBAR)
+        fixedFee.setHbarAmount(Hbar.fromTinybars(fee.amount || 0));
+        this.logger.debug(
+          `[TOKEN TX] Added fixed HBAR fee: ${fee.amount} tinybars`,
+        );
+
+        if (fee.collectorId) {
+          fixedFee.setFeeCollectorAccountId(
+            AccountId.fromString(fee.collectorId),
+          );
+        }
+
+        if (fee.exempt !== undefined) {
+          fixedFee.setAllCollectorsAreExempt(fee.exempt);
+        }
+
+        hederaCustomFees.push(fixedFee);
+      } else {
+        throw new Error(
+          `Only fixed fees are supported. Got fee type: ${fee.type}`,
+        );
+      }
+    }
+
+    return hederaCustomFees;
   }
 }

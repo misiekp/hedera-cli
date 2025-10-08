@@ -4,7 +4,6 @@
  */
 import {
   SigningService,
-  Transaction,
   SignedTransaction,
   TransactionResult,
   TransactionStatus,
@@ -18,7 +17,9 @@ import {
   TransactionResponse,
   TransactionReceipt,
   Status,
+  Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
+import { formatError } from '../../../utils/errors';
 
 export class SigningServiceImpl implements SigningService {
   private client!: Client;
@@ -32,7 +33,62 @@ export class SigningServiceImpl implements SigningService {
     this.credentialsService = credentialsService;
 
     // Initialize with credentials from state or environment
-    this.initializeCredentials();
+    void this.initializeCredentials();
+  }
+
+  /**
+   * Helper function to prepare TransactionResult based on receipt contents
+   * Extracts transaction-specific fields from the receipt
+   */
+  private prepareTransactionResult(
+    response: TransactionResponse,
+    receipt: TransactionReceipt,
+  ): TransactionResult {
+    const transactionId = response.transactionId.toString();
+    const success = receipt.status === Status.Success;
+
+    // Base result object
+    const result: TransactionResult = {
+      transactionId,
+      success,
+      receipt: {
+        status: {
+          status: success ? 'success' : 'failed',
+          transactionId,
+        },
+      },
+    };
+
+    // Extract accountId for account creation transactions
+    if (receipt.accountId) {
+      result.accountId = receipt.accountId.toString();
+      this.logger.debug(`[SIGNING] Extracted accountId: ${result.accountId}`);
+    }
+
+    // Extract tokenId for token creation transactions
+    if (receipt.tokenId) {
+      result.tokenId = receipt.tokenId.toString();
+      this.logger.debug(`[SIGNING] Extracted tokenId: ${result.tokenId}`);
+    }
+
+    // Extract topicId for topic creation transactions
+    if (receipt.topicId) {
+      result.topicId = receipt.topicId.toString();
+      this.logger.debug(`[SIGNING] Extracted topicId: ${result.topicId}`);
+    }
+
+    // Extract topicSequenceNumber for topic message submit transactions
+    if (
+      receipt.topicSequenceNumber !== undefined &&
+      receipt.topicSequenceNumber !== null
+    ) {
+      result.topicSequenceNumber = Number(receipt.topicSequenceNumber);
+      this.logger.debug(
+        `[SIGNING] Extracted topicSequenceNumber: ${result.topicSequenceNumber}`,
+      );
+    }
+
+    return result;
   }
 
   private async initializeCredentials(): Promise<void> {
@@ -75,7 +131,9 @@ export class SigningServiceImpl implements SigningService {
         );
       }
     } catch (error) {
-      this.logger.error(`[SIGNING] Failed to initialize credentials: ${error}`);
+      this.logger.error(
+        formatError('[SIGNING] Failed to initialize credentials: ', error),
+      );
       // Fallback to mock credentials
       this.operatorKey = PrivateKey.generate();
       this.operatorId = AccountId.fromString('0.0.123456');
@@ -89,7 +147,9 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Sign and execute a transaction in one operation
    */
-  async signAndExecute(transaction: any): Promise<TransactionResult> {
+  async signAndExecute(
+    transaction: HederaTransaction,
+  ): Promise<TransactionResult> {
     this.logger.debug(`[SIGNING] Signing and executing transaction`);
 
     try {
@@ -102,33 +162,11 @@ export class SigningServiceImpl implements SigningService {
       );
 
       this.logger.debug(
-        `[SIGNING] Transaction executed successfully: ${response.transactionId}`,
+        `[SIGNING] Transaction executed successfully: ${response.transactionId.toString()}`,
       );
 
-      // Extract account ID for account creation transactions
-      let accountId: string | undefined;
-      if (receipt.accountId) {
-        accountId = receipt.accountId.toString();
-      }
-
-      // Extract token ID for token creation transactions
-      let tokenId: string | undefined;
-      if (receipt.tokenId) {
-        tokenId = receipt.tokenId.toString();
-      }
-
-      return {
-        transactionId: response.transactionId.toString(),
-        success: receipt.status === Status.Success,
-        accountId,
-        tokenId,
-        receipt: {
-          status: {
-            status: receipt.status === Status.Success ? 'success' : 'failed',
-            transactionId: response.transactionId.toString(),
-          },
-        },
-      };
+      // Use helper to prepare the result based on transaction type
+      return this.prepareTransactionResult(response, receipt);
     } catch (error) {
       console.error(`[SIGNING] Transaction execution failed:`, error);
       throw error;
@@ -168,30 +206,8 @@ export class SigningServiceImpl implements SigningService {
         `[SIGNING] Transaction executed successfully with custom key: ${response.transactionId}`,
       );
 
-      // Extract account ID for account creation transactions
-      let accountId: string | undefined;
-      if (receipt.accountId) {
-        accountId = receipt.accountId.toString();
-      }
-
-      // Extract token ID for token creation transactions
-      let tokenId: string | undefined;
-      if (receipt.tokenId) {
-        tokenId = receipt.tokenId.toString();
-      }
-
-      return {
-        transactionId: response.transactionId.toString(),
-        success: receipt.status === Status.Success,
-        accountId,
-        tokenId,
-        receipt: {
-          status: {
-            status: receipt.status === Status.Success ? 'success' : 'failed',
-            transactionId: response.transactionId.toString(),
-          },
-        },
-      };
+      // Use helper to prepare the result based on transaction type
+      return this.prepareTransactionResult(response, receipt);
     } catch (error) {
       console.error(
         `[SIGNING] Transaction execution with custom key failed:`,
@@ -204,7 +220,7 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Sign a transaction without executing it
    */
-  async sign(transaction: any): Promise<SignedTransaction> {
+  async sign(transaction: HederaTransaction): Promise<SignedTransaction> {
     this.logger.debug(`[SIGNING] Signing transaction`);
 
     try {
@@ -212,7 +228,7 @@ export class SigningServiceImpl implements SigningService {
       transaction.freezeWith(this.client);
 
       // Sign the transaction
-      const signedTransaction = await transaction.sign(this.operatorKey);
+      await transaction.sign(this.operatorKey);
 
       return {
         transactionId: `signed-${Date.now()}`,
@@ -257,9 +273,7 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Execute a pre-signed transaction
    */
-  async execute(
-    signedTransaction: SignedTransaction,
-  ): Promise<TransactionResult> {
+  execute(signedTransaction: SignedTransaction): Promise<TransactionResult> {
     this.logger.debug(
       `[SIGNING] Executing signed transaction: ${signedTransaction.transactionId}`,
     );
@@ -280,7 +294,7 @@ export class SigningServiceImpl implements SigningService {
   /**
    * Get the status of a transaction
    */
-  async getStatus(transactionId: string): Promise<TransactionStatus> {
+  getStatus(transactionId: string): Promise<TransactionStatus> {
     this.logger.debug(
       `[SIGNING] Getting status for transaction: ${transactionId}`,
     );
@@ -288,10 +302,10 @@ export class SigningServiceImpl implements SigningService {
     try {
       // In a real implementation, you would query the network for transaction status
       // For now, we'll return a mock status
-      return {
+      return Promise.resolve({
         status: 'success',
         transactionId,
-      };
+      });
     } catch (error) {
       console.error(`[SIGNING] Failed to get transaction status:`, error);
       throw error;
