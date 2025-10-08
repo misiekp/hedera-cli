@@ -3,6 +3,7 @@
  * This demonstrates how plugins would use the Core API
  */
 import { createCoreAPI } from './core-api/core-api';
+import type { AccountData } from '../plugins/account/schema';
 
 async function testCoreAPI() {
   console.log('🚀 Testing Core API Architecture...\n');
@@ -21,7 +22,7 @@ async function testCoreAPI() {
 
   // Test 2: Signing Service
   console.log('🔐 Test 2: Signing Service');
-  const result = await api.signing.signAndExecute(transaction);
+  const result = await api.signing.signAndExecute(transaction.transaction);
   console.log(`✅ Transaction executed: ${result.transactionId}\n`);
 
   // Test 3: State Management
@@ -37,7 +38,7 @@ async function testCoreAPI() {
     privateKey: 'mock-private-key',
     network: 'testnet',
   });
-  const account = api.state.get('accounts', 'test-account');
+  const account = api.state.get<AccountData>('accounts', 'test-account');
   console.log(`✅ Account stored and retrieved: ${account?.name}\n`);
 
   // Test 4: Mirror Node Service

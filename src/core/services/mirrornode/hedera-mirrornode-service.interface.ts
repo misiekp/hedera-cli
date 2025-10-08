@@ -2,8 +2,6 @@
  * Comprehensive Hedera Mirror Node Service Interface
  * Provides access to all Hedera Mirror Node API endpoints
  */
-import { LedgerId } from '@hashgraph/sdk';
-import BigNumber from 'bignumber.js';
 import {
   AccountResponse,
   TokenBalancesResponse,

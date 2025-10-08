@@ -114,7 +114,7 @@ export default (program: Command) => {
             const topicEntry = topics[replacedOptions.topicId];
             if (topicEntry && topicEntry.submitKey) {
               const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
-              submitMessageTx.sign(submitKey);
+              void submitMessageTx.sign(submitKey);
             }
 
             const topicMessageTxResponse =

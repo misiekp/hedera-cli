@@ -2,8 +2,9 @@
  * State List Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
 
-export async function listHandler(args: CommandHandlerArgs): Promise<void> {
+export function listHandler(args: CommandHandlerArgs): Promise<void> {
   const { logger, api } = args;
   const { namespace } = args.args as { namespace?: string };
 
@@ -12,12 +13,18 @@ export async function listHandler(args: CommandHandlerArgs): Promise<void> {
   try {
     if (namespace) {
       // List specific namespace
-      const data = api.state.list(namespace);
+      const data = api.state.list<unknown>(namespace);
       logger.log(`   ${namespace}: ${data.length} entries`);
-      data.forEach((item: any, index: number) => {
-        if (typeof item === 'object' && item.name) {
+      data.forEach((item: unknown, index: number) => {
+        if (item && typeof item === 'object' && 'name' in item) {
+          const rec = item as {
+            name?: string;
+            accountId?: string;
+            tokenId?: string;
+            topicId?: string;
+          };
           logger.log(
-            `     ${index + 1}. ${item.name} (${item.accountId || item.tokenId || item.topicId || 'unknown'})`,
+            `     ${index + 1}. ${rec.name} (${rec.accountId ?? rec.tokenId ?? rec.topicId})`,
           );
         } else {
           logger.log(`     ${index + 1}. ${JSON.stringify(item)}`);
@@ -49,7 +56,7 @@ export async function listHandler(args: CommandHandlerArgs): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error(`❌ Failed to list state data: ${error}`);
+    logger.error(formatError('❌ Failed to list state data: ', error));
     process.exit(1);
   }
 }

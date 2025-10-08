@@ -1,11 +1,13 @@
 /**
  * State Backup Command Handler
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import * as fs from 'fs';
 import * as path from 'path';
+import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
+import { BackupPayload } from '../../../core/types/shared.types';
 
-export async function backupHandler(args: CommandHandlerArgs): Promise<void> {
+export function backupHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
   const { output } = args.args as { output?: string };
 
@@ -14,7 +16,8 @@ export async function backupHandler(args: CommandHandlerArgs): Promise<void> {
   try {
     // Create backup data from all namespaces
     const namespaces = api.state.getNamespaces();
-    const backup: any = {
+
+    const backup: BackupPayload = {
       timestamp: new Date().toISOString(),
       namespaces: {},
       metadata: {
@@ -24,7 +27,7 @@ export async function backupHandler(args: CommandHandlerArgs): Promise<void> {
     };
 
     for (const namespace of namespaces) {
-      const data = api.state.list(namespace);
+      const data = api.state.list<unknown>(namespace);
       backup.namespaces[namespace] = data;
       backup.metadata.totalSize += JSON.stringify(data).length;
     }
@@ -42,7 +45,7 @@ export async function backupHandler(args: CommandHandlerArgs): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error(`❌ Failed to create backup: ${error}`);
+    logger.error(formatError('❌ Failed to create backup: ', error));
     process.exit(1);
   }
 }

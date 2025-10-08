@@ -2,24 +2,16 @@
  * Token Transfer Handler Unit Tests
  * Tests the token transfer functionality of the token plugin
  */
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { transferTokenHandler } from '../../../../src/plugins/token/commands/transfer';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { transferTokenHandler } from '../../commands/transfer';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
 import type {
   SigningService,
   TransactionResult,
-} from '../../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../../src/core/services/state/state-service.interface';
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
+} from '../../../../core/services/signing/signing-service.interface';
+import type { TokenTransactionService } from '../../../../core/services/tokens/token-transaction-service.interface';
+import type { StateService } from '../../../../core/services/state/state-service.interface';
+import { makeLogger } from './helpers/mocks';
 
 const makeApiMocks = ({
   createTransferImpl,

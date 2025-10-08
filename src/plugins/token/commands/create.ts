@@ -17,6 +17,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       logger.error(`   - ${error.path.join('.')}: ${error.message}`);
     });
     process.exit(1);
+    return; // Ensure execution stops (for testing with mocked process.exit)
   }
 
   // Initialize token state helper
@@ -153,12 +154,14 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       logger.log(`   Token data saved to state`);
 
       process.exit(0);
+      return; // Ensure execution stops (for testing with mocked process.exit)
     } else {
       throw new Error('Token creation failed - no token ID returned');
     }
   } catch (error) {
     logger.error(`❌ Failed to create token: ${error}`);
     process.exit(1);
+    return; // Ensure execution stops (for testing with mocked process.exit)
   }
 }
 

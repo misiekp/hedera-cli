@@ -9,7 +9,7 @@ import {
   CustomFeeSchema,
   safeValidateTokenCreateParams,
   validateTokenData,
-} from '../../../../src/plugins/token/schema';
+} from '../../schema';
 
 describe('Token Schema Validation', () => {
   describe('TokenDataSchema', () => {

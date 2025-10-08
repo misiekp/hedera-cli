@@ -18,7 +18,7 @@ import { SigningServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
-import { RealNetworkService } from '../services/network/network-service-real';
+import { MockNetworkService } from '../services/network/network-service';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
 import { CredentialsServiceImpl } from '../services/credentials/credentials-service';
@@ -35,23 +35,21 @@ export class CoreAPIImplementation implements CoreAPI {
   public credentials: CredentialsService;
 
   constructor() {
-    // Initialize logger first
     this.logger = new MockLoggerService();
-
-    // Initialize Zustand state service
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
-    // Initialize all services with dependencies
-    this.network = new RealNetworkService();
-    this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
-    this.tokenTransactions = new TokenTransactionServiceImpl(this.logger);
+    this.network = new MockNetworkService();
 
-    // Initialize credentials service with network service
+    // Initialize credentials service
     this.credentials = new CredentialsServiceImpl(
       this.state,
       this.logger,
       this.network,
     );
+
+    // Initialize all services with dependencies
+    this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
+    this.tokenTransactions = new TokenTransactionServiceImpl(this.logger);
     this.signing = new SigningServiceImpl(this.logger, this.credentials);
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
@@ -66,14 +64,8 @@ export class CoreAPIImplementation implements CoreAPI {
       case 'previewnet':
         ledgerId = LedgerId.PREVIEWNET;
         break;
-      case 'localnet':
-      case 'solo':
-      case 'solo-local':
-        // Custom networks (like local nodes) use testnet LedgerId
-        ledgerId = LedgerId.TESTNET;
-        break;
       default:
-        ledgerId = LedgerId.TESTNET; // Default to testnet
+        throw `Network not supported yet: ${networkString}`;
     }
 
     this.mirror = new HederaMirrornodeServiceDefaultImpl(ledgerId);

@@ -7,7 +7,7 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-async function getAccountBalanceHandler(args: CommandHandlerArgs) {
+export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -23,7 +23,7 @@ async function getAccountBalanceHandler(args: CommandHandlerArgs) {
   try {
     // Check if it's a name (stored in state) or account ID
     let accountId = accountIdOrName;
-    const account = await accountState.loadAccount(accountIdOrName);
+    const account = accountState.loadAccount(accountIdOrName);
 
     if (account) {
       accountId = account.accountId;
@@ -64,5 +64,3 @@ async function getAccountBalanceHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
-
-export default getAccountBalanceHandler;

@@ -51,12 +51,12 @@ export interface StateService {
   /**
    * Get store actions for a namespace
    */
-  getActions(namespace: string): any;
+  getActions(namespace: string): unknown;
 
   /**
    * Get store state for a namespace
    */
-  getState(namespace: string): any;
+  getState(namespace: string): unknown;
 }
 
 /**
@@ -65,7 +65,7 @@ export interface StateService {
 export interface PluginStateSchema {
   namespace: string;
   version: string;
-  schema: Record<string, any>; // JSON Schema or similar
+  schema: Record<string, unknown>; // JSON Schema or similar
   description?: string;
 }
 

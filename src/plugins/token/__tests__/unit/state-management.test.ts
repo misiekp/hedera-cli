@@ -3,14 +3,14 @@
  * Tests the ZustandTokenStateHelper functionality
  */
 
-import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
-import { StateService } from '../../../../src/core/services/state/state-service.interface';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import { TokenData } from '../../../../src/plugins/token/schema';
+import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import { StateService } from '../../../../core/services/state/state-service.interface';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import { TokenData } from '../../schema';
 
 // Mock the dependencies
-jest.mock('../../../../src/core/services/state/state-service.interface');
-jest.mock('../../../../src/core/services/logger/logger-service.interface');
+jest.mock('../../../../core/services/state/state-service.interface');
+jest.mock('../../../../core/services/logger/logger-service.interface');
 
 describe('Token State Management', () => {
   let stateHelper: ZustandTokenStateHelper;

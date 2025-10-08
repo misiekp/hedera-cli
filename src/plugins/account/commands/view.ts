@@ -6,7 +6,7 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-async function viewAccountHandler(args: CommandHandlerArgs) {
+export async function viewAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -20,7 +20,7 @@ async function viewAccountHandler(args: CommandHandlerArgs) {
   try {
     // Check if it's a name (stored in state) or account ID
     let accountId = accountIdOrName;
-    const account = await accountState.loadAccount(accountIdOrName);
+    const account = accountState.loadAccount(accountIdOrName);
 
     if (account) {
       accountId = account.accountId;
@@ -43,5 +43,3 @@ async function viewAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
-
-export default viewAccountHandler;

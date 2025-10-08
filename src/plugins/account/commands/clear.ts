@@ -6,7 +6,7 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-async function clearAccountsHandler(args: CommandHandlerArgs) {
+export function clearAccountsHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -15,11 +15,11 @@ async function clearAccountsHandler(args: CommandHandlerArgs) {
   logger.log('Clearing all accounts...');
 
   try {
-    const accounts = await accountState.listAccounts();
+    const accounts = accountState.listAccounts();
     const count = accounts.length;
 
     // Clear all accounts
-    await accountState.clearAccounts();
+    accountState.clearAccounts();
 
     logger.log(`✅ Cleared ${count} account(s) from the address book`);
 
@@ -29,5 +29,3 @@ async function clearAccountsHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
-
-export default clearAccountsHandler;

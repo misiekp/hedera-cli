@@ -6,7 +6,7 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
-async function createAccountHandler(args: CommandHandlerArgs) {
+export async function createAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -50,7 +50,7 @@ async function createAccountHandler(args: CommandHandlerArgs) {
           | 'previewnet',
       };
 
-      await accountState.saveAccount(name, accountData);
+      accountState.saveAccount(name, accountData);
 
       logger.log(`✅ Account created successfully: ${accountData.accountId}`);
       logger.log(`   Name: ${accountData.name}`);
@@ -67,5 +67,3 @@ async function createAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
-
-export default createAccountHandler;

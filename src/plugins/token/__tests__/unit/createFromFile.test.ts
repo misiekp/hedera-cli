@@ -2,21 +2,30 @@
  * Token Create From File Handler Unit Tests
  * Tests the token creation from file functionality of the token plugin
  */
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { createTokenFromFileHandler } from '../../../../src/plugins/token/commands/createFromFile';
-import { ZustandTokenStateHelper } from '../../../../src/plugins/token/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type {
-  SigningService,
-  TransactionResult,
-} from '../../../../src/core/services/signing/signing-service.interface';
-import type { TokenTransactionService } from '../../../../src/core/services/tokens/token-transaction-service.interface';
-import type { StateService } from '../../../../src/core/services/state/state-service.interface';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { createTokenFromFileHandler } from '../../commands/createFromFile';
+import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
+import {
+  makeLogger,
+  makeApiMocks,
+  mockProcessExit,
+  makeTransactionResult,
+} from './helpers/mocks';
+import {
+  validTokenFile,
+  infiniteSupplyTokenFile,
+  invalidTokenFileMissingName,
+  invalidTokenFileInvalidAccountId,
+  invalidTokenFileInvalidSupplyType,
+  invalidTokenFileNegativeSupply,
+  mockFilePaths,
+  mockTransactions,
+} from './helpers/fixtures';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-let exitSpy: jest.SpyInstance;
+const { setupExit, cleanupExit, getExitSpy } = mockProcessExit();
 
 // Mock fs/promises
 jest.mock('fs/promises', () => ({
@@ -30,7 +39,7 @@ jest.mock('path', () => ({
   resolve: jest.fn(),
 }));
 
-jest.mock('../../../../src/plugins/token/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
 }));
 
@@ -38,111 +47,9 @@ const MockedHelper = ZustandTokenStateHelper as jest.Mock;
 const mockFs = fs as jest.Mocked<typeof fs>;
 const mockPath = path as jest.Mocked<typeof path>;
 
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
-const makeApiMocks = ({
-  createTokenImpl,
-  signAndExecuteImpl,
-  createAssociationImpl,
-}: {
-  createTokenImpl?: jest.Mock;
-  signAndExecuteImpl?: jest.Mock;
-  createAssociationImpl?: jest.Mock;
-}) => {
-  const tokenTransactions: jest.Mocked<TokenTransactionService> = {
-    createTokenTransaction: createTokenImpl || jest.fn(),
-    createTokenAssociationTransaction: createAssociationImpl || jest.fn(),
-    createTransferTransaction: jest.fn(),
-  };
-
-  const signing: jest.Mocked<SigningService> = {
-    signAndExecute: jest.fn(),
-    signAndExecuteWithKey: signAndExecuteImpl || jest.fn(),
-    signWithKey: jest.fn(),
-    sign: jest.fn(),
-    execute: jest.fn(),
-    getStatus: jest.fn(),
-  };
-
-  const state: jest.Mocked<StateService> = {
-    get: jest.fn(),
-    set: jest.fn(),
-    delete: jest.fn(),
-    list: jest.fn(),
-    clear: jest.fn(),
-    has: jest.fn(),
-    getNamespaces: jest.fn(),
-    getKeys: jest.fn(),
-    subscribe: jest.fn(),
-    getActions: jest.fn(),
-    getState: jest.fn(),
-  };
-
-  const api: jest.Mocked<CoreAPI> = {
-    accountTransactions: {} as any,
-    tokenTransactions: tokenTransactions,
-    signing: signing,
-    credentials: {} as any,
-    state,
-    mirror: {} as any,
-    network: {
-      getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-    } as any,
-    config: {} as any,
-    logger: {} as any,
-  };
-
-  return { api, tokenTransactions: tokenTransactions, signing: signing, state };
-};
-
-const validTokenFile = {
-  name: 'TestToken',
-  symbol: 'TEST',
-  decimals: 2,
-  supplyType: 'finite' as const,
-  initialSupply: 1000,
-  maxSupply: 10000,
-  treasury: {
-    accountId: '0.0.123456',
-    key: 'treasury-key',
-  },
-  keys: {
-    adminKey: 'admin-key',
-    supplyKey: 'supply-key',
-    wipeKey: 'wipe-key',
-    kycKey: 'kyc-key',
-    freezeKey: 'freeze-key',
-    pauseKey: 'pause-key',
-    feeScheduleKey: 'fee-schedule-key',
-  },
-  associations: [
-    {
-      accountId: '0.0.789012',
-      key: 'association-key',
-    },
-  ],
-  customFees: [
-    {
-      type: 'fixed' as const,
-      amount: 10,
-      unitType: 'HBAR' as const,
-      collectorId: '0.0.999999',
-    },
-  ],
-  memo: 'Test token created from file',
-};
-
 describe('createTokenFromFileHandler', () => {
   beforeEach(() => {
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-      return undefined as never;
-    });
+    setupExit();
     MockedHelper.mockClear();
     MockedHelper.mockImplementation(() => ({
       saveToken: jest.fn().mockResolvedValue(undefined),
@@ -154,7 +61,7 @@ describe('createTokenFromFileHandler', () => {
   });
 
   afterEach(() => {
-    exitSpy.mockRestore();
+    cleanupExit();
   });
 
   describe('success scenarios', () => {
@@ -200,23 +107,29 @@ describe('createTokenFromFileHandler', () => {
         tokenTransactions: tokenTransactions,
         signing,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(mockAssociationTransaction),
-        signAndExecuteImpl: jest.fn().mockImplementation((transaction) => {
-          if (transaction === mockTokenTransaction) {
-            return Promise.resolve(mockSignResult);
-          }
-          if (transaction === mockAssociationTransaction) {
-            return Promise.resolve(mockAssociationResult);
-          }
-          return Promise.resolve({
-            success: false,
-            transactionId: '',
-            receipt: { status: { status: 'failed', transactionId: '' } },
-          });
-        }),
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockImplementation((transaction) => {
+            if (transaction === mockTokenTransaction) {
+              return Promise.resolve(mockSignResult);
+            }
+            if (transaction === mockAssociationTransaction) {
+              return Promise.resolve(mockAssociationResult);
+            }
+            return Promise.resolve({
+              success: false,
+              transactionId: '',
+              receipt: { status: { status: 'failed', transactionId: '' } },
+            });
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -266,7 +179,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.log).toHaveBeenCalledWith(
         '✅ Token created successfully from file!',
       );
-      expect(exitSpy).toHaveBeenCalledWith(0);
+      expect(getExitSpy()).toHaveBeenCalledWith(0);
     });
 
     test('should handle infinite supply type', async () => {
@@ -305,8 +218,14 @@ describe('createTokenFromFileHandler', () => {
         tokenTransactions: tokenTransactions,
         signing,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -344,7 +263,7 @@ describe('createTokenFromFileHandler', () => {
           },
         ],
       });
-      expect(exitSpy).toHaveBeenCalledWith(0);
+      expect(getExitSpy()).toHaveBeenCalledWith(0);
     });
 
     test('should process associations after token creation', async () => {
@@ -378,11 +297,17 @@ describe('createTokenFromFileHandler', () => {
         tokenTransactions: tokenTransactions,
         signing,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
-        createAssociationImpl: jest
-          .fn()
-          .mockResolvedValue(_mockAssociationTransaction),
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(_mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -406,14 +331,14 @@ describe('createTokenFromFileHandler', () => {
         tokenId: '0.0.123456', // This would be the actual token ID from the transaction result
         accountId: '0.0.789012',
       });
-      expect(exitSpy).toHaveBeenCalledWith(0);
+      expect(getExitSpy()).toHaveBeenCalledWith(0);
     });
   });
 
   describe('file handling scenarios', () => {
     test('should handle file not found', async () => {
       // Arrange
-      mockFs.access.mockRejectedValue(new Error('File not found'));
+      mockFs.readFile.mockRejectedValue(new Error('File not found'));
       mockPath.join.mockReturnValue('/path/to/token.test.json');
       mockPath.resolve.mockReturnValue('/resolved/path/to/token.test.json');
 
@@ -434,7 +359,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('❌ Failed to create token from file:'),
       );
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
 
     test('should handle file read error', async () => {
@@ -461,7 +386,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('❌ Failed to create token from file:'),
       );
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
 
     test('should handle invalid JSON', async () => {
@@ -488,7 +413,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('❌ Failed to create token from file:'),
       );
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
   });
 
@@ -530,7 +455,7 @@ describe('createTokenFromFileHandler', () => {
       // Act & Assert
       await createTokenFromFileHandler(args);
       expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
 
     test('should handle invalid account ID format', async () => {
@@ -563,7 +488,7 @@ describe('createTokenFromFileHandler', () => {
       // Act & Assert
       await createTokenFromFileHandler(args);
       expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
 
     test('should handle invalid supply type', async () => {
@@ -593,7 +518,7 @@ describe('createTokenFromFileHandler', () => {
       // Act & Assert
       await createTokenFromFileHandler(args);
       expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
 
     test('should handle negative initial supply', async () => {
@@ -623,7 +548,7 @@ describe('createTokenFromFileHandler', () => {
       // Act & Assert
       await createTokenFromFileHandler(args);
       expect(logger.error).toHaveBeenCalledWith('Token file validation failed');
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
   });
 
@@ -652,8 +577,14 @@ describe('createTokenFromFileHandler', () => {
         tokenTransactions: tokenTransactions,
         signing,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -672,7 +603,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('❌ Failed to create token from file:'),
       );
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
 
     test('should handle association failure gracefully', async () => {
@@ -706,11 +637,17 @@ describe('createTokenFromFileHandler', () => {
         tokenTransactions: tokenTransactions,
         signing,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
-        createAssociationImpl: jest
-          .fn()
-          .mockRejectedValue(new Error('Association failed')),
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockRejectedValue(new Error('Association failed')),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -734,7 +671,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.log).toHaveBeenCalledWith(
         '✅ Token created successfully from file!',
       );
-      expect(exitSpy).toHaveBeenCalledWith(0);
+      expect(getExitSpy()).toHaveBeenCalledWith(0);
     });
   });
 
@@ -769,8 +706,14 @@ describe('createTokenFromFileHandler', () => {
         tokenTransactions: tokenTransactions,
         signing,
       } = makeApiMocks({
-        createTokenImpl: jest.fn().mockResolvedValue(mockTokenTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTokenTransaction),
+        },
+        signing: {
+          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+        },
       });
 
       const logger = makeLogger();
@@ -795,7 +738,7 @@ describe('createTokenFromFileHandler', () => {
       expect(logger.log).toHaveBeenCalledWith(
         '✅ Token created successfully from file!',
       );
-      expect(exitSpy).toHaveBeenCalledWith(0);
+      expect(getExitSpy()).toHaveBeenCalledWith(0);
     });
   });
 });
