@@ -14,7 +14,7 @@ async function testCoreAPI() {
   // Test 1: Account Transactions
   console.log('📝 Test 1: Account Transactions');
   const transaction = await api.accountTransactions.createAccount({
-    balance: 1000000,
+    balance: 10, // 10 HBAR for initial account balance
     name: 'test-account',
     maxAutoAssociations: 1000,
   });
@@ -66,6 +66,28 @@ async function testCoreAPI() {
   api.logger.error('Error message');
   console.log('✅ Logger service working\n');
 
+  // Test 8: Token Transactions
+  console.log('🪙 Test 8: Token Transactions');
+  // Use the operator's private key from environment (or the account we just created)
+  const treasuryKey =
+    process.env.TESTNET_OPERATOR_KEY || transaction.privateKey;
+  const treasuryAccountId =
+    process.env.TESTNET_OPERATOR_ID || result.accountId || '0.0.5970025';
+
+  const tokenTransaction = await api.tokenTransactions.createTokenTransaction({
+    name: 'Test Token',
+    symbol: 'TST',
+    treasuryId: treasuryAccountId,
+    decimals: 2,
+    initialSupply: 1000000,
+    supplyType: 'INFINITE',
+    adminKey: treasuryKey,
+    treasuryKey: treasuryKey,
+  });
+  console.log(
+    `✅ Token creation transaction created: ${tokenTransaction.constructor.name}\n`,
+  );
+
   console.log(
     '🎉 All Core API tests passed! Architecture is working correctly.',
   );
@@ -73,7 +95,15 @@ async function testCoreAPI() {
 
 // Run the test if this file is executed directly
 if (require.main === module) {
-  testCoreAPI().catch(console.error);
+  testCoreAPI()
+    .then(() => {
+      console.log('\n✨ Test completed successfully. Exiting...');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
 }
 
 export { testCoreAPI };
