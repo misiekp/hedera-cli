@@ -23,24 +23,28 @@ export const hbarPluginManifest: PluginManifest = {
       options: [
         {
           name: 'balance',
+          short: 'b',
           type: 'number',
           required: true,
           description: 'Amount of tinybars to transfer',
         },
         {
           name: 'to',
+          short: 't',
           type: 'string',
           required: false,
           description: 'Account ID or name to transfer to',
         },
         {
           name: 'from',
+          short: 'f',
           type: 'string',
           required: false,
           description: 'Account ID or name to transfer from',
         },
         {
           name: 'memo',
+          short: 'm',
           type: 'string',
           required: false,
           description: 'Memo for the transfer',
