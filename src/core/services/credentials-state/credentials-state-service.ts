@@ -136,9 +136,9 @@ export class CredentialsStateServiceImpl implements CredentialsStateService {
   ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null {
     const existing = this.getDefaultOperator();
     if (existing) return existing;
-    const accountId = process.env.HEDERA_ACCOUNT_ID || process.env.OPERATOR_ID;
-    const privateKey =
-      process.env.HEDERA_PRIVATE_KEY || process.env.OPERATOR_KEY;
+    // TODO: Improve environment variable handling to support multiple networks (not just Testnet)
+    const accountId = process.env.TESTNET_OPERATOR_ID;
+    const privateKey = process.env.TESTNET_OPERATOR_KEY;
     if (accountId && privateKey) {
       const { keyRefId } = this.importPrivateKey(privateKey, ['env-default']);
       this.setDefaultOperator(accountId, keyRefId);
