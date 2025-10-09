@@ -35,6 +35,7 @@ export interface CommandSpec {
   name: string;
   summary: string;
   description: string;
+  arguments?: string;
   options?: CommandOption[];
   handler: string;
 }

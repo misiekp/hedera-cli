@@ -151,8 +151,13 @@ export class PluginManager {
     commandSpec: CommandSpec,
   ): void {
     const commandName = String(commandSpec.name);
+    // Add positional arguments if specified (e.g., '<name>' or '<source> <destination>')
+    const commandSignature = commandSpec.arguments
+      ? `${commandName} ${commandSpec.arguments}`
+      : commandName;
+
     const command = pluginCommand
-      .command(commandName)
+      .command(commandSignature)
       .description(
         String(
           commandSpec.description ||
