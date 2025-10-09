@@ -1,16 +1,16 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { importAccountHandler } from '../../../../src/plugins/account/commands/import';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { HederaMirrornodeService } from '../../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { NetworkService } from '../../../../src/core/services/network/network-service.interface';
-import type { CredentialsStateService } from '../../../../src/core/services/credentials-state/credentials-state-service.interface';
-import type { AliasManagementService } from '../../../../src/core/services/alias/alias-service.interface';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { importAccountHandler } from '../../commands/import';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
+import type { NetworkService } from '../../../../core/services/network/network-service.interface';
+import type { CredentialsStateService } from '../../../../core/services/credentials-state/credentials-state-service.interface';
+import type { AliasManagementService } from '../../../../core/services/alias/alias-service.interface';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 

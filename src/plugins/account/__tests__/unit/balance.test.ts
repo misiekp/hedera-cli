@@ -1,14 +1,14 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { getAccountBalanceHandler } from '../../../../src/plugins/account/commands/balance';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { HederaMirrornodeService } from '../../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { AccountData } from '../../../../src/plugins/account/schema';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { getAccountBalanceHandler } from '../../commands/balance';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { AccountData } from '../../schema';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
@@ -25,6 +25,7 @@ const makeLogger = (): jest.Mocked<Logger> => ({
 const makeAccountData = (
   overrides: Partial<AccountData> = {},
 ): AccountData => ({
+  keyRefId: 'kr_default123',
   name: 'default',
   accountId: '0.0.1234',
   type: 'ECDSA',
@@ -32,7 +33,6 @@ const makeAccountData = (
   evmAddress: '0x0000000000000000000000000000000000000000',
   solidityAddress: 'sa',
   solidityAddressFull: 'safull',
-  privateKey: 'priv',
   network: 'testnet',
   ...overrides,
 });
