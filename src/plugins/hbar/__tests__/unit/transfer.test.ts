@@ -1,18 +1,18 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import transferHandler from '../../../../src/plugins/hbar/commands/transfer';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { HbarService } from '../../../../src/core/services/hbar/hbar-service.interface';
-import type { NetworkService } from '../../../../src/core/services/network/network-service.interface';
-import type { CredentialsStateService } from '../../../../src/core/services/credentials-state/credentials-state-service.interface';
-import type { AliasManagementService } from '../../../../src/core/services/alias/alias-service.interface';
-import type { SigningService } from '../../../../src/core/services/signing/signing-service.interface';
-import type { AccountData } from '../../../../src/plugins/account/schema';
-import { StateService } from '../../../../src/core/services/state/state-service.interface';
-import { ConfigService } from '../../../../src/core/services/config/config-service.interface';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import transferHandler from '../../commands/transfer';
+import { ZustandAccountStateHelper } from '../../../account/zustand-state-helper';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { HbarService } from '../../../../core/services/hbar/hbar-service.interface';
+import type { NetworkService } from '../../../../core/services/network/network-service.interface';
+import type { CredentialsStateService } from '../../../../core/services/credentials-state/credentials-state-service.interface';
+import type { AliasManagementService } from '../../../../core/services/alias/alias-service.interface';
+import type { SigningService } from '../../../../core/services/signing/signing-service.interface';
+import type { AccountData } from '../../../account/schema';
+import { StateService } from '../../../../core/services/state/state-service.interface';
+import { ConfigService } from '../../../../core/services/config/config-service.interface';
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../../account/zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
