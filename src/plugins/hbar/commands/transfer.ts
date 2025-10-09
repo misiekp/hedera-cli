@@ -9,7 +9,7 @@ export default async function transferHandler(
   const to = args.args.toIdOrNameOrAlias
     ? (args.args.toIdOrNameOrAlias as string)
     : '';
-  const from = args.args.fromIdOrNameOrAlias
+  let from = args.args.fromIdOrNameOrAlias
     ? (args.args.fromIdOrNameOrAlias as string)
     : '';
   const memo = args.args.memo ? (args.args.memo as string) : '';
@@ -21,10 +21,23 @@ export default async function transferHandler(
     throw new Error('Invalid balance: provide a positive number of tinybars');
   }
 
-  if (!from || !to) {
-    throw new Error(
-      'Both --from-id-or-name-or-alias and --to-id-or-name-or-alias are required',
-    );
+  if (!to) {
+    throw new Error('--to-id-or-name-or-alias is required');
+  }
+
+  // Fallback to default operator from env if from not provided
+  if (!from) {
+    const defaultOp =
+      api.credentialsState.getDefaultOperator() ||
+      api.credentialsState.ensureDefaultFromEnv();
+    if (defaultOp) {
+      from = defaultOp.accountId;
+      logger.log(`[HBAR] Using default operator as from: ${from}`);
+    } else {
+      throw new Error(
+        'No --from provided and no default operator found in env (TESTNET_OPERATOR_ID/KEY)',
+      );
+    }
   }
 
   if (from === to) {

@@ -39,8 +39,9 @@ export const hbarPluginManifest: PluginManifest = {
           name: 'from-id-or-name-or-alias',
           short: 'f',
           type: 'string',
-          required: true,
-          description: 'Account ID, name, or alias to transfer from',
+          required: false,
+          description:
+            'Account ID, name, or alias to transfer from (defaults to operator from env)',
         },
         {
           name: 'memo',
