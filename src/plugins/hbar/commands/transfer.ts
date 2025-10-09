@@ -80,10 +80,23 @@ export default async function transferHandler(
     });
 
     // Sign and execute the transaction
-    // If we have a fromAlias with keyRefId, use it; otherwise use default operator
-    const result = fromAlias?.keyRefId
+    // Try to get keyRefId: first from alias, then from state by accountId/name
+    let fromKeyRefId = fromAlias?.keyRefId;
+    if (!fromKeyRefId) {
+      const accounts = api.state.list<{
+        accountId: string;
+        name: string;
+        keyRefId?: string;
+      }>('account-accounts');
+      const account = accounts.find(
+        (a) => a.accountId === from || a.name === from,
+      );
+      fromKeyRefId = account?.keyRefId;
+    }
+
+    const result = fromKeyRefId
       ? await api.signing.signAndExecuteWith(transferResult.transaction, {
-          keyRefId: fromAlias.keyRefId,
+          keyRefId: fromKeyRefId,
         })
       : await api.signing.signAndExecute(transferResult.transaction);
 
