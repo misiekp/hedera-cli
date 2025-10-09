@@ -40,8 +40,8 @@ export class HbarServiceImpl implements HbarService {
       `[HBAR SERVICE] Created transfer transaction: from=${from} to=${to} amount=${amount}`,
     );
 
-    return {
+    return Promise.resolve({
       transaction: tx,
-    };
+    });
   }
 }

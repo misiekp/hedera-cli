@@ -37,7 +37,7 @@ export class LocalPrivateKeyCredentialsSignerService
         ? PrivateKey.fromStringECDSA(secret.privateKey)
         : PrivateKey.fromStringED25519(secret.privateKey);
     const sig = pk.sign(bytes);
-    return new Uint8Array(sig);
+    return Promise.resolve(new Uint8Array(sig));
   }
 
   getPublicKey(): string {
