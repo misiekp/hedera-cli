@@ -1,45 +1,24 @@
-import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import transferHandler from '../../commands/transfer';
 import { ZustandAccountStateHelper } from '../../../account/zustand-state-helper';
-import { Logger } from '../../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
 import type { HbarService } from '../../../../core/services/hbar/hbar-service.interface';
-import type { NetworkService } from '../../../../core/services/network/network-service.interface';
-import type { CredentialsStateService } from '../../../../core/services/credentials-state/credentials-state-service.interface';
-import type { AliasManagementService } from '../../../../core/services/alias/alias-service.interface';
-import type { SigningService } from '../../../../core/services/signing/signing-service.interface';
 import type { AccountData } from '../../../account/schema';
-import { StateService } from '../../../../core/services/state/state-service.interface';
-import { ConfigService } from '../../../../core/services/config/config-service.interface';
+import {
+  makeLogger,
+  makeAccountData,
+  makeArgs,
+  makeNetworkMock,
+  makeCredentialsStateMock,
+  makeAliasMock,
+  makeSigningMock,
+  makeStateMock,
+} from '../../../../../__tests__/helpers/plugin';
 
 jest.mock('../../../account/zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
-const makeAccountData = (
-  overrides: Partial<AccountData> = {},
-): AccountData => ({
-  name: 'default',
-  accountId: '0.0.1234',
-  type: 'ECDSA',
-  publicKey: 'pk',
-  evmAddress: '0x0000000000000000000000000000000000000000',
-  solidityAddress: 'sa',
-  solidityAddressFull: 'safull',
-  keyRefId: 'kr_test123',
-  network: 'testnet',
-  ...overrides,
-});
 
 const makeApiMocks = ({
   transferImpl,
@@ -56,53 +35,10 @@ const makeApiMocks = ({
     transferTinybar: transferImpl || jest.fn(),
   };
 
-  const signing: jest.Mocked<SigningService> = {
-    signAndExecute: signAndExecuteImpl || jest.fn(),
-    signAndExecuteWith:
-      signAndExecuteImpl ||
-      jest.fn().mockResolvedValue({
-        success: true,
-        transactionId: 'mock-tx-id',
-        receipt: { status: { status: 'success' } },
-      }),
-    sign: jest.fn(),
-    signWith: jest.fn(),
-    execute: jest.fn(),
-    getStatus: jest.fn(),
-    setDefaultSigner: jest.fn(),
-  };
-
-  const networkMock: jest.Mocked<NetworkService> = {
-    getCurrentNetwork: jest.fn().mockReturnValue(network),
-    getAvailableNetworks: jest.fn(),
-    switchNetwork: jest.fn(),
-    getNetworkConfig: jest.fn(),
-    isNetworkAvailable: jest.fn(),
-  };
-
-  const credentialsState: jest.Mocked<CredentialsStateService> = {
-    createLocalPrivateKey: jest.fn(),
-    importPrivateKey: jest.fn(),
-    getPublicKey: jest.fn(),
-    getPrivateKeyString: jest.fn(),
-    getSignerHandle: jest.fn(),
-    findByPublicKey: jest.fn(),
-    list: jest.fn(),
-    remove: jest.fn(),
-    setDefaultOperator: jest.fn(),
-    getDefaultOperator: jest.fn(),
-    ensureDefaultFromEnv: jest.fn(),
-    createClient: jest.fn(),
-    signTransaction: jest.fn(),
-  };
-
-  const alias: jest.Mocked<AliasManagementService> = {
-    register: jest.fn(),
-    resolve: jest.fn().mockReturnValue(null), // No alias resolution by default
-    list: jest.fn(),
-    remove: jest.fn(),
-    parseRef: jest.fn(),
-  };
+  const signing = makeSigningMock({ signAndExecuteImpl });
+  const networkMock = makeNetworkMock(network);
+  const credentialsState = makeCredentialsStateMock();
+  const alias = makeAliasMock();
 
   MockedHelper.mockImplementation(() => ({
     getAccountsByNetwork: jest.fn().mockReturnValue(accounts),
@@ -110,18 +46,6 @@ const makeApiMocks = ({
 
   return { hbar, signing, networkMock, credentialsState, alias };
 };
-
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as StateService,
-  config: {} as ConfigService,
-  args,
-});
 
 // Common test accounts
 const SENDER_ACCOUNT = makeAccountData({
@@ -155,20 +79,9 @@ const setupTransferTest = (options: {
     );
   }
 
-  // Mock StateService with list method
-  const stateMock: Partial<StateService> = {
-    list: jest.fn().mockReturnValue(options.accounts || []),
-    get: jest.fn(),
-    set: jest.fn(),
-    delete: jest.fn(),
-    clear: jest.fn(),
-    has: jest.fn(),
-    getNamespaces: jest.fn(),
-    getKeys: jest.fn(),
-    subscribe: jest.fn(),
-    getActions: jest.fn(),
-    getState: jest.fn(),
-  };
+  const stateMock = makeStateMock({
+    listData: options.accounts || [],
+  });
 
   const api: Partial<CoreAPI> = {
     hbar,

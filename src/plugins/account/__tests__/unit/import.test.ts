@@ -1,12 +1,16 @@
-import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { importAccountHandler } from '../../commands/import';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import { Logger } from '../../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { NetworkService } from '../../../../core/services/network/network-service.interface';
-import type { CredentialsStateService } from '../../../../core/services/credentials-state/credentials-state-service.interface';
-import type { AliasManagementService } from '../../../../core/services/alias/alias-service.interface';
+import {
+  makeLogger,
+  makeArgs,
+  makeNetworkMock,
+  makeCredentialsStateMock,
+  makeAliasMock,
+  makeMirrorMock,
+  setupExitSpy,
+} from '../../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -16,73 +20,8 @@ jest.mock('../../zustand-state-helper', () => ({
 
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
-const makeMirrorMock = (overrides?: {
-  getAccountImpl?: jest.Mock;
-}): Partial<HederaMirrornodeService> => ({
-  getAccount:
-    overrides?.getAccountImpl ||
-    jest.fn().mockResolvedValue({
-      accountPublicKey: 'pubKey',
-      evmAddress: '0xabc',
-      balance: { balance: 100n },
-    }),
-});
-
-const makeNetworkMock = (): Partial<NetworkService> => ({
-  getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-});
-
-const makeCredentialsStateMock = (): jest.Mocked<CredentialsStateService> => ({
-  createLocalPrivateKey: jest.fn(),
-  importPrivateKey: jest.fn().mockReturnValue({
-    keyRefId: 'kr_test123',
-    publicKey: 'pub-key-test',
-  }),
-  getPublicKey: jest.fn(),
-  getPrivateKeyString: jest.fn(),
-  getSignerHandle: jest.fn(),
-  findByPublicKey: jest.fn(),
-  list: jest.fn(),
-  remove: jest.fn(),
-  setDefaultOperator: jest.fn(),
-  getDefaultOperator: jest.fn(),
-  ensureDefaultFromEnv: jest.fn(),
-  createClient: jest.fn(),
-  signTransaction: jest.fn(),
-});
-
-const makeAliasMock = (): jest.Mocked<AliasManagementService> => ({
-  register: jest.fn(),
-  resolve: jest.fn(),
-  list: jest.fn(),
-  remove: jest.fn(),
-  parseRef: jest.fn(),
-});
-
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {

@@ -1,9 +1,12 @@
-import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { listAccountsHandler } from '../../commands/list';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import { Logger } from '../../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
-import type { AccountData } from '../../schema';
+import {
+  makeLogger,
+  makeAccountData,
+  makeArgs,
+  setupExitSpy,
+} from '../../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -13,45 +16,8 @@ jest.mock('../../zustand-state-helper', () => ({
 
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
-const makeAccountData = (
-  overrides: Partial<AccountData> = {},
-): AccountData => ({
-  name: 'default',
-  accountId: '0.0.1234',
-  type: 'ECDSA',
-  publicKey: 'pk',
-  evmAddress: '0x0000000000000000000000000000000000000000',
-  solidityAddress: 'sa',
-  solidityAddressFull: 'safull',
-  keyRefId: 'kr_test123',
-  network: 'testnet',
-  ...overrides,
-});
-
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
