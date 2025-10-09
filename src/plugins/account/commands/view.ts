@@ -43,3 +43,5 @@ export async function viewAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+export default viewAccountHandler;

@@ -50,3 +50,5 @@ export function deleteAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+export default deleteAccountHandler;

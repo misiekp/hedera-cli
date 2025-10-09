@@ -2,11 +2,18 @@
  * Plugin System Type Definitions
  * Types specific to the plugin architecture
  */
+import { Command } from 'commander';
 import { CoreAPI } from '../core-api/core-api.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { CommandHandlerArgs } from './plugin.interface';
+
+/**
+ * Global pre-action hook type
+ * Function that runs before every command execution
+ */
+export type GlobalPreActionHook = (command: Command) => Promise<void>;
 
 /**
  * Plugin manifest structure
@@ -24,7 +31,14 @@ export interface PluginManifest {
   capabilities: string[];
   commands: CommandSpec[];
   stateSchemas?: PluginStateSchema[];
-  init?: (context?: PluginContext) => void | Promise<void>;
+  init?: (
+    context?: PluginContext,
+  ) =>
+    | void
+    | Promise<void>
+    | GlobalPreActionHook
+    | Promise<GlobalPreActionHook>
+    | Promise<GlobalPreActionHook | void>;
   teardown?: (context?: PluginContext) => void | Promise<void>;
 }
 

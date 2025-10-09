@@ -48,6 +48,7 @@ async function initializeCLI() {
 
     // Set default plugins
     pluginManager.setDefaultPlugins([
+      './dist/plugins/setup', // Setup and initialization plugin (must be first for auto-setup)
       './dist/plugins/account', // Default account plugin
       './dist/plugins/plugin-management', // Plugin management plugin
       './dist/plugins/credentials', // Credentials management plugin

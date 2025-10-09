@@ -48,3 +48,5 @@ export function listAccountsHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+export default listAccountsHandler;

@@ -67,3 +67,5 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+export default createAccountHandler;

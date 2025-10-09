@@ -29,3 +29,5 @@ export function clearAccountsHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+export default clearAccountsHandler;

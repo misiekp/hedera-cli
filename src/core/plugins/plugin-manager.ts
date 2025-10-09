@@ -21,6 +21,7 @@ export class PluginManager {
   private coreAPI: CoreAPI;
   private loadedPlugins: Map<string, LoadedPlugin> = new Map();
   private defaultPlugins: string[] = [];
+  private globalPreActionHooks: Array<(cmd: Command) => Promise<void>> = [];
 
   constructor(coreAPI: CoreAPI) {
     this.coreAPI = coreAPI;
@@ -41,8 +42,28 @@ export class PluginManager {
 
     for (const pluginPath of this.defaultPlugins) {
       try {
-        await this.loadPluginFromPath(pluginPath);
+        const plugin = await this.loadPluginFromPath(pluginPath);
         logger.log(`✅ Loaded: ${pluginPath}`);
+
+        // Call plugin init hook if it exists
+        if (plugin.manifest.init) {
+          const pluginContext = {
+            api: this.coreAPI,
+            state: this.coreAPI.state,
+            config: this.coreAPI.config,
+            logger: this.coreAPI.logger,
+          };
+
+          const hookFn = await plugin.manifest.init(pluginContext);
+
+          // If init returns a function, treat it as a global pre-action hook
+          if (typeof hookFn === 'function') {
+            this.globalPreActionHooks.push(hookFn);
+            logger.log(
+              `  ✅ Registered global hook for: ${plugin.manifest.name}`,
+            );
+          }
+        }
       } catch (error) {
         logger.log(`ℹ️  Plugin not available: ${pluginPath}`);
       }
@@ -55,6 +76,19 @@ export class PluginManager {
    * Register all plugin commands with Commander.js
    */
   registerCommands(program: Command): void {
+    // Register global pre-action hooks
+    if (this.globalPreActionHooks.length > 0) {
+      program.hook('preAction', async (thisCommand: Command) => {
+        for (const hookFn of this.globalPreActionHooks) {
+          await hookFn(thisCommand);
+        }
+      });
+      logger.log(
+        `✅ Registered ${this.globalPreActionHooks.length} global hook(s)`,
+      );
+    }
+
+    // Register plugin commands
     for (const plugin of this.loadedPlugins.values()) {
       this.registerPluginCommands(program, plugin);
     }

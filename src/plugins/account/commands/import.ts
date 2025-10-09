@@ -60,3 +60,5 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+export default importAccountHandler;

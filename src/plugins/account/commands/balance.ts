@@ -64,3 +64,5 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+export default getAccountBalanceHandler;
