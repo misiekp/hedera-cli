@@ -58,7 +58,13 @@ const makeApiMocks = ({
 
   const signing: jest.Mocked<SigningService> = {
     signAndExecute: signAndExecuteImpl || jest.fn(),
-    signAndExecuteWith: jest.fn(),
+    signAndExecuteWith:
+      signAndExecuteImpl ||
+      jest.fn().mockResolvedValue({
+        success: true,
+        transactionId: 'mock-tx-id',
+        receipt: { status: { status: 'success' } },
+      }),
     sign: jest.fn(),
     signWith: jest.fn(),
     execute: jest.fn(),
@@ -149,6 +155,21 @@ const setupTransferTest = (options: {
     );
   }
 
+  // Mock StateService with list method
+  const stateMock: Partial<StateService> = {
+    list: jest.fn().mockReturnValue(options.accounts || []),
+    get: jest.fn(),
+    set: jest.fn(),
+    delete: jest.fn(),
+    clear: jest.fn(),
+    has: jest.fn(),
+    getNamespaces: jest.fn(),
+    getKeys: jest.fn(),
+    subscribe: jest.fn(),
+    getActions: jest.fn(),
+    getState: jest.fn(),
+  };
+
   const api: Partial<CoreAPI> = {
     hbar,
     signing,
@@ -156,10 +177,10 @@ const setupTransferTest = (options: {
     credentialsState,
     alias,
     logger,
-    state: {} as StateService,
+    state: stateMock as StateService,
   };
 
-  return { api, logger, hbar, signing, credentialsState, alias };
+  return { api, logger, hbar, signing, credentialsState, alias, stateMock };
 };
 
 describe('hbar plugin - transfer command (unit)', () => {
