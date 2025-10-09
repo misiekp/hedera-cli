@@ -1,11 +1,11 @@
-import { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { clearAccountsHandler } from '../../../../src/plugins/account/commands/clear';
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { clearAccountsHandler } from '../../commands/clear';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 

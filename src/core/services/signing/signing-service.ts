@@ -9,84 +9,45 @@ import {
   TransactionStatus,
 } from './signing-service.interface';
 import { Logger } from '../logger/logger-service.interface';
-import { CredentialsService } from '../credentials/credentials-service.interface';
+import { CredentialsStateService } from '../credentials-state/credentials-state-service.interface';
+import { NetworkService } from '../network/network-service.interface';
+import type { SignerRef } from './signing-service.interface';
 import {
   Client,
-  PrivateKey,
-  AccountId,
   TransactionResponse,
   TransactionReceipt,
   Status,
   Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
-import { formatError } from '../../../utils/errors';
 
 export class SigningServiceImpl implements SigningService {
   private client!: Client;
-  private operatorKey!: PrivateKey;
-  private operatorId!: AccountId;
   private logger: Logger;
-  private credentialsService: CredentialsService;
+  private credentialsState: CredentialsStateService;
+  private networkService: NetworkService;
 
-  constructor(logger: Logger, credentialsService: CredentialsService) {
+  constructor(
+    logger: Logger,
+    credentialsState: CredentialsStateService,
+    networkService: NetworkService,
+  ) {
     this.logger = logger;
-    this.credentialsService = credentialsService;
+    this.credentialsState = credentialsState;
+    this.networkService = networkService;
 
     // Initialize with credentials from state or environment
     void this.initializeCredentials();
   }
 
-  private async initializeCredentials(): Promise<void> {
+  private initializeCredentials(): void {
     this.logger.debug('[SIGNING] Initializing credentials');
 
-    try {
-      // Try to get credentials from state or environment
-      const credentials = await this.credentialsService.getDefaultCredentials();
+    // Get network from NetworkService
+    const currentNetwork = this.networkService.getCurrentNetwork();
+    const network = currentNetwork as 'mainnet' | 'testnet' | 'previewnet';
 
-      if (credentials) {
-        this.logger.debug(
-          `[SIGNING] Using credentials for account: ${credentials.accountId}`,
-        );
-        this.operatorId = AccountId.fromString(credentials.accountId);
-        this.operatorKey = PrivateKey.fromString(credentials.privateKey);
-
-        // Set up client based on network
-        if (credentials.network === 'mainnet') {
-          this.client = Client.forMainnet().setOperator(
-            this.operatorId,
-            this.operatorKey,
-          );
-        } else {
-          this.client = Client.forTestnet().setOperator(
-            this.operatorId,
-            this.operatorKey,
-          );
-        }
-      } else {
-        // Fallback to mock credentials for development
-        this.logger.debug(
-          '[SIGNING] No credentials found, using mock credentials',
-        );
-        this.operatorKey = PrivateKey.generate();
-        this.operatorId = AccountId.fromString('0.0.123456'); // Mock operator account
-
-        this.client = Client.forTestnet().setOperator(
-          this.operatorId,
-          this.operatorKey,
-        );
-      }
-    } catch (error) {
-      this.logger.error(
-        formatError('[SIGNING] Failed to initialize credentials: ', error),
-      );
-      // Fallback to mock credentials
-      this.operatorKey = PrivateKey.generate();
-      this.operatorId = AccountId.fromString('0.0.123456');
-      this.client = Client.forTestnet().setOperator(
-        this.operatorId,
-        this.operatorKey,
-      );
-    }
+    // Use credentials-state to create client without exposing private keys
+    this.client = this.credentialsState.createClient(network);
   }
 
   /**
@@ -98,6 +59,22 @@ export class SigningServiceImpl implements SigningService {
     this.logger.debug(`[SIGNING] Signing and executing transaction`);
 
     try {
+      // Get default operator keyRefId for signing
+      const mapping =
+        this.credentialsState.getDefaultOperator() ||
+        this.credentialsState.ensureDefaultFromEnv();
+      if (!mapping) {
+        throw new Error('[SIGNING] No default operator configured');
+      }
+
+      transaction.freezeWith(this.client);
+
+      // Sign using credentials-state without exposing private key
+      await this.credentialsState.signTransaction(
+        transaction,
+        mapping.keyRefId,
+      );
+
       // Execute the transaction
       const response: TransactionResponse = await transaction.execute(
         this.client,
@@ -140,11 +117,22 @@ export class SigningServiceImpl implements SigningService {
     this.logger.debug(`[SIGNING] Signing transaction`);
 
     try {
+      // Get default operator keyRefId for signing
+      const mapping =
+        this.credentialsState.getDefaultOperator() ||
+        this.credentialsState.ensureDefaultFromEnv();
+      if (!mapping) {
+        throw new Error('[SIGNING] No default operator configured');
+      }
+
       // Freeze the transaction first
       transaction.freezeWith(this.client);
 
-      // Sign the transaction
-      await transaction.sign(this.operatorKey);
+      // Sign using credentials-state without exposing private key
+      await this.credentialsState.signTransaction(
+        transaction,
+        mapping.keyRefId,
+      );
 
       return {
         transactionId: `signed-${Date.now()}`,
@@ -153,6 +141,90 @@ export class SigningServiceImpl implements SigningService {
       console.error(`[SIGNING] Transaction signing failed:`, error);
       throw error;
     }
+  }
+
+  // New API: minimal delegations to preserve behavior
+  async signAndExecuteWith(
+    transaction: HederaTransaction,
+    signer: SignerRef,
+  ): Promise<TransactionResult> {
+    const keyRefId = this.resolveSignerRef(signer);
+
+    transaction.freezeWith(this.client);
+
+    // Sign using credentials-state without exposing private key
+    await this.credentialsState.signTransaction(transaction, keyRefId);
+
+    // Execute the transaction
+    const response: TransactionResponse = await transaction.execute(
+      this.client,
+    );
+    const receipt: TransactionReceipt = await response.getReceipt(this.client);
+
+    return {
+      transactionId: response.transactionId.toString(),
+      success: receipt.status === Status.Success,
+      receipt: {
+        status: {
+          status: receipt.status === Status.Success ? 'success' : 'failed',
+          transactionId: response.transactionId.toString(),
+        },
+      },
+    };
+  }
+
+  async signWith(
+    transaction: HederaTransaction,
+    signer: SignerRef,
+  ): Promise<SignedTransaction> {
+    const keyRefId = this.resolveSignerRef(signer);
+
+    // Freeze the transaction first
+    transaction.freezeWith(this.client);
+
+    // Sign using credentials-state without exposing private key
+    await this.credentialsState.signTransaction(transaction, keyRefId);
+
+    return { transactionId: `signed-${Date.now()}` };
+  }
+
+  setDefaultSigner(): void {
+    // TODO: Store default signer ref and reconfigure operator if applicable
+    this.logger.debug('[SIGNING] setDefaultSigner called (stub)');
+  }
+
+  /**
+   * Resolve a SignerRef to a keyRefId for signing.
+   * Supports both keyRefId and publicKey directly.
+   */
+  private resolveSignerRef(signer: SignerRef): string {
+    if (!signer) throw new Error('[SIGNING] signer ref is required');
+
+    // If direct keyRefId provided, validate it exists
+    if (signer.keyRefId) {
+      const pub = this.credentialsState.getPublicKey(signer.keyRefId);
+      if (!pub) {
+        throw new Error(
+          `[SIGNING] Unknown keyRefId: ${signer.keyRefId}. Use 'hcli keys list' to inspect available keys.`,
+        );
+      }
+      return signer.keyRefId;
+    }
+
+    // If publicKey provided, find the corresponding keyRefId
+    if (signer.publicKey) {
+      const keyRefId = this.credentialsState.findByPublicKey(signer.publicKey);
+      if (!keyRefId) {
+        throw new Error(
+          `[SIGNING] No keyRefId found for public key: ${signer.publicKey}`,
+        );
+      }
+      return keyRefId;
+    }
+
+    throw new Error(
+      '[SIGNING] SignerRef must provide either keyRefId or publicKey',
+    );
   }
 
   /**

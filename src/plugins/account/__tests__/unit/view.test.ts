@@ -1,14 +1,14 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { viewAccountHandler } from '../../../../src/plugins/account/commands/view';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { HederaMirrornodeService } from '../../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { AccountData } from '../../../../src/plugins/account/schema';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { viewAccountHandler } from '../../commands/view';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
+import type { AccountData } from '../../schema';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
@@ -32,7 +32,7 @@ const makeAccountData = (
   evmAddress: '0x0000000000000000000000000000000000000000',
   solidityAddress: 'sa',
   solidityAddressFull: 'safull',
-  privateKey: 'priv',
+  keyRefId: 'kr_test123',
   network: 'testnet',
   ...overrides,
 });
@@ -90,7 +90,7 @@ describe('account plugin - view command', () => {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrName: 'acc1' });
+    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: 'acc1' });
 
     await viewAccountHandler(args);
 
@@ -113,7 +113,7 @@ describe('account plugin - view command', () => {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrName: '0.0.2222' });
+    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: '0.0.2222' });
 
     await viewAccountHandler(args);
 

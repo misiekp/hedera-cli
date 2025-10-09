@@ -9,7 +9,9 @@ import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornod
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
-import { CredentialsService } from '../services/credentials/credentials-service.interface';
+import { HbarService } from '../services/hbar/hbar-service.interface';
+import { AliasManagementService } from '../services/alias/alias-service.interface';
+import { CredentialsStateService } from '../services/credentials-state/credentials-state-service.interface';
 
 export interface CoreAPI {
   /**
@@ -48,7 +50,17 @@ export interface CoreAPI {
   logger: Logger;
 
   /**
-   * Credentials management
+   * Alias management (non-sensitive)
    */
-  credentials: CredentialsService;
+  alias: AliasManagementService;
+
+  /**
+   * Secure credentials store
+   */
+  credentialsState: CredentialsStateService;
+
+  /**
+   * HBAR operations
+   */
+  hbar?: HbarService;
 }

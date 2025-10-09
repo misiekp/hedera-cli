@@ -43,7 +43,7 @@ export class PluginManager {
       try {
         await this.loadPluginFromPath(pluginPath);
         logger.log(`✅ Loaded: ${pluginPath}`);
-      } catch (error) {
+      } catch {
         logger.log(`ℹ️  Plugin not available: ${pluginPath}`);
       }
     }
@@ -170,30 +170,58 @@ export class PluginManager {
     if (commandSpec.options) {
       for (const option of commandSpec.options) {
         const optionName = String(option.name);
-        const optionFlag = `--${optionName}`;
+        const short = option.short ? `-${String(option.short)}` : '';
+        const long = `--${optionName}`;
+        const combined = short ? `${short}, ${long}` : long;
 
         if (option.type === 'boolean') {
           command.option(
-            optionFlag,
+            combined,
             String(option.description || `Set ${optionName}`),
           );
         } else if (option.type === 'number') {
-          command.option(
-            `${optionFlag} <value>`,
-            String(option.description || `Set ${optionName}`),
-            parseFloat,
-          );
+          const flags = `${combined} <value>`;
+          if (option.required) {
+            command.requiredOption(
+              flags,
+              String(option.description || `Set ${optionName}`),
+              parseFloat,
+            );
+          } else {
+            command.option(
+              flags,
+              String(option.description || `Set ${optionName}`),
+              parseFloat,
+            );
+          }
         } else if (option.type === 'array') {
-          command.option(
-            `${optionFlag} <values>`,
-            String(option.description || `Set ${optionName}`),
-            (value: unknown) => String(value).split(','),
-          );
+          const flags = `${combined} <values>`;
+          if (option.required) {
+            command.requiredOption(
+              flags,
+              String(option.description || `Set ${optionName}`),
+              (value: unknown) => String(value).split(','),
+            );
+          } else {
+            command.option(
+              flags,
+              String(option.description || `Set ${optionName}`),
+              (value: unknown) => String(value).split(','),
+            );
+          }
         } else {
-          command.option(
-            `${optionFlag} <value>`,
-            String(option.description || `Set ${optionName}`),
-          );
+          const flags = `${combined} <value>`;
+          if (option.required) {
+            command.requiredOption(
+              flags,
+              String(option.description || `Set ${optionName}`),
+            );
+          } else {
+            command.option(
+              flags,
+              String(option.description || `Set ${optionName}`),
+            );
+          }
         }
       }
     }

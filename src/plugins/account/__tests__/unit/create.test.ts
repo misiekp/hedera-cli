@@ -1,18 +1,20 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { createAccountHandler } from '../../../../src/plugins/account/commands/create';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { AccountTransactionService } from '../../../../src/core/services/accounts/account-transaction-service.interface';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { createAccountHandler } from '../../commands/create';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { AccountTransactionService } from '../../../../core/services/accounts/account-transaction-service.interface';
 import type {
   SigningService,
   TransactionResult,
-} from '../../../../src/core/services/signing/signing-service.interface';
-import type { NetworkService } from '../../../../src/core/services/network/network-service.interface';
+} from '../../../../core/services/signing/signing-service.interface';
+import type { NetworkService } from '../../../../core/services/network/network-service.interface';
+import type { CredentialsStateService } from '../../../../core/services/credentials-state/credentials-state-service.interface';
+import type { AliasManagementService } from '../../../../core/services/alias/alias-service.interface';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
@@ -43,9 +45,12 @@ const makeApiMocks = ({
 
   const signing: jest.Mocked<SigningService> = {
     signAndExecute: signAndExecuteImpl || jest.fn(),
+    signAndExecuteWith: jest.fn(),
     sign: jest.fn(),
+    signWith: jest.fn(),
     execute: jest.fn(),
     getStatus: jest.fn(),
+    setDefaultSigner: jest.fn(),
   };
 
   const networkMock: jest.Mocked<NetworkService> = {
@@ -56,7 +61,34 @@ const makeApiMocks = ({
     isNetworkAvailable: jest.fn(),
   };
 
-  return { accountTransactions, signing, networkMock };
+  const credentialsState: jest.Mocked<CredentialsStateService> = {
+    createLocalPrivateKey: jest.fn().mockReturnValue({
+      keyRefId: 'kr_test123',
+      publicKey: 'pub-key-test',
+    }),
+    importPrivateKey: jest.fn(),
+    getPublicKey: jest.fn(),
+    getPrivateKeyString: jest.fn(),
+    getSignerHandle: jest.fn(),
+    findByPublicKey: jest.fn(),
+    list: jest.fn(),
+    remove: jest.fn(),
+    setDefaultOperator: jest.fn(),
+    getDefaultOperator: jest.fn(),
+    ensureDefaultFromEnv: jest.fn(),
+    createClient: jest.fn(),
+    signTransaction: jest.fn(),
+  };
+
+  const alias: jest.Mocked<AliasManagementService> = {
+    register: jest.fn(),
+    resolve: jest.fn(),
+    list: jest.fn(),
+    remove: jest.fn(),
+    parseRef: jest.fn(),
+  };
+
+  return { accountTransactions, signing, networkMock, credentialsState, alias };
 };
 
 const makeArgs = (
@@ -91,11 +123,16 @@ describe('account plugin - create command (unit)', () => {
     const saveAccountMock = jest.fn();
     MockedHelper.mockImplementation(() => ({ saveAccount: saveAccountMock }));
 
-    const { accountTransactions, signing, networkMock } = makeApiMocks({
+    const {
+      accountTransactions,
+      signing,
+      networkMock,
+      credentialsState,
+      alias,
+    } = makeApiMocks({
       createAccountImpl: jest.fn().mockResolvedValue({
         transaction: {},
-        privateKey: 'priv-key',
-        publicKey: 'pub-key',
+        publicKey: 'pub-key-test',
         evmAddress: '0x000000000000000000000000000000000000abcd',
       }),
       signAndExecuteImpl: jest.fn().mockResolvedValue({
@@ -110,23 +147,37 @@ describe('account plugin - create command (unit)', () => {
       accountTransactions,
       signing,
       network: networkMock,
+      credentialsState,
+      alias,
       logger,
     };
 
     const args = makeArgs(api, logger, {
-      name: 'myAccount',
       balance: 5000,
       'auto-associations': 3,
+      alias: 'myAccount',
     });
 
     await createAccountHandler(args);
 
+    expect(credentialsState.createLocalPrivateKey).toHaveBeenCalled();
     expect(accountTransactions.createAccount).toHaveBeenCalledWith({
       balance: 5000,
-      name: 'myAccount',
       maxAutoAssociations: 3,
+      publicKey: 'pub-key-test',
+      keyType: 'ECDSA',
     });
     expect(signing.signAndExecute).toHaveBeenCalled();
+    expect(alias.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alias: 'myAccount',
+        type: 'account',
+        network: 'testnet',
+        entityId: '0.0.9999',
+        publicKey: 'pub-key-test',
+        keyRefId: 'kr_test123',
+      }),
+    );
     expect(saveAccountMock).toHaveBeenCalledWith(
       'myAccount',
       expect.objectContaining({
@@ -134,6 +185,7 @@ describe('account plugin - create command (unit)', () => {
         accountId: '0.0.9999',
         type: 'ECDSA',
         network: 'testnet',
+        keyRefId: 'kr_test123',
       }),
     );
     expect(logger.log).toHaveBeenCalledWith(

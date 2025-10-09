@@ -1,13 +1,13 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { listAccountsHandler } from '../../../../src/plugins/account/commands/list';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { AccountData } from '../../../../src/plugins/account/schema';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { listAccountsHandler } from '../../commands/list';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { AccountData } from '../../schema';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
@@ -31,7 +31,7 @@ const makeAccountData = (
   evmAddress: '0x0000000000000000000000000000000000000000',
   solidityAddress: 'sa',
   solidityAddressFull: 'safull',
-  privateKey: 'priv',
+  keyRefId: 'kr_test123',
   network: 'testnet',
   ...overrides,
 });
@@ -120,7 +120,7 @@ describe('account plugin - list command', () => {
     listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc3');
-    expect(logger.log).toHaveBeenCalledWith('   Private Key: priv');
+    expect(logger.log).toHaveBeenCalledWith('   Key Reference ID: kr_test123');
     expect(exitSpy).toHaveBeenCalledWith(0);
   });
 

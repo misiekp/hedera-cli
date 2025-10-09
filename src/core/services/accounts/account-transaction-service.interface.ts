@@ -24,7 +24,6 @@ export interface AccountTransactionService {
 
 export interface AccountCreateResult {
   transaction: AccountCreateTransaction;
-  privateKey: string;
   publicKey: string;
   evmAddress: string;
 }
@@ -32,8 +31,8 @@ export interface AccountCreateResult {
 // Parameter types for account operations
 export interface CreateAccountParams {
   balance: number;
-  name: string;
   maxAutoAssociations?: number;
+  publicKey: string;
   keyType?: 'ECDSA' | 'ED25519';
 }
 
