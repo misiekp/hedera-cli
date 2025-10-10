@@ -31,13 +31,6 @@ export const networkPluginManifest: PluginManifest = {
       arguments: '<name>',
       handler: './commands/use',
     },
-    {
-      name: 'add',
-      summary: 'Add a custom network',
-      description: 'Interactively add a custom network configuration',
-      options: [],
-      handler: './commands/add',
-    },
   ],
   init: () => {
     console.log('[NETWORK PLUGIN] Initializing network plugin...');

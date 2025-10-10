@@ -7,4 +7,3 @@ export { networkPluginManifest } from './manifest';
 // Export command handlers
 export { listHandler } from './commands/list';
 export { useHandler } from './commands/use';
-export { addHandler } from './commands/add';
