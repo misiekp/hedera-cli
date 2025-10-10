@@ -33,13 +33,13 @@ describe('account plugin - list command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockReturnValue([]),
+      listAccounts: jest.fn().mockResolvedValue([]),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    listAccountsHandler(args);
+    await listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith(
       '📝 No accounts found in the address book',
@@ -55,13 +55,13 @@ describe('account plugin - list command', () => {
     ];
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockReturnValue(accounts),
+      listAccounts: jest.fn().mockResolvedValue(accounts),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    listAccountsHandler(args);
+    await listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('📝 Found 2 account(s):');
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc1');
@@ -77,13 +77,13 @@ describe('account plugin - list command', () => {
     const accounts = [makeAccountData({ name: 'acc3', accountId: '0.0.3333' })];
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockReturnValue(accounts),
+      listAccounts: jest.fn().mockResolvedValue(accounts),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { private: true });
 
-    listAccountsHandler(args);
+    await listAccountsHandler(args);
 
     expect(logger.log).toHaveBeenCalledWith('1. Name: acc3');
     expect(logger.log).toHaveBeenCalledWith('   Key Reference ID: kr_test123');
@@ -94,15 +94,13 @@ describe('account plugin - list command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockImplementation(() => {
-        throw new Error('db error');
-      }),
+      listAccounts: jest.fn().mockRejectedValue(new Error('db error')),
     }));
 
     const api: Partial<CoreAPI> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    listAccountsHandler(args);
+    await listAccountsHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('❌ Failed to list accounts'),

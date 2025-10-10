@@ -37,7 +37,7 @@ describe('account plugin - balance command (unit)', () => {
     MockedHelper.mockImplementation(() => ({
       loadAccount: jest
         .fn()
-        .mockReturnValue(
+        .mockResolvedValue(
           makeAccountData({ accountId: '0.0.1001', name: 'test-account' }),
         ),
     }));
@@ -66,7 +66,7 @@ describe('account plugin - balance command (unit)', () => {
     MockedHelper.mockImplementation(() => ({
       loadAccount: jest
         .fn()
-        .mockReturnValue(
+        .mockResolvedValue(
           makeAccountData({ accountId: '0.0.2002', name: 'acc2' }),
         ),
     }));
@@ -102,7 +102,7 @@ describe('account plugin - balance command (unit)', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockReturnValue(
+      loadAccount: jest.fn().mockResolvedValue(
         makeAccountData({
           accountId: '0.0.5005',
           name: 'acc3',
@@ -132,7 +132,7 @@ describe('account plugin - balance command (unit)', () => {
     MockedHelper.mockImplementation(() => ({
       loadAccount: jest
         .fn()
-        .mockReturnValue(
+        .mockResolvedValue(
           makeAccountData({ accountId: '0.0.6006', name: 'acc4' }),
         ),
     }));
@@ -160,9 +160,7 @@ describe('account plugin - balance command (unit)', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockImplementation(() => {
-        throw new Error('state failure');
-      }),
+      loadAccount: jest.fn().mockRejectedValue(new Error('state failure')),
     }));
 
     const mirrorMock: Pick<HederaMirrornodeService, 'getAccountHBarBalance'> = {

@@ -77,6 +77,7 @@ export class TransactionServiceImpl implements TransactionService {
       const response: TransactionResponse = await transaction.execute(
         this.client,
       );
+
       const receipt: TransactionReceipt = await response.getReceipt(
         this.client,
       );
@@ -91,10 +92,17 @@ export class TransactionServiceImpl implements TransactionService {
         accountId = receipt.accountId.toString();
       }
 
+      // Extract topic ID for topic creation transactions
+      let topicId: string | undefined;
+      if (receipt.topicId) {
+        topicId = receipt.topicId.toString();
+      }
+
       return {
         transactionId: response.transactionId.toString(),
         success: receipt.status === Status.Success,
         accountId,
+        topicId,
         receipt: {
           status: {
             status: receipt.status === Status.Success ? 'success' : 'failed',

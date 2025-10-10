@@ -32,8 +32,8 @@ describe('account plugin - clear command', () => {
 
     const listAccountsMock = jest
       .fn()
-      .mockReturnValue([{ name: 'a' }, { name: 'b' }]);
-    const clearAccountsMock = jest.fn().mockReturnValue(undefined);
+      .mockResolvedValue([{ name: 'a' }, { name: 'b' }]);
+    const clearAccountsMock = jest.fn().mockResolvedValue(undefined);
 
     MockedHelper.mockImplementation(() => ({
       listAccounts: listAccountsMock,
@@ -46,7 +46,7 @@ describe('account plugin - clear command', () => {
       args: {},
     };
 
-    clearAccountsHandler(args as CommandHandlerArgs);
+    await clearAccountsHandler(args as CommandHandlerArgs);
 
     expect(MockedHelper).toHaveBeenCalledWith(args.api!.state, logger);
     expect(listAccountsMock).toHaveBeenCalledTimes(1);
@@ -62,10 +62,8 @@ describe('account plugin - clear command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      listAccounts: jest.fn().mockReturnValue([{ name: 'a' }]),
-      clearAccounts: jest.fn().mockImplementation(() => {
-        throw new Error('db error');
-      }),
+      listAccounts: jest.fn().mockResolvedValue([{ name: 'a' }]),
+      clearAccounts: jest.fn().mockRejectedValue(new Error('db error')),
     }));
 
     const args: Partial<CommandHandlerArgs> = {
@@ -74,7 +72,7 @@ describe('account plugin - clear command', () => {
       args: {},
     };
 
-    clearAccountsHandler(args as CommandHandlerArgs);
+    await clearAccountsHandler(args as CommandHandlerArgs);
 
     expect(logger.error).toHaveBeenCalled();
     expect(exitSpy).toHaveBeenCalledWith(1);
