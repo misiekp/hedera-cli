@@ -7,10 +7,11 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // Zod schema for runtime validation
 export const AccountDataSchema = z.object({
+  keyRefId: z.string().min(1, 'Key reference ID is required'),
+
   name: z
     .string()
-    .min(1, 'Name is required')
-    .max(50, 'Name must be 50 characters or less')
+    .max(50, 'Alias must be 50 characters or less')
     .regex(
       /^[a-zA-Z0-9_-]+$/,
       'Name can only contain letters, numbers, underscores, and hyphens',
@@ -36,8 +37,6 @@ export const AccountDataSchema = z.object({
   solidityAddress: z.string().min(1, 'Solidity address is required'),
 
   solidityAddressFull: z.string().min(1, 'Solidity address full is required'),
-
-  privateKey: z.string().min(1, 'Private key is required'),
 
   network: z.enum(['mainnet', 'testnet', 'previewnet'], {
     errorMap: () => ({

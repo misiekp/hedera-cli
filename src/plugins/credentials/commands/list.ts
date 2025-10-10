@@ -10,7 +10,7 @@ export function listHandler(args: CommandHandlerArgs): Promise<void> {
   logger.log('🔐 Stored Credentials:');
 
   try {
-    const credentials = api.credentials.listCredentials();
+    const credentials = api.credentialsState.list();
 
     if (credentials.length === 0) {
       logger.log('   No credentials stored');
@@ -20,10 +20,12 @@ export function listHandler(args: CommandHandlerArgs): Promise<void> {
       );
     } else {
       credentials.forEach((cred, index) => {
-        logger.log(`   ${index + 1}. Account: ${cred.accountId}`);
-        logger.log(`      Network: ${cred.network}`);
-        logger.log(`      Default: ${cred.isDefault ? 'Yes' : 'No'}`);
-        logger.log(`      Created: ${cred.createdAt}`);
+        logger.log(`   ${index + 1}. Key Reference ID: ${cred.keyRefId}`);
+        logger.log(`      Type: ${cred.type}`);
+        logger.log(`      Public Key: ${cred.publicKey}`);
+        if (cred.labels && cred.labels.length > 0) {
+          logger.log(`      Labels: ${cred.labels.join(', ')}`);
+        }
         logger.log('');
       });
     }

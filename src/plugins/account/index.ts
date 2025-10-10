@@ -5,10 +5,10 @@
 export { accountPluginManifest } from './manifest';
 
 // Export command handlers
-export { getAccountBalanceHandler } from './commands/balance';
-export { clearAccountsHandler } from './commands/clear';
-export { createAccountHandler } from './commands/create';
-export { deleteAccountHandler } from './commands/delete';
-export { importAccountHandler } from './commands/import';
-export { listAccountsHandler } from './commands/list';
-export { viewAccountHandler } from './commands/view';
+export { getAccountBalanceHandler as balanceHandler } from './commands/balance';
+export { clearAccountsHandler as clearHandler } from './commands/clear';
+export { createAccountHandler as createHandler } from './commands/create';
+export { deleteAccountHandler as deleteHandler } from './commands/delete';
+export { importAccountHandler as importHandler } from './commands/import';
+export { listAccountsHandler as listHandler } from './commands/list';
+export { viewAccountHandler as viewHandler } from './commands/view';
