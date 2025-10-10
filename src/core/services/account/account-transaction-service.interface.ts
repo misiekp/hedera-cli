@@ -1,8 +1,8 @@
 /**
- * Interface for Account-related transaction operations
- * All account transaction services must implement this interface
+ * Interface for Account-related operations
+ * All account services must implement this interface
  */
-export interface AccountTransactionService {
+export interface AccountService {
   /**
    * Create a new Hedera account
    */

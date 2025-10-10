@@ -1,4 +1,4 @@
-export type SupportedNetwork = 'mainnet' | 'testnet' | 'previewnet';
+import { SupportedNetwork } from '../../types/shared.types';
 
 export type AliasType = 'account' | 'token' | 'key' | 'topic' | 'contract';
 
@@ -14,18 +14,16 @@ export interface AliasRecord {
   updatedAt?: string;
 }
 
-export type RefKind = 'alias' | 'keyRef' | 'pub' | 'acc' | 'token';
-
 export interface AliasManagementService {
   register(record: AliasRecord): void;
   resolve(
     ref: string,
-    expectation?: 'account' | 'token' | 'key' | 'any',
+    expectation: AliasType | undefined,
+    network: SupportedNetwork,
   ): AliasRecord | null;
   list(filter?: {
     network?: SupportedNetwork;
     type?: AliasType;
   }): AliasRecord[];
   remove(alias: string, network: SupportedNetwork): void;
-  parseRef(ref: string): { kind: RefKind; value: string };
 }

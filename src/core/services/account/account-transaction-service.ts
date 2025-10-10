@@ -11,15 +11,13 @@ import {
   PublicKey,
 } from '@hashgraph/sdk';
 import {
-  AccountTransactionService,
+  AccountService,
   CreateAccountParams,
   AccountCreateResult,
 } from './account-transaction-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 
-export class AccountTransactionServiceImpl
-  implements AccountTransactionService
-{
+export class AccountServiceImpl implements AccountService {
   private logger: Logger;
 
   constructor(logger: Logger) {

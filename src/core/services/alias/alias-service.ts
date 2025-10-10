@@ -2,24 +2,20 @@ import {
   AliasManagementService,
   AliasRecord,
   AliasType,
-  RefKind,
-  SupportedNetwork,
 } from './alias-service.interface';
+import { SupportedNetwork } from '../../types/shared.types';
 import { StateService } from '../state/state-service.interface';
 import { Logger } from '../logger/logger-service.interface';
-import { NetworkService } from '../network/network-service.interface';
 
 const NAMESPACE = 'aliases';
 
 export class AliasManagementServiceImpl implements AliasManagementService {
   private readonly state: StateService;
   private readonly logger: Logger;
-  private readonly network: NetworkService;
 
-  constructor(state: StateService, logger: Logger, network: NetworkService) {
+  constructor(state: StateService, logger: Logger) {
     this.state = state;
     this.logger = logger;
-    this.network = network;
   }
 
   register(record: AliasRecord): void {
@@ -41,16 +37,13 @@ export class AliasManagementServiceImpl implements AliasManagementService {
 
   resolve(
     ref: string,
-    expectation?: 'account' | 'token' | 'key' | 'any',
+    expectation: AliasType | undefined,
+    network: SupportedNetwork,
   ): AliasRecord | null {
-    const { kind, value } = this.parseRef(ref);
-    if (kind !== 'alias') return null;
-    const network = this.currentNetwork();
-    const key = this.composeKey(network, value);
+    const key = this.composeKey(network, ref);
     const rec = this.state.get<AliasRecord>(NAMESPACE, key);
     if (!rec) return null;
-    if (expectation && expectation !== 'any' && rec.type !== expectation)
-      return null;
+    if (expectation && rec.type !== expectation) return null;
     return rec;
   }
 
@@ -78,25 +71,7 @@ export class AliasManagementServiceImpl implements AliasManagementService {
     return this.state.has(NAMESPACE, key);
   }
 
-  parseRef(ref: string): { kind: RefKind; value: string } {
-    if (ref.startsWith('keyRef:'))
-      return { kind: 'keyRef', value: ref.substring(7) };
-    if (ref.startsWith('pub:')) return { kind: 'pub', value: ref.substring(4) };
-    if (ref.startsWith('acc:')) return { kind: 'acc', value: ref.substring(4) };
-    if (ref.startsWith('token:'))
-      return { kind: 'token', value: ref.substring(6) };
-    if (ref.startsWith('alias:'))
-      return { kind: 'alias', value: ref.substring(6) };
-    return { kind: 'alias', value: ref };
-  }
-
   private composeKey(network: SupportedNetwork, alias: string): string {
     return `${network}:${alias}`;
-  }
-
-  private currentNetwork(): SupportedNetwork {
-    const n = this.network.getCurrentNetwork();
-    if (n === 'mainnet' || n === 'testnet' || n === 'previewnet') return n;
-    return 'testnet';
   }
 }

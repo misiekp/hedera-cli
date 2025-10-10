@@ -116,7 +116,7 @@ interface AccountData {
 
 ## 🔐 Security
 
-- Private keys stored securely via `CredentialsStateService` using `keyRefId` references
+- Private keys stored securely via `KeyManagementService` using `keyRefId` references
 - No raw private keys in plugin state JSON
 - Secure key retrieval through Core API
 - Keys isolated in credentials storage namespace

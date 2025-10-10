@@ -1,16 +1,17 @@
-import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { createAccountHandler } from '../../commands/create';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import { Logger } from '../../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
-import type { AccountTransactionService } from '../../../../core/services/accounts/account-transaction-service.interface';
-import type {
-  SigningService,
-  TransactionResult,
-} from '../../../../core/services/signing/signing-service.interface';
-import type { NetworkService } from '../../../../core/services/network/network-service.interface';
-import type { CredentialsStateService } from '../../../../core/services/credentials-state/credentials-state-service.interface';
-import type { AliasManagementService } from '../../../../core/services/alias/alias-service.interface';
+import type { AccountService } from '../../../../core/services/account/account-transaction-service.interface';
+import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
+import {
+  makeLogger,
+  makeArgs,
+  makeNetworkMock,
+  makeCredentialsStateMock,
+  makeAliasMock,
+  makeSigningMock,
+  setupExitSpy,
+} from '../../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -19,14 +20,6 @@ jest.mock('../../zustand-state-helper', () => ({
 }));
 
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
 
 const makeApiMocks = ({
   createAccountImpl,
@@ -37,76 +30,29 @@ const makeApiMocks = ({
   signAndExecuteImpl?: jest.Mock;
   network?: 'testnet' | 'mainnet' | 'previewnet';
 }) => {
-  const accountTransactions: jest.Mocked<AccountTransactionService> = {
+  const accountTransactions: jest.Mocked<AccountService> = {
     createAccount: createAccountImpl || jest.fn(),
     getAccountInfo: jest.fn(),
     getAccountBalance: jest.fn(),
   };
 
-  const signing: jest.Mocked<SigningService> = {
-    signAndExecute: signAndExecuteImpl || jest.fn(),
-    signAndExecuteWith: jest.fn(),
-    sign: jest.fn(),
-    signWith: jest.fn(),
-    execute: jest.fn(),
-    getStatus: jest.fn(),
-    setDefaultSigner: jest.fn(),
-  };
+  const signing = makeSigningMock({ signAndExecuteImpl });
+  const networkMock = makeNetworkMock(network);
+  const credentialsState = makeCredentialsStateMock();
 
-  const networkMock: jest.Mocked<NetworkService> = {
-    getCurrentNetwork: jest.fn().mockReturnValue(network),
-    getAvailableNetworks: jest.fn(),
-    switchNetwork: jest.fn(),
-    getNetworkConfig: jest.fn(),
-    isNetworkAvailable: jest.fn(),
-  };
+  // Override createLocalPrivateKey for create tests
+  credentialsState.createLocalPrivateKey = jest.fn().mockReturnValue({
+    keyRefId: 'kr_test123',
+    publicKey: 'pub-key-test',
+  });
 
-  const credentialsState: jest.Mocked<CredentialsStateService> = {
-    createLocalPrivateKey: jest.fn().mockReturnValue({
-      keyRefId: 'kr_test123',
-      publicKey: 'pub-key-test',
-    }),
-    importPrivateKey: jest.fn(),
-    getPublicKey: jest.fn(),
-    getPrivateKeyString: jest.fn(),
-    getSignerHandle: jest.fn(),
-    findByPublicKey: jest.fn(),
-    list: jest.fn(),
-    remove: jest.fn(),
-    setDefaultOperator: jest.fn(),
-    getDefaultOperator: jest.fn(),
-    ensureDefaultFromEnv: jest.fn(),
-    createClient: jest.fn(),
-    signTransaction: jest.fn(),
-  };
-
-  const alias: jest.Mocked<AliasManagementService> = {
-    register: jest.fn(),
-    resolve: jest.fn(),
-    list: jest.fn(),
-    remove: jest.fn(),
-    parseRef: jest.fn(),
-  };
+  const alias = makeAliasMock();
 
   return { accountTransactions, signing, networkMock, credentialsState, alias };
 };
 
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
