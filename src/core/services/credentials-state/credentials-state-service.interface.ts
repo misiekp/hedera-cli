@@ -3,7 +3,7 @@ import { CredentialsStateSignerService } from './credentials-state-signer-servic
 import { Client, Transaction as HederaTransaction } from '@hashgraph/sdk';
 import { SupportedNetwork } from '../../types/shared.types';
 
-export interface CredentialsStateService {
+export interface KeyManagementService {
   createLocalPrivateKey(labels?: string[]): {
     keyRefId: string;
     publicKey: string;

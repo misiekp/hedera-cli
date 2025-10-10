@@ -9,7 +9,7 @@ import {
   TransactionStatus,
 } from './signing-service.interface';
 import { Logger } from '../logger/logger-service.interface';
-import { CredentialsStateService } from '../credentials-state/credentials-state-service.interface';
+import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
 import { NetworkService } from '../network/network-service.interface';
 import type { SignerRef } from './signing-service.interface';
 import {
@@ -23,12 +23,12 @@ import {
 export class SigningServiceImpl implements SigningService {
   private client!: Client;
   private logger: Logger;
-  private credentialsState: CredentialsStateService;
+  private credentialsState: KeyManagementService;
   private networkService: NetworkService;
 
   constructor(
     logger: Logger,
-    credentialsState: CredentialsStateService,
+    credentialsState: KeyManagementService,
     networkService: NetworkService,
   ) {
     this.logger = logger;

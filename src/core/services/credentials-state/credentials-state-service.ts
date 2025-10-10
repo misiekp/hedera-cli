@@ -1,4 +1,4 @@
-import { CredentialsStateService } from './credentials-state-service.interface';
+import { KeyManagementService } from './credentials-state-service.interface';
 import {
   CredentialType,
   CredentialsRecord,
@@ -20,7 +20,7 @@ import { StateService } from '../state/state-service.interface';
 import { CredentialsStorageService } from './credentials-storage-service.interface';
 import { StateCredentialsStorageService } from './state-credentials-storage.service';
 
-export class CredentialsStateServiceImpl implements CredentialsStateService {
+export class KeyManagementServiceImpl implements KeyManagementService {
   private readonly logger: Logger;
   private readonly storage: CredentialsStorageService;
 

@@ -11,7 +11,7 @@ import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { HbarService } from '../services/hbar/hbar-service.interface';
 import { AliasManagementService } from '../services/alias/alias-service.interface';
-import { CredentialsStateService } from '../services/credentials-state/credentials-state-service.interface';
+import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
 
 export interface CoreAPI {
   /**
@@ -55,9 +55,9 @@ export interface CoreAPI {
   alias: AliasManagementService;
 
   /**
-   * Secure credentials store
+   * Key Management Service (KMS)
    */
-  credentialsState: CredentialsStateService;
+  credentialsState: KeyManagementService;
 
   /**
    * HBAR operations

@@ -22,8 +22,8 @@ import { HbarService } from '../services/hbar/hbar-service.interface';
 import { HbarServiceImpl } from '../services/hbar/hbar-service';
 import { AliasManagementService } from '../services/alias/alias-service.interface';
 import { AliasManagementServiceImpl } from '../services/alias/alias-service';
-import { CredentialsStateService } from '../services/credentials-state/credentials-state-service.interface';
-import { CredentialsStateServiceImpl } from '../services/credentials-state/credentials-state-service';
+import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
+import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountTransactionService;
@@ -34,7 +34,7 @@ export class CoreAPIImplementation implements CoreAPI {
   public config: ConfigService;
   public logger: Logger;
   public alias: AliasManagementService;
-  public credentialsState: CredentialsStateService;
+  public credentialsState: KeyManagementService;
   public hbar?: HbarService;
 
   constructor() {
@@ -47,7 +47,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
     // Initialize new services
     this.alias = new AliasManagementServiceImpl(this.state, this.logger);
-    this.credentialsState = new CredentialsStateServiceImpl(
+    this.credentialsState = new KeyManagementServiceImpl(
       this.logger,
       this.state,
     );
