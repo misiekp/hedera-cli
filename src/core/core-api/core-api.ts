@@ -46,11 +46,7 @@ export class CoreAPIImplementation implements CoreAPI {
     // Initialize all services with dependencies
     this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
     // Initialize new services
-    this.alias = new AliasManagementServiceImpl(
-      this.state,
-      this.logger,
-      this.network,
-    );
+    this.alias = new AliasManagementServiceImpl(this.state, this.logger);
     this.credentialsState = new CredentialsStateServiceImpl(
       this.logger,
       this.state,

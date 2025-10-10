@@ -14,8 +14,6 @@ export interface AliasRecord {
   updatedAt?: string;
 }
 
-export type RefKind = 'alias' | 'keyRef' | 'pub' | 'acc' | 'token';
-
 export interface AliasManagementService {
   register(record: AliasRecord): void;
   resolve(
@@ -28,5 +26,4 @@ export interface AliasManagementService {
     type?: AliasType;
   }): AliasRecord[];
   remove(alias: string, network: SupportedNetwork): void;
-  parseRef(ref: string): { kind: RefKind; value: string };
 }
