@@ -11,7 +11,7 @@ export { CoreAPIImplementation, createCoreAPI } from './core-api';
 
 // Service interfaces
 export { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
-export { SigningService } from '../services/signing/signing-service.interface';
+export { TransactionService } from '../services/signing/signing-service.interface';
 export { StateService as GenericStateService } from '../services/state/state-service.interface';
 export { NetworkService } from '../services/network/network-service.interface';
 export { ConfigService } from '../services/config/config-service.interface';

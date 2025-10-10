@@ -3,7 +3,7 @@
  * This is the primary interface that plugins will use
  */
 import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
-import { SigningService } from '../services/signing/signing-service.interface';
+import { TransactionService } from '../services/signing/signing-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
@@ -22,7 +22,7 @@ export interface CoreAPI {
   /**
    * Transaction signing and execution
    */
-  signing: SigningService;
+  signing: TransactionService;
 
   /**
    * State management with namespaced access

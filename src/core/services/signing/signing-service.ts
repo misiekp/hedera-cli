@@ -3,10 +3,8 @@
  * Uses Hedera SDK to sign and execute transactions
  */
 import {
-  SigningService,
-  SignedTransaction,
+  TransactionService,
   TransactionResult,
-  TransactionStatus,
 } from './signing-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
@@ -20,7 +18,7 @@ import {
   Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
 
-export class SigningServiceImpl implements SigningService {
+export class TransactionServiceImpl implements TransactionService {
   private client!: Client;
   private logger: Logger;
   private credentialsState: KeyManagementService;
@@ -110,39 +108,6 @@ export class SigningServiceImpl implements SigningService {
     }
   }
 
-  /**
-   * Sign a transaction without executing it
-   */
-  async sign(transaction: HederaTransaction): Promise<SignedTransaction> {
-    this.logger.debug(`[SIGNING] Signing transaction`);
-
-    try {
-      // Get default operator keyRefId for signing
-      const mapping =
-        this.credentialsState.getDefaultOperator() ||
-        this.credentialsState.ensureDefaultFromEnv();
-      if (!mapping) {
-        throw new Error('[SIGNING] No default operator configured');
-      }
-
-      // Freeze the transaction first
-      transaction.freezeWith(this.client);
-
-      // Sign using credentials-state without exposing private key
-      await this.credentialsState.signTransaction(
-        transaction,
-        mapping.keyRefId,
-      );
-
-      return {
-        transactionId: `signed-${Date.now()}`,
-      };
-    } catch (error) {
-      console.error(`[SIGNING] Transaction signing failed:`, error);
-      throw error;
-    }
-  }
-
   // New API: minimal delegations to preserve behavior
   async signAndExecuteWith(
     transaction: HederaTransaction,
@@ -171,26 +136,6 @@ export class SigningServiceImpl implements SigningService {
         },
       },
     };
-  }
-
-  async signWith(
-    transaction: HederaTransaction,
-    signer: SignerRef,
-  ): Promise<SignedTransaction> {
-    const keyRefId = this.resolveSignerRef(signer);
-
-    // Freeze the transaction first
-    transaction.freezeWith(this.client);
-
-    // Sign using credentials-state without exposing private key
-    await this.credentialsState.signTransaction(transaction, keyRefId);
-
-    return { transactionId: `signed-${Date.now()}` };
-  }
-
-  setDefaultSigner(): void {
-    // TODO: Store default signer ref and reconfigure operator if applicable
-    this.logger.debug('[SIGNING] setDefaultSigner called (stub)');
   }
 
   /**
@@ -225,47 +170,5 @@ export class SigningServiceImpl implements SigningService {
     throw new Error(
       '[SIGNING] SignerRef must provide either keyRefId or publicKey',
     );
-  }
-
-  /**
-   * Execute a pre-signed transaction
-   */
-  execute(signedTransaction: SignedTransaction): Promise<TransactionResult> {
-    this.logger.debug(
-      `[SIGNING] Executing signed transaction: ${signedTransaction.transactionId}`,
-    );
-
-    try {
-      // Execute the signed transaction
-      // Note: In a real implementation, we would need to store the signed transaction
-      // For now, we'll throw an error as this is not fully implemented
-      throw new Error(
-        'Execute method not fully implemented - signed transaction storage required',
-      );
-    } catch (error) {
-      console.error(`[SIGNING] Transaction execution failed:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get the status of a transaction
-   */
-  getStatus(transactionId: string): Promise<TransactionStatus> {
-    this.logger.debug(
-      `[SIGNING] Getting status for transaction: ${transactionId}`,
-    );
-
-    try {
-      // In a real implementation, you would query the network for transaction status
-      // For now, we'll return a mock status
-      return Promise.resolve({
-        status: 'success',
-        transactionId,
-      });
-    } catch (error) {
-      console.error(`[SIGNING] Failed to get transaction status:`, error);
-      throw error;
-    }
   }
 }

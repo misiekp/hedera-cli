@@ -4,14 +4,14 @@
  */
 import { CoreAPI } from './core-api.interface';
 import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
-import { SigningService } from '../services/signing/signing-service.interface';
+import { TransactionService } from '../services/signing/signing-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { AccountTransactionServiceImpl } from '../services/accounts/account-transaction-service';
-import { SigningServiceImpl } from '../services/signing/signing-service';
+import { TransactionServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
@@ -27,7 +27,7 @@ import { KeyManagementServiceImpl } from '../services/credentials-state/credenti
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountTransactionService;
-  public signing: SigningService;
+  public signing: TransactionService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
   public network: NetworkService;
@@ -51,7 +51,7 @@ export class CoreAPIImplementation implements CoreAPI {
       this.logger,
       this.state,
     );
-    this.signing = new SigningServiceImpl(
+    this.signing = new TransactionServiceImpl(
       this.logger,
       this.credentialsState,
       this.network,
