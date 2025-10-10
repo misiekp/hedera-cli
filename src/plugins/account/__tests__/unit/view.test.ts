@@ -1,4 +1,3 @@
-import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { viewAccountHandler } from '../../commands/view';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
@@ -6,10 +5,10 @@ import type { HederaMirrornodeService } from '../../../../core/services/mirrorno
 import {
   makeLogger,
   makeAccountData,
-  makeMirrorNodeMock,
-  makeAccountStateHelperMock,
   makeArgs,
-} from './helpers/mocks';
+  makeMirrorMock,
+  setupExitSpy,
+} from '../../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -20,9 +19,7 @@ jest.mock('../../zustand-state-helper', () => ({
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
@@ -38,18 +35,16 @@ describe('account plugin - view command', () => {
     const logger = makeLogger();
     const account = makeAccountData({ name: 'acc1', accountId: '0.0.1111' });
 
-    const helperMock = makeAccountStateHelperMock({
+    MockedHelper.mockImplementation(() => ({
       loadAccount: jest.fn().mockReturnValue(account),
-    });
+    }));
 
-    MockedHelper.mockImplementation(() => helperMock);
-
-    const mirrorMock = makeMirrorNodeMock();
+    const mirrorMock = makeMirrorMock();
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrName: 'acc1' });
+    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: 'acc1' });
 
     await viewAccountHandler(args);
 
@@ -63,18 +58,16 @@ describe('account plugin - view command', () => {
   test('views account details when not found in state', async () => {
     const logger = makeLogger();
 
-    const helperMock = makeAccountStateHelperMock({
+    MockedHelper.mockImplementation(() => ({
       loadAccount: jest.fn().mockReturnValue(null),
-    });
+    }));
 
-    MockedHelper.mockImplementation(() => helperMock);
-
-    const mirrorMock = makeMirrorNodeMock();
+    const mirrorMock = makeMirrorMock();
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrName: '0.0.2222' });
+    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: '0.0.2222' });
 
     await viewAccountHandler(args);
 
@@ -89,14 +82,12 @@ describe('account plugin - view command', () => {
   test('logs error and exits when mirror.getAccount throws', async () => {
     const logger = makeLogger();
 
-    const helperMock = makeAccountStateHelperMock({
+    MockedHelper.mockImplementation(() => ({
       loadAccount: jest.fn().mockResolvedValue(null),
-    });
+    }));
 
-    MockedHelper.mockImplementation(() => helperMock);
-
-    const mirrorMock = makeMirrorNodeMock({
-      getAccount: jest.fn().mockRejectedValue(new Error('mirror down')),
+    const mirrorMock = makeMirrorMock({
+      getAccountImpl: jest.fn().mockRejectedValue(new Error('mirror down')),
     });
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
@@ -115,15 +106,13 @@ describe('account plugin - view command', () => {
   test('logs error and exits when loadAccount throws', async () => {
     const logger = makeLogger();
 
-    const helperMock = makeAccountStateHelperMock({
+    MockedHelper.mockImplementation(() => ({
       loadAccount: jest.fn().mockImplementation(() => {
         throw new Error('state error');
       }),
-    });
+    }));
 
-    MockedHelper.mockImplementation(() => helperMock);
-
-    const mirrorMock = makeMirrorNodeMock();
+    const mirrorMock = makeMirrorMock();
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,

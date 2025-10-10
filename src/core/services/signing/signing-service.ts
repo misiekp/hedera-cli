@@ -3,145 +3,49 @@
  * Uses Hedera SDK to sign and execute transactions
  */
 import {
-  SigningService,
-  SignedTransaction,
+  TransactionService,
   TransactionResult,
-  TransactionStatus,
 } from './signing-service.interface';
 import { Logger } from '../logger/logger-service.interface';
-import { CredentialsService } from '../credentials/credentials-service.interface';
+import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
+import { NetworkService } from '../network/network-service.interface';
+import type { SignerRef } from './signing-service.interface';
 import {
   Client,
-  PrivateKey,
-  AccountId,
   TransactionResponse,
   TransactionReceipt,
   Status,
   Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
-import { formatError } from '../../../utils/errors';
 
-export class SigningServiceImpl implements SigningService {
+export class TransactionServiceImpl implements TransactionService {
   private client!: Client;
-  private operatorKey!: PrivateKey;
-  private operatorId!: AccountId;
   private logger: Logger;
-  private credentialsService: CredentialsService;
+  private credentialsState: KeyManagementService;
+  private networkService: NetworkService;
 
-  constructor(logger: Logger, credentialsService: CredentialsService) {
+  constructor(
+    logger: Logger,
+    credentialsState: KeyManagementService,
+    networkService: NetworkService,
+  ) {
     this.logger = logger;
-    this.credentialsService = credentialsService;
+    this.credentialsState = credentialsState;
+    this.networkService = networkService;
 
     // Initialize with credentials from state or environment
     void this.initializeCredentials();
   }
 
-  /**
-   * Helper function to prepare TransactionResult based on receipt contents
-   * Extracts transaction-specific fields from the receipt
-   */
-  private prepareTransactionResult(
-    response: TransactionResponse,
-    receipt: TransactionReceipt,
-  ): TransactionResult {
-    const transactionId = response.transactionId.toString();
-    const success = receipt.status === Status.Success;
-
-    // Base result object
-    const result: TransactionResult = {
-      transactionId,
-      success,
-      receipt: {
-        status: {
-          status: success ? 'success' : 'failed',
-          transactionId,
-        },
-      },
-    };
-
-    // Extract accountId for account creation transactions
-    if (receipt.accountId) {
-      result.accountId = receipt.accountId.toString();
-      this.logger.debug(`[SIGNING] Extracted accountId: ${result.accountId}`);
-    }
-
-    // Extract tokenId for token creation transactions
-    if (receipt.tokenId) {
-      result.tokenId = receipt.tokenId.toString();
-      this.logger.debug(`[SIGNING] Extracted tokenId: ${result.tokenId}`);
-    }
-
-    // Extract topicId for topic creation transactions
-    if (receipt.topicId) {
-      result.topicId = receipt.topicId.toString();
-      this.logger.debug(`[SIGNING] Extracted topicId: ${result.topicId}`);
-    }
-
-    // Extract topicSequenceNumber for topic message submit transactions
-    if (
-      receipt.topicSequenceNumber !== undefined &&
-      receipt.topicSequenceNumber !== null
-    ) {
-      result.topicSequenceNumber = Number(receipt.topicSequenceNumber);
-      this.logger.debug(
-        `[SIGNING] Extracted topicSequenceNumber: ${result.topicSequenceNumber}`,
-      );
-    }
-
-    return result;
-  }
-
-  private async initializeCredentials(): Promise<void> {
+  private initializeCredentials(): void {
     this.logger.debug('[SIGNING] Initializing credentials');
 
-    try {
-      // Try to get credentials from state or environment
-      const credentials = await this.credentialsService.getDefaultCredentials();
+    // Get network from NetworkService
+    const currentNetwork = this.networkService.getCurrentNetwork();
+    const network = currentNetwork as 'mainnet' | 'testnet' | 'previewnet';
 
-      if (credentials) {
-        this.logger.debug(
-          `[SIGNING] Using credentials for account: ${credentials.accountId}`,
-        );
-        this.operatorId = AccountId.fromString(credentials.accountId);
-        this.operatorKey = PrivateKey.fromString(credentials.privateKey);
-
-        // Set up client based on network
-        if (credentials.network === 'mainnet') {
-          this.client = Client.forMainnet().setOperator(
-            this.operatorId,
-            this.operatorKey,
-          );
-        } else {
-          this.client = Client.forTestnet().setOperator(
-            this.operatorId,
-            this.operatorKey,
-          );
-        }
-      } else {
-        // Fallback to mock credentials for development
-        this.logger.debug(
-          '[SIGNING] No credentials found, using mock credentials',
-        );
-        this.operatorKey = PrivateKey.generate();
-        this.operatorId = AccountId.fromString('0.0.123456'); // Mock operator account
-
-        this.client = Client.forTestnet().setOperator(
-          this.operatorId,
-          this.operatorKey,
-        );
-      }
-    } catch (error) {
-      this.logger.error(
-        formatError('[SIGNING] Failed to initialize credentials: ', error),
-      );
-      // Fallback to mock credentials
-      this.operatorKey = PrivateKey.generate();
-      this.operatorId = AccountId.fromString('0.0.123456');
-      this.client = Client.forTestnet().setOperator(
-        this.operatorId,
-        this.operatorKey,
-      );
-    }
+    // Use credentials-state to create client without exposing private keys
+    this.client = this.credentialsState.createClient(network);
   }
 
   /**
@@ -153,6 +57,22 @@ export class SigningServiceImpl implements SigningService {
     this.logger.debug(`[SIGNING] Signing and executing transaction`);
 
     try {
+      // Get default operator keyRefId for signing
+      const mapping =
+        this.credentialsState.getDefaultOperator() ||
+        this.credentialsState.ensureDefaultFromEnv();
+      if (!mapping) {
+        throw new Error('[SIGNING] No default operator configured');
+      }
+
+      transaction.freezeWith(this.client);
+
+      // Sign using credentials-state without exposing private key
+      await this.credentialsState.signTransaction(
+        transaction,
+        mapping.keyRefId,
+      );
+
       // Execute the transaction
       const response: TransactionResponse = await transaction.execute(
         this.client,
@@ -165,150 +85,90 @@ export class SigningServiceImpl implements SigningService {
         `[SIGNING] Transaction executed successfully: ${response.transactionId.toString()}`,
       );
 
-      // Use helper to prepare the result based on transaction type
-      return this.prepareTransactionResult(response, receipt);
+      // Extract account ID for account creation transactions
+      let accountId: string | undefined;
+      if (receipt.accountId) {
+        accountId = receipt.accountId.toString();
+      }
+
+      return {
+        transactionId: response.transactionId.toString(),
+        success: receipt.status === Status.Success,
+        accountId,
+        receipt: {
+          status: {
+            status: receipt.status === Status.Success ? 'success' : 'failed',
+            transactionId: response.transactionId.toString(),
+          },
+        },
+      };
     } catch (error) {
       console.error(`[SIGNING] Transaction execution failed:`, error);
       throw error;
     }
   }
 
-  /**
-   * Sign and execute a transaction using a specific private key
-   */
-  async signAndExecuteWithKey(
-    transaction: any,
-    privateKey: string,
+  // New API: minimal delegations to preserve behavior
+  async signAndExecuteWith(
+    transaction: HederaTransaction,
+    signer: SignerRef,
   ): Promise<TransactionResult> {
-    this.logger.debug(
-      `[SIGNING] Signing and executing transaction with custom key`,
+    const keyRefId = this.resolveSignerRef(signer);
+
+    transaction.freezeWith(this.client);
+
+    // Sign using credentials-state without exposing private key
+    await this.credentialsState.signTransaction(transaction, keyRefId);
+
+    // Execute the transaction
+    const response: TransactionResponse = await transaction.execute(
+      this.client,
     );
+    const receipt: TransactionReceipt = await response.getReceipt(this.client);
 
-    try {
-      // Parse the private key
-      const customKey = PrivateKey.fromString(privateKey);
-
-      // Freeze the transaction first
-      transaction.freezeWith(this.client);
-
-      // Sign with the custom key
-      transaction.sign(customKey);
-
-      // Execute the signed transaction
-      const response: TransactionResponse = await transaction.execute(
-        this.client,
-      );
-      const receipt: TransactionReceipt = await response.getReceipt(
-        this.client,
-      );
-
-      this.logger.debug(
-        `[SIGNING] Transaction executed successfully with custom key: ${response.transactionId}`,
-      );
-
-      // Use helper to prepare the result based on transaction type
-      return this.prepareTransactionResult(response, receipt);
-    } catch (error) {
-      console.error(
-        `[SIGNING] Transaction execution with custom key failed:`,
-        error,
-      );
-      throw error;
-    }
+    return {
+      transactionId: response.transactionId.toString(),
+      success: receipt.status === Status.Success,
+      receipt: {
+        status: {
+          status: receipt.status === Status.Success ? 'success' : 'failed',
+          transactionId: response.transactionId.toString(),
+        },
+      },
+    };
   }
 
   /**
-   * Sign a transaction without executing it
+   * Resolve a SignerRef to a keyRefId for signing.
+   * Supports both keyRefId and publicKey directly.
    */
-  async sign(transaction: HederaTransaction): Promise<SignedTransaction> {
-    this.logger.debug(`[SIGNING] Signing transaction`);
+  private resolveSignerRef(signer: SignerRef): string {
+    if (!signer) throw new Error('[SIGNING] signer ref is required');
 
-    try {
-      // Freeze the transaction first
-      transaction.freezeWith(this.client);
-
-      // Sign the transaction
-      await transaction.sign(this.operatorKey);
-
-      return {
-        transactionId: `signed-${Date.now()}`,
-      };
-    } catch (error) {
-      console.error(`[SIGNING] Transaction signing failed:`, error);
-      throw error;
+    // If direct keyRefId provided, validate it exists
+    if (signer.keyRefId) {
+      const pub = this.credentialsState.getPublicKey(signer.keyRefId);
+      if (!pub) {
+        throw new Error(
+          `[SIGNING] Unknown keyRefId: ${signer.keyRefId}. Use 'hcli keys list' to inspect available keys.`,
+        );
+      }
+      return signer.keyRefId;
     }
-  }
 
-  /**
-   * Sign a transaction using a specific private key without executing it
-   */
-  async signWithKey(
-    transaction: any,
-    privateKey: string,
-  ): Promise<SignedTransaction> {
-    this.logger.debug(`[SIGNING] Signing transaction with custom key`);
-
-    try {
-      // Parse the private key
-      const customKey = PrivateKey.fromString(privateKey);
-
-      // Freeze the transaction first
-      transaction.freezeWith(this.client);
-
-      // Sign the transaction with the custom key
-      const signedTransaction = await transaction.sign(customKey);
-
-      return {
-        transactionId: `signed-${Date.now()}`,
-      };
-    } catch (error) {
-      console.error(
-        `[SIGNING] Transaction signing with custom key failed:`,
-        error,
-      );
-      throw error;
+    // If publicKey provided, find the corresponding keyRefId
+    if (signer.publicKey) {
+      const keyRefId = this.credentialsState.findByPublicKey(signer.publicKey);
+      if (!keyRefId) {
+        throw new Error(
+          `[SIGNING] No keyRefId found for public key: ${signer.publicKey}`,
+        );
+      }
+      return keyRefId;
     }
-  }
 
-  /**
-   * Execute a pre-signed transaction
-   */
-  execute(signedTransaction: SignedTransaction): Promise<TransactionResult> {
-    this.logger.debug(
-      `[SIGNING] Executing signed transaction: ${signedTransaction.transactionId}`,
+    throw new Error(
+      '[SIGNING] SignerRef must provide either keyRefId or publicKey',
     );
-
-    try {
-      // Execute the signed transaction
-      // Note: In a real implementation, we would need to store the signed transaction
-      // For now, we'll throw an error as this is not fully implemented
-      throw new Error(
-        'Execute method not fully implemented - signed transaction storage required',
-      );
-    } catch (error) {
-      console.error(`[SIGNING] Transaction execution failed:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get the status of a transaction
-   */
-  getStatus(transactionId: string): Promise<TransactionStatus> {
-    this.logger.debug(
-      `[SIGNING] Getting status for transaction: ${transactionId}`,
-    );
-
-    try {
-      // In a real implementation, you would query the network for transaction status
-      // For now, we'll return a mock status
-      return Promise.resolve({
-        status: 'success',
-        transactionId,
-      });
-    } catch (error) {
-      console.error(`[SIGNING] Failed to get transaction status:`, error);
-      throw error;
-    }
   }
 }

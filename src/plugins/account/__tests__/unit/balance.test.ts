@@ -1,13 +1,14 @@
 import { getAccountBalanceHandler } from '../../commands/balance';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import {
   makeLogger,
   makeAccountData,
-  makeMirrorMocks,
   makeArgs,
-} from './helpers/mocks';
+  makeMirrorMock,
+  setupExitSpy,
+} from '../../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -18,9 +19,7 @@ jest.mock('../../zustand-state-helper', () => ({
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
@@ -43,7 +42,7 @@ describe('account plugin - balance command (unit)', () => {
         ),
     }));
 
-    const mirrorMock = makeMirrorMocks({ hbarBalance: 123456n });
+    const mirrorMock = makeMirrorMock({ hbarBalance: 123456n });
 
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
@@ -72,7 +71,7 @@ describe('account plugin - balance command (unit)', () => {
         ),
     }));
 
-    const mirrorMock = makeMirrorMocks({
+    const mirrorMock = makeMirrorMock({
       hbarBalance: 5000n,
       tokenBalances: [
         { token_id: '0.0.3003', balance: 100 },
@@ -112,7 +111,7 @@ describe('account plugin - balance command (unit)', () => {
       ),
     }));
 
-    const mirrorMock = makeMirrorMocks({ hbarBalance: 42n, tokenBalances: [] });
+    const mirrorMock = makeMirrorMock({ hbarBalance: 42n, tokenBalances: [] });
 
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
@@ -138,7 +137,7 @@ describe('account plugin - balance command (unit)', () => {
         ),
     }));
 
-    const mirrorMock = makeMirrorMocks({
+    const mirrorMock = makeMirrorMock({
       hbarBalance: 77n,
       tokenError: new Error('mirror error'),
     });
