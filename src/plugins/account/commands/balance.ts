@@ -14,20 +14,25 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const accountIdOrName = args.args['accountIdOrName'] as string;
+  const accountIdOrNameOrAlias = args.args['accountIdOrNameOrAlias'] as string;
   const onlyHbar = (args.args['only-hbar'] as boolean) || false;
   const tokenId = args.args['token-id'] as string;
 
-  logger.log(`Getting balance for account: ${accountIdOrName}`);
+  logger.log(`Getting balance for account: ${accountIdOrNameOrAlias}`);
 
   try {
-    // Check if it's a name (stored in state) or account ID
-    let accountId = accountIdOrName;
-    const account = accountState.loadAccount(accountIdOrName);
+    // Resolve account identifier (could be name, account ID, or alias)
+    let accountId = accountIdOrNameOrAlias;
 
+    // First check if it's a stored account name
+    const account = accountState.loadAccount(accountIdOrNameOrAlias);
     if (account) {
       accountId = account.accountId;
       logger.log(`Found account in state: ${account.name} -> ${accountId}`);
+    } else {
+      // For now, assume it's an account ID
+      // TODO: Add proper alias resolution here
+      logger.log(`Using as account ID: ${accountIdOrNameOrAlias}`);
     }
 
     // Get HBAR balance from mirror node

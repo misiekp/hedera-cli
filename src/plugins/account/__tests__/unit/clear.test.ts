@@ -1,28 +1,21 @@
-import { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { clearAccountsHandler } from '../../../../src/plugins/account/commands/clear';
+import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { clearAccountsHandler } from '../../commands/clear';
+import {
+  makeLogger,
+  setupExitSpy,
+} from '../../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {

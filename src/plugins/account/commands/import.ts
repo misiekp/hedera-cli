@@ -13,10 +13,12 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const name = args.args.name as string;
   const accountId = args.args.id as string;
   const privateKey = args.args.key as string;
+  const alias = (args.args.alias as string) || '';
 
+  // Generate a unique name for the account
+  const name = alias || `imported-${accountId.replace(/\./g, '-')}`;
   logger.log(`Importing account: ${name} (${accountId})`);
 
   try {
@@ -25,20 +27,44 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
       throw new Error(`Account with name '${name}' already exists`);
     }
 
+    // No alias resolution needed for import
+
     // Get account info from mirror node
     const accountInfo = await api.mirror.getAccount(accountId);
 
-    // Create account object
+    // Securely store the private key in credentials storage
+    const { keyRefId, publicKey } = api.credentialsState.importPrivateKey(
+      privateKey,
+      [`account:${name}`],
+    );
+
+    // Register alias if provided
+    if (alias) {
+      api.alias.register({
+        alias,
+        type: 'account',
+        network: api.network.getCurrentNetwork() as
+          | 'mainnet'
+          | 'testnet'
+          | 'previewnet',
+        entityId: accountId,
+        publicKey,
+        keyRefId,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    // Create account object (no private key in plugin state)
     const account = {
       name,
       accountId,
       type: 'ECDSA' as 'ECDSA' | 'ED25519', // Default type since key info not available in new API
-      publicKey: accountInfo.accountPublicKey || 'unknown',
+      publicKey: publicKey,
       evmAddress:
         accountInfo.evmAddress || '0x0000000000000000000000000000000000000000',
       solidityAddress: accountId, // Simplified for mock
       solidityAddressFull: `0x${accountId}`,
-      privateKey: privateKey || 'imported-without-key',
+      keyRefId,
       network: api.network.getCurrentNetwork() as
         | 'mainnet'
         | 'testnet'
@@ -52,6 +78,9 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
     logger.log(`   Name: ${account.name}`);
     logger.log(`   Type: ${account.type}`);
     logger.log(`   Network: ${account.network}`);
+    if (alias) {
+      logger.log(`   Alias: ${alias}`);
+    }
     logger.log(`   Balance: ${accountInfo.balance.balance} tinybars`);
 
     process.exit(0);

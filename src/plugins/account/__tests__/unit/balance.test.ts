@@ -1,75 +1,25 @@
-import type { CommandHandlerArgs } from '../../../../src/core/plugins/plugin.interface';
-import { getAccountBalanceHandler } from '../../../../src/plugins/account/commands/balance';
-import { ZustandAccountStateHelper } from '../../../../src/plugins/account/zustand-state-helper';
-import { Logger } from '../../../../src/core/services/logger/logger-service.interface';
-import type { HederaMirrornodeService } from '../../../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { CoreAPI } from '../../../../src/core/core-api/core-api.interface';
-import type { AccountData } from '../../../../src/plugins/account/schema';
+import { getAccountBalanceHandler } from '../../commands/balance';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
+import {
+  makeLogger,
+  makeAccountData,
+  makeArgs,
+  makeMirrorMock,
+  setupExitSpy,
+} from '../../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
-jest.mock('../../../../src/plugins/account/zustand-state-helper', () => ({
+jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
 }));
 
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
-const makeAccountData = (
-  overrides: Partial<AccountData> = {},
-): AccountData => ({
-  name: 'default',
-  accountId: '0.0.1234',
-  type: 'ECDSA',
-  publicKey: 'pk',
-  evmAddress: '0x0000000000000000000000000000000000000000',
-  solidityAddress: 'sa',
-  solidityAddressFull: 'safull',
-  privateKey: 'priv',
-  network: 'testnet',
-  ...overrides,
-});
-
-const makeMirrorMocks = ({
-  hbarBalance = 0n,
-  tokenBalances,
-  tokenError,
-}: {
-  hbarBalance?: bigint;
-  tokenBalances?: { token_id: string; balance: number }[];
-  tokenError?: Error;
-}): Partial<HederaMirrornodeService> => {
-  return {
-    getAccountHBarBalance: jest.fn().mockResolvedValue(hbarBalance),
-    getAccountTokenBalances: tokenError
-      ? jest.fn().mockRejectedValue(tokenError)
-      : jest.fn().mockResolvedValue({ tokens: tokenBalances ?? [] }),
-  };
-};
-
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
@@ -92,7 +42,7 @@ describe('account plugin - balance command (unit)', () => {
         ),
     }));
 
-    const mirrorMock = makeMirrorMocks({ hbarBalance: 123456n });
+    const mirrorMock = makeMirrorMock({ hbarBalance: 123456n });
 
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
@@ -121,7 +71,7 @@ describe('account plugin - balance command (unit)', () => {
         ),
     }));
 
-    const mirrorMock = makeMirrorMocks({
+    const mirrorMock = makeMirrorMock({
       hbarBalance: 5000n,
       tokenBalances: [
         { token_id: '0.0.3003', balance: 100 },
@@ -161,7 +111,7 @@ describe('account plugin - balance command (unit)', () => {
       ),
     }));
 
-    const mirrorMock = makeMirrorMocks({ hbarBalance: 42n, tokenBalances: [] });
+    const mirrorMock = makeMirrorMock({ hbarBalance: 42n, tokenBalances: [] });
 
     const api: Partial<CoreAPI> = {
       mirror: mirrorMock as HederaMirrornodeService,
@@ -187,7 +137,7 @@ describe('account plugin - balance command (unit)', () => {
         ),
     }));
 
-    const mirrorMock = makeMirrorMocks({
+    const mirrorMock = makeMirrorMock({
       hbarBalance: 77n,
       tokenError: new Error('mirror error'),
     });

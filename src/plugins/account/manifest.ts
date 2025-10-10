@@ -28,7 +28,6 @@ export const accountPluginManifest: PluginManifest = {
       description:
         'Create a new Hedera account with specified balance and settings',
       options: [
-        { name: 'name', type: 'string', required: true },
         { name: 'balance', type: 'number', required: false, default: 10000 },
         {
           name: 'auto-associations',
@@ -36,19 +35,21 @@ export const accountPluginManifest: PluginManifest = {
           required: false,
           default: 0,
         },
+        { name: 'alias', type: 'string', required: false },
+        { name: 'payer', type: 'string', required: false },
       ],
-      handler: './commands/create',
+      handler: './index',
     },
     {
       name: 'balance',
       summary: 'Get account balance',
-      description: 'Retrieve the balance for an account ID or name',
+      description: 'Retrieve the balance for an account ID, name, or alias',
       options: [
-        { name: 'account-id-or-name', type: 'string', required: true },
+        { name: 'account-id-or-name-or-alias', type: 'string', required: true },
         { name: 'only-hbar', type: 'boolean', required: false, default: false },
         { name: 'token-id', type: 'string', required: false },
       ],
-      handler: './commands/balance',
+      handler: './index',
     },
     {
       name: 'list',
@@ -57,25 +58,25 @@ export const accountPluginManifest: PluginManifest = {
       options: [
         { name: 'private', type: 'boolean', required: false, default: false },
       ],
-      handler: './commands/list',
+      handler: './index',
     },
     {
       name: 'import',
       summary: 'Import an existing account',
       description: 'Import an existing account into the CLI tool',
       options: [
-        { name: 'name', type: 'string', required: true },
         { name: 'id', type: 'string', required: true },
         { name: 'key', type: 'string', required: false },
+        { name: 'alias', type: 'string', required: false },
       ],
-      handler: './commands/import',
+      handler: './index',
     },
     {
       name: 'clear',
       summary: 'Clear all accounts',
       description: 'Remove all account information from the address book',
       options: [],
-      handler: './commands/clear',
+      handler: './index',
     },
     {
       name: 'delete',
@@ -85,14 +86,16 @@ export const accountPluginManifest: PluginManifest = {
         { name: 'name', type: 'string', required: false },
         { name: 'id', type: 'string', required: false },
       ],
-      handler: './commands/delete',
+      handler: './index',
     },
     {
       name: 'view',
       summary: 'View account details',
       description: 'View detailed information about an account',
-      options: [{ name: 'account-id-or-name', type: 'string', required: true }],
-      handler: './commands/view',
+      options: [
+        { name: 'account-id-or-name-or-alias', type: 'string', required: true },
+      ],
+      handler: './index',
     },
   ],
   stateSchemas: [

@@ -2,25 +2,27 @@
  * Main Core API interface that combines all services
  * This is the primary interface that plugins will use
  */
-import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
-import { SigningService } from '../services/signing/signing-service.interface';
+import { AccountService } from '../services/account/account-transaction-service.interface';
+import { TransactionService } from '../services/signing/signing-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
-import { CredentialsService } from '../services/credentials/credentials-service.interface';
+import { HbarService } from '../services/hbar/hbar-service.interface';
+import { AliasManagementService } from '../services/alias/alias-service.interface';
+import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
 
 export interface CoreAPI {
   /**
-   * Account transaction operations
+   * Account operations
    */
-  accountTransactions: AccountTransactionService;
+  accountTransactions: AccountService;
 
   /**
    * Transaction signing and execution
    */
-  signing: SigningService;
+  signing: TransactionService;
 
   /**
    * State management with namespaced access
@@ -48,7 +50,17 @@ export interface CoreAPI {
   logger: Logger;
 
   /**
-   * Credentials management
+   * Alias management (non-sensitive)
    */
-  credentials: CredentialsService;
+  alias: AliasManagementService;
+
+  /**
+   * Key Management Service (KMS)
+   */
+  credentialsState: KeyManagementService;
+
+  /**
+   * HBAR operations
+   */
+  hbar?: HbarService;
 }

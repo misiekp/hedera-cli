@@ -13,28 +13,52 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const name = args.args.name as string;
   const balance =
     args.args.balance !== undefined ? (args.args.balance as number) : 10000;
   const autoAssociations = (args.args['auto-associations'] as number) || 0;
+  const alias = (args.args.alias as string) || '';
 
-  logger.log(`Creating account with name: ${name}`);
+  const name = alias || `account-${Date.now()}`;
+
+  // Generate a unique name for the account
+  logger.log(`Creating account with alias: ${alias}`);
 
   try {
-    // 1. Create transaction using Core API
+    // 1. Generate a new key pair for the account
+    const { keyRefId, publicKey } =
+      api.credentialsState.createLocalPrivateKey();
+
+    // 2. Create transaction using Core API
     const accountCreateResult = await api.accountTransactions.createAccount({
       balance,
-      name,
       maxAutoAssociations: autoAssociations,
+      publicKey,
+      keyType: 'ECDSA',
     });
 
-    // 2. Sign and execute transaction
+    // 2. Sign and execute transaction with default operator
     const result = await api.signing.signAndExecute(
       accountCreateResult.transaction,
     );
 
     if (result.success) {
-      // 3. Store account in state with real data using state helper
+      // 4. Optionally register alias for the new account (per-network)
+      if (alias) {
+        api.alias.register({
+          alias,
+          type: 'account',
+          network: api.network.getCurrentNetwork() as
+            | 'mainnet'
+            | 'testnet'
+            | 'previewnet',
+          entityId: result.accountId,
+          publicKey,
+          keyRefId,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      // 5. Store account metadata in plugin state (no private key)
       const accountData = {
         name,
         accountId: result.accountId || '0.0.123456',
@@ -43,7 +67,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
         evmAddress: accountCreateResult.evmAddress,
         solidityAddress: accountCreateResult.evmAddress,
         solidityAddressFull: accountCreateResult.evmAddress,
-        privateKey: accountCreateResult.privateKey,
+        keyRefId,
         network: api.network.getCurrentNetwork() as
           | 'mainnet'
           | 'testnet'
@@ -55,6 +79,9 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
       logger.log(`✅ Account created successfully: ${accountData.accountId}`);
       logger.log(`   Name: ${accountData.name}`);
       logger.log(`   Type: ${accountData.type}`);
+      if (alias) {
+        logger.log(`   Alias: ${alias}`);
+      }
       logger.log(`   Network: ${accountData.network}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
@@ -67,3 +94,6 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
     process.exit(1);
   }
 }
+
+// Default export for plugin manager
+export default createAccountHandler;

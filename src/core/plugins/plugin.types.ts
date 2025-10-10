@@ -48,6 +48,7 @@ export interface CommandOption {
   required: boolean;
   default?: unknown;
   description?: string;
+  short?: string; // optional short flag alias like 'b' for -b
 }
 
 /**
