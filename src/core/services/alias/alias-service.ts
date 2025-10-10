@@ -39,10 +39,13 @@ export class AliasManagementServiceImpl implements AliasManagementService {
     );
   }
 
-  resolve(ref: string, expectation?: AliasType): AliasRecord | null {
+  resolve(
+    ref: string,
+    expectation: AliasType | undefined,
+    network: SupportedNetwork,
+  ): AliasRecord | null {
     const { kind, value } = this.parseRef(ref);
     if (kind !== 'alias') return null;
-    const network = this.currentNetwork();
     const key = this.composeKey(network, value);
     const rec = this.state.get<AliasRecord>(NAMESPACE, key);
     if (!rec) return null;

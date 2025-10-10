@@ -18,7 +18,11 @@ export type RefKind = 'alias' | 'keyRef' | 'pub' | 'acc' | 'token';
 
 export interface AliasManagementService {
   register(record: AliasRecord): void;
-  resolve(ref: string, expectation?: AliasType): AliasRecord | null;
+  resolve(
+    ref: string,
+    expectation: AliasType | undefined,
+    network: SupportedNetwork,
+  ): AliasRecord | null;
   list(filter?: {
     network?: SupportedNetwork;
     type?: AliasType;

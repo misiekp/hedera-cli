@@ -1,4 +1,5 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import type { SupportedNetwork } from '../../../core/types/shared.types';
 
 export default async function transferHandler(
   args: CommandHandlerArgs,
@@ -44,12 +45,16 @@ export default async function transferHandler(
     throw new Error('Cannot transfer to the same account');
   }
 
+  // Get current network for alias resolution
+  const currentNetwork: SupportedNetwork =
+    api.network.getCurrentNetwork() as SupportedNetwork;
+
   // Resolve from/to using alias service
   let fromAccountId = from;
   let toAccountId = to;
 
   // Resolve from account
-  const fromAlias = api.alias.resolve(from, 'account');
+  const fromAlias = api.alias.resolve(from, 'account', currentNetwork);
   if (fromAlias) {
     fromAccountId = fromAlias.entityId || from;
     logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);
@@ -58,7 +63,7 @@ export default async function transferHandler(
   }
 
   // Resolve to account
-  const toAlias = api.alias.resolve(to, 'account');
+  const toAlias = api.alias.resolve(to, 'account', currentNetwork);
   if (toAlias) {
     toAccountId = toAlias.entityId || to;
     logger.log(`[HBAR] Resolved to alias: ${to} -> ${toAccountId}`);
