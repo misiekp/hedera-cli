@@ -12,7 +12,6 @@ export interface CredentialsStateService {
     labels?: string[],
   ): { keyRefId: string; publicKey: string };
   getPublicKey(keyRefId: string): string | null;
-  getPrivateKeyString(keyRefId: string): string | null;
   getSignerHandle(keyRefId: string): CredentialsStateSignerService;
 
   // Find key by publicKey (for commands that resolve aliases to publicKeys)

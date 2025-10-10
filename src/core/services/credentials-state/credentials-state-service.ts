@@ -2,6 +2,7 @@ import { CredentialsStateService } from './credentials-state-service.interface';
 import {
   CredentialType,
   CredentialsRecord,
+  KeyAlgorithm,
 } from './credentials-types.interface';
 import { randomBytes } from 'crypto';
 import {
@@ -57,7 +58,7 @@ export class CredentialsStateServiceImpl implements CredentialsStateService {
     const keyRefId = this.generateId('kr');
     // TODO: Try to parse either ED25519 or ECDSA
     const pk: PrivateKey = PrivateKey.fromStringECDSA(privateKey);
-    const algo: 'ed25519' | 'ecdsa' = 'ecdsa';
+    const algo: KeyAlgorithm = 'ecdsa';
     const publicKey = pk.publicKey.toStringRaw();
     this.saveRecord({
       keyRefId,
@@ -76,11 +77,6 @@ export class CredentialsStateServiceImpl implements CredentialsStateService {
 
   getPublicKey(keyRefId: string): string | null {
     return this.getRecord(keyRefId)?.publicKey || null;
-  }
-
-  getPrivateKeyString(keyRefId: string): string | null {
-    const secret = this.storage.readSecret(keyRefId);
-    return secret?.privateKey || null;
   }
 
   getSignerHandle(keyRefId: string): CredentialsStateSignerService {
@@ -193,6 +189,11 @@ export class CredentialsStateServiceImpl implements CredentialsStateService {
     await transaction.signWith(publicKey, async (message: Uint8Array) =>
       handle.sign(message),
     );
+  }
+
+  private getPrivateKeyString(keyRefId: string): string | null {
+    const secret = this.storage.readSecret(keyRefId);
+    return secret?.privateKey || null;
   }
 
   private generateId(prefix: string): string {
