@@ -36,7 +36,7 @@ export function listAccountsHandler(args: CommandHandlerArgs) {
       logger.log(`   EVM Address: ${account.evmAddress}`);
 
       if (showPrivateKeys) {
-        logger.log(`   Private Key: ${account.privateKey}`);
+        logger.log(`   Key Reference ID: ${account.keyRefId}`);
       }
 
       logger.log('');

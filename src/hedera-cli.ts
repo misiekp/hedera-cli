@@ -52,6 +52,8 @@ async function initializeCLI() {
       './dist/plugins/plugin-management', // Plugin management plugin
       './dist/plugins/credentials', // Credentials management plugin
       './dist/plugins/state-management', // State management plugin
+      './dist/plugins/topic', // Topic management plugin
+      './dist/plugins/hbar', // HBAR plugin
     ]);
 
     // Initialize plugins
@@ -65,6 +67,7 @@ async function initializeCLI() {
     // Parse arguments and execute command
     installGlobalErrorHandlers();
     await program.parseAsync(process.argv);
+    process.exit(0);
   } catch (error) {
     console.error('❌ CLI initialization failed:', error);
     process.exit(1);

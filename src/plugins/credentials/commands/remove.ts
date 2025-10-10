@@ -6,13 +6,13 @@ import { formatError } from '../../../utils/errors';
 
 export function removeHandler(args: CommandHandlerArgs): Promise<void> {
   const { logger, api } = args;
-  const { accountId } = args.args as { accountId: string };
+  const { keyRefId } = args.args as { keyRefId: string };
 
-  logger.log(`🗑️  Removing credentials for account: ${accountId}`);
+  logger.log(`🗑️  Removing credentials for keyRefId: ${keyRefId}`);
 
   try {
-    api.credentials.removeCredentials(accountId);
-    logger.log(`✅ Credentials removed for account: ${accountId}`);
+    api.credentialsState.remove(keyRefId);
+    logger.log(`✅ Credentials removed for keyRefId: ${keyRefId}`);
   } catch (error) {
     logger.error(formatError('❌ Failed to remove credentials: ', error));
     throw error;

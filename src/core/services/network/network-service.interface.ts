@@ -2,11 +2,14 @@
  * Interface for network management operations
  * All network services must implement this interface
  */
+
+export type NetworkType = 'mainnet' | 'testnet' | 'previewnet';
+
 export interface NetworkService {
   /**
    * Get the current active network
    */
-  getCurrentNetwork(): string;
+  getCurrentNetwork(): NetworkType;
 
   /**
    * Get list of available networks

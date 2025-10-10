@@ -67,10 +67,10 @@ describe('account plugin - import command', () => {
 
   test('imports account successfully', async () => {
     const logger = makeLogger();
-    const saveAccountMock = jest.fn().mockReturnValue(undefined);
+    const saveAccountMock = jest.fn().mockResolvedValue(undefined);
 
     MockedHelper.mockImplementation(() => ({
-      hasAccount: jest.fn().mockReturnValue(false),
+      hasAccount: jest.fn().mockResolvedValue(false),
       saveAccount: saveAccountMock,
     }));
 
@@ -110,7 +110,7 @@ describe('account plugin - import command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      hasAccount: jest.fn().mockReturnValue(true),
+      hasAccount: jest.fn().mockResolvedValue(true),
       saveAccount: jest.fn(),
     }));
 
@@ -141,7 +141,7 @@ describe('account plugin - import command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      hasAccount: jest.fn().mockReturnValue(false),
+      hasAccount: jest.fn().mockResolvedValue(false),
       saveAccount: jest.fn(),
     }));
 

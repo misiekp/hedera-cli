@@ -6,6 +6,16 @@
 import { CustomFee } from '@hashgraph/sdk';
 
 /**
+ * Supported Hedera networks
+ * Used across all services for network identification
+ */
+export type SupportedNetwork =
+  | 'mainnet'
+  | 'testnet'
+  | 'previewnet'
+  | 'localnet';
+
+/**
  * Account data structure
  */
 export interface Account {
