@@ -3,33 +3,39 @@
  * Combines all services into a single Core API instance
  */
 import { CoreAPI } from './core-api.interface';
-import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
-import { SigningService } from '../services/signing/signing-service.interface';
+import { AccountService } from '../services/account/account-transaction-service.interface';
+import { TransactionService } from '../services/signing/signing-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
-import { CredentialsService } from '../services/credentials/credentials-service.interface';
-import { AccountTransactionServiceImpl } from '../services/accounts/account-transaction-service';
-import { SigningServiceImpl } from '../services/signing/signing-service';
+import { AccountServiceImpl } from '../services/account/account-transaction-service';
+import { TransactionServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
 import { MockNetworkService } from '../services/network/network-service';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
-import { CredentialsServiceImpl } from '../services/credentials/credentials-service';
+import { HbarService } from '../services/hbar/hbar-service.interface';
+import { HbarServiceImpl } from '../services/hbar/hbar-service';
+import { AliasManagementService } from '../services/alias/alias-service.interface';
+import { AliasManagementServiceImpl } from '../services/alias/alias-service';
+import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
+import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
 
 export class CoreAPIImplementation implements CoreAPI {
-  public accountTransactions: AccountTransactionService;
-  public signing: SigningService;
+  public accountTransactions: AccountService;
+  public signing: TransactionService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
   public network: NetworkService;
   public config: ConfigService;
   public logger: Logger;
-  public credentials: CredentialsService;
+  public alias: AliasManagementService;
+  public credentialsState: KeyManagementService;
+  public hbar?: HbarService;
 
   constructor() {
     this.logger = new MockLoggerService();
@@ -37,16 +43,19 @@ export class CoreAPIImplementation implements CoreAPI {
 
     this.network = new MockNetworkService();
 
-    // Initialize credentials service
-    this.credentials = new CredentialsServiceImpl(
-      this.state,
+    // Initialize all services with dependencies
+    this.accountTransactions = new AccountServiceImpl(this.logger);
+    // Initialize new services
+    this.alias = new AliasManagementServiceImpl(this.state, this.logger);
+    this.credentialsState = new KeyManagementServiceImpl(
       this.logger,
+      this.state,
+    );
+    this.signing = new TransactionServiceImpl(
+      this.logger,
+      this.credentialsState,
       this.network,
     );
-
-    // Initialize all services with dependencies
-    this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
-    this.signing = new SigningServiceImpl(this.logger, this.credentials);
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
     let ledgerId: LedgerId;
@@ -66,6 +75,8 @@ export class CoreAPIImplementation implements CoreAPI {
 
     this.mirror = new HederaMirrornodeServiceDefaultImpl(ledgerId);
     this.config = new MockConfigService();
+
+    this.hbar = new HbarServiceImpl(this.logger);
   }
 }
 

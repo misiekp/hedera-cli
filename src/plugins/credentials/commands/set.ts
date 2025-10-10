@@ -15,15 +15,19 @@ export function setHandler(args: CommandHandlerArgs): void {
   logger.log(`🔐 Setting credentials for account: ${accountId}`);
 
   try {
-    api.credentials.setDefaultCredentials(
-      accountId,
+    // Import the private key and get the keyRefId
+    const { keyRefId, publicKey } = api.credentialsState.importPrivateKey(
       privateKey,
-      network || 'testnet',
+      ['default-operator'],
     );
+
+    // Set as default operator
+    api.credentialsState.setDefaultOperator(accountId, keyRefId);
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
     logger.log(`   Network: ${network || 'testnet'}`);
-    logger.log(`   Account ID: ${accountId}`);
+    logger.log(`   Key Reference ID: ${keyRefId}`);
+    logger.log(`   Public Key: ${publicKey}`);
   } catch (error) {
     logger.error(formatError('❌ Failed to set credentials: ', error));
     throw error;
