@@ -3,14 +3,14 @@
  * Combines all services into a single Core API instance
  */
 import { CoreAPI } from './core-api.interface';
-import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
+import { AccountService } from '../services/account/account-transaction-service.interface';
 import { TransactionService } from '../services/signing/signing-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
-import { AccountTransactionServiceImpl } from '../services/accounts/account-transaction-service';
+import { AccountServiceImpl } from '../services/account/account-transaction-service';
 import { TransactionServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
@@ -26,7 +26,7 @@ import { KeyManagementService } from '../services/credentials-state/credentials-
 import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
 
 export class CoreAPIImplementation implements CoreAPI {
-  public accountTransactions: AccountTransactionService;
+  public accountTransactions: AccountService;
   public signing: TransactionService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
@@ -44,7 +44,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.network = new MockNetworkService();
 
     // Initialize all services with dependencies
-    this.accountTransactions = new AccountTransactionServiceImpl(this.logger);
+    this.accountTransactions = new AccountServiceImpl(this.logger);
     // Initialize new services
     this.alias = new AliasManagementServiceImpl(this.state, this.logger);
     this.credentialsState = new KeyManagementServiceImpl(

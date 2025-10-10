@@ -1,7 +1,7 @@
 import { createAccountHandler } from '../../commands/create';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
-import type { AccountTransactionService } from '../../../../core/services/accounts/account-transaction-service.interface';
+import type { AccountService } from '../../../../core/services/account/account-transaction-service.interface';
 import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
 import {
   makeLogger,
@@ -30,7 +30,7 @@ const makeApiMocks = ({
   signAndExecuteImpl?: jest.Mock;
   network?: 'testnet' | 'mainnet' | 'previewnet';
 }) => {
-  const accountTransactions: jest.Mocked<AccountTransactionService> = {
+  const accountTransactions: jest.Mocked<AccountService> = {
     createAccount: createAccountImpl || jest.fn(),
     getAccountInfo: jest.fn(),
     getAccountBalance: jest.fn(),

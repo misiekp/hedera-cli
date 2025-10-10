@@ -2,7 +2,7 @@
  * Main Core API interface that combines all services
  * This is the primary interface that plugins will use
  */
-import { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
+import { AccountService } from '../services/account/account-transaction-service.interface';
 import { TransactionService } from '../services/signing/signing-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
@@ -15,9 +15,9 @@ import { KeyManagementService } from '../services/credentials-state/credentials-
 
 export interface CoreAPI {
   /**
-   * Account transaction operations
+   * Account operations
    */
-  accountTransactions: AccountTransactionService;
+  accountTransactions: AccountService;
 
   /**
    * Transaction signing and execution

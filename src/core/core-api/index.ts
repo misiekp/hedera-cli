@@ -10,7 +10,7 @@ export { CoreAPI } from './core-api.interface';
 export { CoreAPIImplementation, createCoreAPI } from './core-api';
 
 // Service interfaces
-export { AccountTransactionService } from '../services/accounts/account-transaction-service.interface';
+export { AccountService } from '../services/account/account-transaction-service.interface';
 export { TransactionService } from '../services/signing/signing-service.interface';
 export { StateService as GenericStateService } from '../services/state/state-service.interface';
 export { NetworkService } from '../services/network/network-service.interface';
@@ -41,4 +41,4 @@ export type {
   PluginStateSchema,
 } from '../plugins/plugin.types';
 
-export type { CreateAccountParams } from '../services/accounts/account-transaction-service.interface';
+export type { CreateAccountParams } from '../services/account/account-transaction-service.interface';
