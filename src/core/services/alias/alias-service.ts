@@ -3,8 +3,8 @@ import {
   AliasRecord,
   AliasType,
   RefKind,
-  SupportedNetwork,
 } from './alias-service.interface';
+import { SupportedNetwork } from '../../types/shared.types';
 import { StateService } from '../state/state-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { NetworkService } from '../network/network-service.interface';
@@ -39,18 +39,14 @@ export class AliasManagementServiceImpl implements AliasManagementService {
     );
   }
 
-  resolve(
-    ref: string,
-    expectation?: 'account' | 'token' | 'key' | 'any',
-  ): AliasRecord | null {
+  resolve(ref: string, expectation?: AliasType): AliasRecord | null {
     const { kind, value } = this.parseRef(ref);
     if (kind !== 'alias') return null;
     const network = this.currentNetwork();
     const key = this.composeKey(network, value);
     const rec = this.state.get<AliasRecord>(NAMESPACE, key);
     if (!rec) return null;
-    if (expectation && expectation !== 'any' && rec.type !== expectation)
-      return null;
+    if (expectation && rec.type !== expectation) return null;
     return rec;
   }
 
@@ -96,7 +92,14 @@ export class AliasManagementServiceImpl implements AliasManagementService {
 
   private currentNetwork(): SupportedNetwork {
     const n = this.network.getCurrentNetwork();
-    if (n === 'mainnet' || n === 'testnet' || n === 'previewnet') return n;
+    if (
+      n === 'mainnet' ||
+      n === 'testnet' ||
+      n === 'previewnet' ||
+      n === 'localnet'
+    ) {
+      return n as SupportedNetwork;
+    }
     return 'testnet';
   }
 }

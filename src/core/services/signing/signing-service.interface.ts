@@ -1,4 +1,5 @@
 import type { Transaction as HederaTransaction } from '@hashgraph/sdk';
+import { SupportedNetwork } from '../../types/shared.types';
 
 /**
  * Interface for transaction signing and execution
@@ -79,8 +80,6 @@ export interface TransactionResponse {
   transactionId: string;
   getReceipt(): Promise<TransactionReceipt>;
 }
-
-export type SupportedNetwork = 'mainnet' | 'testnet' | 'previewnet';
 
 export type SignerRef = {
   alias?: string;

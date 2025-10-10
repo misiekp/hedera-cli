@@ -4,6 +4,7 @@ import {
   CredentialsRecord,
   KeyAlgorithm,
 } from './credentials-types.interface';
+import { SupportedNetwork } from '../../types/shared.types';
 import { randomBytes } from 'crypto';
 import {
   PrivateKey,
@@ -143,7 +144,7 @@ export class CredentialsStateServiceImpl implements CredentialsStateService {
     return null;
   }
 
-  createClient(network: 'mainnet' | 'testnet' | 'previewnet'): Client {
+  createClient(network: SupportedNetwork): Client {
     const mapping = this.getDefaultOperator() || this.ensureDefaultFromEnv();
     if (!mapping) {
       throw new Error('[CRED] No default operator configured');

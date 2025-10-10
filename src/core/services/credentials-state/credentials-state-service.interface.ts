@@ -1,6 +1,7 @@
 import type { CredentialType } from './credentials-types.interface';
 import { CredentialsStateSignerService } from './credentials-state-signer-service.interface';
 import { Client, Transaction as HederaTransaction } from '@hashgraph/sdk';
+import { SupportedNetwork } from '../../types/shared.types';
 
 export interface CredentialsStateService {
   createLocalPrivateKey(labels?: string[]): {
@@ -34,7 +35,7 @@ export interface CredentialsStateService {
   ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null;
 
   // Client operations that don't expose private keys
-  createClient(network: 'mainnet' | 'testnet' | 'previewnet'): Client;
+  createClient(network: SupportedNetwork): Client;
   signTransaction(
     transaction: HederaTransaction,
     keyRefId: string,
