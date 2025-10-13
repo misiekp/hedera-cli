@@ -12,8 +12,22 @@ function decodeConsensusTopicData(data: TopicMessage) {}
 export async function findMessageHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
-  const topicId = args.args.topicId as string;
+  const topicIdOrAlias = args.args.topicId as string;
   const sequenceNumber = args.args.sequenceNumber as number | undefined;
+
+  const currentNetwork = api.network.getCurrentNetwork();
+
+  // Resolve topic ID from alias if exist
+  let topicId = topicIdOrAlias;
+  const topicAliasResult = api.alias.resolve(
+    topicIdOrAlias,
+    'topic',
+    currentNetwork,
+  );
+
+  if (topicAliasResult?.entityId) {
+    topicId = topicAliasResult.entityId;
+  }
 
   logger.log(`   Finding messages in topic: ${topicId}`);
 

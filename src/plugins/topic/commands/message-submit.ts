@@ -13,8 +13,22 @@ export async function submitMessageHandler(args: CommandHandlerArgs) {
   const topicState = new ZustandTopicStateHelper(api.state, logger);
 
   // Extract command arguments
-  const topicId = args.args.topicId as string;
+  const topicIdOrAlias = args.args.topicId as string;
   const message = args.args.message as string;
+
+  const currentNetwork = api.network.getCurrentNetwork();
+
+  // Resolve topic ID from alias if exist
+  let topicId = topicIdOrAlias;
+  const topicAliasResult = api.alias.resolve(
+    topicIdOrAlias,
+    'topic',
+    currentNetwork,
+  );
+
+  if (topicAliasResult?.entityId) {
+    topicId = topicAliasResult.entityId;
+  }
 
   logger.log(`Submitting message to topic: ${topicId}`);
 
