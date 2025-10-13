@@ -1,52 +1,59 @@
 /**
- * Mock implementation of Network Service
- * This is a placeholder implementation for testing the architecture
+ * Network Service Implementation
+ * Manages network state through Zustand store
  */
-import { NetworkService, NetworkConfig } from './network-service.interface';
+import {
+  NetworkService,
+  NetworkConfig,
+  LocalnetConfig,
+} from './network-service.interface';
+import { getState, saveState } from '../../../state/store';
 
-export class MockNetworkService implements NetworkService {
-  private currentNetwork: string = 'testnet';
-  private availableNetworks: string[] = ['mainnet', 'testnet', 'previewnet'];
-
+export class NetworkServiceImpl implements NetworkService {
   /**
-   * Get the current active network (mock implementation)
+   * Get the current active network from state
    */
   getCurrentNetwork(): string {
-    console.log(`[MOCK] Getting current network: ${this.currentNetwork}`);
-    return this.currentNetwork;
+    const network = getState().network;
+    console.log(`[MOCK] Getting current network: ${network}`);
+    return network;
   }
 
   /**
-   * Get list of available networks (mock implementation)
+   * Get list of available networks from state
    */
   getAvailableNetworks(): string[] {
-    console.log(
-      `[MOCK] Getting available networks: ${this.availableNetworks.join(', ')}`,
-    );
-    return [...this.availableNetworks];
+    const networks = Object.keys(getState().networks);
+    console.log(`[MOCK] Getting available networks: ${networks.join(', ')}`);
+    return networks;
   }
 
   /**
-   * Switch to a different network (mock implementation)
+   * Switch to a different network and persist to state
    */
   switchNetwork(network: string): void {
+    const currentNetwork = this.getCurrentNetwork();
     console.log(
-      `[MOCK] Switching network from ${this.currentNetwork} to ${network}`,
+      `[MOCK] Switching network from ${currentNetwork} to ${network}`,
     );
-    this.currentNetwork = network;
+    saveState({ network });
   }
 
   /**
-   * Get configuration for a specific network (mock implementation)
+   * Get configuration for a specific network from state
    */
   getNetworkConfig(network: string): NetworkConfig {
     console.log(`[MOCK] Getting network config for: ${network}`);
+    const networkConfig = getState().networks[network];
 
-    // Mock implementation - return mock network config
+    if (!networkConfig) {
+      throw new Error(`Network configuration not found: ${network}`);
+    }
+
     return {
       name: network,
-      rpcUrl: `https://${network}.hedera.com:50211`,
-      mirrorNodeUrl: `https://${network}.mirrornode.hedera.com`,
+      rpcUrl: networkConfig.rpcUrl,
+      mirrorNodeUrl: networkConfig.mirrorNodeUrl,
       chainId: network === 'mainnet' ? '0x127' : '0x128',
       explorerUrl: `https://hashscan.io/${network}`,
       isTestnet: network !== 'mainnet',
@@ -54,10 +61,23 @@ export class MockNetworkService implements NetworkService {
   }
 
   /**
-   * Check if a network is available (mock implementation)
+   * Check if a network is available in state
    */
   isNetworkAvailable(network: string): boolean {
     console.log(`[MOCK] Checking if network is available: ${network}`);
-    return this.availableNetworks.includes(network);
+    return network in getState().networks;
+  }
+
+  /**
+   * Get localnet-specific configuration from state
+   */
+  getLocalnetConfig(): LocalnetConfig {
+    const state = getState();
+    console.log(`[MOCK] Getting localnet configuration`);
+    return {
+      localNodeAddress: state.localNodeAddress,
+      localNodeAccountId: state.localNodeAccountId,
+      localNodeMirrorAddressGRPC: state.localNodeMirrorAddressGRPC,
+    };
   }
 }

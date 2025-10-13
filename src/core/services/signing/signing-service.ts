@@ -10,6 +10,7 @@ import { Logger } from '../logger/logger-service.interface';
 import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
 import { NetworkService } from '../network/network-service.interface';
 import type { SignerRef } from './signing-service.interface';
+import type { SupportedNetwork } from '../../types/shared.types';
 import {
   Client,
   TransactionResponse,
@@ -19,7 +20,6 @@ import {
 } from '@hashgraph/sdk';
 
 export class TransactionServiceImpl implements TransactionService {
-  private client!: Client;
   private logger: Logger;
   private credentialsState: KeyManagementService;
   private networkService: NetworkService;
@@ -32,20 +32,21 @@ export class TransactionServiceImpl implements TransactionService {
     this.logger = logger;
     this.credentialsState = credentialsState;
     this.networkService = networkService;
-
-    // Initialize with credentials from state or environment
-    void this.initializeCredentials();
   }
 
-  private initializeCredentials(): void {
-    this.logger.debug('[SIGNING] Initializing credentials');
+  /**
+   * Get a fresh Hedera client for the current network
+   */
+  private getClient(): Client {
+    this.logger.debug('[SIGNING] Creating client for current network');
 
-    // Get network from NetworkService
+    // Get current network from NetworkService
     const currentNetwork = this.networkService.getCurrentNetwork();
-    const network = currentNetwork as 'mainnet' | 'testnet' | 'previewnet';
+
+    const network = currentNetwork as SupportedNetwork;
 
     // Use credentials-state to create client without exposing private keys
-    this.client = this.credentialsState.createClient(network);
+    return this.credentialsState.createClient(network);
   }
 
   /**
@@ -57,6 +58,9 @@ export class TransactionServiceImpl implements TransactionService {
     this.logger.debug(`[SIGNING] Signing and executing transaction`);
 
     try {
+      // Get fresh client for current network
+      const client = this.getClient();
+
       // Get default operator keyRefId for signing
       const mapping =
         this.credentialsState.getDefaultOperator() ||
@@ -65,7 +69,7 @@ export class TransactionServiceImpl implements TransactionService {
         throw new Error('[SIGNING] No default operator configured');
       }
 
-      transaction.freezeWith(this.client);
+      transaction.freezeWith(client);
 
       // Sign using credentials-state without exposing private key
       await this.credentialsState.signTransaction(
@@ -74,12 +78,8 @@ export class TransactionServiceImpl implements TransactionService {
       );
 
       // Execute the transaction
-      const response: TransactionResponse = await transaction.execute(
-        this.client,
-      );
-      const receipt: TransactionReceipt = await response.getReceipt(
-        this.client,
-      );
+      const response: TransactionResponse = await transaction.execute(client);
+      const receipt: TransactionReceipt = await response.getReceipt(client);
 
       this.logger.debug(
         `[SIGNING] Transaction executed successfully: ${response.transactionId.toString()}`,
@@ -113,18 +113,18 @@ export class TransactionServiceImpl implements TransactionService {
     transaction: HederaTransaction,
     signer: SignerRef,
   ): Promise<TransactionResult> {
+    // Get fresh client for current network
+    const client = this.getClient();
     const keyRefId = this.resolveSignerRef(signer);
 
-    transaction.freezeWith(this.client);
+    transaction.freezeWith(client);
 
     // Sign using credentials-state without exposing private key
     await this.credentialsState.signTransaction(transaction, keyRefId);
 
     // Execute the transaction
-    const response: TransactionResponse = await transaction.execute(
-      this.client,
-    );
-    const receipt: TransactionReceipt = await response.getReceipt(this.client);
+    const response: TransactionResponse = await transaction.execute(client);
+    const receipt: TransactionReceipt = await response.getReceipt(client);
 
     return {
       transactionId: response.transactionId.toString(),

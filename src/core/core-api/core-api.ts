@@ -15,7 +15,7 @@ import { TransactionServiceImpl } from '../services/signing/signing-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
-import { MockNetworkService } from '../services/network/network-service';
+import { NetworkServiceImpl } from '../services/network/network-service';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
 import { HbarService } from '../services/hbar/hbar-service.interface';
@@ -41,7 +41,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.logger = new MockLoggerService();
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
-    this.network = new MockNetworkService();
+    this.network = new NetworkServiceImpl();
 
     // Initialize all services with dependencies
     this.accountTransactions = new AccountServiceImpl(this.logger);
