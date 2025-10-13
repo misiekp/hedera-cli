@@ -8,13 +8,13 @@ import {
   PublicKey,
   PrivateKey,
 } from '@hashgraph/sdk';
+import { TopicService } from './topic-transaction-service.interface';
 import {
-  TopicService,
   CreateTopicParams,
-  TopicCreateResult,
-  SubmitMessageParams,
   MessageSubmitResult,
-} from './topic-transaction-service.interface';
+  SubmitMessageParams,
+  TopicCreateResult,
+} from './types';
 
 export class HederaTopicTransactionService implements TopicService {
   isPrivateKey(key: string): boolean {
