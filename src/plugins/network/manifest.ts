@@ -32,12 +32,6 @@ export const networkPluginManifest: PluginManifest = {
       handler: './commands/use',
     },
   ],
-  init: () => {
-    console.log('[NETWORK PLUGIN] Initializing network plugin...');
-  },
-  teardown: () => {
-    console.log('[NETWORK PLUGIN] Tearing down network plugin...');
-  },
 };
 
 export default networkPluginManifest;
