@@ -5,6 +5,7 @@
 import { CommandHandlerArgs } from '../../../core';
 import { formatError } from '../../../utils/errors';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
+import { AliasRecord } from '../../../core/services/alias/alias-service.interface';
 
 export async function createTopicHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -26,30 +27,69 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
   }
 
   try {
-    // 1. Create transaction using Core API
+    const currentNetwork = api.network.getCurrentNetwork();
+
+    // 1. Find and resolve aliases
+    let topicAdminKeyAlias: AliasRecord | undefined = undefined;
+    let topicSubmitKeyAlias: AliasRecord | undefined = undefined;
+
+    if (adminKey) {
+      const adminKeyAlias = api.alias.resolve(
+        adminKey,
+        'account',
+        currentNetwork,
+      );
+
+      if (adminKeyAlias) {
+        topicAdminKeyAlias = adminKeyAlias;
+      }
+    }
+
+    if (submitKey) {
+      const submitKeyAlias = api.alias.resolve(
+        submitKey,
+        'account',
+        currentNetwork,
+      );
+
+      if (submitKeyAlias) {
+        topicSubmitKeyAlias = submitKeyAlias;
+      }
+    }
+
+    // 2. Create transaction using Core API
     const topicCreateResult = api.topicTransactions.createTopic({
       memo,
-      adminKey,
-      submitKey,
+      adminKey: topicAdminKeyAlias?.publicKey || adminKey,
+      submitKey: topicSubmitKeyAlias?.publicKey || submitKey,
     });
 
-    // 2. Sign and execute transaction
-    const result = await api.signing.signAndExecute(
-      topicCreateResult.transaction,
-    );
+    // 3. Ensure key exist in credentials
+    let adminKeyRefId: string | undefined = topicAdminKeyAlias?.keyRefId;
+    let submitKeyRefId: string | undefined = topicSubmitKeyAlias?.keyRefId;
 
-    let adminKeyRefId: string | undefined = undefined;
-    let submitKeyRefId: string | undefined = undefined;
-
-    // 3. Save submit, admin private key to credentials if exists
-    if (adminKey) {
+    if (adminKey && !topicAdminKeyAlias) {
       const { keyRefId } = api.credentialsState.importPrivateKey(adminKey);
       adminKeyRefId = keyRefId;
     }
 
-    if (submitKey) {
+    if (submitKey && !topicSubmitKeyAlias) {
       const { keyRefId } = api.credentialsState.importPrivateKey(submitKey);
       submitKeyRefId = keyRefId;
+    }
+
+    let result;
+
+    // 4. Sign and execute transaction
+    if (topicAdminKeyAlias?.publicKey || adminKey) {
+      result = await api.signing.signAndExecuteWith(
+        topicCreateResult.transaction,
+        {
+          keyRefId: adminKeyRefId,
+        },
+      );
+    } else {
+      result = await api.signing.signAndExecute(topicCreateResult.transaction);
     }
 
     if (result.success) {
@@ -79,6 +119,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
 
       logger.log(`✅ Topic created successfully: ${topicData.topicId}`);
       logger.log(`   Network: ${topicData.network}`);
+      logger.log(`   Name (Alias): ${topicData.name}`);
       if (topicData.memo) {
         logger.log(`   Memo: ${topicData.memo}`);
       }

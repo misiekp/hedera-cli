@@ -5,6 +5,7 @@
 import {
   TopicCreateTransaction,
   TopicMessageSubmitTransaction,
+  PublicKey,
   PrivateKey,
 } from '@hashgraph/sdk';
 import {
@@ -16,6 +17,25 @@ import {
 } from './topic-transaction-service.interface';
 
 export class HederaTopicTransactionService implements TopicTransactionService {
+  isPrivateKey(key: string): boolean {
+    try {
+      PrivateKey.fromStringDer(key);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  createKeyFromString(key: string) {
+    const isKeyPrivate = this.isPrivateKey(key);
+
+    if (isKeyPrivate) {
+      return PrivateKey.fromStringDer(key);
+    }
+
+    return PublicKey.fromString(key);
+  }
+
   createTopic(params: CreateTopicParams): TopicCreateResult {
     // Create the topic creation transaction
     const topicCreateTx = new TopicCreateTransaction();
@@ -25,30 +45,19 @@ export class HederaTopicTransactionService implements TopicTransactionService {
       topicCreateTx.setTopicMemo(params.memo);
     }
 
-    let adminPrivateKey: string | undefined;
-    let submitPrivateKey: string | undefined;
-
     if (params.adminKey) {
-      const adminKey = PrivateKey.fromStringDer(params.adminKey);
+      const adminKey = this.createKeyFromString(params.adminKey);
       topicCreateTx.setAdminKey(adminKey);
     }
 
     if (params.submitKey) {
-      const submitKey = PrivateKey.fromStringDer(params.submitKey);
+      const submitKey = this.createKeyFromString(params.submitKey);
       topicCreateTx.setSubmitKey(submitKey);
     }
 
     const resultResponse: TopicCreateResult = {
       transaction: topicCreateTx,
     };
-
-    if (adminPrivateKey) {
-      resultResponse.adminPrivateKey = adminPrivateKey;
-    }
-
-    if (submitPrivateKey) {
-      resultResponse.submitPrivateKey = submitPrivateKey;
-    }
 
     return resultResponse;
   }

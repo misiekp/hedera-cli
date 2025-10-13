@@ -21,8 +21,6 @@ export interface TopicTransactionService {
 
 export interface TopicCreateResult {
   transaction: TopicCreateTransaction;
-  adminPrivateKey?: string;
-  submitPrivateKey?: string;
 }
 
 export interface MessageSubmitResult {

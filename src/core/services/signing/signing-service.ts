@@ -134,9 +134,16 @@ export class TransactionServiceImpl implements TransactionService {
     );
     const receipt: TransactionReceipt = await response.getReceipt(this.client);
 
+    // Extract topic ID for topic creation transactions
+    let topicId: string | undefined;
+    if (receipt.topicId) {
+      topicId = receipt.topicId.toString();
+    }
+
     return {
       transactionId: response.transactionId.toString(),
       success: receipt.status === Status.Success,
+      topicId,
       receipt: {
         status: {
           status: receipt.status === Status.Success ? 'success' : 'failed',
