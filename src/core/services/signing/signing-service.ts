@@ -1,5 +1,3 @@
-import { Transaction as HederaTransaction } from '@hashgraph/sdk';
-
 /**
  * Real implementation of Signing Service
  * Uses Hedera SDK to sign and execute transactions
