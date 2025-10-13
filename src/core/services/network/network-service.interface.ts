@@ -27,6 +27,11 @@ export interface NetworkService {
    * Check if a network is available
    */
   isNetworkAvailable(network: string): boolean;
+
+  /**
+   * Get localnet-specific configuration
+   */
+  getLocalnetConfig(): LocalnetConfig;
 }
 
 // Network configuration types
@@ -37,6 +42,12 @@ export interface NetworkConfig {
   chainId: string;
   explorerUrl?: string;
   isTestnet: boolean;
+}
+
+export interface LocalnetConfig {
+  localNodeAddress: string;
+  localNodeAccountId: string;
+  localNodeMirrorAddressGRPC: string;
 }
 
 export interface NetworkInfo {

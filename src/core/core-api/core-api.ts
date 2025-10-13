@@ -50,6 +50,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.credentialsState = new KeyManagementServiceImpl(
       this.logger,
       this.state,
+      this.network,
     );
     this.signing = new TransactionServiceImpl(
       this.logger,
