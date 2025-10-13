@@ -5,9 +5,43 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { Filter } from '../../../../types';
-import { TopicMessage } from '../../../core/services/mirrornode/types';
 
-function decodeConsensusTopicData(data: TopicMessage) {}
+function buildSequenceNumberFilter(
+  args: CommandHandlerArgs['args'],
+): Filter | undefined {
+  const sequenceFilters = [
+    {
+      operation: 'gt',
+      value: args.sequenceNumberGt,
+    },
+    {
+      operation: 'gte',
+      value: args.sequenceNumberGte,
+    },
+    {
+      operation: 'lt',
+      value: args.sequenceNumberLt,
+    },
+    {
+      operation: 'lte',
+      value: args.sequenceNumberLte,
+    },
+    {
+      operation: 'eq',
+      value: args.sequenceNumberEq,
+    },
+    {
+      operation: 'ne',
+      value: args.sequenceNumberNe,
+    },
+  ];
+
+  const nonEmptyFilters = sequenceFilters.filter(
+    (f) => f.value !== undefined,
+  ) as Filter[];
+
+  return nonEmptyFilters.length > 0 ? nonEmptyFilters[0] : undefined;
+}
 
 export async function findMessageHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -52,41 +86,9 @@ export async function findMessageHandler(args: CommandHandlerArgs) {
       return process.exit(0);
     }
 
-    const sequenceFilters = [
-      {
-        operation: 'gt',
-        value: args.args.sequenceNumberGt,
-      },
-      {
-        operation: 'gte',
-        value: args.args.sequenceNumberGte,
-      },
-      {
-        operation: 'lt',
-        value: args.args.sequenceNumberLt,
-      },
-      {
-        operation: 'lte',
-        value: args.args.sequenceNumberLte,
-      },
-      {
-        operation: 'eq',
-        value: args.args.sequenceNumberEq,
-      },
-      {
-        operation: 'ne',
-        value: args.args.sequenceNumberNe,
-      },
-    ];
+    const activeFilter = buildSequenceNumberFilter(args.args);
 
-    const nonEmptyFilters = sequenceFilters.filter(
-      (f) => f.value !== undefined,
-    ) as Filter[];
-
-    if (nonEmptyFilters.length > 0) {
-      // Take first filter as priority
-      const activeFilter = nonEmptyFilters[0];
-
+    if (activeFilter) {
       const response = await api.mirror.getTopicMessages({
         topicId,
         filter: {
