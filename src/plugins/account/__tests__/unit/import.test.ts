@@ -2,7 +2,6 @@ import { importAccountHandler } from '../../commands/import';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { NetworkService } from '../../../../core/services/network/network-service.interface';
 import {
   makeLogger,
   makeArgs,
@@ -36,7 +35,7 @@ describe('account plugin - import command', () => {
 
   test('imports account successfully', async () => {
     const logger = makeLogger();
-    const saveAccountMock = jest.fn().mockResolvedValue(undefined);
+    const saveAccountMock = jest.fn().mockReturnValue(undefined);
 
     MockedHelper.mockImplementation(() => ({
       hasAccount: jest.fn().mockReturnValue(false),

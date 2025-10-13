@@ -49,7 +49,7 @@ export async function findMessageHandler(args: CommandHandlerArgs) {
 
       logger.log(`   Message: "${decodedMessage}"`);
       logger.log(`   Timestamp: ${timestamp}`);
-      process.exit(0);
+      return process.exit(0);
     }
 
     const sequenceFilters = [
@@ -114,11 +114,13 @@ export async function findMessageHandler(args: CommandHandlerArgs) {
           logger.log(''); // Empty line between messages
         }
       });
+
+      return process.exit(0);
     }
 
     logger.error('No sequence number or filter provided.');
 
-    process.exit(0);
+    return process.exit(0);
   } catch (error: unknown) {
     logger.error(formatError('❌ Failed to find messages', error));
     process.exit(1);

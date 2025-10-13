@@ -1,13 +1,16 @@
 import type { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { submitMessageHandler } from '../commands/message-submit';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import { Logger } from '../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../core/core-api/core-api.interface';
-import type {
-  SigningService,
-  TransactionResult,
-} from '../../../core/services/signing/signing-service.interface';
+import type { TransactionResult } from '../../../core/services/signing/signing-service.interface';
 import type { TopicData } from '../schema';
+import {
+  makeLogger,
+  makeArgs,
+  makeNetworkMock,
+  makeAliasMock,
+  setupExitSpy,
+} from '../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -16,14 +19,6 @@ jest.mock('../zustand-state-helper', () => ({
 }));
 
 const MockedHelper = ZustandTopicStateHelper as jest.Mock;
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
 
 const makeTopicData = (overrides: Partial<TopicData> = {}): TopicData => ({
   name: 'test-topic',
@@ -40,11 +35,13 @@ const makeApiMocks = ({
   signAndExecuteImpl,
   signAndExecuteWithImpl,
   freezeTransactionImpl,
+  network = 'testnet',
 }: {
   submitMessageImpl?: jest.Mock;
   signAndExecuteImpl?: jest.Mock;
   signAndExecuteWithImpl?: jest.Mock;
   freezeTransactionImpl?: jest.Mock;
+  network?: 'testnet' | 'mainnet' | 'previewnet';
 }) => {
   const topicTransactions = {
     createTopic: jest.fn(),
@@ -57,7 +54,7 @@ const makeApiMocks = ({
     }),
   };
 
-  const signing: jest.Mocked<SigningService> = {
+  const signing = {
     signAndExecute: signAndExecuteImpl || jest.fn(),
     signAndExecuteWith: signAndExecuteWithImpl || jest.fn(),
     sign: jest.fn(),
@@ -67,25 +64,14 @@ const makeApiMocks = ({
       freezeTransactionImpl || jest.fn().mockReturnValue(mockTransaction),
   };
 
-  return { topicTransactions, signing };
+  const networkMock = makeNetworkMock(network);
+  const alias = makeAliasMock();
+
+  return { topicTransactions, signing, networkMock, alias };
 };
 
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
@@ -106,7 +92,7 @@ describe('topic plugin - message-submit command', () => {
     const loadTopicMock = jest.fn().mockReturnValue(topicData);
     MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
 
-    const { topicTransactions, signing } = makeApiMocks({
+    const { topicTransactions, signing, networkMock, alias } = makeApiMocks({
       submitMessageImpl: jest.fn().mockReturnValue({
         transaction: {},
       }),
@@ -121,6 +107,9 @@ describe('topic plugin - message-submit command', () => {
     const api: Partial<CoreAPI> = {
       topicTransactions,
       signing,
+      network: networkMock,
+      alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -156,7 +145,7 @@ describe('topic plugin - message-submit command', () => {
     const loadTopicMock = jest.fn().mockReturnValue(topicData);
     MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
 
-    const { topicTransactions, signing } = makeApiMocks({
+    const { topicTransactions, signing, networkMock, alias } = makeApiMocks({
       submitMessageImpl: jest.fn().mockReturnValue({
         transaction: {},
       }),
@@ -171,6 +160,9 @@ describe('topic plugin - message-submit command', () => {
     const api: Partial<CoreAPI> = {
       topicTransactions,
       signing,
+      network: networkMock,
+      alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -196,11 +188,14 @@ describe('topic plugin - message-submit command', () => {
     const loadTopicMock = jest.fn().mockReturnValue(null);
     MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
 
-    const { topicTransactions, signing } = makeApiMocks({});
+    const { topicTransactions, signing, networkMock, alias } = makeApiMocks({});
 
     const api: Partial<CoreAPI> = {
       topicTransactions,
       signing,
+      network: networkMock,
+      alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -225,7 +220,7 @@ describe('topic plugin - message-submit command', () => {
     const loadTopicMock = jest.fn().mockReturnValue(topicData);
     MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
 
-    const { topicTransactions, signing } = makeApiMocks({
+    const { topicTransactions, signing, networkMock, alias } = makeApiMocks({
       submitMessageImpl: jest.fn().mockReturnValue({
         transaction: {},
       }),
@@ -239,6 +234,9 @@ describe('topic plugin - message-submit command', () => {
     const api: Partial<CoreAPI> = {
       topicTransactions,
       signing,
+      network: networkMock,
+      alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -263,7 +261,7 @@ describe('topic plugin - message-submit command', () => {
     const loadTopicMock = jest.fn().mockReturnValue(topicData);
     MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
 
-    const { topicTransactions, signing } = makeApiMocks({
+    const { topicTransactions, signing, networkMock, alias } = makeApiMocks({
       submitMessageImpl: jest.fn().mockImplementation(() => {
         throw new Error('network error');
       }),
@@ -272,6 +270,9 @@ describe('topic plugin - message-submit command', () => {
     const api: Partial<CoreAPI> = {
       topicTransactions,
       signing,
+      network: networkMock,
+      alias: alias as any,
+      state: {} as any,
       logger,
     };
 

@@ -1,13 +1,16 @@
 import type { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { createTopicHandler } from '../commands/create';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import { Logger } from '../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../core/core-api/core-api.interface';
-import type {
-  SigningService,
-  TransactionResult,
-} from '../../../core/services/signing/signing-service.interface';
-import type { NetworkService } from '../../../core/services/network/network-service.interface';
+import type { TransactionResult } from '../../../core/services/signing/signing-service.interface';
+import {
+  makeLogger,
+  makeArgs,
+  makeNetworkMock,
+  makeCredentialsStateMock,
+  makeAliasMock,
+  setupExitSpy,
+} from '../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -17,21 +20,15 @@ jest.mock('../zustand-state-helper', () => ({
 
 const MockedHelper = ZustandTopicStateHelper as jest.Mock;
 
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
-
 const makeApiMocks = ({
   createTopicImpl,
   signAndExecuteImpl,
+  signAndExecuteWithImpl,
   network = 'testnet',
 }: {
   createTopicImpl?: jest.Mock;
   signAndExecuteImpl?: jest.Mock;
+  signAndExecuteWithImpl?: jest.Mock;
   network?: 'testnet' | 'mainnet' | 'previewnet';
 }) => {
   const topicTransactions = {
@@ -39,55 +36,28 @@ const makeApiMocks = ({
     submitMessage: jest.fn(),
   };
 
-  const signing: jest.Mocked<SigningService> = {
+  const signing = {
     signAndExecute: signAndExecuteImpl || jest.fn(),
+    signAndExecuteWith: signAndExecuteWithImpl || jest.fn(),
     sign: jest.fn(),
     execute: jest.fn(),
     getStatus: jest.fn(),
     freezeTransaction: jest.fn(),
   };
 
-  const networkMock: jest.Mocked<NetworkService> = {
-    getCurrentNetwork: jest.fn().mockReturnValue(network),
-    getAvailableNetworks: jest.fn(),
-    switchNetwork: jest.fn(),
-    getNetworkConfig: jest.fn(),
-    isNetworkAvailable: jest.fn(),
-  };
-
-  const credentialsState = {
-    importPrivateKey: jest.fn().mockImplementation((key: string) => ({
-      keyRefId: `kr_${key.slice(-5)}`,
-      publicKey: 'mock-public-key',
-    })),
-  };
-
-  const alias = {
-    register: jest.fn(),
-    resolve: jest.fn(),
-    list: jest.fn(),
-    delete: jest.fn(),
-  };
+  const networkMock = makeNetworkMock(network);
+  const credentialsState = makeCredentialsStateMock();
+  credentialsState.importPrivateKey.mockImplementation((key: string) => ({
+    keyRefId: `kr_${key.slice(-5)}`,
+    publicKey: 'mock-public-key',
+  }));
+  const alias = makeAliasMock();
 
   return { topicTransactions, signing, networkMock, credentialsState, alias };
 };
 
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
@@ -123,6 +93,7 @@ describe('topic plugin - create command', () => {
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -165,7 +136,7 @@ describe('topic plugin - create command', () => {
         createTopicImpl: jest.fn().mockReturnValue({
           transaction: {},
         }),
-        signAndExecuteImpl: jest.fn().mockResolvedValue({
+        signAndExecuteWithImpl: jest.fn().mockResolvedValue({
           transactionId: 'tx-456',
           success: true,
           topicId: '0.0.8888',
@@ -179,6 +150,7 @@ describe('topic plugin - create command', () => {
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -197,6 +169,12 @@ describe('topic plugin - create command', () => {
     });
     expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(adminKey);
     expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(submitKey);
+    expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
+      {},
+      {
+        keyRefId: 'kr_admin',
+      },
+    );
     expect(saveTopicMock).toHaveBeenCalledWith(
       '0.0.8888',
       expect.objectContaining({
@@ -234,6 +212,7 @@ describe('topic plugin - create command', () => {
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -279,6 +258,7 @@ describe('topic plugin - create command', () => {
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
+      state: {} as any,
       logger,
     };
 
@@ -309,6 +289,7 @@ describe('topic plugin - create command', () => {
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
+      state: {} as any,
       logger,
     };
 

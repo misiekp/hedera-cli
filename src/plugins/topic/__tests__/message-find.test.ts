@@ -1,18 +1,16 @@
 import type { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { findMessageHandler } from '../commands/message-find';
-import { Logger } from '../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../core/services/mirrornode/hedera-mirrornode-service.interface';
+import {
+  makeLogger,
+  makeArgs,
+  makeNetworkMock,
+  makeAliasMock,
+  setupExitSpy,
+} from '../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
 
 const makeTopicMessage = (sequenceNumber: number, message: string) => ({
   consensus_timestamp: '1234567890.123456789',
@@ -27,9 +25,11 @@ const makeTopicMessage = (sequenceNumber: number, message: string) => ({
 const makeApiMocks = ({
   getTopicMessageImpl,
   getTopicMessagesImpl,
+  network = 'testnet',
 }: {
   getTopicMessageImpl?: jest.Mock;
   getTopicMessagesImpl?: jest.Mock;
+  network?: 'testnet' | 'mainnet' | 'previewnet';
 }) => {
   const mirror: jest.Mocked<HederaMirrornodeService> = {
     getTopicMessage: getTopicMessageImpl || jest.fn(),
@@ -46,25 +46,14 @@ const makeApiMocks = ({
     getExchangeRate: jest.fn(),
   };
 
-  return { mirror };
+  const networkMock = makeNetworkMock(network);
+  const alias = makeAliasMock();
+
+  return { mirror, networkMock, alias };
 };
 
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
@@ -80,12 +69,14 @@ describe('topic plugin - message-find command', () => {
     const logger = makeLogger();
     const mockMessage = makeTopicMessage(5, 'Hello, World!');
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessageImpl: jest.fn().mockResolvedValue(mockMessage),
     });
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -115,7 +106,7 @@ describe('topic plugin - message-find command', () => {
       makeTopicMessage(8, 'Message 8'),
     ];
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: mockMessages,
         links: { next: null },
@@ -124,6 +115,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -158,7 +151,7 @@ describe('topic plugin - message-find command', () => {
       makeTopicMessage(6, 'Message 6'),
     ];
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: mockMessages,
         links: { next: null },
@@ -167,6 +160,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -197,7 +192,7 @@ describe('topic plugin - message-find command', () => {
       makeTopicMessage(2, 'Message 2'),
     ];
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: mockMessages,
         links: { next: null },
@@ -206,6 +201,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -231,7 +228,7 @@ describe('topic plugin - message-find command', () => {
     const logger = makeLogger();
     const mockMessages = [makeTopicMessage(3, 'Message 3')];
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: mockMessages,
         links: { next: null },
@@ -240,6 +237,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -265,7 +264,7 @@ describe('topic plugin - message-find command', () => {
     const logger = makeLogger();
     const mockMessages = [makeTopicMessage(5, 'Message 5')];
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: mockMessages,
         links: { next: null },
@@ -274,6 +273,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -302,7 +303,7 @@ describe('topic plugin - message-find command', () => {
       makeTopicMessage(3, 'Message 3'),
     ];
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: mockMessages,
         links: { next: null },
@@ -311,6 +312,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -335,10 +338,12 @@ describe('topic plugin - message-find command', () => {
   test('logs error when no sequence number or filter provided', async () => {
     const logger = makeLogger();
 
-    const { mirror } = makeApiMocks({});
+    const { mirror, networkMock, alias } = makeApiMocks({});
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -357,7 +362,7 @@ describe('topic plugin - message-find command', () => {
   test('logs error and exits when getTopicMessage throws', async () => {
     const logger = makeLogger();
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessageImpl: jest
         .fn()
         .mockRejectedValue(new Error('network error')),
@@ -365,6 +370,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -384,7 +391,7 @@ describe('topic plugin - message-find command', () => {
   test('logs error and exits when getTopicMessages throws', async () => {
     const logger = makeLogger();
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest
         .fn()
         .mockRejectedValue(new Error('network error')),
@@ -392,6 +399,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -411,7 +420,7 @@ describe('topic plugin - message-find command', () => {
   test('handles empty message list', async () => {
     const logger = makeLogger();
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: [],
         links: { next: null },
@@ -420,6 +429,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 
@@ -430,9 +441,8 @@ describe('topic plugin - message-find command', () => {
 
     await findMessageHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      'No sequence number or filter provided.',
-    );
+    // Should exit successfully even with empty messages since filter was provided
+    expect(logger.error).not.toHaveBeenCalled();
     expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
@@ -440,7 +450,7 @@ describe('topic plugin - message-find command', () => {
     const logger = makeLogger();
     const mockMessages = [makeTopicMessage(6, 'Message 6')];
 
-    const { mirror } = makeApiMocks({
+    const { mirror, networkMock, alias } = makeApiMocks({
       getTopicMessagesImpl: jest.fn().mockResolvedValue({
         messages: mockMessages,
         links: { next: null },
@@ -449,6 +459,8 @@ describe('topic plugin - message-find command', () => {
 
     const api: Partial<CoreAPI> = {
       mirror,
+      network: networkMock,
+      alias: alias as any,
       logger,
     };
 

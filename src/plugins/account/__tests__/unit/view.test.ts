@@ -36,7 +36,7 @@ describe('account plugin - view command', () => {
     const account = makeAccountData({ name: 'acc1', accountId: '0.0.1111' });
 
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockResolvedValue(account),
+      loadAccount: jest.fn().mockReturnValue(account),
     }));
 
     const mirrorMock = makeMirrorMock();
@@ -59,7 +59,7 @@ describe('account plugin - view command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockResolvedValue(null),
+      loadAccount: jest.fn().mockReturnValue(null),
     }));
 
     const mirrorMock = makeMirrorMock();
@@ -107,7 +107,9 @@ describe('account plugin - view command', () => {
     const logger = makeLogger();
 
     MockedHelper.mockImplementation(() => ({
-      loadAccount: jest.fn().mockRejectedValue(new Error('state error')),
+      loadAccount: jest.fn().mockImplementation(() => {
+        throw new Error('state error');
+      }),
     }));
 
     const mirrorMock = makeMirrorMock();

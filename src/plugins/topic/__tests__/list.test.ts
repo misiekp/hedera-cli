@@ -1,9 +1,13 @@
 import type { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { listTopicsHandler } from '../commands/list';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import { Logger } from '../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../core/core-api/core-api.interface';
 import type { TopicData } from '../schema';
+import {
+  makeLogger,
+  makeArgs,
+  setupExitSpy,
+} from '../../../../__tests__/helpers/plugin';
 
 let exitSpy: jest.SpyInstance;
 
@@ -12,14 +16,6 @@ jest.mock('../zustand-state-helper', () => ({
 }));
 
 const MockedHelper = ZustandTopicStateHelper as jest.Mock;
-
-const makeLogger = (): jest.Mocked<Logger> => ({
-  log: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  verbose: jest.fn(),
-  warn: jest.fn(),
-});
 
 const makeTopicData = (overrides: Partial<TopicData> = {}): TopicData => ({
   name: 'test-topic',
@@ -31,22 +27,8 @@ const makeTopicData = (overrides: Partial<TopicData> = {}): TopicData => ({
   ...overrides,
 });
 
-const makeArgs = (
-  api: Partial<CoreAPI>,
-  logger: jest.Mocked<Logger>,
-  args: Record<string, unknown>,
-): CommandHandlerArgs => ({
-  api: api as CoreAPI,
-  logger,
-  state: {} as any,
-  config: {} as any,
-  args,
-});
-
 beforeAll(() => {
-  exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-    return undefined as never;
-  });
+  exitSpy = setupExitSpy();
 });
 
 afterAll(() => {
