@@ -40,7 +40,7 @@ export async function submitMessageHandler(args: CommandHandlerArgs) {
     }
 
     // 1. Create message submit transaction using Core API
-    const messageSubmitTx = api.topicTransactions.submitMessage({
+    const messageSubmitTx = api.topic.submitMessage({
       topicId,
       message,
     });

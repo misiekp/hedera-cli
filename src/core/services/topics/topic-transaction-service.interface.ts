@@ -7,7 +7,7 @@ import {
  * Interface for Topic-related transaction operations
  * All topic transaction services must implement this interface
  */
-export interface TopicTransactionService {
+export interface TopicService {
   /**
    * Create a new Hedera topic
    */

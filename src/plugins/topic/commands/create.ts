@@ -58,7 +58,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
     }
 
     // 2. Create transaction using Core API
-    const topicCreateResult = api.topicTransactions.createTopic({
+    const topicCreateResult = api.topic.createTopic({
       memo,
       adminKey: topicAdminKeyAlias?.publicKey || adminKey,
       submitKey: topicSubmitKeyAlias?.publicKey || submitKey,

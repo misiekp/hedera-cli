@@ -105,7 +105,7 @@ describe('topic plugin - message-submit command', () => {
     });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       alias: alias as any,
@@ -158,7 +158,7 @@ describe('topic plugin - message-submit command', () => {
     });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       alias: alias as any,
@@ -191,7 +191,7 @@ describe('topic plugin - message-submit command', () => {
     const { topicTransactions, signing, networkMock, alias } = makeApiMocks({});
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       alias: alias as any,
@@ -232,7 +232,7 @@ describe('topic plugin - message-submit command', () => {
     });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       alias: alias as any,
@@ -268,7 +268,7 @@ describe('topic plugin - message-submit command', () => {
     });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       alias: alias as any,

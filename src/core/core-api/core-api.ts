@@ -5,7 +5,7 @@
 import { CoreAPI } from './core-api.interface';
 import { AccountService } from '../services/account/account-transaction-service.interface';
 import { TransactionService } from '../services/signing/signing-service.interface';
-import { TopicTransactionService } from '../services/topics/topic-transaction-service.interface';
+import { TopicService } from '../services/topics/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
@@ -30,7 +30,7 @@ import { KeyManagementServiceImpl } from '../services/credentials-state/credenti
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountService;
   public signing: TransactionService;
-  public topicTransactions: TopicTransactionService;
+  public topic: TopicService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
   public network: NetworkService;
@@ -59,7 +59,7 @@ export class CoreAPIImplementation implements CoreAPI {
       this.credentialsState,
       this.network,
     );
-    this.topicTransactions = new HederaTopicTransactionService();
+    this.topic = new HederaTopicTransactionService();
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
     let ledgerId: LedgerId;

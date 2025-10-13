@@ -4,7 +4,7 @@
  */
 import { AccountService } from '../services/account/account-transaction-service.interface';
 import { TransactionService } from '../services/signing/signing-service.interface';
-import { TopicTransactionService } from '../services/topics/topic-transaction-service.interface';
+import { TopicService } from '../services/topics/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
@@ -23,7 +23,7 @@ export interface CoreAPI {
   /**
    * Topic transaction operations
    */
-  topicTransactions: TopicTransactionService;
+  topic: TopicService;
 
   /**
    * Transaction signing and execution

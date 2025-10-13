@@ -9,14 +9,14 @@ import {
   PrivateKey,
 } from '@hashgraph/sdk';
 import {
-  TopicTransactionService,
+  TopicService,
   CreateTopicParams,
   TopicCreateResult,
   SubmitMessageParams,
   MessageSubmitResult,
 } from './topic-transaction-service.interface';
 
-export class HederaTopicTransactionService implements TopicTransactionService {
+export class HederaTopicTransactionService implements TopicService {
   isPrivateKey(key: string): boolean {
     try {
       PrivateKey.fromStringDer(key);

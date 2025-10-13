@@ -88,7 +88,7 @@ describe('topic plugin - create command', () => {
       });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       credentialsState: credentialsState as any,
@@ -145,7 +145,7 @@ describe('topic plugin - create command', () => {
       });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       credentialsState: credentialsState as any,
@@ -207,7 +207,7 @@ describe('topic plugin - create command', () => {
       });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       credentialsState: credentialsState as any,
@@ -253,7 +253,7 @@ describe('topic plugin - create command', () => {
       });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       credentialsState: credentialsState as any,
@@ -284,7 +284,7 @@ describe('topic plugin - create command', () => {
       });
 
     const api: Partial<CoreAPI> = {
-      topicTransactions,
+      topic: topicTransactions,
       signing,
       network: networkMock,
       credentialsState: credentialsState as any,
