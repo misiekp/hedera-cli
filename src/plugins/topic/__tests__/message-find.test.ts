@@ -1,4 +1,3 @@
-import type { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { findMessageHandler } from '../commands/message-find';
 import type { CoreAPI } from '../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../core/services/mirrornode/hedera-mirrornode-service.interface';

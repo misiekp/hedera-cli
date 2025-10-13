@@ -1,4 +1,3 @@
-import type { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { listTopicsHandler } from '../commands/list';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
 import type { CoreAPI } from '../../../core/core-api/core-api.interface';
