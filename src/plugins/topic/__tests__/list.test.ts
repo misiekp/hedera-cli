@@ -22,10 +22,9 @@ const makeLogger = (): jest.Mocked<Logger> => ({
 });
 
 const makeTopicData = (overrides: Partial<TopicData> = {}): TopicData => ({
+  name: 'test-topic',
   topicId: '0.0.1234',
   memo: 'Test topic',
-  adminKey: undefined,
-  submitKey: undefined,
   network: 'testnet',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -85,8 +84,8 @@ describe('topic plugin - list command', () => {
   test('lists topics without keys', () => {
     const logger = makeLogger();
     const topics = [
-      makeTopicData({ topicId: '0.0.1111', memo: 'Topic 1' }),
-      makeTopicData({ topicId: '0.0.2222', memo: 'Topic 2' }),
+      makeTopicData({ topicId: '0.0.1111', memo: 'Topic 1', name: 'Topic 1' }),
+      makeTopicData({ topicId: '0.0.2222', memo: 'Topic 2', name: 'Topic 2' }),
     ];
 
     MockedHelper.mockImplementation(() => ({
@@ -123,8 +122,9 @@ describe('topic plugin - list command', () => {
       makeTopicData({
         topicId: '0.0.3333',
         memo: 'Topic 3',
-        adminKey: '302e020100300506032b657004220420admin',
-        submitKey: '302e020100300506032b657004220420submit',
+        name: 'Topic 3',
+        adminKeyRefId: 'kr_admin123',
+        submitKeyRefId: 'kr_submit123',
       }),
     ];
 
@@ -158,11 +158,13 @@ describe('topic plugin - list command', () => {
         makeTopicData({
           topicId: '0.0.4444',
           memo: 'Mainnet Topic',
+          name: 'Mainnet Topic',
           network: 'mainnet',
         }),
         makeTopicData({
           topicId: '0.0.5555',
           memo: 'Testnet Topic',
+          name: 'Testnet Topic',
           network: 'testnet',
         }),
       ]),
@@ -195,6 +197,7 @@ describe('topic plugin - list command', () => {
         makeTopicData({
           topicId: '0.0.5555',
           memo: 'Testnet Topic',
+          name: 'Testnet Topic',
           network: 'testnet',
         }),
       ]),
@@ -224,12 +227,14 @@ describe('topic plugin - list command', () => {
       makeTopicData({
         topicId: '0.0.1111',
         memo: 'Topic 1',
-        adminKey: 'admin1',
+        name: 'Topic 1',
+        adminKeyRefId: 'kr_admin1',
       }),
       makeTopicData({
         topicId: '0.0.2222',
         memo: 'Topic 2',
-        submitKey: 'submit1',
+        name: 'Topic 2',
+        submitKeyRefId: 'kr_submit1',
       }),
     ];
 

@@ -8,20 +8,11 @@ import type {
   TransactionResult,
 } from '../../../core/services/signing/signing-service.interface';
 import type { TopicData } from '../schema';
-import { PrivateKey } from '@hashgraph/sdk';
 
 let exitSpy: jest.SpyInstance;
 
 jest.mock('../zustand-state-helper', () => ({
   ZustandTopicStateHelper: jest.fn(),
-}));
-
-jest.mock('@hashgraph/sdk', () => ({
-  PrivateKey: {
-    fromStringDer: jest.fn().mockReturnValue({
-      toString: jest.fn().mockReturnValue('mocked-key'),
-    }),
-  },
 }));
 
 const MockedHelper = ZustandTopicStateHelper as jest.Mock;
@@ -35,10 +26,9 @@ const makeLogger = (): jest.Mocked<Logger> => ({
 });
 
 const makeTopicData = (overrides: Partial<TopicData> = {}): TopicData => ({
+  name: 'test-topic',
   topicId: '0.0.1234',
   memo: 'Test topic',
-  adminKey: undefined,
-  submitKey: undefined,
   network: 'testnet',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -48,10 +38,12 @@ const makeTopicData = (overrides: Partial<TopicData> = {}): TopicData => ({
 const makeApiMocks = ({
   submitMessageImpl,
   signAndExecuteImpl,
+  signAndExecuteWithImpl,
   freezeTransactionImpl,
 }: {
   submitMessageImpl?: jest.Mock;
   signAndExecuteImpl?: jest.Mock;
+  signAndExecuteWithImpl?: jest.Mock;
   freezeTransactionImpl?: jest.Mock;
 }) => {
   const topicTransactions = {
@@ -67,6 +59,7 @@ const makeApiMocks = ({
 
   const signing: jest.Mocked<SigningService> = {
     signAndExecute: signAndExecuteImpl || jest.fn(),
+    signAndExecuteWith: signAndExecuteWithImpl || jest.fn(),
     sign: jest.fn(),
     execute: jest.fn(),
     getStatus: jest.fn(),
@@ -142,7 +135,6 @@ describe('topic plugin - message-submit command', () => {
     expect(topicTransactions.submitMessage).toHaveBeenCalledWith({
       topicId: '0.0.1234',
       message: 'Hello, World!',
-      submitKey: undefined,
     });
     expect(logger.log).toHaveBeenCalledWith(
       '✅ Message submitted successfully',
@@ -155,30 +147,25 @@ describe('topic plugin - message-submit command', () => {
 
   test('submits message successfully with submit key', async () => {
     const logger = makeLogger();
-    const submitKey = '302e020100300506032b657004220420submit';
+    const submitKeyRefId = 'kr_submit123';
     const topicData = makeTopicData({
       topicId: '0.0.5678',
       memo: 'Test topic with key',
-      submitKey,
+      submitKeyRefId,
     });
     const loadTopicMock = jest.fn().mockReturnValue(topicData);
     MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
-
-    const mockSignedTransaction = {
-      sign: jest.fn().mockResolvedValue({}),
-    };
 
     const { topicTransactions, signing } = makeApiMocks({
       submitMessageImpl: jest.fn().mockReturnValue({
         transaction: {},
       }),
-      signAndExecuteImpl: jest.fn().mockResolvedValue({
+      signAndExecuteWithImpl: jest.fn().mockResolvedValue({
         transactionId: 'tx-456',
         success: true,
         topicSequenceNumber: 10,
         receipt: {} as any,
       } as TransactionResult),
-      freezeTransactionImpl: jest.fn().mockReturnValue(mockSignedTransaction),
     });
 
     const api: Partial<CoreAPI> = {
@@ -194,8 +181,10 @@ describe('topic plugin - message-submit command', () => {
 
     await submitMessageHandler(args);
 
-    expect(PrivateKey.fromStringDer).toHaveBeenCalledWith(submitKey);
-    expect(mockSignedTransaction.sign).toHaveBeenCalled();
+    expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
+      {},
+      { keyRefId: submitKeyRefId },
+    );
     expect(logger.log).toHaveBeenCalledWith(
       '✅ Message submitted successfully',
     );
