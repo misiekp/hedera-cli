@@ -18,6 +18,9 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
   const adminKey = args.args.adminKey as string | undefined;
   const submitKey = args.args.submitKey as string | undefined;
 
+  const alias = args.args.alias as string | undefined;
+  const name = alias || `topic-${Date.now()}`;
+
   if (memo) {
     logger.log(`Creating topic with memo: ${memo}`);
   }
@@ -35,17 +38,42 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
       topicCreateResult.transaction,
     );
 
+    let adminKeyRefId: string | undefined = undefined;
+    let submitKeyRefId: string | undefined = undefined;
+
+    // 3. Save submit, admin private key to credentials if exists
+    if (adminKey) {
+      const { keyRefId } = api.credentialsState.importPrivateKey(adminKey);
+      adminKeyRefId = keyRefId;
+    }
+
+    if (submitKey) {
+      const { keyRefId } = api.credentialsState.importPrivateKey(submitKey);
+      submitKeyRefId = keyRefId;
+    }
+
     if (result.success) {
       // 3. Store topic in state with real data using state helper
       const topicData = {
+        name,
         topicId: result.topicId || '(unknown)',
         memo: memo || '(No memo)',
-        adminKey,
-        submitKey,
+        adminKeyRefId,
+        submitKeyRefId,
         network: api.network.getCurrentNetwork(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+
+      if (alias) {
+        api.alias.register({
+          alias,
+          type: 'topic',
+          network: api.network.getCurrentNetwork(),
+          entityId: result.topicId,
+          createdAt: new Date().toISOString(),
+        });
+      }
 
       topicState.saveTopic(String(result.topicId), topicData);
 
@@ -54,8 +82,8 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
       if (topicData.memo) {
         logger.log(`   Memo: ${topicData.memo}`);
       }
-      logger.log(`   Admin key: ${topicData.adminKey}`);
-      logger.log(`   Submit key: ${topicData.submitKey}`);
+      logger.log(`   Admin key: ${Boolean(topicData.adminKeyRefId)}`);
+      logger.log(`   Submit key: ${Boolean(topicData.submitKeyRefId)}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
       process.exit(0);

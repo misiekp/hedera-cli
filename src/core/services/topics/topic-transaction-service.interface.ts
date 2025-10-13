@@ -40,5 +40,4 @@ export interface CreateTopicParams {
 export interface SubmitMessageParams {
   topicId: string;
   message: string;
-  submitKey?: string; // DER-encoded private key if topic has a submit key
 }

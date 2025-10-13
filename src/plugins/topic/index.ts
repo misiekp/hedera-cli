@@ -5,7 +5,7 @@
 export { topicPluginManifest } from './manifest';
 
 // Export command handlers
-export { createTopicHandler } from './commands/create';
-export { listTopicsHandler } from './commands/list';
+export { createTopicHandler as createHandler } from './commands/create';
+export { listTopicsHandler as listHandler } from './commands/list';
 export { submitMessageHandler } from './commands/message-submit';
 export { findMessageHandler } from './commands/message-find';

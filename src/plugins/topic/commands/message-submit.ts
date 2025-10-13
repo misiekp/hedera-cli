@@ -2,10 +2,9 @@
  * Topic Message Submit Command Handler
  * Handles submitting messages to topics
  */
-import { CommandHandlerArgs } from '../../../core';
+import { CommandHandlerArgs, TransactionResult } from '../../../core';
 import { formatError } from '../../../utils/errors';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import { PrivateKey } from '@hashgraph/sdk';
 
 export async function submitMessageHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -25,35 +24,35 @@ export async function submitMessageHandler(args: CommandHandlerArgs) {
     if (!topicData) {
       throw new Error(`Topic not found with name: ${topicId}`);
     }
-    const submitKey = topicData.submitKey;
+
     // 1. Create message submit transaction using Core API
-    const messageSubmitResult = api.topicTransactions.submitMessage({
+    const messageSubmitTx = api.topicTransactions.submitMessage({
       topicId,
       message,
-      submitKey,
     });
 
-    let transaction = api.signing.freezeTransaction(
-      messageSubmitResult.transaction,
-    );
+    let txResult: TransactionResult;
 
-    // 2. If we have a submit key, sign the transaction with it
-    if (submitKey) {
-      const privateKey = PrivateKey.fromStringDer(submitKey);
-      transaction = await transaction.sign(privateKey);
+    // 2. If we have a submit key, sign the transaction with it and execute else execute
+    if (topicData.submitKeyRefId) {
+      txResult = await api.signing.signAndExecuteWith(
+        messageSubmitTx.transaction,
+        {
+          keyRefId: topicData.submitKeyRefId,
+        },
+      );
+    } else {
+      txResult = await api.signing.signAndExecute(messageSubmitTx.transaction);
     }
 
-    // 3. Sign and execute transaction
-    const result = await api.signing.signAndExecute(transaction);
-
-    if (result.success) {
+    if (txResult.success) {
       logger.log(`✅ Message submitted successfully`);
       logger.log(`   Topic ID: ${topicId}`);
       logger.log(`   Message: "${message}"`);
-      if (result.topicSequenceNumber) {
-        logger.log(`   Sequence Number: ${result.topicSequenceNumber}`);
+      if (txResult.topicSequenceNumber) {
+        logger.log(`   Sequence Number: ${txResult.topicSequenceNumber}`);
       }
-      logger.log(`   Transaction ID: ${result.transactionId}`);
+      logger.log(`   Transaction ID: ${txResult.transactionId}`);
 
       process.exit(0);
     } else {

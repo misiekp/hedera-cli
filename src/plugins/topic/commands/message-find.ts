@@ -5,6 +5,9 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { Filter } from '../../../../types';
+import { TopicMessage } from '../../../core/services/mirrornode/types';
+
+function decodeConsensusTopicData(data: TopicMessage) {}
 
 export async function findMessageHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;

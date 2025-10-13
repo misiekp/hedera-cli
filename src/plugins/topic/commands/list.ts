@@ -39,7 +39,7 @@ export function listTopicsHandler(args: CommandHandlerArgs) {
     logger.log('──────────────────────────────────────');
 
     topics.forEach((topic, index) => {
-      logger.log(`${index + 1}. ${topic.memo ?? '(No memo)'}`);
+      logger.log(`${index + 1}. ${topic.name ?? '(No memo)'}`);
       logger.log(`   Topic ID: ${topic.topicId}`);
       logger.log(`   Network: ${topic.network}`);
 
@@ -48,13 +48,13 @@ export function listTopicsHandler(args: CommandHandlerArgs) {
       }
 
       if (showKeys) {
-        if (topic.adminKey) {
+        if (topic.adminKeyRefId) {
           logger.log(`   Admin Key: ✅ Present`);
         }
-        if (topic.submitKey) {
+        if (topic.submitKeyRefId) {
           logger.log(`   Submit Key: ✅ Present`);
         }
-        if (!topic.adminKey && !topic.submitKey) {
+        if (!topic.adminKeyRefId && !topic.submitKeyRefId) {
           logger.log(`   Keys: None`);
         }
       }

@@ -7,15 +7,23 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // Zod schema for runtime validation
 export const TopicDataSchema = z.object({
+  name: z
+    .string()
+    .max(50, 'Alias must be 50 characters or less')
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Name can only contain letters, numbers, underscores, and hyphens',
+    ),
+
   topicId: z
     .string()
     .regex(/^0\.0\.[0-9]+$/, 'Topic ID must be in format 0.0.123456'),
 
   memo: z.string().max(100, 'Memo must be 100 characters or less').optional(),
 
-  adminKey: z.string().optional().describe('DER-encoded admin private key'),
+  adminKeyRefId: z.string().min(1, 'Key reference ID is required').optional(),
 
-  submitKey: z.string().optional().describe('DER-encoded submit private key'),
+  submitKeyRefId: z.string().min(1, 'Key reference ID is required').optional(),
 
   autoRenewAccount: z
     .string()

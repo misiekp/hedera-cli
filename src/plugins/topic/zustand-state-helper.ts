@@ -211,13 +211,13 @@ export class ZustandTopicStateHelper {
 
     if (criteria.hasAdminKey !== undefined) {
       topics = topics.filter(
-        (topic) => Boolean(topic.adminKey) === criteria.hasAdminKey,
+        (topic) => Boolean(topic.adminKeyRefId) === criteria.hasAdminKey,
       );
     }
 
     if (criteria.hasSubmitKey !== undefined) {
       topics = topics.filter(
-        (topic) => Boolean(topic.submitKey) === criteria.hasSubmitKey,
+        (topic) => Boolean(topic.submitKeyRefId) === criteria.hasSubmitKey,
       );
     }
 
@@ -253,8 +253,8 @@ export class ZustandTopicStateHelper {
       stats.byNetwork[topic.network] =
         (stats.byNetwork[topic.network] || 0) + 1;
 
-      if (topic.adminKey) stats.withAdminKey++;
-      if (topic.submitKey) stats.withSubmitKey++;
+      if (topic.adminKeyRefId) stats.withAdminKey++;
+      if (topic.submitKeyRefId) stats.withSubmitKey++;
       if (topic.memo) stats.withMemo++;
     }
 
