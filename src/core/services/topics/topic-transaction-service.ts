@@ -17,6 +17,8 @@ import {
 } from './types';
 
 export class TopicServiceImpl implements TopicService {
+  // Currently we only support DER formatted ECDSA private/public keys
+  // @TODO Support for HEX format and ED25519 keys
   isPrivateKey(key: string): boolean {
     try {
       PrivateKey.fromStringDer(key);
