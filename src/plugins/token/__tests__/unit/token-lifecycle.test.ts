@@ -60,16 +60,16 @@ describe('Token Lifecycle Integration', () => {
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest
+          signAndExecuteWith: jest
             .fn()
             .mockImplementation((transaction, key) => {
               // Mock different responses based on transaction type
@@ -118,7 +118,7 @@ describe('Token Lifecycle Integration', () => {
             }),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
           }),
@@ -135,7 +135,7 @@ describe('Token Lifecycle Integration', () => {
           decimals: 2,
           initialSupply: 1000,
           supplyType: 'FINITE',
-          treasuryKey,
+          treasury: `${treasuryAccountId}:${treasuryKey}`,
           adminKey: 'admin-key',
         },
         api,
@@ -152,8 +152,7 @@ describe('Token Lifecycle Integration', () => {
       const associateArgs: CommandHandlerArgs = {
         args: {
           tokenId,
-          accountId: userAccountId,
-          accountKey: userKey,
+          account: `${userAccountId}:${userKey}`,
         },
         api,
         state: {} as any,
@@ -169,10 +168,9 @@ describe('Token Lifecycle Integration', () => {
       const transferArgs: CommandHandlerArgs = {
         args: {
           tokenId,
-          from: treasuryAccountId,
+          from: `${treasuryAccountId}:${treasuryKey}`,
           to: userAccountId,
           balance: 100,
-          fromKey: treasuryKey,
         },
         api,
         state: {} as any,
@@ -193,7 +191,6 @@ describe('Token Lifecycle Integration', () => {
         supplyType: 'FINITE',
         maxSupply: 1000,
         treasuryId: treasuryAccountId,
-        treasuryKey: treasuryKey,
         adminKey: 'admin-key',
       });
 
@@ -246,13 +243,13 @@ describe('Token Lifecycle Integration', () => {
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest
+          signAndExecuteWith: jest
             .fn()
             .mockImplementation((transaction, key) => {
               if (transaction === mockTokenTransaction) {
@@ -283,7 +280,7 @@ describe('Token Lifecycle Integration', () => {
             }),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
           }),
@@ -314,8 +311,7 @@ describe('Token Lifecycle Integration', () => {
       const associateArgs: CommandHandlerArgs = {
         args: {
           tokenId,
-          accountId: userAccountId,
-          accountKey: userKey,
+          account: `${userAccountId}:${userKey}`,
         },
         api,
         state: {} as any,
@@ -364,7 +360,7 @@ describe('Token Lifecycle Integration', () => {
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
           createTokenAssociationTransaction: jest
             .fn()
             .mockImplementation(({ accountId }) => {
@@ -375,7 +371,7 @@ describe('Token Lifecycle Integration', () => {
             }),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockImplementation((transaction) => {
+          signAndExecuteWith: jest.fn().mockImplementation((transaction) => {
             if (
               transaction === mockTokenTransaction ||
               transaction === mockAssociationTransaction1 ||
@@ -396,7 +392,7 @@ describe('Token Lifecycle Integration', () => {
           }),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
           }),
@@ -427,8 +423,7 @@ describe('Token Lifecycle Integration', () => {
       const associateArgs1: CommandHandlerArgs = {
         args: {
           tokenId,
-          accountId: userAccountId1,
-          accountKey: userKey1,
+          account: `${userAccountId1}:${userKey1}`,
         },
         api,
         state: {} as any,
@@ -444,8 +439,7 @@ describe('Token Lifecycle Integration', () => {
       const associateArgs2: CommandHandlerArgs = {
         args: {
           tokenId,
-          accountId: userAccountId2,
-          accountKey: userKey2,
+          account: `${userAccountId2}:${userKey2}`,
         },
         api,
         state: {} as any,
@@ -488,20 +482,20 @@ describe('Token Lifecycle Integration', () => {
         credentials,
       } = makeApiMocks({
         tokenTransactions: {
-          createTokenTransaction: jest.fn().mockResolvedValue({}),
-          createTokenAssociationTransaction: jest.fn().mockResolvedValue({}),
+          createTokenTransaction: jest.fn().mockReturnValue({}),
+          createTokenAssociationTransaction: jest.fn().mockReturnValue({}),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue({
+          signAndExecuteWith: jest.fn().mockReturnValue({
             success: true,
             transactionId: '0.0.123@1234567890.123456789',
             receipt: {},
           }),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
-            privateKey: 'treasury-key',
+            keyRefId: 'treasury-key-ref-id',
           }),
         },
       });
@@ -529,8 +523,7 @@ describe('Token Lifecycle Integration', () => {
       const associateArgs: CommandHandlerArgs = {
         args: {
           tokenId,
-          accountId: userAccountId,
-          accountKey: 'user-key',
+          account: `${userAccountId}:user-key`,
         },
         api,
         state: {} as any,

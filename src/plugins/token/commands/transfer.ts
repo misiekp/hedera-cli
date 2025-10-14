@@ -3,47 +3,95 @@
  * Handles token transfer operations using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import {
+  safeValidateTokenTransferParams,
+  resolveAccountParameter,
+  resolveDestinationAccountParameter,
+} from '../schema';
 // import { ZustandTokenStateHelper } from '../zustand-state-helper';
 
 export async function transferTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
+  // Validate command parameters
+  const validationResult = safeValidateTokenTransferParams(args.args);
+  if (!validationResult.success) {
+    logger.error('❌ Invalid command parameters:');
+    validationResult.error.errors.forEach((error) => {
+      logger.error(`   - ${error.path.join('.')}: ${error.message}`);
+    });
+    process.exit(1);
+    return; // Ensure execution stops (for testing with mocked process.exit)
+  }
+
   // Initialize token state helper
   // const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
-  // Extract command arguments (using camelCase as passed by the CLI)
-  const tokenId = args.args['tokenId'] as string;
-  const toAccountId = args.args['to'] as string;
-  const fromAccountId = args.args['from'] as string;
-  const amount = args.args['balance'] as number;
-  const fromKey = args.args['fromKey'] as string;
+  // Use validated parameters
+  const validatedParams = validationResult.data;
+  const tokenId = validatedParams.tokenId;
+  const from = validatedParams.from;
+  const to = validatedParams.to;
+  const amount = validatedParams.balance;
 
-  // Validate required parameters
-  if (!fromKey) {
-    throw new Error('From account key is required for token transfer');
+  // Resolve from parameter (alias or account-id:private-key) if provided
+
+  const network = api.network.getCurrentNetwork() as
+    | 'mainnet'
+    | 'testnet'
+    | 'previewnet';
+  const resolvedFromAccount = await resolveAccountParameter(from, api, network);
+
+  // From account was explicitly provided - it MUST resolve or fail
+  if (!resolvedFromAccount) {
+    throw new Error(
+      `Failed to resolve from account parameter: ${from}. ` +
+        `Expected format: account-alias OR account-id:private-key`,
+    );
   }
 
-  logger.log(`🔑 Using provided from account key for signing`);
+  // Use resolved from account from alias or account-id:private-key
+  const fromAccountId = resolvedFromAccount.accountId;
+  const signerKeyRefId = resolvedFromAccount.accountKeyRefId;
+
+  logger.log(`🔑 Using from account: ${fromAccountId}`);
+  logger.log(`🔑 Will sign with from account key`);
+
+  // Resolve to parameter (alias or account-id)
+  const resolvedToAccount = await resolveDestinationAccountParameter(
+    to,
+    api,
+    network,
+  );
+
+  // To account was explicitly provided - it MUST resolve or fail
+  if (!resolvedToAccount) {
+    throw new Error(
+      `Failed to resolve to account parameter: ${to}. ` +
+        `Expected format: account-alias OR account-id`,
+    );
+  }
+
+  const toAccountId = resolvedToAccount.accountId;
+
   logger.log(
     `Transferring ${amount} tokens of ${tokenId} from ${fromAccountId} to ${toAccountId}`,
   );
 
   try {
     // 1. Create transfer transaction using Core API
-    const transferTransaction =
-      await api.tokenTransactions.createTransferTransaction({
-        tokenId,
-        fromAccountId,
-        toAccountId,
-        amount,
-      });
+    const transferTransaction = await api.tokens.createTransferTransaction({
+      tokenId,
+      fromAccountId,
+      toAccountId,
+      amount,
+    });
 
-    // 2. Sign and execute transaction using the provided from account key
-    logger.debug(`Using from account key for signing transaction`);
-    const result = await api.signing.signAndExecuteWithKey(
-      transferTransaction,
-      fromKey,
-    );
+    // 2. Sign and execute transaction using the from account key
+    logger.debug(`Using key ${signerKeyRefId} for signing transaction`);
+    const result = await api.signing.signAndExecuteWith(transferTransaction, {
+      keyRefId: signerKeyRefId,
+    });
 
     if (result.success) {
       logger.log(`✅ Token transfer successful!`);

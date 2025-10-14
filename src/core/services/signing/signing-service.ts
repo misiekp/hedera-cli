@@ -77,6 +77,7 @@ export class TransactionServiceImpl implements TransactionService {
       const response: TransactionResponse = await transaction.execute(
         this.client,
       );
+
       const receipt: TransactionReceipt = await response.getReceipt(
         this.client,
       );
@@ -85,16 +86,23 @@ export class TransactionServiceImpl implements TransactionService {
         `[SIGNING] Transaction executed successfully: ${response.transactionId.toString()}`,
       );
 
-      // Extract account ID for account creation transactions
+      // Extract IDs from receipt based on transaction type
       let accountId: string | undefined;
+      let tokenId: string | undefined;
+
       if (receipt.accountId) {
         accountId = receipt.accountId.toString();
+      }
+
+      if (receipt.tokenId) {
+        tokenId = receipt.tokenId.toString();
       }
 
       return {
         transactionId: response.transactionId.toString(),
         success: receipt.status === Status.Success,
         accountId,
+        tokenId,
         receipt: {
           status: {
             status: receipt.status === Status.Success ? 'success' : 'failed',
@@ -126,9 +134,23 @@ export class TransactionServiceImpl implements TransactionService {
     );
     const receipt: TransactionReceipt = await response.getReceipt(this.client);
 
+    // Extract IDs from receipt based on transaction type
+    let accountId: string | undefined;
+    let tokenId: string | undefined;
+
+    if (receipt.accountId) {
+      accountId = receipt.accountId.toString();
+    }
+
+    if (receipt.tokenId) {
+      tokenId = receipt.tokenId.toString();
+    }
+
     return {
       transactionId: response.transactionId.toString(),
       success: receipt.status === Status.Success,
+      accountId,
+      tokenId,
       receipt: {
         status: {
           status: receipt.status === Status.Success ? 'success' : 'failed',

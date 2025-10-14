@@ -4,7 +4,7 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import { TokenData } from '../schema';
+import { TokenData, resolveTreasuryParameter } from '../schema';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { z } from 'zod';
@@ -48,6 +48,16 @@ const accountSchema = z
   })
   .strict();
 
+// Treasury can be either:
+// 1. A string (alias or treasury-id:treasury-key)
+// 2. An object with accountId and key (legacy format)
+const treasurySchema = z.union([
+  z
+    .string()
+    .min(1, 'Treasury is required (either alias or treasury-id:treasury-key)'),
+  accountSchema,
+]);
+
 const tokenFileSchema = z
   .object({
     name: z.string().min(1).max(100),
@@ -56,7 +66,7 @@ const tokenFileSchema = z
     supplyType: z.union([z.literal('finite'), z.literal('infinite')]),
     initialSupply: z.number().int().nonnegative(),
     maxSupply: z.number().int().nonnegative().default(0),
-    treasury: accountSchema,
+    treasury: treasurySchema,
     keys: keysSchema,
     associations: z.array(accountSchema).default([]),
     customFees: z.array(customFeeSchema).default([]),
@@ -122,34 +132,72 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
 
     const tokenDefinition = validated.data;
 
-    // 2. Create token transaction using Core API
-    const tokenCreateTransaction =
-      await api.tokenTransactions.createTokenTransaction({
-        name: tokenDefinition.name,
-        symbol: tokenDefinition.symbol,
-        treasuryId: tokenDefinition.treasury.accountId,
-        decimals: tokenDefinition.decimals,
-        initialSupply: tokenDefinition.initialSupply,
-        supplyType: tokenDefinition.supplyType.toUpperCase() as
-          | 'FINITE'
-          | 'INFINITE',
-        maxSupply: tokenDefinition.maxSupply,
-        adminKey: tokenDefinition.keys.adminKey,
-        treasuryKey: tokenDefinition.treasury.key,
-        customFees: tokenDefinition.customFees.map((fee) => ({
-          type: fee.type,
-          amount: fee.amount,
-          unitType: fee.unitType,
-          collectorId: fee.collectorId,
-          exempt: fee.exempt,
-        })),
-      });
+    // 2. Resolve treasury parameter
+    const network = api.network.getCurrentNetwork() as
+      | 'mainnet'
+      | 'testnet'
+      | 'previewnet';
+    let treasuryId: string;
+    let treasuryKeyRefId: string;
+    let treasuryPublicKey: string;
 
-    // 3. Sign and execute transaction using the treasury key
+    if (typeof tokenDefinition.treasury === 'string') {
+      // New format: alias or treasury-id:treasury-key
+      const resolvedTreasury = await resolveTreasuryParameter(
+        tokenDefinition.treasury,
+        api,
+        network,
+      );
+
+      if (!resolvedTreasury) {
+        throw new Error('Treasury parameter is required');
+      }
+
+      treasuryId = resolvedTreasury.treasuryId;
+      treasuryKeyRefId = resolvedTreasury.treasuryKeyRefId;
+      treasuryPublicKey = resolvedTreasury.treasuryPublicKey;
+
+      logger.log(`🏦 Using treasury: ${treasuryId}`);
+    } else {
+      // Legacy format: object with accountId and key
+      treasuryId = tokenDefinition.treasury.accountId;
+
+      // Import the treasury key
+      const imported = api.credentialsState.importPrivateKey(
+        tokenDefinition.treasury.key,
+      );
+      treasuryKeyRefId = imported.keyRefId;
+      treasuryPublicKey = imported.publicKey;
+
+      logger.log(`🏦 Using treasury (legacy format): ${treasuryId}`);
+    }
+
+    // 3. Create token transaction using Core API
+    const tokenCreateTransaction = await api.tokens.createTokenTransaction({
+      name: tokenDefinition.name,
+      symbol: tokenDefinition.symbol,
+      treasuryId: treasuryId,
+      decimals: tokenDefinition.decimals,
+      initialSupply: tokenDefinition.initialSupply,
+      supplyType: tokenDefinition.supplyType.toUpperCase() as
+        | 'FINITE'
+        | 'INFINITE',
+      maxSupply: tokenDefinition.maxSupply,
+      adminKey: tokenDefinition.keys.adminKey,
+      customFees: tokenDefinition.customFees.map((fee) => ({
+        type: fee.type,
+        amount: fee.amount,
+        unitType: fee.unitType,
+        collectorId: fee.collectorId,
+        exempt: fee.exempt,
+      })),
+    });
+
+    // 4. Sign and execute transaction using the treasury key
     logger.log(`🔑 Using treasury key for signing transaction`);
-    const result = await api.signing.signAndExecuteWithKey(
+    const result = await api.signing.signAndExecuteWith(
       tokenCreateTransaction,
-      tokenDefinition.treasury.key,
+      { keyRefId: treasuryKeyRefId },
     );
 
     if (result.success && result.tokenId) {
@@ -163,12 +211,12 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
       logger.log(`   Max Supply: ${tokenDefinition.maxSupply}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
-      // 4. Store token in state
+      // 5. Store token in state
       const tokenData: TokenData = {
         tokenId: result.tokenId,
         name: tokenDefinition.name,
         symbol: tokenDefinition.symbol,
-        treasuryId: tokenDefinition.treasury.accountId,
+        treasuryId: treasuryId,
         decimals: tokenDefinition.decimals,
         initialSupply: tokenDefinition.initialSupply,
         supplyType: tokenDefinition.supplyType.toUpperCase() as
@@ -183,7 +231,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
           freezeKey: tokenDefinition.keys.freezeKey || '',
           pauseKey: tokenDefinition.keys.pauseKey || '',
           feeScheduleKey: tokenDefinition.keys.feeScheduleKey || '',
-          treasuryKey: tokenDefinition.treasury.key,
+          treasuryKey: treasuryPublicKey,
         },
         network: api.network.getCurrentNetwork() as
           | 'mainnet'
@@ -199,7 +247,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
         })),
       };
 
-      // 5. Create associations if specified
+      // 6. Create associations if specified
       if (tokenDefinition.associations.length > 0) {
         logger.log(
           `   Creating ${tokenDefinition.associations.length} token associations...`,
@@ -209,15 +257,18 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
           try {
             // Create association transaction
             const associateTransaction =
-              await api.tokenTransactions.createTokenAssociationTransaction({
+              await api.tokens.createTokenAssociationTransaction({
                 tokenId: result.tokenId,
                 accountId: association.accountId,
               });
 
             // Sign and execute with the account's key
-            const associateResult = await api.signing.signAndExecuteWithKey(
-              associateTransaction,
+            const associationImported = api.credentialsState.importPrivateKey(
               association.key,
+            );
+            const associateResult = await api.signing.signAndExecuteWith(
+              associateTransaction,
+              { keyRefId: associationImported.keyRefId },
             );
 
             if (associateResult.success) {
@@ -245,7 +296,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
       await tokenState.saveToken(result.tokenId, tokenData);
       logger.log(`   Token data saved to state`);
 
-      // 5. Store script arguments if provided
+      // 7. Store script arguments if provided
       if (scriptArgs.length > 0) {
         logger.debug(`Storing script arguments: ${scriptArgs.join(', ')}`);
         // Note: In a full implementation, you'd store these in the state or dynamic variables system

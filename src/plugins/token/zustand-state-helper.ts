@@ -118,17 +118,44 @@ export class ZustandTokenStateHelper {
       }
 
       // Check if association already exists
-      const existingAssociation = tokenData.associations.find(
+      // Create a copy of the associations array to avoid immutability issues
+      const associations = Array.isArray(tokenData.associations)
+        ? [...tokenData.associations]
+        : [];
+      const existingAssociation = associations.find(
         (assoc) => assoc.accountId === accountId,
       );
 
       if (!existingAssociation) {
-        tokenData.associations.push({
+        // Create a completely new token object to avoid immutability issues
+        // Create new associations array from scratch to avoid frozen array issues
+        const newAssociations = [];
+        for (const assoc of associations) {
+          newAssociations.push({ ...assoc });
+        }
+        newAssociations.push({
           name: accountName,
           accountId: accountId,
         });
 
-        await this.saveToken(tokenId, tokenData);
+        const updatedTokenData: TokenData = {
+          tokenId: tokenData.tokenId,
+          name: tokenData.name,
+          symbol: tokenData.symbol,
+          treasuryId: tokenData.treasuryId,
+          decimals: tokenData.decimals,
+          initialSupply: tokenData.initialSupply,
+          supplyType: tokenData.supplyType,
+          maxSupply: tokenData.maxSupply,
+          keys: { ...tokenData.keys },
+          network: tokenData.network,
+          associations: newAssociations,
+          customFees: Array.isArray(tokenData.customFees)
+            ? [...tokenData.customFees]
+            : [],
+        };
+
+        await this.saveToken(tokenId, updatedTokenData);
         this.logger.debug(
           `[TOKEN STATE] Added association ${accountId} to token ${tokenId}`,
         );

@@ -6,11 +6,11 @@
   "supplyType": "finite",
   "maxSupply": 5000000,
   "treasury": {
-    "accountId": "0.0.6928192",
-    "key": "302e020100300506032b6570042204208e01bffc1a627321511570e41290132647fac7bb3887101444f881aa2ffd7fa8"
+    "accountId": "0.0.7055223",
+    "key": "9e7a9ddaa53f4a030c83acbcc8e24d01b64da79b75b1ca98ccdecf6b133a6b46"
   },
   "keys": {
-    "adminKey": "302e020100300506032b6570042204208e01bffc1a627321511570e41290132647fac7bb3887101444f881aa2ffd7fa8"
+    "adminKey": "02ff15c8a27ea65977ad309b478db39ab982343781fa16c79ff3a748df8210a477"
   },
   "customFees": [
     {

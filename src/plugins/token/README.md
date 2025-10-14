@@ -30,42 +30,68 @@ src/plugins/token/
 
 ### Token Create
 
+Create a new fungible token with specified properties.
+
 ```bash
 hedera token create \
   --name "My Token" \
   --symbol "MTK" \
-  --treasury-id 0.0.123456 \
-  --treasury-key <private-key> \
+  --treasury 0.0.123456:treasury-key \
   --decimals 2 \
   --initial-supply 1000 \
-  --supply-type finite \
-  --admin-key <private-key>
+  --supply-type FINITE \
+  --max-supply 10000 \
+  --admin-key admin-public-key
 ```
 
 ### Token Associate
 
+Associate a token with an account to enable transfers.
+
 ```bash
 hedera token associate \
   --token-id 0.0.123456 \
-  --account-id 0.0.789012
+  --account 0.0.789012:account-key
 ```
 
 ### Token Transfer
 
+Transfer a fungible token from one account to another.
+
 ```bash
 hedera token transfer \
   --token-id 0.0.123456 \
-  --from 0.0.111111 \
+  --from 0.0.111111:from-key \
   --to 0.0.222222 \
   --balance 100
 ```
+
+### Token Create From File
+
+Create a new token from a JSON file definition with advanced features.
+
+```bash
+hedera token create-from-file \
+  --file token-definition.json \
+  --args additional-args
+```
+
+## 📝 Parameter Formats
+
+The plugin supports flexible account parameter formats:
+
+- **Account ID only**: `0.0.123456` (for destination accounts)
+- **Account ID with key**: `0.0.123456:private-key` (for source accounts that need signing)
+- **Account alias**: `alice` (resolved via alias service)
 
 ## 🔧 Core API Integration
 
 The plugin uses the Core API services:
 
-- `api.tokenTransactions` - Token transaction creation
+- `api.tokens` - Token transaction creation and management
 - `api.signing` - Transaction signing and execution
+- `api.credentialsState` - Account credentials and key management
+- `api.alias` - Account alias resolution
 - `api.state` - Namespaced state management
 - `api.network` - Network information
 - `api.logger` - Logging

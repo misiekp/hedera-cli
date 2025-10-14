@@ -4,11 +4,12 @@
  */
 import type { Logger } from '../../../../../core/services/logger/logger-service.interface';
 import type { CoreAPI } from '../../../../../core/core-api/core-api.interface';
-import type { TokenTransactionService } from '../../../../../core/services/tokens/token-transaction-service.interface';
-import type { SigningService } from '../../../../../core/services/signing/signing-service.interface';
+import type { TokenService } from '../../../../../core/services/token/token-service.interface';
+import type { TransactionService } from '../../../../../core/services/signing/signing-service.interface';
 import type { StateService } from '../../../../../core/services/state/state-service.interface';
-import type { CredentialsService } from '../../../../../core/services/credentials/credentials-service.interface';
-import type { AccountTransactionService } from '../../../../../core/services/accounts/account-transaction-service.interface';
+import type { KeyManagementService } from '../../../../../core/services/credentials-state/credentials-state-service.interface';
+import type { AliasManagementService } from '../../../../../core/services/alias/alias-service.interface';
+import type { AccountService } from '../../../../../core/services/account/account-transaction-service.interface';
 import type { NetworkService } from '../../../../../core/services/network/network-service.interface';
 import type { ConfigService } from '../../../../../core/services/config/config-service.interface';
 import { mockTransactionResults } from './fixtures';
@@ -25,47 +26,78 @@ export const makeLogger = (): jest.Mocked<Logger> => ({
 });
 
 /**
- * Create a mocked TokenTransactionService
+ * Create a mocked TokenService
  */
-export const makeTokenTransactionServiceMock = (
-  overrides?: Partial<jest.Mocked<TokenTransactionService>>,
-): jest.Mocked<TokenTransactionService> => ({
+export const makeTokenServiceMock = (
+  overrides?: Partial<jest.Mocked<TokenService>>,
+): jest.Mocked<TokenService> => ({
   createTokenTransaction: jest.fn(),
   createTokenAssociationTransaction: jest.fn(),
   createTransferTransaction: jest.fn(),
+  createToken: jest.fn(),
+  associateToken: jest.fn(),
+  transfer: jest.fn(),
   ...overrides,
 });
 
 /**
- * Create a mocked SigningService
+ * @deprecated Use makeTokenServiceMock instead
+ */
+export const makeTokenTransactionServiceMock = makeTokenServiceMock;
+
+/**
+ * Create a mocked TransactionService (SigningService)
  */
 export const makeSigningServiceMock = (
-  overrides?: Partial<jest.Mocked<SigningService>>,
-): jest.Mocked<SigningService> => ({
+  overrides?: Partial<jest.Mocked<TransactionService>>,
+): jest.Mocked<TransactionService> => ({
   signAndExecute: jest.fn().mockResolvedValue(mockTransactionResults.success),
-  signAndExecuteWithKey: jest
+  signAndExecuteWith: jest
     .fn()
     .mockResolvedValue(mockTransactionResults.success),
-  signWithKey: jest.fn(),
-  sign: jest.fn(),
-  execute: jest.fn(),
-  getStatus: jest.fn(),
   ...overrides,
 });
 
 /**
- * Create a mocked CredentialsService
+ * Create a mocked KeyManagementService (CredentialsState)
  */
-export const makeCredentialsServiceMock = (
-  overrides?: Partial<jest.Mocked<CredentialsService>>,
-): jest.Mocked<CredentialsService> => ({
-  getDefaultCredentials: jest.fn(),
-  setDefaultCredentials: jest.fn(),
-  getCredentials: jest.fn(),
-  addCredentials: jest.fn(),
-  removeCredentials: jest.fn(),
-  listCredentials: jest.fn(),
-  loadFromEnvironment: jest.fn(),
+export const makeCredentialsStateMock = (
+  overrides?: Partial<jest.Mocked<KeyManagementService>>,
+): jest.Mocked<KeyManagementService> => ({
+  createLocalPrivateKey: jest.fn(),
+  importPrivateKey: jest.fn().mockReturnValue({
+    keyRefId: 'mock-key-ref-id',
+    publicKey: 'mock-public-key',
+  }),
+  getPublicKey: jest.fn().mockReturnValue('mock-public-key'),
+  getSignerHandle: jest.fn(),
+  findByPublicKey: jest.fn(),
+  list: jest.fn().mockReturnValue([]),
+  remove: jest.fn(),
+  setDefaultOperator: jest.fn(),
+  getDefaultOperator: jest.fn().mockReturnValue({
+    accountId: '0.0.100000',
+    keyRefId: 'operator-key-ref-id',
+  }),
+  ensureDefaultFromEnv: jest.fn().mockReturnValue({
+    accountId: '0.0.100000',
+    keyRefId: 'operator-key-ref-id',
+  }),
+  createClient: jest.fn(),
+  signTransaction: jest.fn(),
+  ...overrides,
+});
+
+/**
+ * Create a mocked AliasManagementService
+ */
+export const makeAliasServiceMock = (
+  overrides?: Partial<jest.Mocked<AliasManagementService>>,
+): jest.Mocked<AliasManagementService> => ({
+  register: jest.fn(),
+  resolve: jest.fn().mockReturnValue(null),
+  list: jest.fn().mockReturnValue([]),
+  remove: jest.fn(),
   ...overrides,
 });
 
@@ -93,41 +125,52 @@ export const makeStateServiceMock = (
  * Create a mocked AccountTransactionService
  */
 export const makeAccountTransactionServiceMock =
-  (): jest.Mocked<AccountTransactionService> =>
+  (): jest.Mocked<AccountService> =>
     ({
       createAccount: jest.fn(),
       getAccountInfo: jest.fn(),
       getAccountBalance: jest.fn(),
-    }) as jest.Mocked<AccountTransactionService>;
+    }) as jest.Mocked<AccountService>;
 
 /**
  * Configuration options for makeApiMocks
  */
 interface ApiMocksConfig {
-  tokenTransactions?: Partial<jest.Mocked<TokenTransactionService>>;
-  signing?: Partial<jest.Mocked<SigningService>>;
-  credentials?: Partial<jest.Mocked<CredentialsService>>;
+  tokens?: Partial<jest.Mocked<TokenService>>;
+  tokenTransactions?: Partial<jest.Mocked<TokenService>>; // Deprecated, use 'tokens'
+  signing?: Partial<jest.Mocked<TransactionService>>;
+  credentialsState?: Partial<jest.Mocked<KeyManagementService>>;
+  alias?: Partial<jest.Mocked<AliasManagementService>>;
   state?: Partial<jest.Mocked<StateService>>;
   network?: string;
+  // Legacy support for old test patterns
+  credentials?: Partial<jest.Mocked<KeyManagementService>>;
+  createTransferImpl?: jest.Mock;
+  signAndExecuteImpl?: jest.Mock;
 }
 
 /**
  * Create a complete mocked CoreAPI with configurable services
  */
 export const makeApiMocks = (config?: ApiMocksConfig) => {
-  const tokenTransactions = makeTokenTransactionServiceMock(
-    config?.tokenTransactions,
+  // Support both 'tokens' and 'tokenTransactions' for backward compatibility
+  const tokens = makeTokenServiceMock(
+    config?.tokens || config?.tokenTransactions,
   );
   const signing = makeSigningServiceMock(config?.signing);
-  const credentials = makeCredentialsServiceMock(config?.credentials);
+  const credentialsState = makeCredentialsStateMock(
+    config?.credentialsState || config?.credentials,
+  );
+  const alias = makeAliasServiceMock(config?.alias);
   const state = makeStateServiceMock(config?.state);
   const accountTransactions = makeAccountTransactionServiceMock();
 
   const api: jest.Mocked<CoreAPI> = {
     accountTransactions,
-    tokenTransactions,
+    tokens,
     signing,
-    credentials,
+    credentialsState,
+    alias,
     state,
     mirror: {} as unknown as any,
     network: {
@@ -147,11 +190,15 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
 
   return {
     api,
-    tokenTransactions,
+    tokens,
+    tokenTransactions: tokens, // Deprecated alias for backward compatibility
     signing,
-    credentials,
+    credentialsState,
+    credentials: credentialsState, // Legacy alias for backward compatibility
+    alias,
     state,
     accountTransactions,
+    createTransferImpl: config?.createTransferImpl, // Legacy support
   };
 };
 

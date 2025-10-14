@@ -31,7 +31,7 @@ describe('associateTokenHandler', () => {
   });
 
   describe('success scenarios', () => {
-    test('should associate token with account using provided key', async () => {
+    test('should associate token with account using account-id:account-key format', async () => {
       // Arrange
       const mockAddAssociation = jest.fn();
       const mockAssociationTransaction = { test: 'association-transaction' };
@@ -49,6 +49,7 @@ describe('associateTokenHandler', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -56,7 +57,13 @@ describe('associateTokenHandler', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -64,8 +71,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,
@@ -84,9 +90,82 @@ describe('associateTokenHandler', () => {
         tokenId: '0.0.123456',
         accountId: '0.0.789012',
       });
-      expect(signing.signAndExecuteWithKey).toHaveBeenCalledWith(
+      expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockAssociationTransaction,
+        { keyRefId: 'imported-key-ref-id' },
+      );
+      expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(
         'test-account-key',
+      );
+    });
+
+    test('should associate token with account using alias', async () => {
+      // Arrange
+      const mockAddAssociation = jest.fn();
+      const mockAssociationTransaction = { test: 'association-transaction' };
+      const mockSignResult: TransactionResult = {
+        success: true,
+        transactionId: '0.0.123@1234567890.123456789',
+        receipt: {} as any,
+      };
+
+      mockZustandTokenStateHelper(MockedHelper, {
+        addAssociation: mockAddAssociation,
+      });
+
+      const {
+        api,
+        tokenTransactions: tokenTransactions,
+        signing: signing,
+        alias,
+        credentialsState,
+      } = makeApiMocks({
+        tokenTransactions: {
+          createTokenAssociationTransaction: jest
+            .fn()
+            .mockResolvedValue(mockAssociationTransaction),
+        },
+        signing: {
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        alias: {
+          resolve: jest.fn().mockReturnValue({
+            entityId: '0.0.789012',
+            keyRefId: 'alias-key-ref-id',
+          }),
+        },
+        credentialsState: {
+          getPublicKey: jest.fn().mockReturnValue('alias-public-key'),
+        },
+      });
+
+      const logger = makeLogger();
+      const args: CommandHandlerArgs = {
+        args: {
+          tokenId: '0.0.123456',
+          account: 'alice',
+        },
+        api,
+        state: {} as any,
+        config: {} as any,
+        logger,
+      };
+
+      // Act & Assert
+      await expect(associateTokenHandler(args)).rejects.toThrow(
+        'Process.exit(1)',
+      );
+
+      expect(alias.resolve).toHaveBeenCalledWith('alice', 'account', 'testnet');
+      expect(
+        tokenTransactions.createTokenAssociationTransaction,
+      ).toHaveBeenCalledWith({
+        tokenId: '0.0.123456',
+        accountId: '0.0.789012',
+      });
+      expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
+        mockAssociationTransaction,
+        { keyRefId: 'alias-key-ref-id' },
       );
     });
 
@@ -108,6 +187,7 @@ describe('associateTokenHandler', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -115,7 +195,13 @@ describe('associateTokenHandler', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -123,8 +209,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,
@@ -140,15 +225,14 @@ describe('associateTokenHandler', () => {
   });
 
   describe('validation scenarios', () => {
-    test('should throw error when account key is missing', async () => {
+    test('should throw error when account parameter is missing', async () => {
       // Arrange
       const { api } = makeApiMocks();
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          // accountKey missing
+          // account missing
         },
         api,
         state: {} as any,
@@ -158,7 +242,7 @@ describe('associateTokenHandler', () => {
 
       // Act & Assert
       await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Account key is required for token association',
+        'Process.exit(1)',
       );
     });
 
@@ -169,8 +253,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           // tokenId missing
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,
@@ -179,18 +262,19 @@ describe('associateTokenHandler', () => {
       };
 
       // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow();
+      await expect(associateTokenHandler(args)).rejects.toThrow(
+        'Process.exit(1)',
+      );
     });
 
-    test('should throw error when accountId is missing', async () => {
+    test('should throw error when account parameter is empty', async () => {
       // Arrange
       const { api } = makeApiMocks();
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          // accountId missing
-          accountKey: 'test-account-key',
+          account: '',
         },
         api,
         state: {} as any,
@@ -199,7 +283,9 @@ describe('associateTokenHandler', () => {
       };
 
       // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow();
+      await expect(associateTokenHandler(args)).rejects.toThrow(
+        'Process.exit(1)',
+      );
     });
   });
 
@@ -222,6 +308,7 @@ describe('associateTokenHandler', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -229,7 +316,13 @@ describe('associateTokenHandler', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -237,8 +330,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,
@@ -257,11 +349,21 @@ describe('associateTokenHandler', () => {
 
     test('should handle token transaction service error', async () => {
       // Arrange
-      const { api, tokenTransactions: tokenTransactions } = makeApiMocks({
+      const {
+        api,
+        tokenTransactions: tokenTransactions,
+        credentialsState,
+      } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
             .mockRejectedValue(new Error('Service unavailable')),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -269,8 +371,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,
@@ -292,6 +393,7 @@ describe('associateTokenHandler', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -299,9 +401,15 @@ describe('associateTokenHandler', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest
+          signAndExecuteWith: jest
             .fn()
             .mockRejectedValue(new Error('Signing failed')),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -309,8 +417,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,
@@ -344,6 +451,7 @@ describe('associateTokenHandler', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -351,7 +459,13 @@ describe('associateTokenHandler', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -359,8 +473,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,
@@ -394,6 +507,7 @@ describe('associateTokenHandler', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: signing,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -401,7 +515,13 @@ describe('associateTokenHandler', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -409,8 +529,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-account-key',
+          account: '0.0.789012:test-account-key',
         },
         api,
         state: {} as any,

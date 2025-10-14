@@ -51,22 +51,28 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, credentials } = makeApiMocks({
-        tokenTransactions: {
-          createTokenTransaction: jest
-            .fn()
-            .mockResolvedValue(mockTransactions.token),
-        },
-        signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
-        },
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
-            accountId: mockAccountIds.treasury,
-            privateKey: 'different-private-key',
-          }),
-        },
-      });
+      const { api, tokenTransactions, signing, credentialsState } =
+        makeApiMocks({
+          tokenTransactions: {
+            createTokenTransaction: jest
+              .fn()
+              .mockResolvedValue(mockTransactions.token),
+          },
+          signing: {
+            signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+          },
+          credentialsState: {
+            getDefaultOperator: jest.fn().mockReturnValue({
+              accountId: mockAccountIds.operator,
+              keyRefId: 'operator-key-ref-id',
+            }),
+            getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
+            importPrivateKey: jest.fn().mockReturnValue({
+              keyRefId: 'treasury-key-ref-id',
+              publicKey: 'treasury-public-key',
+            }),
+          },
+        });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -76,8 +82,7 @@ describe('createTokenHandler', () => {
           decimals: 2,
           initialSupply: 1000,
           supplyType: 'INFINITE',
-          treasuryId: '0.0.123456',
-          treasuryKey: 'test-private-key',
+          treasury: '0.0.123456:test-private-key',
           adminKey: 'test-admin-key',
         },
         api,
@@ -90,6 +95,9 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
+      expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(
+        'test-private-key',
+      );
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith({
         name: 'TestToken',
         symbol: 'TEST',
@@ -97,13 +105,12 @@ describe('createTokenHandler', () => {
         initialSupply: 1000,
         supplyType: 'INFINITE',
         maxSupply: undefined,
-        treasuryId: mockAccountIds.treasury,
-        treasuryKey: 'test-private-key',
+        treasuryId: '0.0.123456',
         adminKey: 'test-admin-key',
       });
-      expect(signing.signAndExecuteWithKey).toHaveBeenCalledWith(
+      expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockTransactions.token,
-        'test-private-key',
+        { keyRefId: 'treasury-key-ref-id' },
       );
       expect(mockSaveToken).toHaveBeenCalled();
       expect(getExitSpy()).toHaveBeenCalledWith(0);
@@ -120,22 +127,24 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, credentials } = makeApiMocks({
-        tokenTransactions: {
-          createTokenTransaction: jest
-            .fn()
-            .mockResolvedValue(mockTransactions.token),
-        },
-        signing: {
-          signAndExecute: jest.fn().mockResolvedValue(mockSignResult),
-        },
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
-            accountId: '0.0.789012',
-            privateKey: mockKeys.operator,
-          }),
-        },
-      });
+      const { api, tokenTransactions, signing, credentialsState } =
+        makeApiMocks({
+          tokenTransactions: {
+            createTokenTransaction: jest
+              .fn()
+              .mockResolvedValue(mockTransactions.token),
+          },
+          signing: {
+            signAndExecute: jest.fn().mockResolvedValue(mockSignResult),
+          },
+          credentialsState: {
+            getDefaultOperator: jest.fn().mockReturnValue({
+              accountId: '0.0.100000',
+              keyRefId: 'operator-key-ref-id',
+            }),
+            getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
+          },
+        });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -153,7 +162,7 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
-      expect(credentials.getDefaultCredentials).toHaveBeenCalled();
+      expect(credentialsState.getDefaultOperator).toHaveBeenCalled();
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith({
         name: 'TestToken',
         symbol: 'TEST',
@@ -161,9 +170,8 @@ describe('createTokenHandler', () => {
         initialSupply: 1000000,
         supplyType: 'INFINITE',
         maxSupply: undefined,
-        treasuryId: '0.0.789012',
-        treasuryKey: mockKeys.operator,
-        adminKey: mockKeys.operator,
+        treasuryId: '0.0.100000',
+        adminKey: 'operator-public-key',
       });
       expect(signing.signAndExecute).toHaveBeenCalledWith(
         mockTransactions.token,
@@ -199,11 +207,12 @@ describe('createTokenHandler', () => {
       expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
 
-    test('should throw error when no credentials found', async () => {
+    test('should exit with error when no credentials found', async () => {
       // Arrange
-      const { api, credentials } = makeApiMocks({
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue(null),
+      const { api, credentialsState } = makeApiMocks({
+        credentialsState: {
+          getDefaultOperator: jest.fn().mockReturnValue(null),
+          ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
         },
       });
 
@@ -219,10 +228,14 @@ describe('createTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(createTokenHandler(args)).rejects.toThrow(
-        'No credentials found. Please set up your Hedera account credentials.',
+      // Act
+      await createTokenHandler(args);
+
+      // Assert
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('❌ Failed to create token:'),
       );
+      expect(getExitSpy()).toHaveBeenCalledWith(1);
     });
   });
 
@@ -247,31 +260,32 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, credentials } = makeApiMocks({
-        tokenTransactions: {
-          createTokenTransaction: jest
-            .fn()
-            .mockResolvedValue(mockTokenTransaction),
-        },
-        signing: {
-          signAndExecute: jest
-            .fn()
-            .mockResolvedValue(mockSignResult as TransactionResult),
-        },
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
-            accountId: '0.0.123456',
-            privateKey: 'test-private-key',
-          }),
-        },
-      });
+      const { api, tokenTransactions, signing, credentialsState } =
+        makeApiMocks({
+          tokenTransactions: {
+            createTokenTransaction: jest
+              .fn()
+              .mockResolvedValue(mockTokenTransaction),
+          },
+          signing: {
+            signAndExecute: jest
+              .fn()
+              .mockResolvedValue(mockSignResult as TransactionResult),
+          },
+          credentialsState: {
+            getDefaultOperator: jest.fn().mockReturnValue({
+              accountId: '0.0.100000',
+              keyRefId: 'operator-key-ref-id',
+            }),
+            getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
+          },
+        });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
           name: 'TestToken',
           symbol: 'TEST',
-          treasuryKey: 'test-private-key',
           adminKey: 'test-admin-key',
         },
         api,
@@ -292,17 +306,18 @@ describe('createTokenHandler', () => {
 
     test('should handle token transaction service error', async () => {
       // Arrange
-      const { api, tokenTransactions, credentials } = makeApiMocks({
+      const { api, tokenTransactions, credentialsState } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
             .mockRejectedValue(new Error('Service error')),
         },
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
-            accountId: '0.0.123456',
-            privateKey: 'test-private-key',
+        credentialsState: {
+          getDefaultOperator: jest.fn().mockReturnValue({
+            accountId: '0.0.100000',
+            keyRefId: 'operator-key-ref-id',
           }),
+          getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
         },
       });
 
@@ -311,7 +326,6 @@ describe('createTokenHandler', () => {
         args: {
           name: 'TestToken',
           symbol: 'TEST',
-          treasuryKey: 'test-private-key',
           adminKey: 'test-admin-key',
         },
         api,
@@ -349,20 +363,21 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, credentials } = makeApiMocks({
+      const { api, credentialsState } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
             .mockResolvedValue(mockTokenTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
-            accountId: '0.0.123456',
-            privateKey: 'test-private-key',
+        credentialsState: {
+          getDefaultOperator: jest.fn().mockReturnValue({
+            accountId: '0.0.100000',
+            keyRefId: 'operator-key-ref-id',
           }),
+          getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
         },
       });
 
@@ -371,7 +386,6 @@ describe('createTokenHandler', () => {
         args: {
           name: 'TestToken',
           symbol: 'TEST',
-          treasuryKey: 'test-private-key',
           adminKey: 'test-admin-key',
         },
         api,

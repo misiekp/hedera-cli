@@ -28,10 +28,20 @@ export const tokenPluginManifest: PluginManifest = {
       description: 'Transfer a fungible token from one account to another',
       options: [
         { name: 'token-id', type: 'string', required: true },
-        { name: 'to', type: 'string', required: true },
-        { name: 'from', type: 'string', required: true },
+        {
+          name: 'to',
+          type: 'string',
+          required: true,
+          description: 'Destination account: either an alias or account-id',
+        },
+        {
+          name: 'from',
+          type: 'string',
+          required: true,
+          description:
+            'Source account: either an alias or account-id:private-key pair',
+        },
         { name: 'balance', type: 'number', required: true },
-        { name: 'from-key', type: 'string', required: true },
       ],
       handler: './commands/transfer',
     },
@@ -42,8 +52,13 @@ export const tokenPluginManifest: PluginManifest = {
       options: [
         { name: 'name', type: 'string', required: true },
         { name: 'symbol', type: 'string', required: true },
-        { name: 'treasury-id', type: 'string', required: false },
-        { name: 'treasury-key', type: 'string', required: false },
+        {
+          name: 'treasury',
+          type: 'string',
+          required: false,
+          description:
+            'Treasury account: either an alias or treasury-id:treasury-key pair',
+        },
         { name: 'decimals', type: 'number', required: false, default: 0 },
         {
           name: 'initial-supply',
@@ -68,8 +83,13 @@ export const tokenPluginManifest: PluginManifest = {
       description: 'Associate a token with an account to enable transfers',
       options: [
         { name: 'token-id', type: 'string', required: true },
-        { name: 'account-id', type: 'string', required: true },
-        { name: 'account-key', type: 'string', required: true },
+        {
+          name: 'account',
+          type: 'string',
+          required: true,
+          description:
+            'Account: either an alias or account-id:account-key pair',
+        },
       ],
       handler: './commands/associate',
     },
