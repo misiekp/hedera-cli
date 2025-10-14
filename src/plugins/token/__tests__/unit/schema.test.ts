@@ -354,7 +354,7 @@ describe('Token Schema Validation', () => {
       decimals: 2,
       initialSupply: 1000,
       supplyType: 'INFINITE',
-      treasuryId: '0.0.123456',
+      treasury: '0.0.123456:treasury-key',
       adminKey: 'admin-key',
     };
 

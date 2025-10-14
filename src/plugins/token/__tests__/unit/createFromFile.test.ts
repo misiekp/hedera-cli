@@ -116,7 +116,7 @@ describe('createTokenFromFileHandler', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockImplementation((transaction) => {
+          signAndExecuteWith: jest.fn().mockImplementation((transaction) => {
             if (transaction === mockTokenTransaction) {
               return Promise.resolve(mockSignResult);
             }
@@ -128,6 +128,12 @@ describe('createTokenFromFileHandler', () => {
               transactionId: '',
               receipt: { status: { status: 'failed', transactionId: '' } },
             });
+          }),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'treasury-key-ref-id',
+            publicKey: 'treasury-key',
           }),
         },
       });
@@ -159,7 +165,6 @@ describe('createTokenFromFileHandler', () => {
         supplyType: 'FINITE',
         maxSupply: 10000,
         treasuryId: '0.0.123456',
-        treasuryKey: 'treasury-key',
         adminKey: 'admin-key',
         customFees: [
           {
@@ -171,9 +176,9 @@ describe('createTokenFromFileHandler', () => {
           },
         ],
       });
-      expect(signing.signAndExecuteWithKey).toHaveBeenCalledWith(
+      expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockTokenTransaction,
-        'treasury-key',
+        { keyRefId: 'treasury-key-ref-id' },
       );
       expect(mockAddToken).toHaveBeenCalled();
       expect(logger.log).toHaveBeenCalledWith(
@@ -224,7 +229,13 @@ describe('createTokenFromFileHandler', () => {
             .mockResolvedValue(mockTokenTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'treasury-key-ref-id',
+            publicKey: 'treasury-key',
+          }),
         },
       });
 
@@ -252,7 +263,6 @@ describe('createTokenFromFileHandler', () => {
         supplyType: 'INFINITE',
         maxSupply: 0,
         adminKey: 'admin-key',
-        treasuryKey: 'treasury-key',
         customFees: [
           {
             type: 'fixed',
@@ -306,7 +316,13 @@ describe('createTokenFromFileHandler', () => {
             .mockResolvedValue(_mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'treasury-key-ref-id',
+            publicKey: 'treasury-key',
+          }),
         },
       });
 
@@ -583,7 +599,13 @@ describe('createTokenFromFileHandler', () => {
             .mockResolvedValue(mockTokenTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'treasury-key-ref-id',
+            publicKey: 'treasury-key',
+          }),
         },
       });
 
@@ -646,7 +668,13 @@ describe('createTokenFromFileHandler', () => {
             .mockRejectedValue(new Error('Association failed')),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'treasury-key-ref-id',
+            publicKey: 'treasury-key',
+          }),
         },
       });
 
@@ -712,7 +740,13 @@ describe('createTokenFromFileHandler', () => {
             .mockResolvedValue(mockTokenTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'treasury-key-ref-id',
+            publicKey: 'treasury-key',
+          }),
         },
       });
 

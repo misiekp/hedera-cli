@@ -7,7 +7,7 @@ import type { Logger } from '../../../../../core/services/logger/logger-service.
 import type { HederaMirrornodeService } from '../../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { CoreAPI } from '../../../../../core/core-api/core-api.interface';
 import type { AccountData } from '../../../schema';
-import type { AccountTransactionService } from '../../../../../core/services/accounts/account-transaction-service.interface';
+import type { AccountService } from '../../../../../core/services/account/account-transaction-service.interface';
 import type { SigningService } from '../../../../../core/services/signing/signing-service.interface';
 import type { NetworkService } from '../../../../../core/services/network/network-service.interface';
 import {
@@ -61,8 +61,8 @@ export const makeMirrorMocks = ({
  * Creates mock AccountTransactionService
  */
 export const makeAccountTransactionServiceMock = (
-  overrides?: Partial<jest.Mocked<AccountTransactionService>>,
-): jest.Mocked<AccountTransactionService> => ({
+  overrides?: Partial<jest.Mocked<AccountService>>,
+): jest.Mocked<AccountService> => ({
   createAccount: jest.fn(),
   getAccountInfo: jest.fn(),
   getAccountBalance: jest.fn(),

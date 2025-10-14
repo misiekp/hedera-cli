@@ -36,7 +36,6 @@ export interface TokenCreateParams {
   supplyType: 'FINITE' | 'INFINITE';
   maxSupply?: number; // Required for FINITE supply type
   adminKey: string;
-  treasuryKey: string;
   customFees?: CustomFee[];
 }
 

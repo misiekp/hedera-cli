@@ -4,7 +4,11 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import { TokenData, safeValidateTokenCreateParams } from '../schema';
+import {
+  TokenData,
+  safeValidateTokenCreateParams,
+  resolveTreasuryParameter,
+} from '../schema';
 
 export async function createTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -32,25 +36,37 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
   const supplyType = validatedParams.supplyType || 'INFINITE';
   const maxSupply = validatedParams.maxSupply;
 
-  // Get current account credentials for treasury
-  const credentials = await api.credentials.getDefaultCredentials();
-  if (!credentials) {
-    throw new Error(
-      'No credentials found. Please set up your Hedera account credentials.',
+  // Resolve treasury parameter (alias or treasury-id:treasury-key) if provided
+  let treasuryId: string | undefined;
+  let treasuryKeyRefId: string | undefined;
+  let treasuryPublicKey: string | undefined;
+
+  if (validatedParams.treasury) {
+    const network = api.network.getCurrentNetwork() as
+      | 'mainnet'
+      | 'testnet'
+      | 'previewnet';
+    const resolvedTreasury = await resolveTreasuryParameter(
+      validatedParams.treasury,
+      api,
+      network,
     );
-  }
 
-  // Use provided treasury ID and key or default to operator credentials
-  const treasuryId = validatedParams.treasuryId || credentials.accountId;
-  const treasuryKey = validatedParams.treasuryKey || credentials.privateKey;
+    // Treasury was explicitly provided - it MUST resolve or fail
+    if (!resolvedTreasury) {
+      throw new Error(
+        `Failed to resolve treasury parameter: ${validatedParams.treasury}. ` +
+          `Expected format: account-alias OR treasury-id:treasury-key`,
+      );
+    }
 
-  // Log treasury information
-  logger.debug(`Using treasury account: ${treasuryId}`);
-  if (treasuryId !== credentials.accountId) {
+    // Use resolved treasury from alias or treasury-id:treasury-key
+    treasuryId = resolvedTreasury.treasuryId;
+    treasuryKeyRefId = resolvedTreasury.treasuryKeyRefId;
+    treasuryPublicKey = resolvedTreasury.treasuryPublicKey;
+
     logger.log(`🏦 Using custom treasury account: ${treasuryId}`);
-    logger.log(`🔑 Will sign with treasury key (not operator key)`);
-  } else {
-    logger.log(`🏦 Using operator account as treasury: ${treasuryId}`);
+    logger.log(`🔑 Will sign with treasury key`);
   }
 
   // Validate and determine maxSupply
@@ -79,35 +95,79 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
   }
 
   try {
-    // 1. Create token transaction using Core API
-    const adminKey = validatedParams.adminKey || treasuryKey;
+    // 1. Determine treasury - use provided or fall back to operator
+    let finalTreasuryId: string;
+    let useCustomTreasury = false;
+
+    if (treasuryId && treasuryKeyRefId && treasuryPublicKey) {
+      // Custom treasury provided
+      finalTreasuryId = treasuryId;
+      useCustomTreasury = true;
+    } else {
+      // No treasury provided - get operator info (required for token creation)
+      const operator = api.credentialsState.getDefaultOperator();
+      if (!operator) {
+        throw new Error(
+          'No operator credentials found. Please set up your Hedera account credentials or provide a treasury account.',
+        );
+      }
+      finalTreasuryId = operator.accountId;
+    }
+
+    // 2. Create token transaction using Core API
+    // Admin key is a public key parameter (not used for signing)
+    // If no admin key provided, use treasury public key (or operator's key if no custom treasury)
+    let adminPublicKey: string;
+    if (validatedParams.adminKey) {
+      adminPublicKey = validatedParams.adminKey;
+    } else if (treasuryPublicKey) {
+      adminPublicKey = treasuryPublicKey;
+    } else {
+      // Get operator's public key
+      const operator = api.credentialsState.getDefaultOperator();
+      if (!operator) {
+        throw new Error('No operator credentials found');
+      }
+      const pubKey = api.credentialsState.getPublicKey(operator.keyRefId);
+      logger.debug(`operator.keyRefId: ${operator.keyRefId}`);
+      logger.debug(`pubKey: ${pubKey}`);
+      if (!pubKey) {
+        throw new Error(`Operator key not found: ${operator.keyRefId}`);
+      }
+      adminPublicKey = pubKey;
+    }
+
+    logger.debug('=== TOKEN PARAMS DEBUG ===');
+    logger.debug(`Treasury ID: ${finalTreasuryId}`);
+    logger.debug(`Admin Key (public): ${adminPublicKey}`);
+    logger.debug(`Use Custom Treasury: ${useCustomTreasury}`);
+    logger.debug('=========================');
 
     const tokenCreateParams = {
       name,
       symbol,
-      treasuryId,
+      treasuryId: finalTreasuryId,
       decimals,
       initialSupply,
       supplyType: supplyType.toUpperCase() as 'FINITE' | 'INFINITE',
       maxSupply: finalMaxSupply,
-      adminKey,
-      treasuryKey,
+      adminKey: adminPublicKey,
     };
 
     const tokenCreateTransaction =
-      await api.tokenTransactions.createTokenTransaction(tokenCreateParams);
+      await api.tokens.createTokenTransaction(tokenCreateParams);
 
-    // 2. Sign and execute transaction
-    // Use treasury key for signing if provided, otherwise use operator key
+    // 3. Sign and execute transaction
+    // If custom treasury provided, sign with treasury key
+    // Otherwise sign with operator key (signAndExecute handles this internally)
     let result;
-    if (treasuryKey !== credentials.privateKey) {
-      logger.debug(`Using treasury key for signing transaction`);
-      result = await api.signing.signAndExecuteWithKey(
-        tokenCreateTransaction,
-        treasuryKey,
-      );
+    if (useCustomTreasury && treasuryKeyRefId) {
+      logger.debug(`Signing with custom treasury key`);
+      result = await api.signing.signAndExecuteWith(tokenCreateTransaction, {
+        keyRefId: treasuryKeyRefId,
+      });
     } else {
-      logger.debug(`Using operator key for signing transaction`);
+      logger.debug(`Signing with operator key`);
       result = await api.signing.signAndExecute(tokenCreateTransaction);
     }
 
@@ -116,7 +176,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       logger.log(`   Token ID: ${result.tokenId}`);
       logger.log(`   Name: ${name}`);
       logger.log(`   Symbol: ${symbol}`);
-      logger.log(`   Treasury: ${treasuryId}`);
+      logger.log(`   Treasury: ${finalTreasuryId}`);
       logger.log(`   Decimals: ${decimals}`);
       logger.log(`   Initial Supply: ${initialSupply}`);
       logger.log(`   Supply Type: ${supplyType}`);
@@ -127,20 +187,20 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
         tokenId: result.tokenId,
         name,
         symbol,
-        treasuryId,
+        treasuryId: finalTreasuryId,
         decimals,
         initialSupply,
         supplyType: supplyType.toUpperCase() as 'FINITE' | 'INFINITE',
         maxSupply: supplyType.toUpperCase() === 'FINITE' ? initialSupply : 0,
         keys: {
-          adminKey: treasuryKey,
+          adminKey: adminPublicKey,
           supplyKey: '',
           wipeKey: '',
           kycKey: '',
           freezeKey: '',
           pauseKey: '',
           feeScheduleKey: '',
-          treasuryKey,
+          treasuryKey: treasuryPublicKey || '',
         },
         network: api.network.getCurrentNetwork() as
           | 'mainnet'

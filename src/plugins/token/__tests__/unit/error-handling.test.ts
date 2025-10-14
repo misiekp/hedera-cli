@@ -36,17 +36,18 @@ describe('Token Plugin Error Handling', () => {
   describe('network and connectivity errors', () => {
     test('should handle network timeout during token creation', async () => {
       // Arrange
-      const { api, tokenTransactions, credentials } = makeApiMocks({
+      const { api, tokenTransactions, credentialsState } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
             .mockRejectedValue(new Error('Network timeout')),
         },
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+        credentialsState: {
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
-            privateKey: 'test-key',
+            keyRefId: 'test-key-ref-id',
           }),
+          getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
       });
 
@@ -55,7 +56,6 @@ describe('Token Plugin Error Handling', () => {
         args: {
           name: 'TestToken',
           symbol: 'TEST',
-          treasuryKey: 'test-key',
           adminKey: 'admin-key',
         },
         api,
@@ -85,8 +85,7 @@ describe('Token Plugin Error Handling', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'test-key',
+          account: '0.0.789012:test-key',
         },
         api,
         state: {} as any,
@@ -98,15 +97,24 @@ describe('Token Plugin Error Handling', () => {
       await expect(associateTokenHandler(args)).rejects.toThrow(
         'Process.exit(1)',
       );
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to associate token: Error: Connection refused',
+      );
     });
 
     test('should handle network errors during transfer', async () => {
       // Arrange
-      const { api, tokenTransactions } = makeApiMocks({
-        tokenTransactions: {
+      const { api, tokens, credentialsState } = makeApiMocks({
+        tokens: {
           createTransferTransaction: jest
             .fn()
             .mockRejectedValue(new Error('Network unreachable')),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -114,10 +122,9 @@ describe('Token Plugin Error Handling', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          from: '0.0.345678',
+          from: '0.0.345678:test-key',
           to: '0.0.789012',
           balance: 100,
-          fromKey: 'test-key',
         },
         api,
         state: {} as any,
@@ -129,15 +136,19 @@ describe('Token Plugin Error Handling', () => {
       await expect(transferTokenHandler(args)).rejects.toThrow(
         'Process.exit(1)',
       );
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to transfer token: Error: Network unreachable',
+      );
     });
   });
 
   describe('authentication and authorization errors', () => {
     test('should handle invalid credentials', async () => {
       // Arrange
-      const { api, credentials } = makeApiMocks({
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue(null),
+      const { api, credentialsState } = makeApiMocks({
+        credentialsState: {
+          getDefaultOperator: jest.fn().mockReturnValue(null),
+          ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
         },
       });
 
@@ -154,8 +165,9 @@ describe('Token Plugin Error Handling', () => {
       };
 
       // Act & Assert
-      await expect(createTokenHandler(args)).rejects.toThrow(
-        'No credentials found. Please set up your Hedera account credentials.',
+      await expect(createTokenHandler(args)).rejects.toThrow('Process.exit(1)');
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('❌ Failed to create token:'),
       );
     });
 
@@ -167,7 +179,7 @@ describe('Token Plugin Error Handling', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentials,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -186,7 +198,7 @@ describe('Token Plugin Error Handling', () => {
               },
             },
           }),
-          signAndExecuteWithKey: jest.fn().mockResolvedValue({
+          signAndExecuteWith: jest.fn().mockResolvedValue({
             success: false,
             transactionId: '',
             receipt: {
@@ -198,11 +210,12 @@ describe('Token Plugin Error Handling', () => {
             },
           }),
         },
-        credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+        credentialsState: {
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
-            privateKey: 'invalid-key',
+            keyRefId: 'invalid-key-ref-id',
           }),
+          getPublicKey: jest.fn().mockReturnValue('invalid-public-key'),
         },
       });
 
@@ -239,6 +252,7 @@ describe('Token Plugin Error Handling', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing,
+        credentialsState,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -246,7 +260,13 @@ describe('Token Plugin Error Handling', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(_mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
+        },
+        credentialsState: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
         },
       });
 
@@ -254,8 +274,7 @@ describe('Token Plugin Error Handling', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.789012',
-          accountKey: 'insufficient-permissions-key',
+          account: '0.0.789012:insufficient-permissions-key',
         },
         api,
         state: {} as any,
@@ -294,7 +313,7 @@ describe('Token Plugin Error Handling', () => {
             .mockResolvedValue(mockTransferTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(_mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
       });
 
@@ -302,10 +321,9 @@ describe('Token Plugin Error Handling', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          from: '0.0.345678',
+          from: '0.0.345678:test-key',
           to: '0.0.789012',
           balance: 1000000, // Large amount
-          fromKey: 'test-key',
         },
         api,
         state: {} as any,
@@ -371,7 +389,7 @@ describe('Token Plugin Error Handling', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(_mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
       });
 
@@ -415,16 +433,16 @@ describe('Token Plugin Error Handling', () => {
             transactionId: '',
             receipt: { status: { status: 'failed', transactionId: '' } },
           }),
-          signAndExecuteWithKey: jest.fn().mockResolvedValue({
+          signAndExecuteWith: jest.fn().mockResolvedValue({
             success: false,
             transactionId: '',
             receipt: { status: { status: 'failed', transactionId: '' } },
           }),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
-            privateKey: 'test-key',
+            keyRefId: 'test-key-ref-id',
           }),
         },
       });
@@ -554,7 +572,7 @@ describe('Token Plugin Error Handling', () => {
               },
             },
           }),
-          signAndExecuteWithKey: jest.fn().mockResolvedValue({
+          signAndExecuteWith: jest.fn().mockResolvedValue({
             success: true,
             transactionId: '0.0.123@1234567890.123456789',
             tokenId: '0.0.123456',
@@ -567,9 +585,9 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
-            privateKey: 'test-key',
+            keyRefId: 'test-key-ref-id',
           }),
         },
       });
@@ -606,9 +624,9 @@ describe('Token Plugin Error Handling', () => {
             .mockRejectedValue(new Error('Rate limit exceeded')),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
-            privateKey: 'test-key',
+            keyRefId: 'test-key-ref-id',
           }),
         },
       });
@@ -654,7 +672,7 @@ describe('Token Plugin Error Handling', () => {
             .mockResolvedValue(mockTransferTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(_mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
       });
 
@@ -662,10 +680,9 @@ describe('Token Plugin Error Handling', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          from: '0.0.345678',
+          from: '0.0.345678:test-key',
           to: '0.0.789012',
           balance: 100,
-          fromKey: 'test-key',
         },
         api,
         state: {} as any,
@@ -712,12 +729,12 @@ describe('Token Plugin Error Handling', () => {
         },
         signing: {
           signAndExecute: jest.fn().mockResolvedValue(_mockSignResult),
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(_mockSignResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
         credentials: {
-          getDefaultCredentials: jest.fn().mockResolvedValue({
+          getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
-            privateKey: 'test-key',
+            keyRefId: 'test-key-ref-id',
           }),
         },
       });
@@ -789,7 +806,7 @@ describe('Token Plugin Error Handling', () => {
             .mockResolvedValue(mockAssociationTransaction),
         },
         signing: {
-          signAndExecuteWithKey: jest.fn().mockResolvedValue(mockFailureResult),
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockFailureResult),
         },
       });
 
@@ -799,8 +816,7 @@ describe('Token Plugin Error Handling', () => {
       const associateArgs: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          accountId: '0.0.345678',
-          accountKey: 'user-key',
+          account: '0.0.345678:user-key',
         },
         api,
         state: {} as any,

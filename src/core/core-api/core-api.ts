@@ -24,9 +24,12 @@ import { AliasManagementService } from '../services/alias/alias-service.interfac
 import { AliasManagementServiceImpl } from '../services/alias/alias-service';
 import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
 import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
+import { TokenService } from '../services/token/token-service.interface';
+import { TokenServiceImpl } from '../services/token/token-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountService;
+  public tokens: TokenService;
   public signing: TransactionService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
@@ -43,8 +46,6 @@ export class CoreAPIImplementation implements CoreAPI {
 
     this.network = new MockNetworkService();
 
-    // Initialize all services with dependencies
-    this.accountTransactions = new AccountServiceImpl(this.logger);
     // Initialize new services
     this.alias = new AliasManagementServiceImpl(this.state, this.logger);
     this.credentialsState = new KeyManagementServiceImpl(
@@ -56,6 +57,10 @@ export class CoreAPIImplementation implements CoreAPI {
       this.credentialsState,
       this.network,
     );
+
+    // Initialize all services with dependencies
+    this.accountTransactions = new AccountServiceImpl(this.logger);
+    this.tokens = new TokenServiceImpl(this.logger, this.signing);
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
     let ledgerId: LedgerId;
