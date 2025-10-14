@@ -3,6 +3,7 @@
  * This is a placeholder implementation for testing the architecture
  */
 import { NetworkService, NetworkConfig } from './network-service.interface';
+import { SupportedNetwork } from '../../types/shared.types';
 
 export class MockNetworkService implements NetworkService {
   private currentNetwork: string = 'testnet';
@@ -11,9 +12,9 @@ export class MockNetworkService implements NetworkService {
   /**
    * Get the current active network (mock implementation)
    */
-  getCurrentNetwork(): string {
+  getCurrentNetwork(): SupportedNetwork {
     console.log(`[MOCK] Getting current network: ${this.currentNetwork}`);
-    return this.currentNetwork;
+    return <SupportedNetwork>this.currentNetwork;
   }
 
   /**
