@@ -22,7 +22,7 @@ export function setHandler(args: CommandHandlerArgs): void {
     );
 
     // Set as default operator
-    api.credentialsState.setDefaultOperator(accountId, keyRefId);
+    api.credentialsState.setOperator(accountId, keyRefId);
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
     logger.log(`   Network: ${network || 'testnet'}`);

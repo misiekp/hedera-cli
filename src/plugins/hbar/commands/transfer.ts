@@ -28,7 +28,7 @@ export default async function transferHandler(
   // Fallback to default operator from env if from not provided
   if (!from) {
     const defaultOp =
-      api.credentialsState.getDefaultOperator() ||
+      api.credentialsState.getOperator() ||
       api.credentialsState.ensureDefaultFromEnv();
     if (defaultOp) {
       from = defaultOp.accountId;

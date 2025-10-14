@@ -7,11 +7,12 @@ import type { Logger } from '../../src/core/services/logger/logger-service.inter
 import type { StateService } from '../../src/core/services/state/state-service.interface';
 import type { ConfigService } from '../../src/core/services/config/config-service.interface';
 import type { NetworkService } from '../../src/core/services/network/network-service.interface';
-import type { KeyManagementService } from '../../src/core/services/credentials-state/credentials-state-service.interface';
+
 import type { AliasManagementService } from '../../src/core/services/alias/alias-service.interface';
 import type { TransactionService } from '../../src/core/services/signing/signing-service.interface';
 import type { HederaMirrornodeService } from '../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { AccountData } from '../../src/plugins/account/schema';
+import { KeyManagementService } from '../../src/core/services/kms/credentials-state-service.interface';
 
 /**
  * Create a mocked Logger instance
@@ -102,10 +103,8 @@ export const makeCredentialsStateMock = (
   findByPublicKey: jest.fn(),
   list: jest.fn(),
   remove: jest.fn(),
-  setDefaultOperator: jest.fn(),
-  getDefaultOperator: jest
-    .fn()
-    .mockReturnValue(options.defaultOperator ?? null),
+  setOperator: jest.fn(),
+  getOperator: jest.fn().mockReturnValue(options.defaultOperator ?? null),
   ensureDefaultFromEnv: jest.fn(),
   createClient: jest.fn(),
   signTransaction: jest.fn(),

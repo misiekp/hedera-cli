@@ -7,7 +7,7 @@ import {
   TransactionResult,
 } from './signing-service.interface';
 import { Logger } from '../logger/logger-service.interface';
-import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
+import { KeyManagementService } from '../kms/credentials-state-service.interface';
 import { NetworkService } from '../network/network-service.interface';
 import type { SignerRef } from './signing-service.interface';
 import {
@@ -60,7 +60,7 @@ export class TransactionServiceImpl implements TransactionService {
 
       // Get default operator keyRefId for signing
       const mapping =
-        this.credentialsState.getDefaultOperator() ||
+        this.credentialsState.getOperator() ||
         this.credentialsState.ensureDefaultFromEnv();
       if (!mapping) {
         throw new Error('[SIGNING] No default operator configured');

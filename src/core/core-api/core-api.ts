@@ -24,8 +24,8 @@ import { HbarService } from '../services/hbar/hbar-service.interface';
 import { HbarServiceImpl } from '../services/hbar/hbar-service';
 import { AliasManagementService } from '../services/alias/alias-service.interface';
 import { AliasManagementServiceImpl } from '../services/alias/alias-service';
-import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
-import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
+import { KeyManagementService } from '../services/kms/credentials-state-service.interface';
+import { KeyManagementServiceImpl } from '../services/kms/credentials-state-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountService;

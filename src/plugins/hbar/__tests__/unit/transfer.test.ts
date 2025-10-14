@@ -75,7 +75,7 @@ const setupTransferTest = (options: {
   });
 
   if (options.defaultCredentials) {
-    (credentialsState.getDefaultOperator as jest.Mock).mockReturnValue(
+    (credentialsState.getOperator as jest.Mock).mockReturnValue(
       options.defaultCredentials,
     );
   }

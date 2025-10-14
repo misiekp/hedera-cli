@@ -5,9 +5,7 @@ import type {
   CredentialSecret,
 } from './credentials-types.interface';
 
-export class StateCredentialsStorageService
-  implements CredentialsStorageService
-{
+export class KmsStorageService implements CredentialsStorageService {
   private readonly state: StateService;
   private readonly namespace: string = 'credentials-state';
 
@@ -50,11 +48,11 @@ export class StateCredentialsStorageService
     this.state.delete(this.namespace + '-secrets', keyRefId);
   }
 
-  setDefaultOperator(mapping: { accountId: string; keyRefId: string }): void {
+  setOperator(mapping: { accountId: string; keyRefId: string }): void {
     this.state.set(this.namespace + '-default', 'operator', mapping);
   }
 
-  getDefaultOperator(): { accountId: string; keyRefId: string } | null {
+  getOperator(): { accountId: string; keyRefId: string } | null {
     return (
       this.state.get<{ accountId: string; keyRefId: string }>(
         this.namespace + '-default',
