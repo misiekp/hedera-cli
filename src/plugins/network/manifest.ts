@@ -28,7 +28,14 @@ export const networkPluginManifest: PluginManifest = {
       name: 'use',
       summary: 'Switch to a specific network',
       description: 'Switch the active network to the specified network name',
-      arguments: '<name>',
+      options: [
+        {
+          name: 'network',
+          type: 'string',
+          required: true,
+          description: 'Network name (testnet, mainnet, previewnet, localnet)',
+        },
+      ],
       handler: './commands/use',
     },
   ],

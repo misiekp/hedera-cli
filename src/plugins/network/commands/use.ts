@@ -10,27 +10,26 @@ import { isJsonOutput, printOutput } from '../../../utils/output';
 export function useHandler(args: CommandHandlerArgs) {
   const { logger, api } = args;
 
-  // Extract command arguments
-  const positionalArgs = args.args._ as string[];
-  const name = positionalArgs[0];
+  // Extract network from options
+  const network = args.args.network as string | undefined;
 
-  if (!name) {
-    logger.error('❌ Network name is required');
+  if (!network) {
+    logger.error('❌ Network name is required. Use --network <name>');
     process.exit(1);
     return;
   }
 
-  logger.verbose(`Switching to network: ${name}`);
+  logger.verbose(`Switching to network: ${network}`);
 
   try {
-    api.network.switchNetwork(name);
+    api.network.switchNetwork(network);
 
     if (isJsonOutput()) {
-      printOutput('network', { activeNetwork: name });
+      printOutput('network', { activeNetwork: network });
       return;
     }
 
-    logger.log(heading('Active network: ') + success(name));
+    logger.log(heading('Active network: ') + success(network));
     process.exit(0);
   } catch (error: unknown) {
     logger.error(formatError('❌ Failed to switch network', error));

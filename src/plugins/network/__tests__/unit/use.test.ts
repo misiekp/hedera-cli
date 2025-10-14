@@ -46,7 +46,7 @@ describe('network plugin - use command', () => {
     networkService.isNetworkAvailable = jest.fn().mockReturnValue(true);
 
     const args = makeArgs({ network: networkService }, logger, {
-      _: ['mainnet'],
+      network: 'mainnet',
     });
 
     useHandler(args);
@@ -66,7 +66,7 @@ describe('network plugin - use command', () => {
     });
 
     const args = makeArgs({ network: networkService }, logger, {
-      _: ['invalid'],
+      network: 'invalid',
     });
 
     useHandler(args);
@@ -85,7 +85,7 @@ describe('network plugin - use command', () => {
     networkService.switchNetwork = jest.fn();
 
     const args = makeArgs({ network: networkService }, logger, {
-      _: ['previewnet'],
+      network: 'previewnet',
       json: true,
     });
 
@@ -103,7 +103,7 @@ describe('network plugin - use command', () => {
     networkService.switchNetwork = jest.fn();
 
     const args = makeArgs({ network: networkService }, logger, {
-      _: ['mainnet'],
+      network: 'mainnet',
     });
 
     useHandler(args);
@@ -117,11 +117,13 @@ describe('network plugin - use command', () => {
     const logger = makeLogger();
     const networkService = makeNetworkMock('testnet');
 
-    const args = makeArgs({ network: networkService }, logger, { _: [] });
+    const args = makeArgs({ network: networkService }, logger, {});
 
     useHandler(args);
 
-    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Network name is required'),
+    );
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -131,7 +133,7 @@ describe('network plugin - use command', () => {
     networkService.switchNetwork = jest.fn();
 
     const argsToMainnet = makeArgs({ network: networkService }, logger, {
-      _: ['mainnet'],
+      network: 'mainnet',
     });
 
     useHandler(argsToMainnet);
@@ -141,7 +143,7 @@ describe('network plugin - use command', () => {
     jest.clearAllMocks();
 
     const argsToPreviewnet = makeArgs({ network: networkService }, logger, {
-      _: ['previewnet'],
+      network: 'previewnet',
     });
 
     useHandler(argsToPreviewnet);
