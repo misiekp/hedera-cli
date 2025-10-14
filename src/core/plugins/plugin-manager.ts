@@ -10,6 +10,7 @@ import { CommandHandlerArgs, PluginManifest } from './plugin.interface';
 import { CommandSpec, CommandHandler } from './plugin.types';
 import { formatError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
+import { kebabToCamel } from '../utils/kebab-to-camel';
 
 interface LoadedPlugin {
   manifest: PluginManifest;
@@ -268,9 +269,13 @@ export class PluginManager {
       string,
       unknown
     >;
+
+    // handle for dash commands handlers like `submit-message` -> `submitMessage`
+    const fixedName = kebabToCamel(commandSpec.name);
+
     const handler =
       (handlerModule.default as CommandHandler) ||
-      (handlerModule[commandSpec.name + 'Handler'] as CommandHandler);
+      (handlerModule[fixedName + 'Handler'] as CommandHandler);
 
     if (typeof handler !== 'function') {
       throw new Error(`Handler for ${commandSpec.name} is not a function`);

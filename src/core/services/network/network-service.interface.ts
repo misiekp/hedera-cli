@@ -2,11 +2,13 @@
  * Interface for network management operations
  * All network services must implement this interface
  */
+import { SupportedNetwork } from '../../types/shared.types';
+
 export interface NetworkService {
   /**
    * Get the current active network
    */
-  getCurrentNetwork(): string;
+  getCurrentNetwork(): SupportedNetwork;
 
   /**
    * Get list of available networks
