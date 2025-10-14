@@ -42,7 +42,7 @@ export const TopicDataSchema = z.object({
     .optional()
     .describe('Topic expiration time as ISO string'),
 
-  network: z.enum(['mainnet', 'testnet', 'previewnet'], {
+  network: z.enum(['mainnet', 'testnet', 'previewnet', 'localnet'], {
     errorMap: () => ({
       message: 'Network must be mainnet, testnet, or previewnet',
     }),
