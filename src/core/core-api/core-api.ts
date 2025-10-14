@@ -17,15 +17,15 @@ import { TopicServiceImpl } from '../services/topics/topic-transaction-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
-import { MockNetworkService } from '../services/network/network-service';
+import { NetworkServiceImpl } from '../services/network/network-service';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
 import { HbarService } from '../services/hbar/hbar-service.interface';
 import { HbarServiceImpl } from '../services/hbar/hbar-service';
 import { AliasManagementService } from '../services/alias/alias-service.interface';
 import { AliasManagementServiceImpl } from '../services/alias/alias-service';
-import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
-import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
+import { KeyManagementService } from '../services/kms/credentials-state-service.interface';
+import { KeyManagementServiceImpl } from '../services/kms/credentials-state-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountService;
@@ -44,7 +44,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.logger = new MockLoggerService();
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
-    this.network = new MockNetworkService();
+    this.network = new NetworkServiceImpl(this.state, this.logger);
 
     // Initialize all services with dependencies
     this.accountTransactions = new AccountServiceImpl(this.logger);
@@ -53,6 +53,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.credentialsState = new KeyManagementServiceImpl(
       this.logger,
       this.state,
+      this.network,
     );
     this.signing = new TransactionServiceImpl(
       this.logger,

@@ -13,6 +13,7 @@ import {
   makeSigningMock,
   makeStateMock,
 } from '../../../../../__tests__/helpers/plugin';
+import { StateService } from '../../../../core/services/state/state-service.interface';
 
 jest.mock('../../../account/zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
@@ -74,7 +75,7 @@ const setupTransferTest = (options: {
   });
 
   if (options.defaultCredentials) {
-    (credentialsState.getDefaultOperator as jest.Mock).mockReturnValue(
+    (credentialsState.getOperator as jest.Mock).mockReturnValue(
       options.defaultCredentials,
     );
   }

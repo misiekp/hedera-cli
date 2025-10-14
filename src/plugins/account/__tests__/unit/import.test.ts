@@ -11,6 +11,7 @@ import {
   makeMirrorMock,
   setupExitSpy,
 } from '../../../../../__tests__/helpers/plugin';
+import { NetworkService } from '../../../../core/services/network/network-service.interface';
 
 let exitSpy: jest.SpyInstance;
 

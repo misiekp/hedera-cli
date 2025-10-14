@@ -17,16 +17,23 @@ import { LocalPrivateKeyCredentialsSignerService } from './local-private-key-cre
 import { CredentialsStateSignerService } from './credentials-state-signer-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { StateService } from '../state/state-service.interface';
+import { NetworkService } from '../network/network-service.interface';
 import { CredentialsStorageService } from './credentials-storage-service.interface';
-import { StateCredentialsStorageService } from './state-credentials-storage.service';
+import { KmsStorageService } from './state-credentials-storage.service';
 
 export class KeyManagementServiceImpl implements KeyManagementService {
   private readonly logger: Logger;
   private readonly storage: CredentialsStorageService;
+  private readonly networkService: NetworkService;
 
-  constructor(logger: Logger, state: StateService) {
+  constructor(
+    logger: Logger,
+    state: StateService,
+    networkService: NetworkService,
+  ) {
     this.logger = logger;
-    this.storage = new StateCredentialsStorageService(state);
+    this.networkService = networkService;
+    this.storage = new KmsStorageService(state);
   }
 
   createLocalPrivateKey(labels?: string[]): {
@@ -121,31 +128,31 @@ export class KeyManagementServiceImpl implements KeyManagementService {
 
   // Removed registerProvider - no longer needed
 
-  setDefaultOperator(accountId: string, keyRefId: string): void {
-    this.storage.setDefaultOperator({ accountId, keyRefId });
+  setOperator(accountId: string, keyRefId: string): void {
+    this.storage.setOperator({ accountId, keyRefId });
     this.logger.debug(`[CRED] Default operator set: ${accountId}`);
   }
 
-  getDefaultOperator(): { accountId: string; keyRefId: string } | null {
-    return this.storage.getDefaultOperator();
+  getOperator(): { accountId: string; keyRefId: string } | null {
+    return this.storage.getOperator();
   }
 
   ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null {
-    const existing = this.getDefaultOperator();
+    const existing = this.getOperator();
     if (existing) return existing;
     // TODO: Improve environment variable handling to support multiple networks (not just Testnet)
     const accountId = process.env.TESTNET_OPERATOR_ID;
     const privateKey = process.env.TESTNET_OPERATOR_KEY;
     if (accountId && privateKey) {
       const { keyRefId } = this.importPrivateKey(privateKey, ['env-default']);
-      this.setDefaultOperator(accountId, keyRefId);
+      this.setOperator(accountId, keyRefId);
       return { accountId, keyRefId };
     }
     return null;
   }
 
   createClient(network: SupportedNetwork): Client {
-    const mapping = this.getDefaultOperator() || this.ensureDefaultFromEnv();
+    const mapping = this.getOperator() || this.ensureDefaultFromEnv();
     if (!mapping) {
       throw new Error('[CRED] No default operator configured');
     }
@@ -163,8 +170,37 @@ export class KeyManagementServiceImpl implements KeyManagementService {
     }
 
     // Create client and set operator with credentials
-    const client =
-      network === 'mainnet' ? Client.forMainnet() : Client.forTestnet();
+    let client: Client;
+    switch (network) {
+      case 'mainnet':
+        client = Client.forMainnet();
+        break;
+      case 'testnet':
+        client = Client.forTestnet();
+        break;
+      case 'previewnet':
+        client = Client.forPreviewnet();
+        break;
+      case 'localnet': {
+        // For localnet, get configuration from NetworkService
+        const localnetConfig = this.networkService.getLocalnetConfig();
+
+        const node = {
+          [localnetConfig.localNodeAddress]: AccountId.fromString(
+            localnetConfig.localNodeAccountId,
+          ),
+        };
+        client = Client.forNetwork(node);
+
+        if (localnetConfig.localNodeMirrorAddressGRPC) {
+          client.setMirrorNetwork(localnetConfig.localNodeMirrorAddressGRPC);
+        }
+        break;
+      }
+      default:
+        throw new Error(`[CRED] Unsupported network: ${String(network)}`);
+    }
+
     const accountIdObj = AccountId.fromString(accountId);
 
     // Use the correct PrivateKey.fromString method based on algorithm

@@ -152,8 +152,14 @@ export class PluginManager {
     commandSpec: CommandSpec,
   ): void {
     const commandName = String(commandSpec.name);
+    // Build command signature with positional arguments if specified
+    // Example: 'use' + '<name>' -> 'use <name>' for "network use testnet"
+    const commandSignature = commandSpec.arguments
+      ? `${commandName} ${commandSpec.arguments}`
+      : commandName;
+
     const command = pluginCommand
-      .command(commandName)
+      .command(commandSignature)
       .description(
         String(
           commandSpec.description ||
