@@ -2,6 +2,7 @@
  * Default network configurations for NetworkService
  * This is the single source of truth for network settings
  */
+import { SupportedNetwork } from '../../types/shared.types';
 
 export interface DefaultNetworkConfig {
   rpcUrl: string;
@@ -14,7 +15,7 @@ export interface DefaultLocalnetNode {
   localNodeMirrorAddressGRPC: string;
 }
 
-export const DEFAULT_NETWORK = 'testnet';
+export const DEFAULT_NETWORK: SupportedNetwork = 'testnet';
 
 export const DEFAULT_NETWORKS: Record<string, DefaultNetworkConfig> = {
   localnet: {

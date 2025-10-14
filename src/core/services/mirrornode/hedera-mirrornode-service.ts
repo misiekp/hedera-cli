@@ -19,6 +19,7 @@ import {
   ContractInfo,
   TokenAirdropsResponse,
   ExchangeRateResponse,
+  TopicMessageQueryParams,
 } from './types';
 import BigNumber from 'bignumber.js';
 import { formatError } from '../../../utils/errors';
@@ -90,18 +91,25 @@ export class HederaMirrornodeServiceDefaultImpl
     return data;
   }
 
+  async getTopicMessage(
+    queryParams: TopicMessageQueryParams,
+  ): Promise<TopicMessage> {
+    const response = await fetch(
+      `${this.baseUrl}/topics/${queryParams.topicId}/messages/${queryParams.sequenceNumber}`,
+    );
+
+    return (await response.json()) as TopicMessage;
+  }
+
   async getTopicMessages(
     queryParams: TopicMessagesQueryParams,
   ): Promise<TopicMessagesResponse> {
-    const lowerThreshold = queryParams.lowerTimestamp
-      ? `&timestamp=gte:${queryParams.lowerTimestamp}`
-      : '';
-    const upperThreshold = queryParams.upperTimestamp
-      ? `&timestamp=lte:${queryParams.upperTimestamp}`
-      : '';
+    const { filter } = queryParams;
+
+    const queryWithFilter = `&${filter?.field}=${filter?.operation}:${filter?.value}`;
     const baseParams = `&order=desc&limit=100`;
     let url: string | null =
-      `${this.baseUrl}/topics/${queryParams.topicId}/messages?${lowerThreshold}${upperThreshold}${baseParams}`;
+      `${this.baseUrl}/topics/${queryParams.topicId}/messages?${queryWithFilter}${baseParams}`;
     const arrayOfMessages: TopicMessage[] = [];
     let fetchedMessages = 0;
     try {
@@ -137,7 +145,7 @@ export class HederaMirrornodeServiceDefaultImpl
     }
     return {
       topicId: queryParams.topicId,
-      messages: arrayOfMessages.slice(0, queryParams.limit),
+      messages: arrayOfMessages,
     };
   }
 

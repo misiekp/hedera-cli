@@ -1,5 +1,4 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import type { SupportedNetwork } from '../../../core/types/shared.types';
 
 export default async function transferHandler(
   args: CommandHandlerArgs,
@@ -46,8 +45,7 @@ export default async function transferHandler(
   }
 
   // Get current network for alias resolution
-  const currentNetwork: SupportedNetwork =
-    api.network.getCurrentNetwork() as SupportedNetwork;
+  const currentNetwork = api.network.getCurrentNetwork();
 
   // Resolve from/to using alias service
   let fromAccountId = from;

@@ -5,6 +5,7 @@
 import { CoreAPI } from './core-api.interface';
 import { AccountService } from '../services/account/account-transaction-service.interface';
 import { TransactionService } from '../services/signing/signing-service.interface';
+import { TopicService } from '../services/topics/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
@@ -12,6 +13,7 @@ import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { AccountServiceImpl } from '../services/account/account-transaction-service';
 import { TransactionServiceImpl } from '../services/signing/signing-service';
+import { TopicServiceImpl } from '../services/topics/topic-transaction-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
@@ -28,6 +30,7 @@ import { KeyManagementServiceImpl } from '../services/credentials-state/credenti
 export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountService;
   public signing: TransactionService;
+  public topic: TopicService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
   public network: NetworkService;
@@ -57,6 +60,7 @@ export class CoreAPIImplementation implements CoreAPI {
       this.credentialsState,
       this.network,
     );
+    this.topic = new TopicServiceImpl();
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
     let ledgerId: LedgerId;

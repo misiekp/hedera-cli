@@ -53,6 +53,7 @@ async function initializeCLI() {
       './dist/plugins/plugin-management', // Plugin management plugin
       './dist/plugins/credentials', // Credentials management plugin
       './dist/plugins/state-management', // State management plugin
+      './dist/plugins/topic', // Topic management plugin
       './dist/plugins/hbar', // HBAR plugin
     ]);
 

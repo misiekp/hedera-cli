@@ -9,6 +9,7 @@ import {
 } from './network-service.interface';
 import { StateService } from '../state/state-service.interface';
 import { Logger } from '../logger/logger-service.interface';
+import { SupportedNetwork } from '../../types/shared.types';
 import {
   DEFAULT_NETWORK,
   DEFAULT_NETWORKS,
@@ -27,8 +28,11 @@ export class NetworkServiceImpl implements NetworkService {
     this.logger = logger;
   }
 
-  getCurrentNetwork(): string {
-    const network = this.state.get<string>(NAMESPACE, CURRENT_NETWORK_KEY);
+  getCurrentNetwork(): SupportedNetwork {
+    const network = this.state.get<SupportedNetwork>(
+      NAMESPACE,
+      CURRENT_NETWORK_KEY,
+    );
     this.logger.debug(`[NETWORK] Getting current network: ${network}`);
     return network || DEFAULT_NETWORK;
   }

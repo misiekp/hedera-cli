@@ -112,6 +112,7 @@ function createNamespaceStore(
             getItem: (name) => {
               try {
                 const filePath = path.join(storageDir, `${name}.json`);
+
                 if (fs.existsSync(filePath)) {
                   return fs.readFileSync(filePath, 'utf8');
                 }

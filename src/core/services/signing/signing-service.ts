@@ -10,7 +10,6 @@ import { Logger } from '../logger/logger-service.interface';
 import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
 import { NetworkService } from '../network/network-service.interface';
 import type { SignerRef } from './signing-service.interface';
-import type { SupportedNetwork } from '../../types/shared.types';
 import {
   Client,
   TransactionResponse,
@@ -41,9 +40,7 @@ export class TransactionServiceImpl implements TransactionService {
     this.logger.debug('[SIGNING] Creating client for current network');
 
     // Get current network from NetworkService
-    const currentNetwork = this.networkService.getCurrentNetwork();
-
-    const network = currentNetwork as SupportedNetwork;
+    const network = this.networkService.getCurrentNetwork();
 
     // Use credentials-state to create client without exposing private keys
     return this.credentialsState.createClient(network);
@@ -91,10 +88,17 @@ export class TransactionServiceImpl implements TransactionService {
         accountId = receipt.accountId.toString();
       }
 
+      // Extract topic ID for topic creation transactions
+      let topicId: string | undefined;
+      if (receipt.topicId) {
+        topicId = receipt.topicId.toString();
+      }
+
       return {
         transactionId: response.transactionId.toString(),
         success: receipt.status === Status.Success,
         accountId,
+        topicId,
         receipt: {
           status: {
             status: receipt.status === Status.Success ? 'success' : 'failed',
@@ -126,9 +130,16 @@ export class TransactionServiceImpl implements TransactionService {
     const response: TransactionResponse = await transaction.execute(client);
     const receipt: TransactionReceipt = await response.getReceipt(client);
 
+    // Extract topic ID for topic creation transactions
+    let topicId: string | undefined;
+    if (receipt.topicId) {
+      topicId = receipt.topicId.toString();
+    }
+
     return {
       transactionId: response.transactionId.toString(),
       success: receipt.status === Status.Success,
+      topicId,
       receipt: {
         status: {
           status: receipt.status === Status.Success ? 'success' : 'failed',
