@@ -1,83 +1,84 @@
 /**
  * Network Service Implementation
- * Manages network state through Zustand store
+ * Manages network configuration using StateService with namespace
  */
 import {
   NetworkService,
   NetworkConfig,
   LocalnetConfig,
 } from './network-service.interface';
-import { getState, saveState } from '../../../state/store';
+import { StateService } from '../state/state-service.interface';
+import { Logger } from '../logger/logger-service.interface';
+import {
+  DEFAULT_NETWORK,
+  DEFAULT_NETWORKS,
+  DEFAULT_LOCALNET_NODE,
+} from './network.config';
+
+const NAMESPACE = 'network-config';
+const CURRENT_NETWORK_KEY = 'current';
 
 export class NetworkServiceImpl implements NetworkService {
-  /**
-   * Get the current active network from state
-   */
-  getCurrentNetwork(): string {
-    const network = getState().network;
-    console.log(`[MOCK] Getting current network: ${network}`);
-    return network;
+  private readonly state: StateService;
+  private readonly logger: Logger;
+
+  constructor(state: StateService, logger: Logger) {
+    this.state = state;
+    this.logger = logger;
   }
 
-  /**
-   * Get list of available networks from state
-   */
+  getCurrentNetwork(): string {
+    const network = this.state.get<string>(NAMESPACE, CURRENT_NETWORK_KEY);
+    this.logger.debug(`[NETWORK] Getting current network: ${network}`);
+    return network || DEFAULT_NETWORK;
+  }
+
   getAvailableNetworks(): string[] {
-    const networks = Object.keys(getState().networks);
-    console.log(`[MOCK] Getting available networks: ${networks.join(', ')}`);
+    const networks = Object.keys(DEFAULT_NETWORKS);
+    this.logger.debug(
+      `[NETWORK] Getting available networks: ${networks.join(', ')}`,
+    );
     return networks;
   }
 
-  /**
-   * Switch to a different network and persist to state
-   */
   switchNetwork(network: string): void {
+    if (!this.isNetworkAvailable(network)) {
+      throw new Error(`Network not available: ${network}`);
+    }
     const currentNetwork = this.getCurrentNetwork();
-    console.log(
-      `[MOCK] Switching network from ${currentNetwork} to ${network}`,
+    this.logger.debug(
+      `[NETWORK] Switching network from ${currentNetwork} to ${network}`,
     );
-    saveState({ network });
+    this.state.set<string>(NAMESPACE, CURRENT_NETWORK_KEY, network);
   }
 
-  /**
-   * Get configuration for a specific network from state
-   */
   getNetworkConfig(network: string): NetworkConfig {
-    console.log(`[MOCK] Getting network config for: ${network}`);
-    const networkConfig = getState().networks[network];
+    const config = DEFAULT_NETWORKS[network];
 
-    if (!networkConfig) {
+    if (!config) {
       throw new Error(`Network configuration not found: ${network}`);
     }
 
     return {
       name: network,
-      rpcUrl: networkConfig.rpcUrl,
-      mirrorNodeUrl: networkConfig.mirrorNodeUrl,
+      rpcUrl: config.rpcUrl,
+      mirrorNodeUrl: config.mirrorNodeUrl,
       chainId: network === 'mainnet' ? '0x127' : '0x128',
       explorerUrl: `https://hashscan.io/${network}`,
       isTestnet: network !== 'mainnet',
     };
   }
 
-  /**
-   * Check if a network is available in state
-   */
   isNetworkAvailable(network: string): boolean {
-    console.log(`[MOCK] Checking if network is available: ${network}`);
-    return network in getState().networks;
+    const available = network in DEFAULT_NETWORKS;
+    this.logger.debug(
+      `[NETWORK] Checking if network is available: ${network} -> ${available}`,
+    );
+    return available;
   }
 
-  /**
-   * Get localnet-specific configuration from state
-   */
   getLocalnetConfig(): LocalnetConfig {
-    const state = getState();
-    console.log(`[MOCK] Getting localnet configuration`);
-    return {
-      localNodeAddress: state.localNodeAddress,
-      localNodeAccountId: state.localNodeAccountId,
-      localNodeMirrorAddressGRPC: state.localNodeMirrorAddressGRPC,
-    };
+    this.logger.debug(`[NETWORK] Getting localnet configuration`);
+    return DEFAULT_LOCALNET_NODE;
   }
 }

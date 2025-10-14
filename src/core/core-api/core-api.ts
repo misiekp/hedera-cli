@@ -41,7 +41,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.logger = new MockLoggerService();
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
-    this.network = new NetworkServiceImpl();
+    this.network = new NetworkServiceImpl(this.state, this.logger);
 
     // Initialize all services with dependencies
     this.accountTransactions = new AccountServiceImpl(this.logger);

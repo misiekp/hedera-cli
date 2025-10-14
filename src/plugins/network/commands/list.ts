@@ -7,26 +7,22 @@ import { formatError } from '../../../utils/errors';
 import { color, heading } from '../../../utils/color';
 import { isJsonOutput, printOutput } from '../../../utils/output';
 import { checkMirrorNodeHealth, checkRpcHealth } from '../utils/networkHealth';
-import stateUtils from '../../../utils/state';
-import { selectNetworks } from '../../../state/selectors';
 
 export async function listHandler(args: CommandHandlerArgs) {
-  const { logger } = args;
+  const { logger, api } = args;
 
   try {
-    const networkNames = stateUtils.getAvailableNetworks();
-    const currentNetwork = stateUtils.getNetwork();
-    const networks = selectNetworks();
+    const networkNames = api.network.getAvailableNetworks();
+    const currentNetwork = api.network.getCurrentNetwork();
 
     if (isJsonOutput()) {
       const networksWithConfig = networkNames.map((name) => {
-        const config = networks[name];
+        const config = api.network.getNetworkConfig(name);
         return {
           name,
           isActive: name === currentNetwork,
           mirrorNodeUrl: config.mirrorNodeUrl,
           rpcUrl: config.rpcUrl,
-          operatorId: config.operatorId,
         };
       });
       printOutput('networks', {
@@ -39,7 +35,7 @@ export async function listHandler(args: CommandHandlerArgs) {
     logger.log(heading('Available networks:'));
     for (const name of networkNames) {
       const isActive = name === currentNetwork;
-      const config = networks[name];
+      const config = api.network.getNetworkConfig(name);
       const networkLine = `${color.green('-')} ${color.magenta(name)}`;
       const activeIndicator = isActive ? ` ${color.yellow('(active)')}` : '';
       logger.log(`${networkLine}${activeIndicator}`);
@@ -58,10 +54,6 @@ export async function listHandler(args: CommandHandlerArgs) {
             rpcStatus.code ? `(${rpcStatus.code})` : ''
           }`,
         );
-
-        if (config.operatorId) {
-          logger.log(`  Operator ID: ${color.cyan(config.operatorId)}`);
-        }
       }
     }
 
