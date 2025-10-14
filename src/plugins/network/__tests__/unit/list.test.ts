@@ -3,25 +3,13 @@ import {
   makeLogger,
   makeArgs,
   setupExitSpy,
+  makeNetworkMock,
 } from '../../../../../__tests__/helpers/plugin';
-import stateUtils from '../../../../utils/state';
-import { selectNetworks } from '../../../../state/selectors';
 import { isJsonOutput, printOutput } from '../../../../utils/output';
 import {
   checkMirrorNodeHealth,
   checkRpcHealth,
 } from '../../utils/networkHealth';
-
-jest.mock('../../../../utils/state', () => ({
-  default: {
-    getAvailableNetworks: jest.fn(),
-    getNetwork: jest.fn(),
-  },
-}));
-
-jest.mock('../../../../state/selectors', () => ({
-  selectNetworks: jest.fn(),
-}));
 
 jest.mock('../../../../utils/output', () => ({
   isJsonOutput: jest.fn(),
@@ -43,9 +31,6 @@ jest.mock('../../../../utils/color', () => ({
   heading: (str: string) => str,
 }));
 
-const mockedGetAvailableNetworks = stateUtils.getAvailableNetworks as jest.Mock;
-const mockedGetNetwork = stateUtils.getNetwork as jest.Mock;
-const mockedSelectNetworks = selectNetworks as jest.Mock;
 const mockedIsJsonOutput = isJsonOutput as jest.Mock;
 const mockedPrintOutput = printOutput as jest.Mock;
 const mockedCheckMirrorNodeHealth = checkMirrorNodeHealth as jest.Mock;
@@ -62,55 +47,17 @@ afterAll(() => {
 });
 
 describe('network plugin - list command', () => {
-  const mockNetworks = {
-    localnet: {
-      mirrorNodeUrl: 'http://localhost:8081/api/v1',
-      rpcUrl: 'http://localhost:7546',
-      operatorId: '0.0.2',
-      operatorKey: 'key123',
-      hexKey: '',
-    },
-    testnet: {
-      mirrorNodeUrl: 'https://testnet.mirrornode.hedera.com/api/v1',
-      rpcUrl: 'https://testnet.hashio.io/api',
-      operatorId: '',
-      operatorKey: '',
-      hexKey: '',
-    },
-    previewnet: {
-      mirrorNodeUrl: 'https://previewnet.mirrornode.hedera.com/api/v1',
-      rpcUrl: 'https://previewnet.hashio.io/api',
-      operatorId: '',
-      operatorKey: '',
-      hexKey: '',
-    },
-    mainnet: {
-      mirrorNodeUrl: 'https://mainnet.mirrornode.hedera.com/api/v1',
-      rpcUrl: 'https://mainnet.hashio.io/api',
-      operatorId: '',
-      operatorKey: '',
-      hexKey: '',
-    },
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockedIsJsonOutput.mockReturnValue(false);
-    mockedGetAvailableNetworks.mockReturnValue([
-      'localnet',
-      'testnet',
-      'previewnet',
-      'mainnet',
-    ]);
-    mockedGetNetwork.mockReturnValue('testnet');
-    mockedSelectNetworks.mockReturnValue(mockNetworks);
     mockedCheckMirrorNodeHealth.mockResolvedValue({ status: '✅', code: 200 });
     mockedCheckRpcHealth.mockResolvedValue({ status: '✅', code: 200 });
   });
 
   test('lists all available networks', async () => {
     const logger = makeLogger();
-    const args = makeArgs({}, logger, {});
+    const networkService = makeNetworkMock('testnet');
+    const args = makeArgs({ network: networkService }, logger, {});
 
     await listHandler(args);
 
@@ -120,147 +67,136 @@ describe('network plugin - list command', () => {
     expect(logger.log).toHaveBeenCalledWith(
       expect.stringContaining('localnet'),
     );
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('testnet'));
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('- testnet (active)'),
+    );
     expect(logger.log).toHaveBeenCalledWith(
       expect.stringContaining('previewnet'),
     );
     expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('mainnet'));
-    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
-  test('marks active network with indicator', async () => {
+  test('shows health checks for active network', async () => {
     const logger = makeLogger();
-    const args = makeArgs({}, logger, {});
+    const networkService = makeNetworkMock('testnet');
+    networkService.getNetworkConfig = jest.fn().mockImplementation((name) => ({
+      name,
+      rpcUrl: `https://${name}.hashio.io/api`,
+      mirrorNodeUrl: `https://${name}.mirrornode.hedera.com/api/v1`,
+      chainId: '0x128',
+      explorerUrl: `https://hashscan.io/${name}`,
+      isTestnet: name !== 'mainnet',
+    }));
+    const args = makeArgs({ network: networkService }, logger, {});
 
     await listHandler(args);
 
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('- testnet (active)'),
+    expect(mockedCheckMirrorNodeHealth).toHaveBeenCalledWith(
+      'https://testnet.mirrornode.hedera.com/api/v1',
     );
-    expect(exitSpy).toHaveBeenCalledWith(0);
+    expect(mockedCheckRpcHealth).toHaveBeenCalledWith(
+      'https://testnet.hashio.io/api',
+    );
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('Mirror Node:'),
+    );
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('RPC URL:'),
+    );
   });
 
-  test('performs health checks only for active network', async () => {
+  test('does not show health checks for inactive networks', async () => {
     const logger = makeLogger();
-    const args = makeArgs({}, logger, {});
+    const networkService = makeNetworkMock('testnet');
+    const args = makeArgs({ network: networkService }, logger, {});
 
     await listHandler(args);
 
     expect(mockedCheckMirrorNodeHealth).toHaveBeenCalledTimes(1);
-    expect(mockedCheckMirrorNodeHealth).toHaveBeenCalledWith(
-      'https://testnet.mirrornode.hedera.com/api/v1',
-    );
     expect(mockedCheckRpcHealth).toHaveBeenCalledTimes(1);
-    expect(mockedCheckRpcHealth).toHaveBeenCalledWith(
-      'https://testnet.hashio.io/api',
-    );
-    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
-  test('displays health check results', async () => {
-    const logger = makeLogger();
-    mockedCheckMirrorNodeHealth.mockResolvedValue({ status: '✅', code: 200 });
-    mockedCheckRpcHealth.mockResolvedValue({ status: '❌', code: 500 });
-
-    const args = makeArgs({}, logger, {});
-
-    await listHandler(args);
-
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('Mirror Node:'),
-    );
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('✅'));
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('(200)'));
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('RPC URL:'),
-    );
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('❌'));
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('(500)'));
-    expect(exitSpy).toHaveBeenCalledWith(0);
-  });
-
-  test('displays operator ID when present', async () => {
-    const logger = makeLogger();
-    mockedGetNetwork.mockReturnValue('localnet');
-    const args = makeArgs({}, logger, {});
-
-    await listHandler(args);
-
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('Operator ID:'),
-    );
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('0.0.2'));
-    expect(exitSpy).toHaveBeenCalledWith(0);
-  });
-
-  test('does not display operator ID when empty', async () => {
-    const logger = makeLogger();
-    const args = makeArgs({}, logger, {});
-
-    await listHandler(args);
-
-    const operatorIdCalls = logger.log.mock.calls.filter((call) =>
-      String(call[0]).includes('Operator ID:'),
-    );
-    expect(operatorIdCalls.length).toBe(0);
-    expect(exitSpy).toHaveBeenCalledWith(0);
-  });
-
-  test('returns JSON output with network configuration', async () => {
-    const logger = makeLogger();
+  test('outputs JSON format when --json flag is set', async () => {
     mockedIsJsonOutput.mockReturnValue(true);
-    const args = makeArgs({}, logger, {});
+
+    const logger = makeLogger();
+    const networkService = makeNetworkMock('mainnet');
+    networkService.getAvailableNetworks = jest
+      .fn()
+      .mockReturnValue(['localnet', 'testnet', 'previewnet', 'mainnet']);
+    networkService.getNetworkConfig = jest.fn().mockImplementation((name) => ({
+      name,
+      rpcUrl: `https://${name}.hashio.io/api`,
+      mirrorNodeUrl: `https://${name}.mirrornode.hedera.com/api/v1`,
+      chainId: '0x127',
+      explorerUrl: `https://hashscan.io/${name}`,
+      isTestnet: name !== 'mainnet',
+    }));
+    const args = makeArgs({ network: networkService }, logger, { json: true });
 
     await listHandler(args);
 
     expect(mockedPrintOutput).toHaveBeenCalledWith('networks', {
       networks: expect.arrayContaining([
         expect.objectContaining({
-          name: 'localnet',
-          isActive: false,
-          mirrorNodeUrl: 'http://localhost:8081/api/v1',
-          rpcUrl: 'http://localhost:7546',
-          operatorId: '0.0.2',
-        }),
-        expect.objectContaining({
-          name: 'testnet',
+          name: 'mainnet',
           isActive: true,
-          mirrorNodeUrl: 'https://testnet.mirrornode.hedera.com/api/v1',
-          rpcUrl: 'https://testnet.hashio.io/api',
-          operatorId: '',
+          mirrorNodeUrl: 'https://mainnet.mirrornode.hedera.com/api/v1',
+          rpcUrl: 'https://mainnet.hashio.io/api',
         }),
       ]),
-      activeNetwork: 'testnet',
+      activeNetwork: 'mainnet',
     });
-    expect(exitSpy).not.toHaveBeenCalled();
   });
 
-  test('handles health check failures', async () => {
+  test('handles errors gracefully', async () => {
     const logger = makeLogger();
-    mockedCheckMirrorNodeHealth.mockResolvedValue({ status: '❌' });
-    mockedCheckRpcHealth.mockResolvedValue({ status: '❌' });
-
-    const args = makeArgs({}, logger, {});
-
-    await listHandler(args);
-
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('❌'));
-    expect(exitSpy).toHaveBeenCalledWith(0);
-  });
-
-  test('logs error and exits on exception', async () => {
-    const logger = makeLogger();
-    mockedGetAvailableNetworks.mockImplementation(() => {
-      throw new Error('State error');
+    const networkService = makeNetworkMock('testnet');
+    networkService.getAvailableNetworks = jest.fn().mockImplementation(() => {
+      throw new Error('Network service error');
     });
-
-    const args = makeArgs({}, logger, {});
+    const args = makeArgs({ network: networkService }, logger, {});
 
     await listHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to list networks'),
+      expect.stringContaining('Failed to list networks'),
     );
     expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  test('shows health check failures', async () => {
+    const logger = makeLogger();
+    const networkService = makeNetworkMock('testnet');
+    networkService.getNetworkConfig = jest.fn().mockImplementation((name) => ({
+      name,
+      rpcUrl: `https://${name}.hashio.io/api`,
+      mirrorNodeUrl: `https://${name}.mirrornode.hedera.com/api/v1`,
+      chainId: '0x128',
+      explorerUrl: `https://hashscan.io/${name}`,
+      isTestnet: true,
+    }));
+
+    mockedCheckMirrorNodeHealth.mockResolvedValue({ status: '❌', code: 500 });
+    mockedCheckRpcHealth.mockResolvedValue({ status: '❌' });
+
+    const args = makeArgs({ network: networkService }, logger, {});
+
+    await listHandler(args);
+
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('Mirror Node:'),
+    );
+    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('❌'));
+  });
+
+  test('exits with code 0 on success', async () => {
+    const logger = makeLogger();
+    const networkService = makeNetworkMock('testnet');
+    const args = makeArgs({ network: networkService }, logger, {});
+
+    await listHandler(args);
+
+    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 });
