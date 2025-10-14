@@ -152,6 +152,7 @@ export class PluginManager {
     commandSpec: CommandSpec,
   ): void {
     const commandName = String(commandSpec.name);
+
     const command = pluginCommand
       .command(commandName)
       .description(

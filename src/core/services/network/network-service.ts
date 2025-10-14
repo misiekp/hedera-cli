@@ -1,64 +1,88 @@
 /**
- * Mock implementation of Network Service
- * This is a placeholder implementation for testing the architecture
+ * Network Service Implementation
+ * Manages network configuration using StateService with namespace
  */
-import { NetworkService, NetworkConfig } from './network-service.interface';
+import {
+  NetworkService,
+  NetworkConfig,
+  LocalnetConfig,
+} from './network-service.interface';
+import { StateService } from '../state/state-service.interface';
+import { Logger } from '../logger/logger-service.interface';
 import { SupportedNetwork } from '../../types/shared.types';
+import {
+  DEFAULT_NETWORK,
+  DEFAULT_NETWORKS,
+  DEFAULT_LOCALNET_NODE,
+} from './network.config';
 
-export class MockNetworkService implements NetworkService {
-  private currentNetwork: string = 'testnet';
-  private availableNetworks: string[] = ['mainnet', 'testnet', 'previewnet'];
+const NAMESPACE = 'network-config';
+const CURRENT_NETWORK_KEY = 'current';
 
-  /**
-   * Get the current active network (mock implementation)
-   */
+export class NetworkServiceImpl implements NetworkService {
+  private readonly state: StateService;
+  private readonly logger: Logger;
+
+  constructor(state: StateService, logger: Logger) {
+    this.state = state;
+    this.logger = logger;
+  }
+
   getCurrentNetwork(): SupportedNetwork {
-    console.log(`[MOCK] Getting current network: ${this.currentNetwork}`);
-    return <SupportedNetwork>this.currentNetwork;
+    const network = this.state.get<SupportedNetwork>(
+      NAMESPACE,
+      CURRENT_NETWORK_KEY,
+    );
+    this.logger.debug(`[NETWORK] Getting current network: ${network}`);
+    return network || DEFAULT_NETWORK;
   }
 
-  /**
-   * Get list of available networks (mock implementation)
-   */
   getAvailableNetworks(): string[] {
-    console.log(
-      `[MOCK] Getting available networks: ${this.availableNetworks.join(', ')}`,
+    const networks = Object.keys(DEFAULT_NETWORKS);
+    this.logger.debug(
+      `[NETWORK] Getting available networks: ${networks.join(', ')}`,
     );
-    return [...this.availableNetworks];
+    return networks;
   }
 
-  /**
-   * Switch to a different network (mock implementation)
-   */
   switchNetwork(network: string): void {
-    console.log(
-      `[MOCK] Switching network from ${this.currentNetwork} to ${network}`,
+    if (!this.isNetworkAvailable(network)) {
+      throw new Error(`Network not available: ${network}`);
+    }
+    const currentNetwork = this.getCurrentNetwork();
+    this.logger.debug(
+      `[NETWORK] Switching network from ${currentNetwork} to ${network}`,
     );
-    this.currentNetwork = network;
+    this.state.set<string>(NAMESPACE, CURRENT_NETWORK_KEY, network);
   }
 
-  /**
-   * Get configuration for a specific network (mock implementation)
-   */
   getNetworkConfig(network: string): NetworkConfig {
-    console.log(`[MOCK] Getting network config for: ${network}`);
+    const config = DEFAULT_NETWORKS[network];
 
-    // Mock implementation - return mock network config
+    if (!config) {
+      throw new Error(`Network configuration not found: ${network}`);
+    }
+
     return {
       name: network,
-      rpcUrl: `https://${network}.hedera.com:50211`,
-      mirrorNodeUrl: `https://${network}.mirrornode.hedera.com`,
+      rpcUrl: config.rpcUrl,
+      mirrorNodeUrl: config.mirrorNodeUrl,
       chainId: network === 'mainnet' ? '0x127' : '0x128',
       explorerUrl: `https://hashscan.io/${network}`,
       isTestnet: network !== 'mainnet',
     };
   }
 
-  /**
-   * Check if a network is available (mock implementation)
-   */
   isNetworkAvailable(network: string): boolean {
-    console.log(`[MOCK] Checking if network is available: ${network}`);
-    return this.availableNetworks.includes(network);
+    const available = network in DEFAULT_NETWORKS;
+    this.logger.debug(
+      `[NETWORK] Checking if network is available: ${network} -> ${available}`,
+    );
+    return available;
+  }
+
+  getLocalnetConfig(): LocalnetConfig {
+    this.logger.debug(`[NETWORK] Getting localnet configuration`);
+    return DEFAULT_LOCALNET_NODE;
   }
 }
