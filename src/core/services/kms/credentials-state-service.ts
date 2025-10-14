@@ -128,33 +128,29 @@ export class KeyManagementServiceImpl implements KeyManagementService {
 
   // Removed registerProvider - no longer needed
 
-  setOperator(accountId: string, keyRefId: string): void {
-    this.storage.setOperator({ accountId, keyRefId });
-    this.logger.debug(`[CRED] Default operator set: ${accountId}`);
+  setOperator(
+    network: SupportedNetwork,
+    accountId: string,
+    keyRefId: string,
+  ): void {
+    this.storage.setOperator(network, { accountId, keyRefId });
+    this.logger.debug(
+      `[CRED] Default operator set for ${network}: ${accountId}`,
+    );
   }
 
-  getOperator(): { accountId: string; keyRefId: string } | null {
-    return this.storage.getOperator();
-  }
-
-  ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null {
-    const existing = this.getOperator();
-    if (existing) return existing;
-    // TODO: Improve environment variable handling to support multiple networks (not just Testnet)
-    const accountId = process.env.TESTNET_OPERATOR_ID;
-    const privateKey = process.env.TESTNET_OPERATOR_KEY;
-    if (accountId && privateKey) {
-      const { keyRefId } = this.importPrivateKey(privateKey, ['env-default']);
-      this.setOperator(accountId, keyRefId);
-      return { accountId, keyRefId };
-    }
-    return null;
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null {
+    return this.storage.getOperator(network);
   }
 
   createClient(network: SupportedNetwork): Client {
-    const mapping = this.getOperator() || this.ensureDefaultFromEnv();
+    const mapping = this.getOperator(network);
     if (!mapping) {
-      throw new Error('[CRED] No default operator configured');
+      throw new Error(
+        `[CRED] No default operator configured for network: ${network}`,
+      );
     }
 
     const { accountId, keyRefId } = mapping;

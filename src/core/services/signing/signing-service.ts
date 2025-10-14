@@ -59,11 +59,12 @@ export class TransactionServiceImpl implements TransactionService {
       const client = this.getClient();
 
       // Get default operator keyRefId for signing
-      const mapping =
-        this.credentialsState.getOperator() ||
-        this.credentialsState.ensureDefaultFromEnv();
+      const currentNetwork = this.networkService.getCurrentNetwork();
+      const mapping = this.credentialsState.getOperator(currentNetwork);
       if (!mapping) {
-        throw new Error('[SIGNING] No default operator configured');
+        throw new Error(
+          `[SIGNING] No default operator configured for network: ${currentNetwork}`,
+        );
       }
 
       transaction.freezeWith(client);

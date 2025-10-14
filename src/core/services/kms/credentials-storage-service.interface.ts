@@ -14,7 +14,10 @@ export interface CredentialsStorageService {
   readSecret(keyRefId: string): CredentialSecret | null;
   removeSecret(keyRefId: string): void;
 
-  // Default operator mapping (metadata)
-  setOperator(mapping: { accountId: string; keyRefId: string }): void;
-  getOperator(): { accountId: string; keyRefId: string } | null;
+  // Default operator mapping (metadata) per network
+  setOperator(
+    network: string,
+    mapping: { accountId: string; keyRefId: string },
+  ): void;
+  getOperator(network: string): { accountId: string; keyRefId: string } | null;
 }

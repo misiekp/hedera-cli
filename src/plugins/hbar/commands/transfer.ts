@@ -25,17 +25,16 @@ export default async function transferHandler(
     throw new Error('--to-id-or-name-or-alias is required');
   }
 
-  // Fallback to default operator from env if from not provided
+  // Fallback to default operator if from not provided
   if (!from) {
-    const defaultOp =
-      api.credentialsState.getOperator() ||
-      api.credentialsState.ensureDefaultFromEnv();
+    const currentNetwork = api.network.getCurrentNetwork();
+    const defaultOp = api.credentialsState.getOperator(currentNetwork);
     if (defaultOp) {
       from = defaultOp.accountId;
       logger.log(`[HBAR] Using default operator as from: ${from}`);
     } else {
       throw new Error(
-        'No --from provided and no default operator found in env (TESTNET_OPERATOR_ID/KEY)',
+        `No --from provided and no default operator found for network: ${currentNetwork}`,
       );
     }
   }

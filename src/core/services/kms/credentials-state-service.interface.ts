@@ -30,9 +30,14 @@ export interface KeyManagementService {
   // Removed registerProvider - no longer needed
 
   // Default operator management
-  setOperator(accountId: string, keyRefId: string): void;
-  getOperator(): { accountId: string; keyRefId: string } | null;
-  ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null;
+  setOperator(
+    network: SupportedNetwork,
+    accountId: string,
+    keyRefId: string,
+  ): void;
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null;
 
   // Client operations that don't expose private keys
   createClient(network: SupportedNetwork): Client;

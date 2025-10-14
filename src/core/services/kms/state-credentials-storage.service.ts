@@ -48,15 +48,18 @@ export class KmsStorageService implements CredentialsStorageService {
     this.state.delete(this.namespace + '-secrets', keyRefId);
   }
 
-  setOperator(mapping: { accountId: string; keyRefId: string }): void {
-    this.state.set(this.namespace + '-default', 'operator', mapping);
+  setOperator(
+    network: string,
+    mapping: { accountId: string; keyRefId: string },
+  ): void {
+    this.state.set(this.namespace + '-default', `${network}-operator`, mapping);
   }
 
-  getOperator(): { accountId: string; keyRefId: string } | null {
+  getOperator(network: string): { accountId: string; keyRefId: string } | null {
     return (
       this.state.get<{ accountId: string; keyRefId: string }>(
         this.namespace + '-default',
-        'operator',
+        `${network}-operator`,
       ) || null
     );
   }
