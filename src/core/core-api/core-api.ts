@@ -13,7 +13,7 @@ import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { AccountServiceImpl } from '../services/account/account-transaction-service';
 import { TransactionServiceImpl } from '../services/signing/signing-service';
-import { HederaTopicTransactionService } from '../services/topics/topic-transaction-service';
+import { TopicServiceImpl } from '../services/topics/topic-transaction-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
@@ -59,7 +59,7 @@ export class CoreAPIImplementation implements CoreAPI {
       this.credentialsState,
       this.network,
     );
-    this.topic = new HederaTopicTransactionService();
+    this.topic = new TopicServiceImpl();
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
     let ledgerId: LedgerId;

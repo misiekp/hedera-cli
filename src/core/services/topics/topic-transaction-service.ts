@@ -16,7 +16,7 @@ import {
   TopicCreateResult,
 } from './types';
 
-export class HederaTopicTransactionService implements TopicService {
+export class TopicServiceImpl implements TopicService {
   isPrivateKey(key: string): boolean {
     try {
       PrivateKey.fromStringDer(key);
