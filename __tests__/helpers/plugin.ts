@@ -64,10 +64,24 @@ export const makeNetworkMock = (
   network: 'testnet' | 'mainnet' | 'previewnet' = 'testnet',
 ): jest.Mocked<NetworkService> => ({
   getCurrentNetwork: jest.fn().mockReturnValue(network),
-  getAvailableNetworks: jest.fn(),
+  getAvailableNetworks: jest
+    .fn()
+    .mockReturnValue(['localnet', 'testnet', 'previewnet', 'mainnet']),
   switchNetwork: jest.fn(),
-  getNetworkConfig: jest.fn(),
-  isNetworkAvailable: jest.fn(),
+  getNetworkConfig: jest.fn().mockImplementation((name: string) => ({
+    name,
+    rpcUrl: `https://${name}.hashio.io/api`,
+    mirrorNodeUrl: `https://${name}.mirrornode.hedera.com/api/v1`,
+    chainId: name === 'mainnet' ? '0x127' : '0x128',
+    explorerUrl: `https://hashscan.io/${name}`,
+    isTestnet: name !== 'mainnet',
+  })),
+  isNetworkAvailable: jest.fn().mockReturnValue(true),
+  getLocalnetConfig: jest.fn().mockReturnValue({
+    localNodeAddress: '127.0.0.1:50211',
+    localNodeAccountId: '0.0.3',
+    localNodeMirrorAddressGRPC: '127.0.0.1:5600',
+  }),
 });
 
 /**
