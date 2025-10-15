@@ -77,7 +77,7 @@ describe('transferTokenHandler', () => {
 
       // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
 
       expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
@@ -145,7 +145,7 @@ describe('transferTokenHandler', () => {
 
       // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
 
       expect(alias.resolve).toHaveBeenCalledWith('alice', 'account', 'testnet');
@@ -219,7 +219,7 @@ describe('transferTokenHandler', () => {
 
       // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
 
       expect(alias.resolve).toHaveBeenCalledWith('bob', 'account', 'testnet');
@@ -400,7 +400,7 @@ describe('transferTokenHandler', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
     });
 
@@ -481,7 +481,7 @@ describe('transferTokenHandler', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Invalid key',
+        '❌ Failed to transfer token: Invalid key',
       );
     });
 
@@ -532,7 +532,7 @@ describe('transferTokenHandler', () => {
 
       // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
 
       expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
@@ -592,7 +592,7 @@ describe('transferTokenHandler', () => {
 
       // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
 
       expect(logger.log).toHaveBeenCalledWith(
@@ -649,7 +649,7 @@ describe('transferTokenHandler', () => {
 
       // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
 
       expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
@@ -707,7 +707,7 @@ describe('transferTokenHandler', () => {
 
       // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Process.exit(0)',
+        '❌ Failed to transfer token: Process.exit(0)',
       );
 
       expect(tokens.createTransferTransaction).toHaveBeenCalledWith({

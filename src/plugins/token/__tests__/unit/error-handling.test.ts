@@ -67,7 +67,7 @@ describe('Token Plugin Error Handling', () => {
       // Act & Assert
       await expect(createTokenHandler(args)).rejects.toThrow('Process.exit(1)');
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to create token: Error: Network timeout',
+        '❌ Failed to create token: Network timeout',
       );
     });
 
@@ -98,7 +98,7 @@ describe('Token Plugin Error Handling', () => {
         'Process.exit(1)',
       );
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to associate token: Error: Connection refused',
+        '❌ Failed to associate token: Connection refused',
       );
     });
 
@@ -137,7 +137,7 @@ describe('Token Plugin Error Handling', () => {
         'Process.exit(1)',
       );
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Network unreachable',
+        '❌ Failed to transfer token: Network unreachable',
       );
     });
   });
@@ -235,7 +235,7 @@ describe('Token Plugin Error Handling', () => {
       // Act & Assert
       await expect(createTokenHandler(args)).rejects.toThrow('Process.exit(1)');
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to create token: Error: Token creation failed - no token ID returned',
+        '❌ Failed to create token: Token creation failed - no token ID returned',
       );
     });
 
@@ -287,7 +287,7 @@ describe('Token Plugin Error Handling', () => {
         'Process.exit(1)',
       );
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to associate token: Error: Token association failed',
+        '❌ Failed to associate token: Token association failed',
       );
     });
   });
@@ -336,7 +336,7 @@ describe('Token Plugin Error Handling', () => {
         'Process.exit(1)',
       );
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Token transfer failed',
+        '❌ Failed to transfer token: Token transfer failed',
       );
     });
 
@@ -463,7 +463,7 @@ describe('Token Plugin Error Handling', () => {
       // Act & Assert
       await expect(createTokenHandler(args)).rejects.toThrow('Process.exit(1)');
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to create token: Error: Token creation failed - no token ID returned',
+        '❌ Failed to create token: Token creation failed - no token ID returned',
       );
     });
   });
@@ -609,7 +609,7 @@ describe('Token Plugin Error Handling', () => {
       // Act & Assert
       await expect(createTokenHandler(args)).rejects.toThrow('Process.exit(1)');
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to create token: Error: State service unavailable',
+        '❌ Failed to create token: State service unavailable',
       );
     });
   });
@@ -648,7 +648,7 @@ describe('Token Plugin Error Handling', () => {
       // Act & Assert
       await expect(createTokenHandler(args)).rejects.toThrow('Process.exit(1)');
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to create token: Error: Rate limit exceeded',
+        '❌ Failed to create token: Rate limit exceeded',
       );
     });
 
@@ -695,7 +695,7 @@ describe('Token Plugin Error Handling', () => {
         'Process.exit(1)',
       );
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Error: Token transfer failed',
+        '❌ Failed to transfer token: Token transfer failed',
       );
     });
   });
@@ -756,7 +756,7 @@ describe('Token Plugin Error Handling', () => {
       // Act & Assert
       await expect(createTokenHandler(args)).rejects.toThrow('Process.exit(1)');
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to create token: Error: Token creation failed - no token ID returned',
+        '❌ Failed to create token: Token creation failed - no token ID returned',
       );
     });
 
@@ -831,7 +831,7 @@ describe('Token Plugin Error Handling', () => {
 
       // Assert - Should log appropriate error
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to associate token: Error: Token association failed',
+        '❌ Failed to associate token: Token association failed',
       );
     });
   });

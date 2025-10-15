@@ -343,7 +343,7 @@ describe('associateTokenHandler', () => {
         'Process.exit(1)',
       );
       expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to associate token: Error: Token association failed',
+        '❌ Failed to associate token: Token association failed',
       );
     });
 

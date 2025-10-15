@@ -98,7 +98,7 @@ describe('Token State Management', () => {
         stateHelper.saveToken('0.0.123456', mockTokenData),
       ).rejects.toThrow('Save failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[TOKEN STATE] Failed to save token 0.0.123456: Error: Save failed',
+        '[TOKEN STATE] Failed to save token 0.0.123456: Save failed',
       );
     });
   });
@@ -167,7 +167,7 @@ describe('Token State Management', () => {
         'Get failed',
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[TOKEN STATE] Failed to get token 0.0.123456: Error: Get failed',
+        '[TOKEN STATE] Failed to get token 0.0.123456: Get failed',
       );
     });
   });
@@ -257,7 +257,7 @@ describe('Token State Management', () => {
 
       await expect(stateHelper.getAllTokens()).rejects.toThrow('List failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[TOKEN STATE] Failed to get all tokens: Error: List failed',
+        '[TOKEN STATE] Failed to get all tokens: List failed',
       );
     });
   });
@@ -290,7 +290,7 @@ describe('Token State Management', () => {
         'Delete failed',
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[TOKEN STATE] Failed to remove token 0.0.123456: Error: Delete failed',
+        '[TOKEN STATE] Failed to remove token 0.0.123456: Delete failed',
       );
     });
   });
@@ -377,7 +377,7 @@ describe('Token State Management', () => {
         ),
       ).rejects.toThrow('Token 0.0.123456 not found');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[TOKEN STATE] Failed to add association to token 0.0.123456: Error: Token 0.0.123456 not found',
+        '[TOKEN STATE] Failed to add association to token 0.0.123456: Token 0.0.123456 not found',
       );
     });
   });
