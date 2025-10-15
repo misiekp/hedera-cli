@@ -9,6 +9,7 @@ import {
   safeValidateTokenCreateParams,
   resolveTreasuryParameter,
 } from '../schema';
+import { formatError } from '../../../utils/errors';
 
 export async function createTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -42,10 +43,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
   let treasuryPublicKey: string | undefined;
 
   if (validatedParams.treasury) {
-    const network = api.network.getCurrentNetwork() as
-      | 'mainnet'
-      | 'testnet'
-      | 'previewnet';
+    const network = api.network.getCurrentNetwork();
     const resolvedTreasury = await resolveTreasuryParameter(
       validatedParams.treasury,
       api,
@@ -202,10 +200,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
           feeScheduleKey: '',
           treasuryKey: treasuryPublicKey || '',
         },
-        network: api.network.getCurrentNetwork() as
-          | 'mainnet'
-          | 'testnet'
-          | 'previewnet',
+        network: api.network.getCurrentNetwork(),
         associations: [],
         customFees: [],
       };
@@ -219,7 +214,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       throw new Error('Token creation failed - no token ID returned');
     }
   } catch (error) {
-    logger.error(`❌ Failed to create token: ${error}`);
+    logger.error(formatError('❌ Failed to create token', error));
     process.exit(1);
     return; // Ensure execution stops (for testing with mocked process.exit)
   }

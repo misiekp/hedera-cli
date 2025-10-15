@@ -8,7 +8,7 @@ import {
   resolveAccountParameter,
   resolveDestinationAccountParameter,
 } from '../schema';
-// import { ZustandTokenStateHelper } from '../zustand-state-helper';
+import { formatError } from '../../../utils/errors';
 
 export async function transferTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -24,9 +24,6 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
     return; // Ensure execution stops (for testing with mocked process.exit)
   }
 
-  // Initialize token state helper
-  // const tokenState = new ZustandTokenStateHelper(api.state, logger);
-
   // Use validated parameters
   const validatedParams = validationResult.data;
   const tokenId = validatedParams.tokenId;
@@ -36,10 +33,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
   // Resolve from parameter (alias or account-id:private-key) if provided
 
-  const network = api.network.getCurrentNetwork() as
-    | 'mainnet'
-    | 'testnet'
-    | 'previewnet';
+  const network = api.network.getCurrentNetwork();
   const resolvedFromAccount = await resolveAccountParameter(from, api, network);
 
   // From account was explicitly provided - it MUST resolve or fail
@@ -109,7 +103,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
       throw new Error('Token transfer failed');
     }
   } catch (error) {
-    logger.error(`❌ Failed to transfer token: ${error}`);
+    logger.error(formatError('❌ Failed to transfer token', error));
     process.exit(1);
   }
 }

@@ -11,24 +11,23 @@ import { PrivateKey } from '@hashgraph/sdk';
  * @throws Error if the key cannot be parsed in any supported format
  */
 export function parsePrivateKey(privateKeyString: string): PrivateKey {
-  // Try ED25519 first
-  try {
-    return PrivateKey.fromStringED25519(privateKeyString);
-  } catch (e) {
-    // If ED25519 fails, try ECDSA
+  const parsers = [
+    (key: string) => PrivateKey.fromStringED25519(key),
+    (key: string) => PrivateKey.fromStringECDSA(key),
+    (key: string) => PrivateKey.fromStringDer(key),
+  ];
+
+  for (const parser of parsers) {
     try {
-      return PrivateKey.fromStringECDSA(privateKeyString);
-    } catch (e2) {
-      // If both fail, try DER format
-      try {
-        return PrivateKey.fromStringDer(privateKeyString);
-      } catch (e3) {
-        throw new Error(
-          `Invalid private key format. Key must be in ED25519, ECDSA, or DER format: ${privateKeyString.substring(0, 10)}...`,
-        );
-      }
+      return parser(privateKeyString);
+    } catch {
+      // Continue to next parser
     }
   }
+
+  throw new Error(
+    `Invalid private key format. Key must be in ED25519, ECDSA, or DER format: ${privateKeyString.substring(0, 10)}...`,
+  );
 }
 
 /**

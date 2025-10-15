@@ -8,6 +8,7 @@ import {
   safeValidateTokenAssociateParams,
   resolveAccountParameter,
 } from '../schema';
+import { formatError } from '../../../utils/errors';
 
 export async function associateTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -33,10 +34,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
   // Resolve account parameter (alias or account-id:account-key) if provided
 
-  const network = api.network.getCurrentNetwork() as
-    | 'mainnet'
-    | 'testnet'
-    | 'previewnet';
+  const network = api.network.getCurrentNetwork();
   const resolvedAccount = await resolveAccountParameter(account, api, network);
 
   // Account was explicitly provided - it MUST resolve or fail
@@ -89,7 +87,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
       throw new Error('Token association failed');
     }
   } catch (error) {
-    logger.error(`❌ Failed to associate token: ${error}`);
+    logger.error(formatError('❌ Failed to associate token', error));
     process.exit(1);
   }
 }

@@ -5,6 +5,7 @@
 import { StateService } from '../../core/services/state/state-service.interface';
 import { Logger } from '../../core/services/logger/logger-service.interface';
 import { TokenData, TOKEN_NAMESPACE } from './schema';
+import { toErrorMessage } from '../../utils/errors';
 
 export class ZustandTokenStateHelper {
   private state: StateService;
@@ -28,7 +29,7 @@ export class ZustandTokenStateHelper {
       this.logger.debug(`[TOKEN STATE] Successfully saved token ${tokenId}`);
     } catch (error) {
       this.logger.error(
-        `[TOKEN STATE] Failed to save token ${tokenId}: ${error}`,
+        `[TOKEN STATE] Failed to save token ${tokenId}: ${toErrorMessage(error)}`,
       );
       throw error;
     }
@@ -52,7 +53,7 @@ export class ZustandTokenStateHelper {
       }
     } catch (error) {
       this.logger.error(
-        `[TOKEN STATE] Failed to get token ${tokenId}: ${error}`,
+        `[TOKEN STATE] Failed to get token ${tokenId}: ${toErrorMessage(error)}`,
       );
       throw error;
     }
@@ -80,7 +81,9 @@ export class ZustandTokenStateHelper {
       );
       return tokensMap;
     } catch (error) {
-      this.logger.error(`[TOKEN STATE] Failed to get all tokens: ${error}`);
+      this.logger.error(
+        `[TOKEN STATE] Failed to get all tokens: ${toErrorMessage(error)}`,
+      );
       throw error;
     }
   }
@@ -97,7 +100,7 @@ export class ZustandTokenStateHelper {
       this.logger.debug(`[TOKEN STATE] Successfully removed token ${tokenId}`);
     } catch (error) {
       this.logger.error(
-        `[TOKEN STATE] Failed to remove token ${tokenId}: ${error}`,
+        `[TOKEN STATE] Failed to remove token ${tokenId}: ${toErrorMessage(error)}`,
       );
       throw error;
     }
@@ -166,7 +169,7 @@ export class ZustandTokenStateHelper {
       }
     } catch (error) {
       this.logger.error(
-        `[TOKEN STATE] Failed to add association to token ${tokenId}: ${error}`,
+        `[TOKEN STATE] Failed to add association to token ${tokenId}: ${toErrorMessage(error)}`,
       );
       throw error;
     }

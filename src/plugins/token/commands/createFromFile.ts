@@ -8,6 +8,7 @@ import { TokenData, resolveTreasuryParameter } from '../schema';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { z } from 'zod';
+import { formatError, toErrorMessage } from '../../../utils/errors';
 
 // Import the token file schema from the original commands
 const accountIdRegex = /^\d+\.\d+\.\d+$/;
@@ -133,10 +134,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
     const tokenDefinition = validated.data;
 
     // 2. Resolve treasury parameter
-    const network = api.network.getCurrentNetwork() as
-      | 'mainnet'
-      | 'testnet'
-      | 'previewnet';
+    const network = api.network.getCurrentNetwork();
     let treasuryId: string;
     let treasuryKeyRefId: string;
     let treasuryPublicKey: string;
@@ -233,10 +231,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
           feeScheduleKey: tokenDefinition.keys.feeScheduleKey || '',
           treasuryKey: treasuryPublicKey,
         },
-        network: api.network.getCurrentNetwork() as
-          | 'mainnet'
-          | 'testnet'
-          | 'previewnet',
+        network: api.network.getCurrentNetwork(),
         associations: [],
         customFees: tokenDefinition.customFees.map((fee) => ({
           type: fee.type,
@@ -287,7 +282,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
             }
           } catch (error) {
             logger.warn(
-              `   ⚠️  Failed to associate account ${association.accountId}: ${error}`,
+              `   ⚠️  Failed to associate account ${association.accountId}: ${toErrorMessage(error)}`,
             );
           }
         }
@@ -307,7 +302,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
       throw new Error('Token creation failed - no token ID returned');
     }
   } catch (error) {
-    logger.error(`❌ Failed to create token from file: ${error}`);
+    logger.error(formatError('❌ Failed to create token from file', error));
     process.exit(1);
   }
 }

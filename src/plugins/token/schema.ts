@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { SupportedNetwork } from '../../core/types/shared.types';
 
 // Zod schema for token keys
 export const TokenKeysSchema = z.object({
@@ -83,9 +84,9 @@ export const TokenDataSchema = z.object({
 
   keys: TokenKeysSchema,
 
-  network: z.enum(['mainnet', 'testnet', 'previewnet'], {
+  network: z.enum(['mainnet', 'testnet', 'previewnet', 'localnet'], {
     errorMap: () => ({
-      message: 'Network must be mainnet, testnet, or previewnet',
+      message: 'Network must be mainnet, testnet, previewnet, or localnet',
     }),
   }),
 
@@ -287,7 +288,7 @@ export interface ResolvedTreasury {
 export async function resolveTreasuryParameter(
   treasury: string | undefined,
   api: any,
-  network: 'mainnet' | 'testnet' | 'previewnet',
+  network: SupportedNetwork,
 ): Promise<ResolvedTreasury | null> {
   if (!treasury) {
     return null;
@@ -382,7 +383,7 @@ export interface ResolvedAccount {
 export async function resolveAccountParameter(
   account: string | undefined,
   api: any,
-  network: 'mainnet' | 'testnet' | 'previewnet',
+  network: SupportedNetwork,
 ): Promise<ResolvedAccount | null> {
   if (!account) {
     return null;
@@ -475,7 +476,7 @@ export interface ResolvedDestinationAccount {
 export async function resolveDestinationAccountParameter(
   account: string | undefined,
   api: any,
-  network: 'mainnet' | 'testnet' | 'previewnet',
+  network: SupportedNetwork,
 ): Promise<ResolvedDestinationAccount | null> {
   if (!account) {
     return null;

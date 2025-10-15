@@ -299,12 +299,6 @@ export class TokenServiceImpl implements TokenService {
     for (const fee of customFees) {
       if (fee.type === 'fixed') {
         // Only support HBAR fixed fees
-        if (fee.unitType && fee.unitType !== 'HBAR') {
-          throw new Error(
-            `Only HBAR fixed fees are supported. Got unitType: ${fee.unitType}`,
-          );
-        }
-
         const fixedFee = new CustomFixedFee();
 
         // Set HBAR amount (default unitType is HBAR)
@@ -324,10 +318,6 @@ export class TokenServiceImpl implements TokenService {
         }
 
         hederaCustomFees.push(fixedFee);
-      } else {
-        throw new Error(
-          `Only fixed fees are supported. Got fee type: ${fee.type}`,
-        );
       }
     }
 
