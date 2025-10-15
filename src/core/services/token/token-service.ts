@@ -16,7 +16,7 @@ import {
 } from '@hashgraph/sdk';
 import { Logger } from '../logger/logger-service.interface';
 import { TransactionService } from '../signing/signing-service.interface';
-import { TokenService, TokenOperationResult } from './token-service.interface';
+import { TokenService } from './token-service.interface';
 import type {
   TokenTransferParams,
   TokenCreateParams,
@@ -24,7 +24,6 @@ import type {
   CustomFee as CustomFeeParams,
 } from '../../types/token.types';
 import { parsePrivateKey } from '../../../utils/keys';
-import type { SignerRef } from '../signing/signing-service.interface';
 
 export class TokenServiceImpl implements TokenService {
   private logger: Logger;
@@ -63,42 +62,6 @@ export class TokenServiceImpl implements TokenService {
     );
 
     return transferTx;
-  }
-
-  /**
-   * Create and execute a token transfer transaction
-   */
-  async transfer(
-    params: TokenTransferParams,
-    signer?: SignerRef,
-  ): Promise<TokenOperationResult> {
-    this.logger.debug(
-      `[TOKEN SERVICE] Executing transfer: ${params.amount} tokens from ${params.fromAccountId} to ${params.toAccountId}`,
-    );
-
-    if (!this.transactionService) {
-      throw new Error(
-        '[TOKEN SERVICE] Transaction service not available for execution',
-      );
-    }
-
-    // Create the transfer transaction
-    const transferTx = this.createTransferTransaction(params);
-
-    // Execute the transaction
-    const result = signer
-      ? await this.transactionService.signAndExecuteWith(transferTx, signer)
-      : await this.transactionService.signAndExecute(transferTx);
-
-    this.logger.debug(
-      `[TOKEN SERVICE] Transfer executed successfully: ${result.transactionId}`,
-    );
-
-    return {
-      transactionId: result.transactionId,
-      success: result.success,
-      receipt: result.receipt,
-    };
   }
 
   /**
@@ -162,43 +125,6 @@ export class TokenServiceImpl implements TokenService {
   }
 
   /**
-   * Create and execute a token creation transaction
-   */
-  async createToken(
-    params: TokenCreateParams,
-    signer?: SignerRef,
-  ): Promise<TokenOperationResult> {
-    this.logger.debug(
-      `[TOKEN SERVICE] Executing token creation: ${params.name} (${params.symbol})`,
-    );
-
-    if (!this.transactionService) {
-      throw new Error(
-        '[TOKEN SERVICE] Transaction service not available for execution',
-      );
-    }
-
-    // Create the token transaction
-    const tokenCreateTx = this.createTokenTransaction(params);
-
-    // Execute the transaction
-    const result = signer
-      ? await this.transactionService.signAndExecuteWith(tokenCreateTx, signer)
-      : await this.transactionService.signAndExecute(tokenCreateTx);
-
-    this.logger.debug(
-      `[TOKEN SERVICE] Token creation executed successfully: ${result.transactionId}`,
-    );
-
-    return {
-      transactionId: result.transactionId,
-      success: result.success,
-      tokenId: result.tokenId,
-      receipt: result.receipt,
-    };
-  }
-
-  /**
    * Create a token association transaction (without execution)
    */
   createTokenAssociationTransaction(
@@ -220,42 +146,6 @@ export class TokenServiceImpl implements TokenService {
     );
 
     return associateTx;
-  }
-
-  /**
-   * Create and execute a token association transaction
-   */
-  async associateToken(
-    params: TokenAssociationParams,
-    signer?: SignerRef,
-  ): Promise<TokenOperationResult> {
-    this.logger.debug(
-      `[TOKEN SERVICE] Executing token association: token ${params.tokenId} with account ${params.accountId}`,
-    );
-
-    if (!this.transactionService) {
-      throw new Error(
-        '[TOKEN SERVICE] Transaction service not available for execution',
-      );
-    }
-
-    // Create the association transaction
-    const associateTx = this.createTokenAssociationTransaction(params);
-
-    // Execute the transaction
-    const result = signer
-      ? await this.transactionService.signAndExecuteWith(associateTx, signer)
-      : await this.transactionService.signAndExecute(associateTx);
-
-    this.logger.debug(
-      `[TOKEN SERVICE] Token association executed successfully: ${result.transactionId}`,
-    );
-
-    return {
-      transactionId: result.transactionId,
-      success: result.success,
-      receipt: result.receipt,
-    };
   }
 
   /**

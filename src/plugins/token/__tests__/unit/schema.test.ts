@@ -10,56 +10,30 @@ import {
   safeValidateTokenCreateParams,
   validateTokenData,
 } from '../../schema';
+import {
+  validTokenDataForSchema,
+  validTokenKeys,
+  validTokenAssociation,
+  validCustomFee,
+  validTokenCreateParams,
+  minimalTokenCreateParams,
+  validTokenDataForValidation,
+  invalidTokenDataForValidation,
+} from './helpers/fixtures';
 
 describe('Token Schema Validation', () => {
   describe('TokenDataSchema', () => {
-    const validTokenData = {
-      tokenId: '0.0.123456',
-      name: 'TestToken',
-      symbol: 'TEST',
-      decimals: 2,
-      initialSupply: 1000,
-      supplyType: 'FINITE',
-      maxSupply: 10000,
-      treasuryId: '0.0.789012',
-      associations: [
-        {
-          name: 'TestAccount',
-          accountId: '0.0.345678',
-        },
-      ],
-      keys: {
-        adminKey: 'admin-key',
-        supplyKey: 'supply-key',
-        wipeKey: 'wipe-key',
-        kycKey: 'kyc-key',
-        freezeKey: 'freeze-key',
-        pauseKey: 'pause-key',
-        feeScheduleKey: 'fee-schedule-key',
-        treasuryKey: 'treasury-key',
-      },
-      network: 'testnet',
-      customFees: [
-        {
-          type: 'fixed',
-          amount: 10,
-          unitType: 'HBAR',
-          collectorId: '0.0.999999',
-        },
-      ],
-    };
-
     test('should validate valid token data', () => {
-      const result = TokenDataSchema.safeParse(validTokenData);
+      const result = TokenDataSchema.safeParse(validTokenDataForSchema);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual(validTokenData);
+        expect(result.data).toEqual(validTokenDataForSchema);
       }
     });
 
     test('should reject invalid token ID format', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         tokenId: 'invalid-id',
       };
 
@@ -74,7 +48,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject empty token name', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         name: '',
       };
 
@@ -89,7 +63,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject empty token symbol', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         symbol: '',
       };
 
@@ -104,7 +78,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject negative decimals', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         decimals: -1,
       };
 
@@ -119,7 +93,7 @@ describe('Token Schema Validation', () => {
 
     test('should accept decimals up to 18', () => {
       const validData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         decimals: 18,
       };
 
@@ -129,7 +103,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject negative initial supply', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         initialSupply: -100,
       };
 
@@ -144,7 +118,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject invalid supply type', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         supplyType: 'INVALID',
       };
 
@@ -159,7 +133,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject invalid treasury ID format', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         treasuryId: 'invalid-treasury-id',
       };
 
@@ -174,7 +148,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject invalid network', () => {
       const invalidData = {
-        ...validTokenData,
+        ...validTokenDataForSchema,
         network: 'invalid-network',
       };
 
@@ -189,25 +163,14 @@ describe('Token Schema Validation', () => {
   });
 
   describe('TokenKeysSchema', () => {
-    const validKeys = {
-      adminKey: 'admin-key',
-      supplyKey: 'supply-key',
-      wipeKey: 'wipe-key',
-      kycKey: 'kyc-key',
-      freezeKey: 'freeze-key',
-      pauseKey: 'pause-key',
-      feeScheduleKey: 'fee-schedule-key',
-      treasuryKey: 'treasury-key',
-    };
-
     test('should validate valid token keys', () => {
-      const result = TokenKeysSchema.safeParse(validKeys);
+      const result = TokenKeysSchema.safeParse(validTokenKeys);
       expect(result.success).toBe(true);
     });
 
     test('should reject empty admin key', () => {
       const invalidKeys = {
-        ...validKeys,
+        ...validTokenKeys,
         adminKey: '',
       };
 
@@ -222,7 +185,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject empty treasury key', () => {
       const invalidKeys = {
-        ...validKeys,
+        ...validTokenKeys,
         treasuryKey: '',
       };
 
@@ -237,7 +200,7 @@ describe('Token Schema Validation', () => {
 
     test('should allow optional keys to be empty', () => {
       const keysWithEmptyOptional = {
-        ...validKeys,
+        ...validTokenKeys,
         supplyKey: '',
         wipeKey: '',
         kycKey: '',
@@ -252,19 +215,14 @@ describe('Token Schema Validation', () => {
   });
 
   describe('TokenAssociationSchema', () => {
-    const validAssociation = {
-      name: 'TestAccount',
-      accountId: '0.0.345678',
-    };
-
     test('should validate valid association', () => {
-      const result = TokenAssociationSchema.safeParse(validAssociation);
+      const result = TokenAssociationSchema.safeParse(validTokenAssociation);
       expect(result.success).toBe(true);
     });
 
     test('should reject empty association name', () => {
       const invalidAssociation = {
-        ...validAssociation,
+        ...validTokenAssociation,
         name: '',
       };
 
@@ -279,7 +237,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject invalid account ID format', () => {
       const invalidAssociation = {
-        ...validAssociation,
+        ...validTokenAssociation,
         accountId: 'invalid-account-id',
       };
 
@@ -294,14 +252,6 @@ describe('Token Schema Validation', () => {
   });
 
   describe('CustomFeeSchema', () => {
-    const validCustomFee = {
-      type: 'fixed',
-      amount: 10,
-      unitType: 'HBAR',
-      collectorId: '0.0.999999',
-      exempt: false,
-    };
-
     test('should validate valid custom fee', () => {
       const result = CustomFeeSchema.safeParse(validCustomFee);
       expect(result.success).toBe(true);
@@ -348,31 +298,16 @@ describe('Token Schema Validation', () => {
   });
 
   describe('safeValidateTokenCreateParams', () => {
-    const validCreateParams = {
-      name: 'TestToken',
-      symbol: 'TEST',
-      decimals: 2,
-      initialSupply: 1000,
-      supplyType: 'INFINITE',
-      treasury: '0.0.123456:treasury-key',
-      adminKey: 'admin-key',
-    };
-
     test('should validate valid create parameters', () => {
-      const result = safeValidateTokenCreateParams(validCreateParams);
+      const result = safeValidateTokenCreateParams(validTokenCreateParams);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual(validCreateParams);
+        expect(result.data).toEqual(validTokenCreateParams);
       }
     });
 
     test('should handle missing optional parameters', () => {
-      const minimalParams = {
-        name: 'TestToken',
-        symbol: 'TEST',
-      };
-
-      const result = safeValidateTokenCreateParams(minimalParams);
+      const result = safeValidateTokenCreateParams(minimalTokenCreateParams);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.decimals).toBeUndefined();
@@ -400,36 +335,12 @@ describe('Token Schema Validation', () => {
 
   describe('validateTokenData', () => {
     test('should validate and return true for valid token data', () => {
-      const rawData = {
-        tokenId: '0.0.123456',
-        name: 'TestToken',
-        symbol: 'TEST',
-        decimals: 2,
-        initialSupply: 1000,
-        supplyType: 'FINITE',
-        maxSupply: 10000,
-        treasuryId: '0.0.789012',
-        associations: [],
-        keys: {
-          adminKey: 'admin-key',
-          treasuryKey: 'treasury-key',
-        },
-        network: 'testnet',
-        customFees: [],
-      };
-
-      const result = validateTokenData(rawData);
+      const result = validateTokenData(validTokenDataForValidation);
       expect(result).toBe(true);
     });
 
     test('should return false for invalid token data', () => {
-      const invalidData = {
-        tokenId: 'invalid-id',
-        name: 'TestToken',
-        symbol: 'TEST',
-      };
-
-      const result = validateTokenData(invalidData);
+      const result = validateTokenData(invalidTokenDataForValidation);
       expect(result).toBe(false);
     });
   });

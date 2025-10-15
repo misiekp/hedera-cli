@@ -21,6 +21,7 @@ import {
   invalidTokenFileNegativeSupply as _invalidTokenFileNegativeSupply,
   mockFilePaths as _mockFilePaths,
   mockTransactions as _mockTransactions,
+  expectedTokenTransactionParamsFromFile,
 } from './helpers/fixtures';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -153,25 +154,9 @@ describe('createTokenFromFileHandler', () => {
         '/path/to/token.test.json',
         'utf-8',
       );
-      expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith({
-        name: 'TestToken',
-        symbol: 'TEST',
-        decimals: 2,
-        initialSupply: 1000,
-        supplyType: 'FINITE',
-        maxSupply: 10000,
-        treasuryId: '0.0.123456',
-        adminKey: 'admin-key',
-        customFees: [
-          {
-            type: 'fixed',
-            amount: 10,
-            unitType: 'HBAR',
-            collectorId: '0.0.999999',
-            exempt: undefined,
-          },
-        ],
-      });
+      expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith(
+        expectedTokenTransactionParamsFromFile,
+      );
       expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockTokenTransaction,
         { keyRefId: 'treasury-key-ref-id' },

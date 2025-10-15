@@ -3,6 +3,10 @@
  * Handles token creation from JSON file definitions using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { CoreAPI } from '../../../core/core-api/core-api.interface';
+import { Logger } from '../../../core/services/logger/logger-service.interface';
+import { TransactionResult } from '../../../core/services/signing/signing-service.interface';
+import { SupportedNetwork } from '../../../core/types/shared.types';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
 import { TokenData } from '../schema';
 import { resolveTreasuryParameter } from '../resolver-helper';
@@ -103,6 +107,220 @@ function resolveTokenFilePath(filename: string): string {
   return path.join(process.cwd(), 'src', 'input', `token.${filename}.json`);
 }
 
+/**
+ * Treasury resolution result from file
+ */
+interface TreasuryFromFileResolution {
+  treasuryId: string;
+  treasuryKeyRefId: string;
+  treasuryPublicKey: string;
+}
+
+/**
+ * Reads and validates the token definition file
+ * @param filename - Token file name
+ * @param logger - Logger instance
+ * @returns Validated token definition
+ */
+async function readAndValidateTokenFile(
+  filename: string,
+  logger: Logger,
+): Promise<TokenFileDefinition> {
+  const filepath = resolveTokenFilePath(filename);
+  logger.debug(`Reading token file from: ${filepath}`);
+
+  const fileContent = await fs.readFile(filepath, 'utf-8');
+  const raw = JSON.parse(fileContent) as unknown;
+
+  const validated = validateTokenFile(raw);
+  if (!validated.valid || !validated.data) {
+    logger.error('Token file validation failed');
+    if (validated.errors && validated.errors.length) {
+      validated.errors.forEach((e) => logger.error(e));
+    }
+    throw new Error('Invalid token definition file');
+  }
+
+  return validated.data;
+}
+
+/**
+ * Resolves treasury from token file definition
+ * Handles both string (alias or treasury-id:key) and object (legacy) formats
+ * @param treasuryDef - Treasury definition from file
+ * @param api - Core API instance
+ * @param network - Current network
+ * @param logger - Logger instance
+ * @returns Resolved treasury information
+ */
+function resolveTreasuryFromDefinition(
+  treasuryDef: string | { accountId: string; key: string },
+  api: CoreAPI,
+  network: SupportedNetwork,
+  logger: Logger,
+): TreasuryFromFileResolution {
+  if (typeof treasuryDef === 'string') {
+    // New format: alias or treasury-id:treasury-key
+    const resolvedTreasury = resolveTreasuryParameter(
+      treasuryDef,
+      api,
+      network,
+    );
+
+    if (!resolvedTreasury) {
+      throw new Error('Treasury parameter is required');
+    }
+
+    logger.log(`🏦 Using treasury: ${resolvedTreasury.treasuryId}`);
+
+    return {
+      treasuryId: resolvedTreasury.treasuryId,
+      treasuryKeyRefId: resolvedTreasury.treasuryKeyRefId,
+      treasuryPublicKey: resolvedTreasury.treasuryPublicKey,
+    };
+  }
+
+  // Legacy format: object with accountId and key
+  const imported = api.credentialsState.importPrivateKey(treasuryDef.key);
+  logger.log(`🏦 Using treasury (legacy format): ${treasuryDef.accountId}`);
+
+  return {
+    treasuryId: treasuryDef.accountId,
+    treasuryKeyRefId: imported.keyRefId,
+    treasuryPublicKey: imported.publicKey,
+  };
+}
+
+/**
+ * Builds token data object from file definition and transaction result
+ * @param result - Transaction result
+ * @param tokenDefinition - Token definition from file
+ * @param treasury - Resolved treasury information
+ * @param network - Current network
+ * @returns Token data object for state storage
+ */
+function buildTokenDataFromFile(
+  result: TransactionResult,
+  tokenDefinition: TokenFileDefinition,
+  treasury: TreasuryFromFileResolution,
+  network: SupportedNetwork,
+): TokenData {
+  return {
+    tokenId: result.tokenId!,
+    name: tokenDefinition.name,
+    symbol: tokenDefinition.symbol,
+    treasuryId: treasury.treasuryId,
+    decimals: tokenDefinition.decimals,
+    initialSupply: tokenDefinition.initialSupply,
+    supplyType: tokenDefinition.supplyType.toUpperCase() as
+      | 'FINITE'
+      | 'INFINITE',
+    maxSupply: tokenDefinition.maxSupply,
+    keys: {
+      adminKey: tokenDefinition.keys.adminKey,
+      supplyKey: tokenDefinition.keys.supplyKey || '',
+      wipeKey: tokenDefinition.keys.wipeKey || '',
+      kycKey: tokenDefinition.keys.kycKey || '',
+      freezeKey: tokenDefinition.keys.freezeKey || '',
+      pauseKey: tokenDefinition.keys.pauseKey || '',
+      feeScheduleKey: tokenDefinition.keys.feeScheduleKey || '',
+      treasuryKey: treasury.treasuryPublicKey,
+    },
+    network,
+    associations: [],
+    customFees: tokenDefinition.customFees.map((fee) => ({
+      type: fee.type,
+      amount: fee.amount,
+      unitType: fee.unitType,
+      collectorId: fee.collectorId,
+      exempt: fee.exempt,
+    })),
+  };
+}
+
+/**
+ * Logs token creation success from file
+ * @param result - Transaction result
+ * @param tokenDefinition - Token definition from file
+ * @param logger - Logger instance
+ */
+function logTokenCreationSuccessFromFile(
+  result: TransactionResult,
+  tokenDefinition: TokenFileDefinition,
+  logger: Logger,
+): void {
+  logger.log(`✅ Token created successfully from file!`);
+  logger.log(`   Token ID: ${result.tokenId!}`);
+  logger.log(`   Name: ${tokenDefinition.name}`);
+  logger.log(`   Symbol: ${tokenDefinition.symbol}`);
+  logger.log(`   Decimals: ${tokenDefinition.decimals}`);
+  logger.log(`   Initial Supply: ${tokenDefinition.initialSupply}`);
+  logger.log(`   Supply Type: ${tokenDefinition.supplyType}`);
+  logger.log(`   Max Supply: ${tokenDefinition.maxSupply}`);
+  logger.log(`   Transaction ID: ${result.transactionId}`);
+}
+
+/**
+ * Processes token associations from file definition
+ * @param tokenId - Created token ID
+ * @param associations - Association definitions from file
+ * @param api - Core API instance
+ * @param logger - Logger instance
+ * @returns Array of successful associations
+ */
+async function processTokenAssociations(
+  tokenId: string,
+  associations: Array<{ accountId: string; key: string }>,
+  api: CoreAPI,
+  logger: Logger,
+): Promise<Array<{ name: string; accountId: string }>> {
+  if (associations.length === 0) {
+    return [];
+  }
+
+  logger.log(`   Creating ${associations.length} token associations...`);
+  const successfulAssociations: Array<{ name: string; accountId: string }> = [];
+
+  for (const association of associations) {
+    try {
+      // Create association transaction
+      const associateTransaction = api.token.createTokenAssociationTransaction({
+        tokenId,
+        accountId: association.accountId,
+      });
+
+      // Sign and execute with the account's key
+      const associationImported = api.credentialsState.importPrivateKey(
+        association.key,
+      );
+      const associateResult = await api.signing.signAndExecuteWith(
+        associateTransaction,
+        { keyRefId: associationImported.keyRefId },
+      );
+
+      if (associateResult.success) {
+        logger.log(
+          `   ✅ Associated account ${association.accountId} with token`,
+        );
+        successfulAssociations.push({
+          name: association.accountId, // Using accountId as name for now
+          accountId: association.accountId,
+        });
+      } else {
+        logger.warn(
+          `   ⚠️  Failed to associate account ${association.accountId}`,
+        );
+      }
+    } catch (error) {
+      logger.warn(
+        `   ⚠️  Failed to associate account ${association.accountId}: ${toErrorMessage(error)}`,
+      );
+    }
+  }
+
+  return successfulAssociations;
+}
+
 export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
 
@@ -116,66 +334,23 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
   logger.log(`Creating token from file: ${filename}`);
 
   try {
-    // 1. Read and validate the token file
-    const filepath = resolveTokenFilePath(filename);
-    logger.debug(`Reading token file from: ${filepath}`);
+    // 1. Read and validate token file
+    const tokenDefinition = await readAndValidateTokenFile(filename, logger);
 
-    const fileContent = await fs.readFile(filepath, 'utf-8');
-    const raw = JSON.parse(fileContent) as unknown;
-
-    const validated = validateTokenFile(raw);
-    if (!validated.valid || !validated.data) {
-      logger.error('Token file validation failed');
-      if (validated.errors && validated.errors.length) {
-        validated.errors.forEach((e) => logger.error(e));
-      }
-      throw new Error('Invalid token definition file');
-    }
-
-    const tokenDefinition = validated.data;
-
-    // 2. Resolve treasury parameter
+    // 2. Resolve treasury (supports both string and object formats)
     const network = api.network.getCurrentNetwork();
-    let treasuryId: string;
-    let treasuryKeyRefId: string;
-    let treasuryPublicKey: string;
+    const treasury = resolveTreasuryFromDefinition(
+      tokenDefinition.treasury,
+      api,
+      network,
+      logger,
+    );
 
-    if (typeof tokenDefinition.treasury === 'string') {
-      // New format: alias or treasury-id:treasury-key
-      const resolvedTreasury = resolveTreasuryParameter(
-        tokenDefinition.treasury,
-        api,
-        network,
-      );
-
-      if (!resolvedTreasury) {
-        throw new Error('Treasury parameter is required');
-      }
-
-      treasuryId = resolvedTreasury.treasuryId;
-      treasuryKeyRefId = resolvedTreasury.treasuryKeyRefId;
-      treasuryPublicKey = resolvedTreasury.treasuryPublicKey;
-
-      logger.log(`🏦 Using treasury: ${treasuryId}`);
-    } else {
-      // Legacy format: object with accountId and key
-      treasuryId = tokenDefinition.treasury.accountId;
-
-      // Import the treasury key
-      const imported = api.credentialsState.importPrivateKey(
-        tokenDefinition.treasury.key,
-      );
-      treasuryKeyRefId = imported.keyRefId;
-      treasuryPublicKey = imported.publicKey;
-
-      logger.log(`🏦 Using treasury (legacy format): ${treasuryId}`);
-    }
-
-    // 3. Create token transaction using Core API
+    // 3. Create and execute token transaction
     const tokenCreateTransaction = api.token.createTokenTransaction({
       name: tokenDefinition.name,
       symbol: tokenDefinition.symbol,
-      treasuryId: treasuryId,
+      treasuryId: treasury.treasuryId,
       decimals: tokenDefinition.decimals,
       initialSupply: tokenDefinition.initialSupply,
       supplyType: tokenDefinition.supplyType.toUpperCase() as
@@ -192,116 +367,48 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
       })),
     });
 
-    // 4. Sign and execute transaction using the treasury key
     logger.log(`🔑 Using treasury key for signing transaction`);
     const result = await api.signing.signAndExecuteWith(
       tokenCreateTransaction,
-      { keyRefId: treasuryKeyRefId },
+      { keyRefId: treasury.treasuryKeyRefId },
     );
 
-    if (result.success && result.tokenId) {
-      logger.log(`✅ Token created successfully from file!`);
-      logger.log(`   Token ID: ${result.tokenId}`);
-      logger.log(`   Name: ${tokenDefinition.name}`);
-      logger.log(`   Symbol: ${tokenDefinition.symbol}`);
-      logger.log(`   Decimals: ${tokenDefinition.decimals}`);
-      logger.log(`   Initial Supply: ${tokenDefinition.initialSupply}`);
-      logger.log(`   Supply Type: ${tokenDefinition.supplyType}`);
-      logger.log(`   Max Supply: ${tokenDefinition.maxSupply}`);
-      logger.log(`   Transaction ID: ${result.transactionId}`);
-
-      // 5. Store token in state
-      const tokenData: TokenData = {
-        tokenId: result.tokenId,
-        name: tokenDefinition.name,
-        symbol: tokenDefinition.symbol,
-        treasuryId: treasuryId,
-        decimals: tokenDefinition.decimals,
-        initialSupply: tokenDefinition.initialSupply,
-        supplyType: tokenDefinition.supplyType.toUpperCase() as
-          | 'FINITE'
-          | 'INFINITE',
-        maxSupply: tokenDefinition.maxSupply,
-        keys: {
-          adminKey: tokenDefinition.keys.adminKey,
-          supplyKey: tokenDefinition.keys.supplyKey || '',
-          wipeKey: tokenDefinition.keys.wipeKey || '',
-          kycKey: tokenDefinition.keys.kycKey || '',
-          freezeKey: tokenDefinition.keys.freezeKey || '',
-          pauseKey: tokenDefinition.keys.pauseKey || '',
-          feeScheduleKey: tokenDefinition.keys.feeScheduleKey || '',
-          treasuryKey: treasuryPublicKey,
-        },
-        network: api.network.getCurrentNetwork(),
-        associations: [],
-        customFees: tokenDefinition.customFees.map((fee) => ({
-          type: fee.type,
-          amount: fee.amount,
-          unitType: fee.unitType,
-          collectorId: fee.collectorId,
-          exempt: fee.exempt,
-        })),
-      };
-
-      // 6. Create associations if specified
-      if (tokenDefinition.associations.length > 0) {
-        logger.log(
-          `   Creating ${tokenDefinition.associations.length} token associations...`,
-        );
-
-        for (const association of tokenDefinition.associations) {
-          try {
-            // Create association transaction
-            const associateTransaction =
-              api.token.createTokenAssociationTransaction({
-                tokenId: result.tokenId,
-                accountId: association.accountId,
-              });
-
-            // Sign and execute with the account's key
-            const associationImported = api.credentialsState.importPrivateKey(
-              association.key,
-            );
-            const associateResult = await api.signing.signAndExecuteWith(
-              associateTransaction,
-              { keyRefId: associationImported.keyRefId },
-            );
-
-            if (associateResult.success) {
-              logger.log(
-                `   ✅ Associated account ${association.accountId} with token`,
-              );
-              // Add to token data associations
-              tokenData.associations.push({
-                name: association.accountId, // Using accountId as name for now
-                accountId: association.accountId,
-              });
-            } else {
-              logger.warn(
-                `   ⚠️  Failed to associate account ${association.accountId}`,
-              );
-            }
-          } catch (error) {
-            logger.warn(
-              `   ⚠️  Failed to associate account ${association.accountId}: ${toErrorMessage(error)}`,
-            );
-          }
-        }
-      }
-
-      tokenState.saveToken(result.tokenId, tokenData);
-      logger.log(`   Token data saved to state`);
-
-      // 7. Store script arguments if provided
-      if (scriptArgs.length > 0) {
-        logger.debug(`Storing script arguments: ${scriptArgs.join(', ')}`);
-        // Note: In a full implementation, you'd store these in the state or dynamic variables system
-      }
-
-      process.exit(0);
-    } else {
+    // 4. Verify success
+    if (!result.success || !result.tokenId) {
       throw new Error('Token creation failed - no token ID returned');
     }
+
+    // 5. Log success
+    logTokenCreationSuccessFromFile(result, tokenDefinition, logger);
+
+    // 6. Build token data for state
+    const tokenData = buildTokenDataFromFile(
+      result,
+      tokenDefinition,
+      treasury,
+      network,
+    );
+
+    // 7. Process associations if specified
+    const successfulAssociations = await processTokenAssociations(
+      result.tokenId,
+      tokenDefinition.associations,
+      api,
+      logger,
+    );
+    tokenData.associations = successfulAssociations;
+
+    // 8. Save token to state
+    tokenState.saveToken(result.tokenId, tokenData);
+    logger.log(`   Token data saved to state`);
+
+    // 9. Store script arguments if provided
+    if (scriptArgs.length > 0) {
+      logger.debug(`Storing script arguments: ${scriptArgs.join(', ')}`);
+      // Note: In a full implementation, you'd store these in the state or dynamic variables system
+    }
+
+    process.exit(0);
   } catch (error) {
     logger.error(formatError('❌ Failed to create token from file', error));
     process.exit(1);

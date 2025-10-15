@@ -329,7 +329,7 @@ export const validTokenCreateParams = {
   decimals: 2,
   initialSupply: 1000,
   supplyType: 'INFINITE' as const,
-  treasuryId: '0.0.123456',
+  treasury: '0.0.123456:treasury-key',
   adminKey: 'admin-key',
 };
 
@@ -407,4 +407,126 @@ export const mockStateTokenData = {
     associations: [{ name: 'TestAccount', accountId: '0.0.111111' }],
     customFees: [],
   },
+  token2: {
+    tokenId: '0.0.789012',
+    name: 'TestToken2',
+    symbol: 'TEST2',
+    decimals: 8,
+    initialSupply: 5000,
+    supplyType: 'INFINITE' as const,
+    maxSupply: 0,
+    treasuryId: '0.0.111111',
+    keys: {
+      adminKey: 'admin-key2',
+      supplyKey: '',
+      wipeKey: '',
+      kycKey: '',
+      freezeKey: '',
+      pauseKey: '',
+      feeScheduleKey: '',
+      treasuryKey: 'treasury-key2',
+    },
+    network: 'testnet' as const,
+    associations: [],
+    customFees: [],
+  },
+};
+
+/**
+ * State Management Test Data - Multiple Tokens for getAllTokens tests
+ */
+export const mockMultipleTokens = {
+  '0.0.123456': mockStateTokenData.basic,
+  '0.0.789012': mockStateTokenData.token2,
+};
+
+/**
+ * Factory function to create CommandHandlerArgs for token create tests
+ */
+export const makeTokenCreateCommandArgs = (params: {
+  api: any;
+  logger: any;
+  args?: Record<string, any>;
+}) => ({
+  args: {
+    name: 'TestToken',
+    symbol: 'TEST',
+    decimals: 2,
+    initialSupply: 1000,
+    supplyType: 'INFINITE',
+    treasury: '0.0.123456:test-private-key',
+    adminKey: 'test-admin-key',
+    ...params.args,
+  },
+  api: params.api,
+  state: {} as any,
+  config: {} as any,
+  logger: params.logger,
+});
+
+/**
+ * Expected token transaction parameters for create tests
+ */
+export const expectedTokenTransactionParams = {
+  name: 'TestToken',
+  symbol: 'TEST',
+  decimals: 2,
+  initialSupply: 1000,
+  supplyType: 'INFINITE',
+  maxSupply: undefined,
+  treasuryId: '0.0.123456',
+  adminKey: 'test-admin-key',
+};
+
+/**
+ * Expected token transaction parameters for createFromFile tests
+ */
+export const expectedTokenTransactionParamsFromFile = {
+  name: 'TestToken',
+  symbol: 'TEST',
+  decimals: 2,
+  initialSupply: 1000,
+  supplyType: 'FINITE',
+  maxSupply: 10000,
+  treasuryId: '0.0.123456',
+  adminKey: 'admin-key',
+  customFees: [
+    {
+      type: 'fixed',
+      amount: 10,
+      unitType: 'HBAR',
+      collectorId: '0.0.999999',
+      exempt: undefined,
+    },
+  ],
+};
+
+/**
+ * Valid data for validateTokenData tests
+ */
+export const validTokenDataForValidation = {
+  tokenId: '0.0.123456',
+  name: 'TestToken',
+  symbol: 'TEST',
+  decimals: 2,
+  initialSupply: 1000,
+  supplyType: 'FINITE' as const,
+  maxSupply: 10000,
+  treasuryId: '0.0.789012',
+  associations: [],
+  keys: {
+    adminKey: 'admin-key',
+    treasuryKey: 'treasury-key',
+  },
+  network: 'testnet' as const,
+  customFees: [],
+};
+
+/**
+ * Invalid data for validateTokenData tests
+ */
+export const invalidTokenDataForValidation = {
+  tokenId: 'invalid-id',
+  name: 'TestToken',
+  symbol: 'TEST',
 };

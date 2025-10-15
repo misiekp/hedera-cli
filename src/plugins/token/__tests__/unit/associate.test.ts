@@ -406,9 +406,9 @@ describe('associateTokenHandler', () => {
   });
 
   describe('state management', () => {
-    test('should initialize token state helper', async () => {
+    test('should initialize token state helper and save association', async () => {
       // Arrange
-      const mockAddAssociation = jest.fn();
+      const mockAddTokenAssociation = jest.fn();
       const mockAssociationTransaction = { test: 'association-transaction' };
       const mockSignResult: TransactionResult = {
         success: true,
@@ -417,25 +417,26 @@ describe('associateTokenHandler', () => {
       };
 
       mockZustandTokenStateHelper(MockedHelper, {
-        addAssociation: mockAddAssociation,
+        addTokenAssociation: mockAddTokenAssociation,
       });
 
-      const { api } = makeApiMocks({
-        tokenTransactions: {
-          createTokenAssociationTransaction: jest
-            .fn()
-            .mockReturnValue(mockAssociationTransaction),
-        },
-        signing: {
-          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
-        },
-        credentialsState: {
-          importPrivateKey: jest.fn().mockReturnValue({
-            keyRefId: 'imported-key-ref-id',
-            publicKey: 'imported-public-key',
-          }),
-        },
-      });
+      const { api, tokenTransactions, signing, credentialsState } =
+        makeApiMocks({
+          tokenTransactions: {
+            createTokenAssociationTransaction: jest
+              .fn()
+              .mockReturnValue(mockAssociationTransaction),
+          },
+          signing: {
+            signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+          },
+          credentialsState: {
+            importPrivateKey: jest.fn().mockReturnValue({
+              keyRefId: 'imported-key-ref-id',
+              publicKey: 'imported-public-key',
+            }),
+          },
+        });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -453,13 +454,36 @@ describe('associateTokenHandler', () => {
       await expect(associateTokenHandler(args)).rejects.toThrow(
         'Process.exit(1)',
       );
-    });
-  });
 
-  describe('logging and debugging', () => {
-    test('should log association details', async () => {
+      // Assert - Verify state helper was initialized
+      expect(MockedHelper).toHaveBeenCalledWith(api.state, logger);
+
+      // Assert - Verify association was saved to state
+      expect(mockAddTokenAssociation).toHaveBeenCalledWith(
+        '0.0.123456',
+        '0.0.789012',
+        '0.0.789012', // accountName = accountId when using account-id:key format
+      );
+
+      // Assert - Verify transaction was created and executed
+      expect(
+        tokenTransactions.createTokenAssociationTransaction,
+      ).toHaveBeenCalledWith({
+        tokenId: '0.0.123456',
+        accountId: '0.0.789012',
+      });
+      expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
+        mockAssociationTransaction,
+        { keyRefId: 'imported-key-ref-id' },
+      );
+      expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(
+        'test-account-key',
+      );
+    });
+
+    test('should use alias name for state when using alias', async () => {
       // Arrange
-      const mockAddAssociation = jest.fn();
+      const mockAddTokenAssociation = jest.fn();
       const mockAssociationTransaction = { test: 'association-transaction' };
       const mockSignResult: TransactionResult = {
         success: true,
@@ -468,10 +492,10 @@ describe('associateTokenHandler', () => {
       };
 
       mockZustandTokenStateHelper(MockedHelper, {
-        addAssociation: mockAddAssociation,
+        addTokenAssociation: mockAddTokenAssociation,
       });
 
-      const { api } = makeApiMocks({
+      const { api, tokenTransactions, signing } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
@@ -480,11 +504,14 @@ describe('associateTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
-          importPrivateKey: jest.fn().mockReturnValue({
-            keyRefId: 'imported-key-ref-id',
-            publicKey: 'imported-public-key',
+        alias: {
+          resolve: jest.fn().mockReturnValue({
+            entityId: '0.0.789012',
+            keyRefId: 'alias-key-ref-id',
           }),
+        },
+        credentialsState: {
+          getPublicKey: jest.fn().mockReturnValue('alias-public-key'),
         },
       });
 
@@ -492,7 +519,7 @@ describe('associateTokenHandler', () => {
       const args: CommandHandlerArgs = {
         args: {
           tokenId: '0.0.123456',
-          account: '0.0.789012:test-account-key',
+          account: 'my-account-alias',
         },
         api,
         state: {} as any,
@@ -503,6 +530,28 @@ describe('associateTokenHandler', () => {
       // Act & Assert
       await expect(associateTokenHandler(args)).rejects.toThrow(
         'Process.exit(1)',
+      );
+
+      // Assert - Verify state helper was initialized
+      expect(MockedHelper).toHaveBeenCalledWith(api.state, logger);
+
+      // Assert - Verify association was saved with alias name
+      expect(mockAddTokenAssociation).toHaveBeenCalledWith(
+        '0.0.123456',
+        '0.0.789012',
+        'my-account-alias', // accountName = alias when using alias format
+      );
+
+      // Assert - Verify transaction was created and executed
+      expect(
+        tokenTransactions.createTokenAssociationTransaction,
+      ).toHaveBeenCalledWith({
+        tokenId: '0.0.123456',
+        accountId: '0.0.789012',
+      });
+      expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
+        mockAssociationTransaction,
+        { keyRefId: 'alias-key-ref-id' },
       );
     });
   });

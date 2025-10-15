@@ -12,7 +12,12 @@ import {
   mockProcessExit,
   makeTransactionResult,
 } from './helpers/mocks';
-import { mockAccountIds, mockTransactions } from './helpers/fixtures';
+import {
+  mockAccountIds,
+  mockTransactions,
+  makeTokenCreateCommandArgs,
+  expectedTokenTransactionParams,
+} from './helpers/fixtures';
 
 jest.mock('../../zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
@@ -70,21 +75,7 @@ describe('createTokenHandler', () => {
         });
 
       const logger = makeLogger();
-      const args: CommandHandlerArgs = {
-        args: {
-          name: 'TestToken',
-          symbol: 'TEST',
-          decimals: 2,
-          initialSupply: 1000,
-          supplyType: 'INFINITE',
-          treasury: '0.0.123456:test-private-key',
-          adminKey: 'test-admin-key',
-        },
-        api,
-        state: {} as any,
-        config: {} as any,
-        logger,
-      };
+      const args = makeTokenCreateCommandArgs({ api, logger });
 
       // Act
       await createTokenHandler(args);
@@ -93,16 +84,9 @@ describe('createTokenHandler', () => {
       expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(
         'test-private-key',
       );
-      expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith({
-        name: 'TestToken',
-        symbol: 'TEST',
-        decimals: 2,
-        initialSupply: 1000,
-        supplyType: 'INFINITE',
-        maxSupply: undefined,
-        treasuryId: '0.0.123456',
-        adminKey: 'test-admin-key',
-      });
+      expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith(
+        expectedTokenTransactionParams,
+      );
       expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockTransactions.token,
         { keyRefId: 'treasury-key-ref-id' },

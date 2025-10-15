@@ -6,7 +6,7 @@
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
 import { StateService } from '../../../../core/services/state/state-service.interface';
 import { Logger } from '../../../../core/services/logger/logger-service.interface';
-import { TokenData } from '../../schema';
+import { mockStateTokenData, mockMultipleTokens } from './helpers/fixtures';
 
 // Mock the dependencies
 jest.mock('../../../../core/services/state/state-service.interface');
@@ -46,39 +46,15 @@ describe('Token State Management', () => {
   });
 
   describe('saveToken', () => {
-    const mockTokenData: TokenData = {
-      tokenId: '0.0.123456',
-      name: 'TestToken',
-      symbol: 'TEST',
-      decimals: 2,
-      initialSupply: 1000,
-      supplyType: 'FINITE',
-      maxSupply: 10000,
-      treasuryId: '0.0.789012',
-      keys: {
-        adminKey: 'admin-key',
-        supplyKey: '',
-        wipeKey: '',
-        kycKey: '',
-        freezeKey: '',
-        pauseKey: '',
-        feeScheduleKey: '',
-        treasuryKey: 'treasury-key',
-      },
-      network: 'testnet',
-      associations: [],
-      customFees: [],
-    };
-
     test('should save token successfully', () => {
       mockStateService.set.mockReturnValue(undefined);
 
-      stateHelper.saveToken('0.0.123456', mockTokenData);
+      stateHelper.saveToken('0.0.123456', mockStateTokenData.basic);
 
       expect(mockStateService.set).toHaveBeenCalledWith(
         'token-tokens',
         '0.0.123456',
-        mockTokenData,
+        mockStateTokenData.basic,
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         '[TOKEN STATE] Saving token 0.0.123456 to state',
@@ -94,9 +70,9 @@ describe('Token State Management', () => {
         throw error;
       });
 
-      expect(() => stateHelper.saveToken('0.0.123456', mockTokenData)).toThrow(
-        'Save failed',
-      );
+      expect(() =>
+        stateHelper.saveToken('0.0.123456', mockStateTokenData.basic),
+      ).toThrow('Save failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
         '[TOKEN STATE] Failed to save token 0.0.123456: Save failed',
       );
@@ -104,36 +80,12 @@ describe('Token State Management', () => {
   });
 
   describe('getToken', () => {
-    const mockTokenData: TokenData = {
-      tokenId: '0.0.123456',
-      name: 'TestToken',
-      symbol: 'TEST',
-      decimals: 2,
-      initialSupply: 1000,
-      supplyType: 'FINITE',
-      maxSupply: 10000,
-      treasuryId: '0.0.789012',
-      keys: {
-        adminKey: 'admin-key',
-        supplyKey: '',
-        wipeKey: '',
-        kycKey: '',
-        freezeKey: '',
-        pauseKey: '',
-        feeScheduleKey: '',
-        treasuryKey: 'treasury-key',
-      },
-      network: 'testnet',
-      associations: [],
-      customFees: [],
-    };
-
     test('should get token successfully', () => {
-      mockStateService.get.mockReturnValue(mockTokenData);
+      mockStateService.get.mockReturnValue(mockStateTokenData.basic);
 
       const result = stateHelper.getToken('0.0.123456');
 
-      expect(result).toEqual(mockTokenData);
+      expect(result).toEqual(mockStateTokenData.basic);
       expect(mockStateService.get).toHaveBeenCalledWith(
         'token-tokens',
         '0.0.123456',
@@ -171,62 +123,16 @@ describe('Token State Management', () => {
   });
 
   describe('getAllTokens', () => {
-    const mockTokens: Record<string, TokenData> = {
-      '0.0.123456': {
-        tokenId: '0.0.123456',
-        name: 'TestToken1',
-        symbol: 'TEST1',
-        decimals: 2,
-        initialSupply: 1000,
-        supplyType: 'FINITE',
-        maxSupply: 10000,
-        treasuryId: '0.0.789012',
-        keys: {
-          adminKey: 'admin-key',
-          supplyKey: '',
-          wipeKey: '',
-          kycKey: '',
-          freezeKey: '',
-          pauseKey: '',
-          feeScheduleKey: '',
-          treasuryKey: 'treasury-key',
-        },
-        network: 'testnet',
-        associations: [],
-        customFees: [],
-      },
-      '0.0.789012': {
-        tokenId: '0.0.789012',
-        name: 'TestToken2',
-        symbol: 'TEST2',
-        decimals: 8,
-        initialSupply: 5000,
-        supplyType: 'INFINITE',
-        maxSupply: 0,
-        treasuryId: '0.0.111111',
-        keys: {
-          adminKey: 'admin-key2',
-          supplyKey: '',
-          wipeKey: '',
-          kycKey: '',
-          freezeKey: '',
-          pauseKey: '',
-          feeScheduleKey: '',
-          treasuryKey: 'treasury-key2',
-        },
-        network: 'testnet',
-        associations: [],
-        customFees: [],
-      },
-    };
-
     test('should get all tokens successfully', () => {
-      const tokenArray = [mockTokens['0.0.123456'], mockTokens['0.0.789012']];
+      const tokenArray = [
+        mockMultipleTokens['0.0.123456'],
+        mockMultipleTokens['0.0.789012'],
+      ];
       mockStateService.list.mockReturnValue(tokenArray);
 
       const result = stateHelper.getAllTokens();
 
-      expect(result).toEqual(mockTokens);
+      expect(result).toEqual(mockMultipleTokens);
       expect(mockStateService.list).toHaveBeenCalledWith('token-tokens');
       expect(mockLogger.debug).toHaveBeenCalledWith(
         '[TOKEN STATE] Getting all tokens from state',
@@ -294,35 +200,13 @@ describe('Token State Management', () => {
   });
 
   describe('addTokenAssociation', () => {
-    const mockTokenData: TokenData = {
-      tokenId: '0.0.123456',
-      name: 'TestToken',
-      symbol: 'TEST',
-      decimals: 2,
-      initialSupply: 1000,
-      supplyType: 'FINITE',
-      maxSupply: 10000,
-      treasuryId: '0.0.789012',
-      keys: {
-        adminKey: 'admin-key',
-        supplyKey: '',
-        wipeKey: '',
-        kycKey: '',
-        freezeKey: '',
-        pauseKey: '',
-        feeScheduleKey: '',
-        treasuryKey: 'treasury-key',
-      },
-      network: 'testnet',
-      associations: [],
-      customFees: [],
-    };
-
     beforeEach(() => {
       // Reset all mocks before each test
       jest.clearAllMocks();
       // Mock getToken to return the token data by default
-      jest.spyOn(stateHelper, 'getToken').mockReturnValue(mockTokenData);
+      jest
+        .spyOn(stateHelper, 'getToken')
+        .mockReturnValue(mockStateTokenData.basic);
       jest.spyOn(stateHelper, 'saveToken').mockImplementation(() => {});
     });
 
@@ -335,7 +219,7 @@ describe('Token State Management', () => {
 
       expect(stateHelper.getToken).toHaveBeenCalledWith('0.0.123456');
       expect(stateHelper.saveToken).toHaveBeenCalledWith('0.0.123456', {
-        ...mockTokenData,
+        ...mockStateTokenData.basic,
         associations: [{ name: 'TestAccount', accountId: '0.0.111111' }],
       });
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -344,11 +228,9 @@ describe('Token State Management', () => {
     });
 
     test('should not add duplicate association', () => {
-      const tokenWithAssociation = {
-        ...mockTokenData,
-        associations: [{ name: 'TestAccount', accountId: '0.0.111111' }],
-      };
-      jest.spyOn(stateHelper, 'getToken').mockReturnValue(tokenWithAssociation);
+      jest
+        .spyOn(stateHelper, 'getToken')
+        .mockReturnValue(mockStateTokenData.withAssociations);
 
       stateHelper.addTokenAssociation(
         '0.0.123456',
