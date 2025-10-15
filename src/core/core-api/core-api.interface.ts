@@ -19,12 +19,12 @@ export interface CoreAPI {
   /**
    * Account operations
    */
-  accountTransactions: AccountService;
+  account: AccountService;
 
   /**
    * Token operations (creation, transfer, association with execution)
    */
-  tokens: TokenService;
+  token: TokenService;
 
   /**
    * Topic transaction operations

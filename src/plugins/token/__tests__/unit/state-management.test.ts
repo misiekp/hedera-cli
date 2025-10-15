@@ -70,10 +70,10 @@ describe('Token State Management', () => {
       customFees: [],
     };
 
-    test('should save token successfully', async () => {
+    test('should save token successfully', () => {
       mockStateService.set.mockReturnValue(undefined);
 
-      await stateHelper.saveToken('0.0.123456', mockTokenData);
+      stateHelper.saveToken('0.0.123456', mockTokenData);
 
       expect(mockStateService.set).toHaveBeenCalledWith(
         'token-tokens',
@@ -88,15 +88,15 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should handle save error', async () => {
+    test('should handle save error', () => {
       const error = new Error('Save failed');
       mockStateService.set.mockImplementation(() => {
         throw error;
       });
 
-      await expect(
-        stateHelper.saveToken('0.0.123456', mockTokenData),
-      ).rejects.toThrow('Save failed');
+      expect(() => stateHelper.saveToken('0.0.123456', mockTokenData)).toThrow(
+        'Save failed',
+      );
       expect(mockLogger.error).toHaveBeenCalledWith(
         '[TOKEN STATE] Failed to save token 0.0.123456: Save failed',
       );
@@ -128,10 +128,10 @@ describe('Token State Management', () => {
       customFees: [],
     };
 
-    test('should get token successfully', async () => {
+    test('should get token successfully', () => {
       mockStateService.get.mockReturnValue(mockTokenData);
 
-      const result = await stateHelper.getToken('0.0.123456');
+      const result = stateHelper.getToken('0.0.123456');
 
       expect(result).toEqual(mockTokenData);
       expect(mockStateService.get).toHaveBeenCalledWith(
@@ -146,10 +146,10 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should return null when token not found', async () => {
+    test('should return null when token not found', () => {
       mockStateService.get.mockReturnValue(null);
 
-      const result = await stateHelper.getToken('0.0.123456');
+      const result = stateHelper.getToken('0.0.123456');
 
       expect(result).toBeNull();
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -157,15 +157,13 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should handle get error', async () => {
+    test('should handle get error', () => {
       const error = new Error('Get failed');
       mockStateService.get.mockImplementation(() => {
         throw error;
       });
 
-      await expect(stateHelper.getToken('0.0.123456')).rejects.toThrow(
-        'Get failed',
-      );
+      expect(() => stateHelper.getToken('0.0.123456')).toThrow('Get failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
         '[TOKEN STATE] Failed to get token 0.0.123456: Get failed',
       );
@@ -222,11 +220,11 @@ describe('Token State Management', () => {
       },
     };
 
-    test('should get all tokens successfully', async () => {
+    test('should get all tokens successfully', () => {
       const tokenArray = [mockTokens['0.0.123456'], mockTokens['0.0.789012']];
       mockStateService.list.mockReturnValue(tokenArray);
 
-      const result = await stateHelper.getAllTokens();
+      const result = stateHelper.getAllTokens();
 
       expect(result).toEqual(mockTokens);
       expect(mockStateService.list).toHaveBeenCalledWith('token-tokens');
@@ -238,10 +236,10 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should return empty object when no tokens', async () => {
+    test('should return empty object when no tokens', () => {
       mockStateService.list.mockReturnValue([]);
 
-      const result = await stateHelper.getAllTokens();
+      const result = stateHelper.getAllTokens();
 
       expect(result).toEqual({});
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -249,13 +247,13 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should handle errors', async () => {
+    test('should handle errors', () => {
       const error = new Error('List failed');
       mockStateService.list.mockImplementation(() => {
         throw error;
       });
 
-      await expect(stateHelper.getAllTokens()).rejects.toThrow('List failed');
+      expect(() => stateHelper.getAllTokens()).toThrow('List failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
         '[TOKEN STATE] Failed to get all tokens: List failed',
       );
@@ -263,10 +261,10 @@ describe('Token State Management', () => {
   });
 
   describe('removeToken', () => {
-    test('should remove token successfully', async () => {
+    test('should remove token successfully', () => {
       mockStateService.delete.mockReturnValue(undefined);
 
-      await stateHelper.removeToken('0.0.123456');
+      stateHelper.removeToken('0.0.123456');
 
       expect(mockStateService.delete).toHaveBeenCalledWith(
         'token-tokens',
@@ -280,13 +278,13 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should handle remove error', async () => {
+    test('should handle remove error', () => {
       const error = new Error('Delete failed');
       mockStateService.delete.mockImplementation(() => {
         throw error;
       });
 
-      await expect(stateHelper.removeToken('0.0.123456')).rejects.toThrow(
+      expect(() => stateHelper.removeToken('0.0.123456')).toThrow(
         'Delete failed',
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -324,12 +322,12 @@ describe('Token State Management', () => {
       // Reset all mocks before each test
       jest.clearAllMocks();
       // Mock getToken to return the token data by default
-      jest.spyOn(stateHelper, 'getToken').mockResolvedValue(mockTokenData);
-      jest.spyOn(stateHelper, 'saveToken').mockResolvedValue(undefined);
+      jest.spyOn(stateHelper, 'getToken').mockReturnValue(mockTokenData);
+      jest.spyOn(stateHelper, 'saveToken').mockImplementation(() => {});
     });
 
-    test('should add association successfully', async () => {
-      await stateHelper.addTokenAssociation(
+    test('should add association successfully', () => {
+      stateHelper.addTokenAssociation(
         '0.0.123456',
         '0.0.111111',
         'TestAccount',
@@ -345,16 +343,14 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should not add duplicate association', async () => {
+    test('should not add duplicate association', () => {
       const tokenWithAssociation = {
         ...mockTokenData,
         associations: [{ name: 'TestAccount', accountId: '0.0.111111' }],
       };
-      jest
-        .spyOn(stateHelper, 'getToken')
-        .mockResolvedValue(tokenWithAssociation);
+      jest.spyOn(stateHelper, 'getToken').mockReturnValue(tokenWithAssociation);
 
-      await stateHelper.addTokenAssociation(
+      stateHelper.addTokenAssociation(
         '0.0.123456',
         '0.0.111111',
         'TestAccount',
@@ -366,16 +362,16 @@ describe('Token State Management', () => {
       );
     });
 
-    test('should handle token not found error', async () => {
-      jest.spyOn(stateHelper, 'getToken').mockResolvedValue(null);
+    test('should handle token not found error', () => {
+      jest.spyOn(stateHelper, 'getToken').mockReturnValue(null);
 
-      await expect(
+      expect(() =>
         stateHelper.addTokenAssociation(
           '0.0.123456',
           '0.0.111111',
           'TestAccount',
         ),
-      ).rejects.toThrow('Token 0.0.123456 not found');
+      ).toThrow('Token 0.0.123456 not found');
       expect(mockLogger.error).toHaveBeenCalledWith(
         '[TOKEN STATE] Failed to add association to token 0.0.123456: Token 0.0.123456 not found',
       );

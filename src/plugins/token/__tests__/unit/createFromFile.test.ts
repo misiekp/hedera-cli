@@ -10,17 +10,17 @@ import {
   makeLogger,
   makeApiMocks,
   mockProcessExit,
-  makeTransactionResult,
+  makeTransactionResult as _makeTransactionResult,
 } from './helpers/mocks';
 import {
   validTokenFile,
-  infiniteSupplyTokenFile,
-  invalidTokenFileMissingName,
-  invalidTokenFileInvalidAccountId,
-  invalidTokenFileInvalidSupplyType,
-  invalidTokenFileNegativeSupply,
-  mockFilePaths,
-  mockTransactions,
+  infiniteSupplyTokenFile as _infiniteSupplyTokenFile,
+  invalidTokenFileMissingName as _invalidTokenFileMissingName,
+  invalidTokenFileInvalidAccountId as _invalidTokenFileInvalidAccountId,
+  invalidTokenFileInvalidSupplyType as _invalidTokenFileInvalidSupplyType,
+  invalidTokenFileNegativeSupply as _invalidTokenFileNegativeSupply,
+  mockFilePaths as _mockFilePaths,
+  mockTransactions as _mockTransactions,
 } from './helpers/fixtures';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -102,18 +102,14 @@ describe('createTokenFromFileHandler', () => {
         },
       };
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing,
-      } = makeApiMocks({
+      const { api, tokenTransactions, signing } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockImplementation((transaction) => {
@@ -220,13 +216,13 @@ describe('createTokenFromFileHandler', () => {
 
       const {
         api,
-        tokenTransactions: tokenTransactions,
-        signing,
+        tokenTransactions,
+        signing: _signing,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -304,16 +300,16 @@ describe('createTokenFromFileHandler', () => {
 
       const {
         api,
-        tokenTransactions: tokenTransactions,
-        signing,
+        tokenTransactions,
+        signing: _signing,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(_mockAssociationTransaction),
+            .mockReturnValue(_mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -590,13 +586,13 @@ describe('createTokenFromFileHandler', () => {
 
       const {
         api,
-        tokenTransactions: tokenTransactions,
-        signing,
+        tokenTransactions: _tokenTransactions,
+        signing: _signing,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -656,16 +652,18 @@ describe('createTokenFromFileHandler', () => {
 
       const {
         api,
-        tokenTransactions: tokenTransactions,
-        signing,
+        tokenTransactions: _tokenTransactions,
+        signing: _signing,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
           createTokenAssociationTransaction: jest
             .fn()
-            .mockRejectedValue(new Error('Association failed')),
+            .mockImplementation(() => {
+              throw new Error('Association failed');
+            }),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -731,13 +729,13 @@ describe('createTokenFromFileHandler', () => {
 
       const {
         api,
-        tokenTransactions: tokenTransactions,
-        signing,
+        tokenTransactions: _tokenTransactions,
+        signing: _signing,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),

@@ -113,11 +113,11 @@ export const tokenPluginManifest: PluginManifest = {
       scope: 'profile',
     },
   ],
-  init: async (context) => {
+  init: () => {
     console.log('[TOKEN PLUGIN] Initializing token plugin...');
     // Plugin initialization logic
   },
-  teardown: async (context) => {
+  teardown: () => {
     console.log('[TOKEN PLUGIN] Tearing down token plugin...');
     // Plugin cleanup logic
   },

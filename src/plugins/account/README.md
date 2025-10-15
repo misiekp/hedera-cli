@@ -87,7 +87,7 @@ hcli account clear
 
 The plugin uses the Core API services:
 
-- `api.accountTransactions` - Account transaction creation
+- `api.account` - Account transaction creation
 - `api.signing` - Transaction signing and execution
 - `api.state` - Namespaced state management
 - `api.network` - Network information

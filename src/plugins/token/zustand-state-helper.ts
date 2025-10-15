@@ -19,7 +19,7 @@ export class ZustandTokenStateHelper {
   /**
    * Save a token to the state
    */
-  async saveToken(tokenId: string, tokenData: TokenData): Promise<void> {
+  saveToken(tokenId: string, tokenData: TokenData): void {
     try {
       this.logger.debug(`[TOKEN STATE] Saving token ${tokenId} to state`);
 
@@ -38,7 +38,7 @@ export class ZustandTokenStateHelper {
   /**
    * Get a token from the state
    */
-  async getToken(tokenId: string): Promise<TokenData | null> {
+  getToken(tokenId: string): TokenData | null {
     try {
       this.logger.debug(`[TOKEN STATE] Getting token ${tokenId} from state`);
 
@@ -62,7 +62,7 @@ export class ZustandTokenStateHelper {
   /**
    * Get all tokens from the state
    */
-  async getAllTokens(): Promise<Record<string, TokenData>> {
+  getAllTokens(): Record<string, TokenData> {
     try {
       this.logger.debug(`[TOKEN STATE] Getting all tokens from state`);
 
@@ -70,7 +70,7 @@ export class ZustandTokenStateHelper {
       const tokensMap: Record<string, TokenData> = {};
 
       // Convert array to record using token IDs as keys
-      allTokens.forEach((token, index) => {
+      allTokens.forEach((token) => {
         if (token && token.tokenId) {
           tokensMap[token.tokenId] = token;
         }
@@ -91,7 +91,7 @@ export class ZustandTokenStateHelper {
   /**
    * Remove a token from the state
    */
-  async removeToken(tokenId: string): Promise<void> {
+  removeToken(tokenId: string): void {
     try {
       this.logger.debug(`[TOKEN STATE] Removing token ${tokenId} from state`);
 
@@ -109,13 +109,13 @@ export class ZustandTokenStateHelper {
   /**
    * Add an association to a token
    */
-  async addTokenAssociation(
+  addTokenAssociation(
     tokenId: string,
     accountId: string,
     accountName: string,
-  ): Promise<void> {
+  ): void {
     try {
-      const tokenData = await this.getToken(tokenId);
+      const tokenData = this.getToken(tokenId);
       if (!tokenData) {
         throw new Error(`Token ${tokenId} not found`);
       }
@@ -158,7 +158,7 @@ export class ZustandTokenStateHelper {
             : [],
         };
 
-        await this.saveToken(tokenId, updatedTokenData);
+        this.saveToken(tokenId, updatedTokenData);
         this.logger.debug(
           `[TOKEN STATE] Added association ${accountId} to token ${tokenId}`,
         );

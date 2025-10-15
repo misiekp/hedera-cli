@@ -134,7 +134,7 @@ function createNamespaceStore(
                 }
                 const filePath = path.join(storageDir, `${name}.json`);
                 // Pretty-print the JSON for better readability
-                const parsed = JSON.parse(value);
+                const parsed: unknown = JSON.parse(value);
                 const prettyJson = JSON.stringify(parsed, null, 2);
                 fs.writeFileSync(filePath, prettyJson);
                 logger.debug(`[ZUSTAND:${namespace}] Saved to: ${filePath}`);

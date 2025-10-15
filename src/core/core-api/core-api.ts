@@ -30,8 +30,8 @@ import { TokenService } from '../services/token/token-service.interface';
 import { TokenServiceImpl } from '../services/token/token-service';
 
 export class CoreAPIImplementation implements CoreAPI {
-  public accountTransactions: AccountService;
-  public tokens: TokenService;
+  public account: AccountService;
+  public token: TokenService;
   public signing: TransactionService;
   public topic: TopicService;
   public state: StateService;
@@ -63,8 +63,8 @@ export class CoreAPIImplementation implements CoreAPI {
     );
 
     // Initialize all services with dependencies
-    this.accountTransactions = new AccountServiceImpl(this.logger);
-    this.tokens = new TokenServiceImpl(this.logger, this.signing);
+    this.account = new AccountServiceImpl(this.logger);
+    this.token = new TokenServiceImpl(this.logger, this.signing);
     this.topic = new TopicServiceImpl();
 
     // Convert network string to LedgerId

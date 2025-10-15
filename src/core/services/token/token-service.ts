@@ -8,22 +8,15 @@ import {
   TokenAssociateTransaction,
   AccountId,
   TokenId,
-  PrivateKey,
   PublicKey,
   TokenSupplyType,
   CustomFee,
   CustomFixedFee,
-  CustomFractionalFee,
   Hbar,
-  TokenId as HederaTokenId,
 } from '@hashgraph/sdk';
 import { Logger } from '../logger/logger-service.interface';
 import { TransactionService } from '../signing/signing-service.interface';
-import {
-  TokenService,
-  TokenOperationResult,
-  SignerRef,
-} from './token-service.interface';
+import { TokenService, TokenOperationResult } from './token-service.interface';
 import type {
   TokenTransferParams,
   TokenCreateParams,
@@ -31,6 +24,7 @@ import type {
   CustomFee as CustomFeeParams,
 } from '../../types/token.types';
 import { parsePrivateKey } from '../../../utils/keys';
+import type { SignerRef } from '../signing/signing-service.interface';
 
 export class TokenServiceImpl implements TokenService {
   private logger: Logger;
@@ -44,9 +38,7 @@ export class TokenServiceImpl implements TokenService {
   /**
    * Create a token transfer transaction (without execution)
    */
-  async createTransferTransaction(
-    params: TokenTransferParams,
-  ): Promise<TransferTransaction> {
+  createTransferTransaction(params: TokenTransferParams): TransferTransaction {
     this.logger.debug(
       `[TOKEN SERVICE] Creating transfer transaction: ${params.amount} tokens from ${params.fromAccountId} to ${params.toAccountId}`,
     );
@@ -91,7 +83,7 @@ export class TokenServiceImpl implements TokenService {
     }
 
     // Create the transfer transaction
-    const transferTx = await this.createTransferTransaction(params);
+    const transferTx = this.createTransferTransaction(params);
 
     // Execute the transaction
     const result = signer
@@ -112,9 +104,7 @@ export class TokenServiceImpl implements TokenService {
   /**
    * Create a token creation transaction (without execution)
    */
-  async createTokenTransaction(
-    params: TokenCreateParams,
-  ): Promise<TokenCreateTransaction> {
+  createTokenTransaction(params: TokenCreateParams): TokenCreateTransaction {
     this.logger.debug(
       `[TOKEN SERVICE] Creating token: ${params.name} (${params.symbol})`,
     );
@@ -189,7 +179,7 @@ export class TokenServiceImpl implements TokenService {
     }
 
     // Create the token transaction
-    const tokenCreateTx = await this.createTokenTransaction(params);
+    const tokenCreateTx = this.createTokenTransaction(params);
 
     // Execute the transaction
     const result = signer
@@ -211,9 +201,9 @@ export class TokenServiceImpl implements TokenService {
   /**
    * Create a token association transaction (without execution)
    */
-  async createTokenAssociationTransaction(
+  createTokenAssociationTransaction(
     params: TokenAssociationParams,
-  ): Promise<TokenAssociateTransaction> {
+  ): TokenAssociateTransaction {
     this.logger.debug(
       `[TOKEN SERVICE] Creating association transaction: token ${params.tokenId} with account ${params.accountId}`,
     );
@@ -250,7 +240,7 @@ export class TokenServiceImpl implements TokenService {
     }
 
     // Create the association transaction
-    const associateTx = await this.createTokenAssociationTransaction(params);
+    const associateTx = this.createTokenAssociationTransaction(params);
 
     // Execute the transaction
     const result = signer

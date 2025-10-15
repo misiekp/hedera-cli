@@ -4,10 +4,7 @@
  */
 import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { transferTokenHandler } from '../../commands/transfer';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
 import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
-import type { TokenService } from '../../../../core/services/token/token-service.interface';
-import type { StateService } from '../../../../core/services/state/state-service.interface';
 import { makeLogger, makeApiMocks } from './helpers/mocks';
 
 let exitSpy: jest.SpyInstance;
@@ -33,11 +30,17 @@ describe('transferTokenHandler', () => {
         receipt: {} as any,
       };
 
-      const { api, tokens, signing, alias, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens,
+        signing,
+        alias: _alias,
+        credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -104,11 +107,17 @@ describe('transferTokenHandler', () => {
         receipt: {} as any,
       };
 
-      const { api, tokens, signing, alias, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens,
+        signing,
+        alias,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -170,17 +179,23 @@ describe('transferTokenHandler', () => {
         receipt: {} as any,
       };
 
-      const { api, tokens, signing, alias, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens,
+        signing: _signing,
+        alias,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
         alias: {
-          resolve: jest.fn().mockImplementation((alias, type, network) => {
+          resolve: jest.fn().mockImplementation((alias, _type, _network) => {
             if (alias === 'bob') {
               return {
                 entityId: '0.0.789012',
@@ -367,7 +382,12 @@ describe('transferTokenHandler', () => {
         receipt: { status: { status: 'failed', transactionId: '' } },
       };
 
-      const { api, tokens, signing, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens: _tokens,
+        signing: _signing,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         createTransferImpl: jest
           .fn()
           .mockResolvedValue(mockTransferTransaction),
@@ -406,7 +426,11 @@ describe('transferTokenHandler', () => {
 
     test('should handle token transaction service error', async () => {
       // Arrange
-      const { api, tokens, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens: _tokens,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         createTransferImpl: jest
           .fn()
           .mockRejectedValue(new Error('Network error')),
@@ -442,11 +466,16 @@ describe('transferTokenHandler', () => {
       // Arrange
       const mockTransferTransaction = { test: 'transfer-transaction' };
 
-      const { api, tokens, signing, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens: _tokens,
+        signing: _signing,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest
@@ -494,11 +523,16 @@ describe('transferTokenHandler', () => {
         receipt: {} as any,
       };
 
-      const { api, tokens, signing, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens,
+        signing: _signing,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -554,11 +588,16 @@ describe('transferTokenHandler', () => {
         receipt: {} as any,
       };
 
-      const { api, tokens, signing, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens: _tokens,
+        signing: _signing,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -611,11 +650,16 @@ describe('transferTokenHandler', () => {
         receipt: {} as any,
       };
 
-      const { api, tokens, signing, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens,
+        signing: _signing,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -669,11 +713,16 @@ describe('transferTokenHandler', () => {
         receipt: {} as any,
       };
 
-      const { api, tokens, signing, credentialsState } = makeApiMocks({
+      const {
+        api,
+        tokens,
+        signing: _signing,
+        credentialsState: _credentialsState,
+      } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
             .fn()
-            .mockResolvedValue(mockTransferTransaction),
+            .mockReturnValue(mockTransferTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),

@@ -19,7 +19,11 @@ jest.mock('../../zustand-state-helper', () => ({
 }));
 
 const MockedHelper = ZustandTokenStateHelper as jest.Mock;
-const { setupExit, cleanupExit, getExitSpy } = mockProcessExitThrows();
+const {
+  setupExit,
+  cleanupExit,
+  getExitSpy: _getExitSpy,
+} = mockProcessExitThrows();
 
 describe('Token Lifecycle Integration', () => {
   beforeEach(() => {
@@ -54,8 +58,8 @@ describe('Token Lifecycle Integration', () => {
       const {
         api,
         tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentials,
+        signing: _signing,
+        credentials: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -71,7 +75,7 @@ describe('Token Lifecycle Integration', () => {
         signing: {
           signAndExecuteWith: jest
             .fn()
-            .mockImplementation((transaction, key) => {
+            .mockImplementation((transaction, _key) => {
               // Mock different responses based on transaction type
               if (transaction === mockTokenTransaction) {
                 return Promise.resolve({
@@ -237,8 +241,8 @@ describe('Token Lifecycle Integration', () => {
       const {
         api,
         tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentials,
+        signing: _signing,
+        credentials: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -251,7 +255,7 @@ describe('Token Lifecycle Integration', () => {
         signing: {
           signAndExecuteWith: jest
             .fn()
-            .mockImplementation((transaction, key) => {
+            .mockImplementation((transaction, _key) => {
               if (transaction === mockTokenTransaction) {
                 return Promise.resolve({
                   success: true,
@@ -354,8 +358,8 @@ describe('Token Lifecycle Integration', () => {
       const {
         api,
         tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentials,
+        signing: _signing,
+        credentials: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -477,9 +481,9 @@ describe('Token Lifecycle Integration', () => {
 
       const {
         api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentials,
+        tokenTransactions: _tokenTransactions,
+        signing: _signing,
+        credentials: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest.fn().mockReturnValue({}),

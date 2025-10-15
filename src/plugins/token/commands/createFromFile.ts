@@ -4,7 +4,8 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import { TokenData, resolveTreasuryParameter } from '../schema';
+import { TokenData } from '../schema';
+import { resolveTreasuryParameter } from '../resolver-helper';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { z } from 'zod';
@@ -141,7 +142,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
 
     if (typeof tokenDefinition.treasury === 'string') {
       // New format: alias or treasury-id:treasury-key
-      const resolvedTreasury = await resolveTreasuryParameter(
+      const resolvedTreasury = resolveTreasuryParameter(
         tokenDefinition.treasury,
         api,
         network,
@@ -171,7 +172,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
     }
 
     // 3. Create token transaction using Core API
-    const tokenCreateTransaction = await api.tokens.createTokenTransaction({
+    const tokenCreateTransaction = api.token.createTokenTransaction({
       name: tokenDefinition.name,
       symbol: tokenDefinition.symbol,
       treasuryId: treasuryId,
@@ -252,7 +253,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
           try {
             // Create association transaction
             const associateTransaction =
-              await api.tokens.createTokenAssociationTransaction({
+              api.token.createTokenAssociationTransaction({
                 tokenId: result.tokenId,
                 accountId: association.accountId,
               });
@@ -288,7 +289,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
         }
       }
 
-      await tokenState.saveToken(result.tokenId, tokenData);
+      tokenState.saveToken(result.tokenId, tokenData);
       logger.log(`   Token data saved to state`);
 
       // 7. Store script arguments if provided

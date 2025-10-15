@@ -4,11 +4,8 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import {
-  TokenData,
-  safeValidateTokenCreateParams,
-  resolveTreasuryParameter,
-} from '../schema';
+import { TokenData, safeValidateTokenCreateParams } from '../schema';
+import { resolveTreasuryParameter } from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
 
 export async function createTokenHandler(args: CommandHandlerArgs) {
@@ -44,7 +41,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
 
   if (validatedParams.treasury) {
     const network = api.network.getCurrentNetwork();
-    const resolvedTreasury = await resolveTreasuryParameter(
+    const resolvedTreasury = resolveTreasuryParameter(
       validatedParams.treasury,
       api,
       network,
@@ -153,7 +150,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
     };
 
     const tokenCreateTransaction =
-      await api.tokens.createTokenTransaction(tokenCreateParams);
+      api.token.createTokenTransaction(tokenCreateParams);
 
     // 3. Sign and execute transaction
     // If custom treasury provided, sign with treasury key
@@ -205,7 +202,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
         customFees: [],
       };
 
-      await tokenState.saveToken(result.tokenId, tokenData);
+      tokenState.saveToken(result.tokenId, tokenData);
       logger.log(`   Token data saved to state`);
 
       process.exit(0);

@@ -63,13 +63,13 @@ describe('token transfer command', () => {
         'hedera-cli.ts',
         'token',
         'transfer',
-        '--token-id',
+        '-t',
         tokenId,
         '--to',
         bob.name,
         '--from',
         alice.name,
-        '--balance',
+        '-b',
         balance.toString(),
       ]);
 

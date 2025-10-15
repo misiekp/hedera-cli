@@ -4,10 +4,8 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import {
-  safeValidateTokenAssociateParams,
-  resolveAccountParameter,
-} from '../schema';
+import { safeValidateTokenAssociateParams } from '../schema';
+import { resolveAccountParameter } from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
 
 export async function associateTokenHandler(args: CommandHandlerArgs) {
@@ -35,7 +33,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
   // Resolve account parameter (alias or account-id:account-key) if provided
 
   const network = api.network.getCurrentNetwork();
-  const resolvedAccount = await resolveAccountParameter(account, api, network);
+  const resolvedAccount = resolveAccountParameter(account, api, network);
 
   // Account was explicitly provided - it MUST resolve or fail
   if (!resolvedAccount) {
@@ -60,11 +58,10 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
   try {
     // 1. Create association transaction using Core API
-    const associateTransaction =
-      await api.tokens.createTokenAssociationTransaction({
-        tokenId,
-        accountId,
-      });
+    const associateTransaction = api.token.createTokenAssociationTransaction({
+      tokenId,
+      accountId,
+    });
 
     // 2. Sign and execute transaction using the account key
     logger.debug(`Using key ${accountKeyRefId} for signing transaction`);
@@ -79,7 +76,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
       // 3. Update token state with association
-      await tokenState.addTokenAssociation(tokenId, accountId, accountName);
+      tokenState.addTokenAssociation(tokenId, accountId, accountName);
       logger.log(`   Association saved to token state`);
 
       process.exit(0);

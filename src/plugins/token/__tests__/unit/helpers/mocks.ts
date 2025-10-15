@@ -163,11 +163,12 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
   );
   const alias = makeAliasServiceMock(config?.alias);
   const state = makeStateServiceMock(config?.state);
-  const accountTransactions = makeAccountTransactionServiceMock();
+  const account = makeAccountTransactionServiceMock();
 
   const api: jest.Mocked<CoreAPI> = {
-    accountTransactions,
-    tokens,
+    account,
+    token: tokens,
+    topic: {} as unknown as any,
     signing,
     credentialsState,
     alias,
@@ -197,7 +198,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
     credentials: credentialsState, // Legacy alias for backward compatibility
     alias,
     state,
-    accountTransactions,
+    account,
     createTransferImpl: config?.createTransferImpl, // Legacy support
   };
 };

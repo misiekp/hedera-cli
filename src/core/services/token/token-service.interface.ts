@@ -12,6 +12,7 @@ import type {
   TokenCreateParams,
   TokenAssociationParams,
 } from '../../types/token.types';
+import type { SignerRef } from '../signing/signing-service.interface';
 
 /**
  * Result of token operations
@@ -29,21 +30,11 @@ export interface TokenOperationResult {
   };
 }
 
-/**
- * Signer reference for transaction signing
- */
-export interface SignerRef {
-  keyRefId?: string;
-  publicKey?: string;
-}
-
 export interface TokenService {
   /**
    * Create a token transfer transaction (without execution)
    */
-  createTransferTransaction(
-    params: TokenTransferParams,
-  ): Promise<TransferTransaction>;
+  createTransferTransaction(params: TokenTransferParams): TransferTransaction;
 
   /**
    * Create and execute a token transfer transaction
@@ -56,9 +47,7 @@ export interface TokenService {
   /**
    * Create a token creation transaction (without execution)
    */
-  createTokenTransaction(
-    params: TokenCreateParams,
-  ): Promise<TokenCreateTransaction>;
+  createTokenTransaction(params: TokenCreateParams): TokenCreateTransaction;
 
   /**
    * Create and execute a token creation transaction
@@ -73,7 +62,7 @@ export interface TokenService {
    */
   createTokenAssociationTransaction(
     params: TokenAssociationParams,
-  ): Promise<TokenAssociateTransaction>;
+  ): TokenAssociateTransaction;
 
   /**
    * Create and execute a token association transaction

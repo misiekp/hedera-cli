@@ -3,11 +3,11 @@
  * Handles token transfer operations using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { safeValidateTokenTransferParams } from '../schema';
 import {
-  safeValidateTokenTransferParams,
   resolveAccountParameter,
   resolveDestinationAccountParameter,
-} from '../schema';
+} from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
 
 export async function transferTokenHandler(args: CommandHandlerArgs) {
@@ -34,7 +34,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   // Resolve from parameter (alias or account-id:private-key) if provided
 
   const network = api.network.getCurrentNetwork();
-  const resolvedFromAccount = await resolveAccountParameter(from, api, network);
+  const resolvedFromAccount = resolveAccountParameter(from, api, network);
 
   // From account was explicitly provided - it MUST resolve or fail
   if (!resolvedFromAccount) {
@@ -52,7 +52,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   logger.log(`🔑 Will sign with from account key`);
 
   // Resolve to parameter (alias or account-id)
-  const resolvedToAccount = await resolveDestinationAccountParameter(
+  const resolvedToAccount = resolveDestinationAccountParameter(
     to,
     api,
     network,
@@ -74,7 +74,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
   try {
     // 1. Create transfer transaction using Core API
-    const transferTransaction = await api.tokens.createTransferTransaction({
+    const transferTransaction = api.token.createTransferTransaction({
       tokenId,
       fromAccountId,
       toAccountId,

@@ -12,12 +12,7 @@ import {
   mockProcessExit,
   makeTransactionResult,
 } from './helpers/mocks';
-import {
-  mockCredentials,
-  mockAccountIds,
-  mockKeys,
-  mockTransactions,
-} from './helpers/fixtures';
+import { mockAccountIds, mockTransactions } from './helpers/fixtures';
 
 jest.mock('../../zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
@@ -56,7 +51,7 @@ describe('createTokenHandler', () => {
           tokenTransactions: {
             createTokenTransaction: jest
               .fn()
-              .mockResolvedValue(mockTransactions.token),
+              .mockReturnValue(mockTransactions.token),
           },
           signing: {
             signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -132,7 +127,7 @@ describe('createTokenHandler', () => {
           tokenTransactions: {
             createTokenTransaction: jest
               .fn()
-              .mockResolvedValue(mockTransactions.token),
+              .mockReturnValue(mockTransactions.token),
           },
           signing: {
             signAndExecute: jest.fn().mockResolvedValue(mockSignResult),
@@ -209,7 +204,7 @@ describe('createTokenHandler', () => {
 
     test('should exit with error when no credentials found', async () => {
       // Arrange
-      const { api, credentialsState } = makeApiMocks({
+      const { api } = makeApiMocks({
         credentialsState: {
           getDefaultOperator: jest.fn().mockReturnValue(null),
           ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
@@ -260,26 +255,25 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, credentialsState } =
-        makeApiMocks({
-          tokenTransactions: {
-            createTokenTransaction: jest
-              .fn()
-              .mockResolvedValue(mockTokenTransaction),
-          },
-          signing: {
-            signAndExecute: jest
-              .fn()
-              .mockResolvedValue(mockSignResult as TransactionResult),
-          },
-          credentialsState: {
-            getDefaultOperator: jest.fn().mockReturnValue({
-              accountId: '0.0.100000',
-              keyRefId: 'operator-key-ref-id',
-            }),
-            getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
-          },
-        });
+      const { api } = makeApiMocks({
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockReturnValue(mockTokenTransaction),
+        },
+        signing: {
+          signAndExecute: jest
+            .fn()
+            .mockResolvedValue(mockSignResult as TransactionResult),
+        },
+        credentialsState: {
+          getDefaultOperator: jest.fn().mockReturnValue({
+            accountId: '0.0.100000',
+            keyRefId: 'operator-key-ref-id',
+          }),
+          getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
+        },
+      });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -306,11 +300,11 @@ describe('createTokenHandler', () => {
 
     test('should handle token transaction service error', async () => {
       // Arrange
-      const { api, tokenTransactions, credentialsState } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
-          createTokenTransaction: jest
-            .fn()
-            .mockRejectedValue(new Error('Service error')),
+          createTokenTransaction: jest.fn().mockImplementation(() => {
+            throw new Error('Service error');
+          }),
         },
         credentialsState: {
           getDefaultOperator: jest.fn().mockReturnValue({
@@ -363,11 +357,11 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, credentialsState } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
-            .mockResolvedValue(mockTokenTransaction),
+            .mockReturnValue(mockTokenTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),

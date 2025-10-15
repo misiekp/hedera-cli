@@ -18,7 +18,7 @@ jest.mock('../../zustand-state-helper', () => ({
 }));
 
 const MockedHelper = ZustandTokenStateHelper as jest.Mock;
-const { setupExit, cleanupExit, getExitSpy } = mockProcessExitThrows();
+const { setupExit, cleanupExit } = mockProcessExitThrows();
 
 describe('associateTokenHandler', () => {
   beforeEach(() => {
@@ -45,27 +45,23 @@ describe('associateTokenHandler', () => {
         addAssociation: mockAddAssociation,
       });
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentialsState,
-      } = makeApiMocks({
-        tokenTransactions: {
-          createTokenAssociationTransaction: jest
-            .fn()
-            .mockResolvedValue(mockAssociationTransaction),
-        },
-        signing: {
-          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
-        },
-        credentialsState: {
-          importPrivateKey: jest.fn().mockReturnValue({
-            keyRefId: 'imported-key-ref-id',
-            publicKey: 'imported-public-key',
-          }),
-        },
-      });
+      const { api, tokenTransactions, signing, credentialsState } =
+        makeApiMocks({
+          tokenTransactions: {
+            createTokenAssociationTransaction: jest
+              .fn()
+              .mockReturnValue(mockAssociationTransaction),
+          },
+          signing: {
+            signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+          },
+          credentialsState: {
+            importPrivateKey: jest.fn().mockReturnValue({
+              keyRefId: 'imported-key-ref-id',
+              publicKey: 'imported-public-key',
+            }),
+          },
+        });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -113,17 +109,11 @@ describe('associateTokenHandler', () => {
         addAssociation: mockAddAssociation,
       });
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        alias,
-        credentialsState,
-      } = makeApiMocks({
+      const { api, tokenTransactions, signing, alias } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -183,16 +173,11 @@ describe('associateTokenHandler', () => {
         addAssociation: mockAddAssociation,
       });
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentialsState,
-      } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -304,16 +289,11 @@ describe('associateTokenHandler', () => {
         addAssociation: mockAddAssociation,
       });
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentialsState,
-      } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -349,15 +329,13 @@ describe('associateTokenHandler', () => {
 
     test('should handle token transaction service error', async () => {
       // Arrange
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        credentialsState,
-      } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
-            .mockRejectedValue(new Error('Service unavailable')),
+            .mockImplementation(() => {
+              throw new Error('Service unavailable');
+            }),
         },
         credentialsState: {
           importPrivateKey: jest.fn().mockReturnValue({
@@ -389,16 +367,11 @@ describe('associateTokenHandler', () => {
       // Arrange
       const mockAssociationTransaction = { test: 'association-transaction' };
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentialsState,
-      } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest
@@ -447,16 +420,11 @@ describe('associateTokenHandler', () => {
         addAssociation: mockAddAssociation,
       });
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentialsState,
-      } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -503,16 +471,11 @@ describe('associateTokenHandler', () => {
         addAssociation: mockAddAssociation,
       });
 
-      const {
-        api,
-        tokenTransactions: tokenTransactions,
-        signing: signing,
-        credentialsState,
-      } = makeApiMocks({
+      const { api } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
             .fn()
-            .mockResolvedValue(mockAssociationTransaction),
+            .mockReturnValue(mockAssociationTransaction),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
