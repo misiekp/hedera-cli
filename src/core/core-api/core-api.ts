@@ -5,6 +5,7 @@
 import { CoreAPI } from './core-api.interface';
 import { AccountService } from '../services/account/account-transaction-service.interface';
 import { TransactionService } from '../services/signing/signing-service.interface';
+import { TopicService } from '../services/topics/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
@@ -12,10 +13,11 @@ import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { AccountServiceImpl } from '../services/account/account-transaction-service';
 import { TransactionServiceImpl } from '../services/signing/signing-service';
+import { TopicServiceImpl } from '../services/topics/topic-transaction-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
-import { MockNetworkService } from '../services/network/network-service';
+import { NetworkServiceImpl } from '../services/network/network-service';
 import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
 import { HbarService } from '../services/hbar/hbar-service.interface';
@@ -31,6 +33,7 @@ export class CoreAPIImplementation implements CoreAPI {
   public accountTransactions: AccountService;
   public tokens: TokenService;
   public signing: TransactionService;
+  public topic: TopicService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
   public network: NetworkService;
@@ -44,13 +47,14 @@ export class CoreAPIImplementation implements CoreAPI {
     this.logger = new MockLoggerService();
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
-    this.network = new MockNetworkService();
+    this.network = new NetworkServiceImpl(this.state, this.logger);
 
     // Initialize new services
     this.alias = new AliasManagementServiceImpl(this.state, this.logger);
     this.credentialsState = new KeyManagementServiceImpl(
       this.logger,
       this.state,
+      this.network,
     );
     this.signing = new TransactionServiceImpl(
       this.logger,
@@ -61,6 +65,8 @@ export class CoreAPIImplementation implements CoreAPI {
     // Initialize all services with dependencies
     this.accountTransactions = new AccountServiceImpl(this.logger);
     this.tokens = new TokenServiceImpl(this.logger, this.signing);
+    this.topic = new TopicServiceImpl();
+
     // Convert network string to LedgerId
     const networkString = this.network.getCurrentNetwork();
     let ledgerId: LedgerId;

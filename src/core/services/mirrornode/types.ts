@@ -140,11 +140,19 @@ export interface TopicMessagesAPIResponse {
   };
 }
 
+export interface TopicMessageQueryParams {
+  topicId: string;
+  sequenceNumber: number;
+}
+
 export interface TopicMessagesQueryParams {
   topicId: string;
-  lowerTimestamp?: string;
-  upperTimestamp?: string;
-  limit?: number;
+  filter?: Filter;
+}
+
+export interface TopicMessageResponse {
+  topicId: string;
+  data: TopicMessage;
 }
 
 export interface TopicMessagesResponse {
@@ -237,4 +245,10 @@ export interface ExchangeRateResponse {
     hbar_equivalent: number;
   };
   timestamp: string;
+}
+
+export interface Filter {
+  field: string;
+  operation: 'gt' | 'lt' | 'gte' | 'lte' | 'eq' | 'ne';
+  value: number | string;
 }

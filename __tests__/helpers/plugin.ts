@@ -7,9 +7,9 @@ import type { Logger } from '../../src/core/services/logger/logger-service.inter
 import type { StateService } from '../../src/core/services/state/state-service.interface';
 import type { ConfigService } from '../../src/core/services/config/config-service.interface';
 import type { NetworkService } from '../../src/core/services/network/network-service.interface';
-import type { CredentialsStateService } from '../../src/core/services/credentials-state/credentials-state-service.interface';
+import type { KeyManagementService } from '../../src/core/services/credentials-state/credentials-state-service.interface';
 import type { AliasManagementService } from '../../src/core/services/alias/alias-service.interface';
-import type { SigningService } from '../../src/core/services/signing/signing-service.interface';
+import type { TransactionService } from '../../src/core/services/signing/signing-service.interface';
 import type { HederaMirrornodeService } from '../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { AccountData } from '../../src/plugins/account/schema';
 
@@ -64,27 +64,40 @@ export const makeNetworkMock = (
   network: 'testnet' | 'mainnet' | 'previewnet' = 'testnet',
 ): jest.Mocked<NetworkService> => ({
   getCurrentNetwork: jest.fn().mockReturnValue(network),
-  getAvailableNetworks: jest.fn(),
+  getAvailableNetworks: jest
+    .fn()
+    .mockReturnValue(['localnet', 'testnet', 'previewnet', 'mainnet']),
   switchNetwork: jest.fn(),
-  getNetworkConfig: jest.fn(),
-  isNetworkAvailable: jest.fn(),
+  getNetworkConfig: jest.fn().mockImplementation((name: string) => ({
+    name,
+    rpcUrl: `https://${name}.hashio.io/api`,
+    mirrorNodeUrl: `https://${name}.mirrornode.hedera.com/api/v1`,
+    chainId: name === 'mainnet' ? '0x127' : '0x128',
+    explorerUrl: `https://hashscan.io/${name}`,
+    isTestnet: name !== 'mainnet',
+  })),
+  isNetworkAvailable: jest.fn().mockReturnValue(true),
+  getLocalnetConfig: jest.fn().mockReturnValue({
+    localNodeAddress: '127.0.0.1:50211',
+    localNodeAccountId: '0.0.3',
+    localNodeMirrorAddressGRPC: '127.0.0.1:5600',
+  }),
 });
 
 /**
- * Create a mocked CredentialsStateService
+ * Create a mocked KeyManagementService
  */
 export const makeCredentialsStateMock = (
   options: {
     defaultOperator?: { accountId: string; keyRefId: string } | null;
   } = {},
-): jest.Mocked<CredentialsStateService> => ({
+): jest.Mocked<KeyManagementService> => ({
   createLocalPrivateKey: jest.fn(),
   importPrivateKey: jest.fn().mockReturnValue({
     keyRefId: 'kr_test123',
     publicKey: 'pub-key-test',
   }),
   getPublicKey: jest.fn(),
-  getPrivateKeyString: jest.fn(),
   getSignerHandle: jest.fn(),
   findByPublicKey: jest.fn(),
   list: jest.fn(),
@@ -106,17 +119,16 @@ export const makeAliasMock = (): jest.Mocked<AliasManagementService> => ({
   resolve: jest.fn().mockReturnValue(null), // No alias resolution by default
   list: jest.fn(),
   remove: jest.fn(),
-  parseRef: jest.fn(),
 });
 
 /**
- * Create a mocked SigningService
+ * Create a mocked TransactionService
  */
 export const makeSigningMock = (
   options: {
     signAndExecuteImpl?: jest.Mock;
   } = {},
-): jest.Mocked<SigningService> => ({
+): jest.Mocked<TransactionService> => ({
   signAndExecute:
     options.signAndExecuteImpl ||
     jest.fn().mockResolvedValue({
@@ -131,11 +143,6 @@ export const makeSigningMock = (
       transactionId: 'mock-tx-id',
       receipt: { status: { status: 'success' } },
     }),
-  sign: jest.fn(),
-  signWith: jest.fn(),
-  execute: jest.fn(),
-  getStatus: jest.fn(),
-  setDefaultSigner: jest.fn(),
 });
 
 /**
