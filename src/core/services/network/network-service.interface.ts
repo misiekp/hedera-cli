@@ -2,11 +2,13 @@
  * Interface for network management operations
  * All network services must implement this interface
  */
+import { SupportedNetwork } from '../../types/shared.types';
+
 export interface NetworkService {
   /**
    * Get the current active network
    */
-  getCurrentNetwork(): string;
+  getCurrentNetwork(): SupportedNetwork;
 
   /**
    * Get list of available networks
@@ -27,6 +29,11 @@ export interface NetworkService {
    * Check if a network is available
    */
   isNetworkAvailable(network: string): boolean;
+
+  /**
+   * Get localnet-specific configuration
+   */
+  getLocalnetConfig(): LocalnetConfig;
 }
 
 // Network configuration types
@@ -37,6 +44,12 @@ export interface NetworkConfig {
   chainId: string;
   explorerUrl?: string;
   isTestnet: boolean;
+}
+
+export interface LocalnetConfig {
+  localNodeAddress: string;
+  localNodeAccountId: string;
+  localNodeMirrorAddressGRPC: string;
 }
 
 export interface NetworkInfo {

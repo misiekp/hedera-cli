@@ -13,6 +13,8 @@ import {
   ContractInfo,
   TokenAirdropsResponse,
   ExchangeRateResponse,
+  TopicMessageQueryParams,
+  TopicMessage,
 } from './types';
 
 export interface HederaMirrornodeService {
@@ -33,6 +35,11 @@ export interface HederaMirrornodeService {
     accountId: string,
     tokenId?: string,
   ): Promise<TokenBalancesResponse>;
+
+  /**
+   * Get topic messages with pagination support
+   */
+  getTopicMessage(queryParams: TopicMessageQueryParams): Promise<TopicMessage>;
 
   /**
    * Get topic messages with pagination support
