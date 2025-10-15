@@ -68,6 +68,15 @@ export class KeyManagementServiceImpl implements KeyManagementService {
     const pk: PrivateKey = PrivateKey.fromStringECDSA(privateKey);
     const algo: KeyAlgorithm = 'ecdsa';
     const publicKey = pk.publicKey.toStringRaw();
+
+    const existingKeyRefId = this.findByPublicKey(publicKey);
+    if (existingKeyRefId) {
+      this.logger.debug(
+        `[CRED] Passed key already exist, keyRefId: ${existingKeyRefId}`,
+      );
+      return { keyRefId: existingKeyRefId, publicKey };
+    }
+
     this.saveRecord({
       keyRefId,
       type: 'localPrivateKey',
