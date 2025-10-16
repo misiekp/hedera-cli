@@ -12,7 +12,8 @@ import { PrivateKey } from '@hashgraph/sdk';
  */
 export function parsePrivateKey(privateKeyString: string): PrivateKey {
   const parsers = [
-    (key: string) => PrivateKey.fromStringED25519(key),
+    // TODO: ED25519 support
+    // (key: string) => PrivateKey.fromStringED25519(key),
     (key: string) => PrivateKey.fromStringECDSA(key),
     (key: string) => PrivateKey.fromStringDer(key),
   ];
