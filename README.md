@@ -485,7 +485,7 @@ account view
 
 **1. Create a New Account:**
 
-Initializes a new Hedera account (the CLI only supports ECDSA keys) with a specified name for internal referencing in the CLI state, and balance. The balance is optional and has a default if not specified. If you set the `--name random` flag, the CLI tool will generate a random 20-character long name.
+Initializes a new Hedera account **(the CLI only supports ECDSA keys)** with a specified name for internal referencing in the CLI state, and balance. The balance is optional and has a default if not specified. If you set the `--name random` flag, the CLI tool will generate a random 20-character long name.
 
 ```sh
 hcli account create -n,--name <name> [-b,--balance <balance>]

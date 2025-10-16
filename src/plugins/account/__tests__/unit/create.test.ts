@@ -30,7 +30,7 @@ const makeApiMocks = ({
   signAndExecuteImpl?: jest.Mock;
   network?: 'testnet' | 'mainnet' | 'previewnet';
 }) => {
-  const accountTransactions: jest.Mocked<AccountService> = {
+  const account: jest.Mocked<AccountService> = {
     createAccount: createAccountImpl || jest.fn(),
     getAccountInfo: jest.fn(),
     getAccountBalance: jest.fn(),
@@ -48,7 +48,7 @@ const makeApiMocks = ({
 
   const alias = makeAliasMock();
 
-  return { accountTransactions, signing, networkMock, credentialsState, alias };
+  return { account, signing, networkMock, credentialsState, alias };
 };
 
 beforeAll(() => {
@@ -69,28 +69,23 @@ describe('account plugin - create command (unit)', () => {
     const saveAccountMock = jest.fn();
     MockedHelper.mockImplementation(() => ({ saveAccount: saveAccountMock }));
 
-    const {
-      accountTransactions,
-      signing,
-      networkMock,
-      credentialsState,
-      alias,
-    } = makeApiMocks({
-      createAccountImpl: jest.fn().mockResolvedValue({
-        transaction: {},
-        publicKey: 'pub-key-test',
-        evmAddress: '0x000000000000000000000000000000000000abcd',
-      }),
-      signAndExecuteImpl: jest.fn().mockResolvedValue({
-        transactionId: 'tx-123',
-        success: true,
-        accountId: '0.0.9999',
-        receipt: {} as any,
-      } as TransactionResult),
-    });
+    const { account, signing, networkMock, credentialsState, alias } =
+      makeApiMocks({
+        createAccountImpl: jest.fn().mockResolvedValue({
+          transaction: {},
+          publicKey: 'pub-key-test',
+          evmAddress: '0x000000000000000000000000000000000000abcd',
+        }),
+        signAndExecuteImpl: jest.fn().mockResolvedValue({
+          transactionId: 'tx-123',
+          success: true,
+          accountId: '0.0.9999',
+          receipt: {} as any,
+        } as TransactionResult),
+      });
 
     const api: Partial<CoreAPI> = {
-      accountTransactions,
+      account,
       signing,
       network: networkMock,
       credentialsState,
@@ -107,7 +102,7 @@ describe('account plugin - create command (unit)', () => {
     await createAccountHandler(args);
 
     expect(credentialsState.createLocalPrivateKey).toHaveBeenCalled();
-    expect(accountTransactions.createAccount).toHaveBeenCalledWith({
+    expect(account.createAccount).toHaveBeenCalledWith({
       balance: 5000,
       maxAutoAssociations: 3,
       publicKey: 'pub-key-test',
@@ -144,7 +139,7 @@ describe('account plugin - create command (unit)', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { accountTransactions, signing, networkMock } = makeApiMocks({
+    const { account, signing, networkMock } = makeApiMocks({
       createAccountImpl: jest.fn().mockResolvedValue({
         transaction: {},
         privateKey: 'priv',
@@ -159,7 +154,7 @@ describe('account plugin - create command (unit)', () => {
     });
 
     const api: Partial<CoreAPI> = {
-      accountTransactions,
+      account,
       signing,
       network: networkMock,
       logger,
@@ -179,14 +174,14 @@ describe('account plugin - create command (unit)', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { accountTransactions, signing, networkMock } = makeApiMocks({
+    const { account, signing, networkMock } = makeApiMocks({
       createAccountImpl: jest
         .fn()
         .mockRejectedValue(new Error('network error')),
     });
 
     const api: Partial<CoreAPI> = {
-      accountTransactions,
+      account,
       signing,
       network: networkMock,
       logger,

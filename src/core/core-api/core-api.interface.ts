@@ -13,12 +13,18 @@ import { Logger } from '../services/logger/logger-service.interface';
 import { HbarService } from '../services/hbar/hbar-service.interface';
 import { AliasManagementService } from '../services/alias/alias-service.interface';
 import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
+import { TokenService } from '../services/token/token-service.interface';
 
 export interface CoreAPI {
   /**
    * Account operations
    */
-  accountTransactions: AccountService;
+  account: AccountService;
+
+  /**
+   * Token operations (creation, transfer, association with execution)
+   */
+  token: TokenService;
 
   /**
    * Topic transaction operations

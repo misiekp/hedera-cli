@@ -133,7 +133,10 @@ function createNamespaceStore(
                   fs.mkdirSync(storageDir, { recursive: true });
                 }
                 const filePath = path.join(storageDir, `${name}.json`);
-                fs.writeFileSync(filePath, value);
+                // Pretty-print the JSON for better readability
+                const parsed: unknown = JSON.parse(value);
+                const prettyJson = JSON.stringify(parsed, null, 2);
+                fs.writeFileSync(filePath, prettyJson);
                 logger.debug(`[ZUSTAND:${namespace}] Saved to: ${filePath}`);
               } catch (error) {
                 logger.error(

@@ -1,0 +1,111 @@
+/**
+ * Token Transfer Command Handler
+ * Handles token transfer operations using the Core API
+ */
+import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { safeValidateTokenTransferParams } from '../schema';
+import {
+  resolveAccountParameter,
+  resolveDestinationAccountParameter,
+} from '../resolver-helper';
+import { formatError } from '../../../utils/errors';
+
+export async function transferTokenHandler(args: CommandHandlerArgs) {
+  const { api, logger } = args;
+
+  // Validate command parameters
+  const validationResult = safeValidateTokenTransferParams(args.args);
+  if (!validationResult.success) {
+    logger.error('❌ Invalid command parameters:');
+    validationResult.error.errors.forEach((error) => {
+      logger.error(`   - ${error.path.join('.')}: ${error.message}`);
+    });
+    process.exit(1);
+    return; // Ensure execution stops (for testing with mocked process.exit)
+  }
+
+  // Use validated parameters
+  const validatedParams = validationResult.data;
+  const tokenId = validatedParams.tokenId;
+  const from = validatedParams.from;
+  const to = validatedParams.to;
+  const amount = validatedParams.balance;
+
+  // Resolve from parameter (alias or account-id:private-key) if provided
+
+  const network = api.network.getCurrentNetwork();
+  const resolvedFromAccount = resolveAccountParameter(from, api, network);
+
+  // From account was explicitly provided - it MUST resolve or fail
+  if (!resolvedFromAccount) {
+    throw new Error(
+      `Failed to resolve from account parameter: ${from}. ` +
+        `Expected format: account-alias OR account-id:private-key`,
+    );
+  }
+
+  // Use resolved from account from alias or account-id:private-key
+  const fromAccountId = resolvedFromAccount.accountId;
+  const signerKeyRefId = resolvedFromAccount.accountKeyRefId;
+
+  logger.log(`🔑 Using from account: ${fromAccountId}`);
+  logger.log(`🔑 Will sign with from account key`);
+
+  // Resolve to parameter (alias or account-id)
+  const resolvedToAccount = resolveDestinationAccountParameter(
+    to,
+    api,
+    network,
+  );
+
+  // To account was explicitly provided - it MUST resolve or fail
+  if (!resolvedToAccount) {
+    throw new Error(
+      `Failed to resolve to account parameter: ${to}. ` +
+        `Expected format: account-alias OR account-id`,
+    );
+  }
+
+  const toAccountId = resolvedToAccount.accountId;
+
+  logger.log(
+    `Transferring ${amount} tokens of ${tokenId} from ${fromAccountId} to ${toAccountId}`,
+  );
+
+  try {
+    // 1. Create transfer transaction using Core API
+    const transferTransaction = api.token.createTransferTransaction({
+      tokenId,
+      fromAccountId,
+      toAccountId,
+      amount,
+    });
+
+    // 2. Sign and execute transaction using the from account key
+    logger.debug(`Using key ${signerKeyRefId} for signing transaction`);
+    const result = await api.signing.signAndExecuteWith(transferTransaction, {
+      keyRefId: signerKeyRefId,
+    });
+
+    if (result.success) {
+      logger.log(`✅ Token transfer successful!`);
+      logger.log(`   Token ID: ${tokenId}`);
+      logger.log(`   From: ${fromAccountId}`);
+      logger.log(`   To: ${toAccountId}`);
+      logger.log(`   Amount: ${amount}`);
+      logger.log(`   Transaction ID: ${result.transactionId}`);
+
+      // 3. Optionally update token state if needed
+      // (e.g., update associations, balances, etc.)
+
+      process.exit(0);
+    } else {
+      throw new Error('Token transfer failed');
+    }
+  } catch (error) {
+    logger.error(formatError('❌ Failed to transfer token', error));
+    process.exit(1);
+  }
+}
+
+export default transferTokenHandler;

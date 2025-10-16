@@ -29,7 +29,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
       api.credentialsState.createLocalPrivateKey();
 
     // 2. Create transaction using Core API
-    const accountCreateResult = await api.accountTransactions.createAccount({
+    const accountCreateResult = await api.account.createAccount({
       balance,
       maxAutoAssociations: autoAssociations,
       publicKey,

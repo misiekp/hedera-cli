@@ -103,7 +103,7 @@ export async function createHandler(args: CommandHandlerArgs): Promise<void> {
 
   try {
     // Use Core API services
-    const result = await api.accountTransactions.createAccount({
+    const result = await api.account.createAccount({
       name,
       balance: 1000,
     });
@@ -190,7 +190,7 @@ Plugins have access to the following services through the Core API:
 
 ```typescript
 // Create accounts
-const result = await api.accountTransactions.createAccount({
+const result = await api.account.createAccount({
   name: 'my-account',
   balance: 1000,
   maxAutoAssociations: 10,
@@ -270,7 +270,7 @@ describe('Create Command', () => {
     const mockArgs: CommandHandlerArgs = {
       args: { name: 'test-item', value: 'test-value' },
       api: {
-        accountTransactions: {
+        account: {
           createAccount: jest.fn().mockResolvedValue({
             accountId: '0.0.123456',
           }),
@@ -295,12 +295,10 @@ describe('Create Command', () => {
 
     await createHandler(mockArgs);
 
-    expect(mockArgs.api.accountTransactions.createAccount).toHaveBeenCalledWith(
-      {
-        name: 'test-item',
-        balance: 1000,
-      },
-    );
+    expect(mockArgs.api.account.createAccount).toHaveBeenCalledWith({
+      name: 'test-item',
+      balance: 1000,
+    });
     expect(mockArgs.state.set).toHaveBeenCalledWith(
       'my-plugin-data',
       'test-item',

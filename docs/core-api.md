@@ -10,7 +10,7 @@ The Core API provides a stable, typed interface for plugins to interact with Hed
 
 ```typescript
 interface CoreAPI {
-  accountTransactions: AccountTransactionService;
+  account: AccountTransactionService;
   signing: SigningService;
   state: StateService;
   mirror: HederaMirrornodeService;
@@ -49,7 +49,7 @@ interface AccountCreationResult {
 **Usage Example:**
 
 ```typescript
-const result = await api.accountTransactions.createAccount({
+const result = await api.account.createAccount({
   name: 'my-account',
   balance: 1000,
   maxAutoAssociations: 10,
@@ -422,7 +422,7 @@ export async function myCommandHandler(
 import { CoreAPI } from '../core/core-api/core-api.interface';
 
 const mockCoreAPI: Partial<CoreAPI> = {
-  accountTransactions: {
+  account: {
     createAccount: jest.fn().mockResolvedValue({
       accountId: '0.0.123456',
       transactionId: '0.0.123456@1234567890.123456789',
@@ -542,7 +542,7 @@ export async function complexOperation(
   const credentials = await api.credentials.getDefaultCredentials();
 
   // Create account
-  const account = await api.accountTransactions.createAccount({
+  const account = await api.account.createAccount({
     name: 'complex-account',
     balance: 1000,
   });
