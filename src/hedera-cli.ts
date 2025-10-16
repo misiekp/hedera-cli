@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 
+// Load environment variables from .env file
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { program } from 'commander';
-import commands from './commands';
 import { setColorEnabled } from './utils/color';
 import { installGlobalErrorHandlers } from './utils/errors';
 import { Logger } from './utils/logger';
 import { setGlobalOutputMode } from './utils/output';
+import { PluginManager } from './core/plugins/plugin-manager';
+import { createCoreAPI } from './core/core-api';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };
@@ -16,51 +21,63 @@ program
   .description('A CLI tool for managing Hedera environments')
   .option('-v, --verbose', 'Enable verbose logging')
   .option('-q, --quiet', 'Quiet mode (only errors)')
-  .option(
-    '--debug',
-    'Enable debug logging (shows API URLs, network info, etc.)',
-  )
-  .option('--json', 'Machine-readable JSON output where supported')
-  .option('--no-color', 'Disable ANSI colors in output')
-  .option(
-    '--log-mode <mode>',
-    'Explicit log mode (normal|verbose|quiet|silent)',
-  );
+  .option('--debug', 'Enable debug logging')
+  .option('--json', 'Machine-readable JSON output')
+  .option('--no-color', 'Disable ANSI colors');
 
-// Ensure logging mode is applied before any command action executes.
+// Apply logging options
 program.hook('preAction', () => {
-  const opts = program.opts<{
-    verbose?: boolean;
-    quiet?: boolean;
-    debug?: boolean;
-    logMode?: string;
-    json?: boolean;
-    color?: boolean; // from --no-color inverse boolean option
-  }>();
+  const opts = program.opts();
 
-  // Handle debug flag (highest priority)
-  if (opts.debug) {
-    process.env.HCLI_DEBUG = 'true';
-  }
+  if (opts.debug) process.env.HCLI_DEBUG = 'true';
+  if (opts.verbose) logger.setLevel('verbose');
+  if (opts.quiet) logger.setLevel('quiet');
 
-  if (opts.logMode) {
-    const mode = opts.logMode as 'verbose' | 'quiet' | 'normal' | 'silent';
-    if (mode === 'silent') logger.setMode('silent');
-    else if (mode === 'verbose' || mode === 'quiet' || mode === 'normal')
-      logger.setLevel(mode);
-  } else if (opts.verbose) logger.setLevel('verbose');
-  else if (opts.quiet) logger.setLevel('quiet');
   setColorEnabled(opts.color !== false);
   setGlobalOutputMode({ json: Boolean(opts.json) });
 });
 
-// Auto-register all exported command registrar functions
-Object.values(commands).forEach((register) => {
-  if (typeof register === 'function') {
-    register(program);
+// Initialize the simplified plugin system
+async function initializeCLI() {
+  try {
+    console.log('🚀 Starting Hedera CLI...');
+
+    // Create plugin manager
+    const coreAPI = createCoreAPI();
+    const pluginManager = new PluginManager(coreAPI);
+
+    // Set default plugins
+    pluginManager.setDefaultPlugins([
+      './dist/plugins/account', // Default account plugin
+      './dist/plugins/token', // Token management plugin
+      './dist/plugins/network', // Network plugin
+      './dist/plugins/plugin-management', // Plugin management plugin
+      './dist/plugins/credentials', // Credentials management plugin
+      './dist/plugins/state-management', // State management plugin
+      './dist/plugins/topic', // Topic management plugin
+      './dist/plugins/hbar', // HBAR plugin
+    ]);
+
+    // Initialize plugins
+    await pluginManager.initialize();
+
+    // Register plugin commands
+    pluginManager.registerCommands(program);
+
+    console.log('✅ CLI ready');
+
+    // Parse arguments and execute command
+    installGlobalErrorHandlers();
+    await program.parseAsync(process.argv);
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ CLI initialization failed:', error);
+    process.exit(1);
   }
+}
+
+// Start the CLI
+initializeCLI().catch((error) => {
+  console.error('❌ CLI startup failed:', error);
+  process.exit(1);
 });
-
-installGlobalErrorHandlers();
-
-program.parseAsync(process.argv);

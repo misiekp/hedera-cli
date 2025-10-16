@@ -1,0 +1,99 @@
+/**
+ * Account Create Command Handler
+ * Handles account creation using the Core API
+ */
+import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { formatError } from '../../../utils/errors';
+import { ZustandAccountStateHelper } from '../zustand-state-helper';
+
+export async function createAccountHandler(args: CommandHandlerArgs) {
+  const { api, logger } = args;
+
+  // Initialize Zustand state helper
+  const accountState = new ZustandAccountStateHelper(api.state, logger);
+
+  // Extract command arguments
+  const balance =
+    args.args.balance !== undefined ? (args.args.balance as number) : 10000;
+  const autoAssociations = (args.args['auto-associations'] as number) || 0;
+  const alias = (args.args.alias as string) || '';
+
+  const name = alias || `account-${Date.now()}`;
+
+  // Generate a unique name for the account
+  logger.log(`Creating account with alias: ${alias}`);
+
+  try {
+    // 1. Generate a new key pair for the account
+    const { keyRefId, publicKey } =
+      api.credentialsState.createLocalPrivateKey();
+
+    // 2. Create transaction using Core API
+    const accountCreateResult = await api.account.createAccount({
+      balance,
+      maxAutoAssociations: autoAssociations,
+      publicKey,
+      keyType: 'ECDSA',
+    });
+
+    // 2. Sign and execute transaction with default operator
+    const result = await api.signing.signAndExecute(
+      accountCreateResult.transaction,
+    );
+
+    if (result.success) {
+      // 4. Optionally register alias for the new account (per-network)
+      if (alias) {
+        api.alias.register({
+          alias,
+          type: 'account',
+          network: api.network.getCurrentNetwork() as
+            | 'mainnet'
+            | 'testnet'
+            | 'previewnet',
+          entityId: result.accountId,
+          publicKey,
+          keyRefId,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      // 5. Store account metadata in plugin state (no private key)
+      const accountData = {
+        name,
+        accountId: result.accountId || '0.0.123456',
+        type: 'ECDSA' as const,
+        publicKey: accountCreateResult.publicKey,
+        evmAddress: accountCreateResult.evmAddress,
+        solidityAddress: accountCreateResult.evmAddress,
+        solidityAddressFull: accountCreateResult.evmAddress,
+        keyRefId,
+        network: api.network.getCurrentNetwork() as
+          | 'mainnet'
+          | 'testnet'
+          | 'previewnet',
+      };
+
+      accountState.saveAccount(name, accountData);
+
+      logger.log(`✅ Account created successfully: ${accountData.accountId}`);
+      logger.log(`   Name: ${accountData.name}`);
+      logger.log(`   Type: ${accountData.type}`);
+      if (alias) {
+        logger.log(`   Alias: ${alias}`);
+      }
+      logger.log(`   Network: ${accountData.network}`);
+      logger.log(`   Transaction ID: ${result.transactionId}`);
+
+      process.exit(0);
+    } else {
+      throw new Error('Failed to create account');
+    }
+  } catch (error: unknown) {
+    logger.error(formatError('❌ Failed to create account', error));
+    process.exit(1);
+  }
+}
+
+// Default export for plugin manager
+export default createAccountHandler;
