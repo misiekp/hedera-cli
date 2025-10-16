@@ -5,6 +5,7 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { AliasType } from '../../../core/services/alias/alias-service.interface';
 
 export function deleteAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -35,6 +36,17 @@ export function deleteAccountHandler(args: CommandHandlerArgs) {
       }
     } else {
       throw new Error('Either name or id must be provided');
+    }
+
+    // Remove any aliases associated with this account on the current network
+    const currentNetwork = api.network.getCurrentNetwork();
+    const aliasesForAccount = api.alias
+      .list({ network: currentNetwork, type: AliasType.Account })
+      .filter((rec) => rec.entityId === accountToDelete.accountId);
+
+    for (const rec of aliasesForAccount) {
+      api.alias.remove(rec.alias, currentNetwork);
+      logger.log(`🧹 Removed alias '${rec.alias}' on ${currentNetwork}`);
     }
 
     // Delete account from state

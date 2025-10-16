@@ -1,12 +1,16 @@
 import { deleteAccountHandler } from '../../commands/delete';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import { setupExitSpy } from '../../../../../__tests__/helpers/plugin';
 import {
   makeLogger,
   makeAccountData,
   makeArgs,
-  setupExitSpy,
-} from '../../../../../__tests__/helpers/plugin';
+  makeNetworkServiceMock,
+  makeAliasServiceMock,
+} from './helpers/mocks';
+import { mockAliasLists } from './helpers/fixtures';
+import { AliasType } from '../../../../core/services/alias/alias-service.interface';
 
 let exitSpy: jest.SpyInstance;
 
@@ -40,7 +44,10 @@ describe('account plugin - delete command', () => {
       deleteAccount: deleteAccountMock,
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const alias = makeAliasServiceMock();
+    const network = makeNetworkServiceMock('testnet');
+
+    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { name: 'acc1' });
 
     deleteAccountHandler(args);
@@ -63,7 +70,10 @@ describe('account plugin - delete command', () => {
       deleteAccount: deleteAccountMock,
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const alias = makeAliasServiceMock();
+    const network = makeNetworkServiceMock('testnet');
+
+    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { id: '0.0.2222' });
 
     deleteAccountHandler(args);
@@ -158,5 +168,55 @@ describe('account plugin - delete command', () => {
       expect.stringContaining('❌ Failed to delete account'),
     );
     expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  test('removes aliases of the account only for current network and type', async () => {
+    const logger = makeLogger();
+    const account = makeAccountData({
+      name: 'acc-alias',
+      accountId: '0.0.7777',
+    });
+
+    // Mock account state helper
+    MockedHelper.mockImplementation(() => ({
+      loadAccount: jest.fn().mockReturnValue(account),
+      listAccounts: jest.fn(),
+      deleteAccount: jest.fn(),
+    }));
+
+    // Setup alias and network mocks via dedicated helpers
+    const alias = makeAliasServiceMock({
+      records: mockAliasLists.multiNetworkMultiType,
+    });
+    const network = makeNetworkServiceMock('testnet');
+
+    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
+    const args = makeArgs(api, logger, { name: 'acc-alias' });
+
+    deleteAccountHandler(args);
+
+    // Ensure list was requested with the correct filters
+    expect(alias.list).toHaveBeenCalledWith({
+      network: 'testnet',
+      type: AliasType.Account,
+    });
+
+    // Only the matching testnet+account type alias for the same entity should be removed
+    expect(alias.remove).toHaveBeenCalledTimes(1);
+    expect(alias.remove).toHaveBeenCalledWith('acc-alias-testnet', 'testnet');
+
+    // Ensure non-matching ones are NOT removed
+    expect(alias.remove).not.toHaveBeenCalledWith(
+      'acc-alias-mainnet',
+      'mainnet',
+    );
+    expect(alias.remove).not.toHaveBeenCalledWith(
+      'token-alias-testnet',
+      'testnet',
+    );
+    expect(alias.remove).not.toHaveBeenCalledWith(
+      'other-acc-testnet',
+      'testnet',
+    );
   });
 });

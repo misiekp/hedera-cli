@@ -1,6 +1,14 @@
 import { SupportedNetwork } from '../../types/shared.types';
 
-export type AliasType = 'account' | 'token' | 'key' | 'topic' | 'contract';
+export const AliasType = {
+  Account: 'account',
+  Token: 'token',
+  Key: 'key',
+  Topic: 'topic',
+  Contract: 'contract',
+} as const;
+
+export type AliasType = (typeof AliasType)[keyof typeof AliasType];
 
 export interface AliasRecord {
   alias: string;

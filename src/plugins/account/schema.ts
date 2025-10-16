@@ -3,7 +3,16 @@
  * Single source of truth for account data structure and validation
  */
 import { z } from 'zod';
+import type { SupportedNetwork } from '../../core/types/shared.types';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+
+// Supported networks aligned with core SupportedNetwork type
+export const SUPPORTED_NETWORKS = [
+  'mainnet',
+  'testnet',
+  'previewnet',
+  'localnet',
+] as const satisfies readonly SupportedNetwork[];
 
 // Zod schema for runtime validation
 export const AccountDataSchema = z.object({
@@ -38,9 +47,9 @@ export const AccountDataSchema = z.object({
 
   solidityAddressFull: z.string().min(1, 'Solidity address full is required'),
 
-  network: z.enum(['mainnet', 'testnet', 'previewnet'], {
+  network: z.enum(SUPPORTED_NETWORKS, {
     errorMap: () => ({
-      message: 'Network must be mainnet, testnet, or previewnet',
+      message: 'Network must be one of: mainnet, testnet, previewnet, localnet',
     }),
   }),
 });

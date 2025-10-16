@@ -3,6 +3,8 @@
  * Handles account creation using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import type { AccountData } from '../schema';
+import { AliasType } from '../../../core/services/alias/alias-service.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 
@@ -46,11 +48,8 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
       if (alias) {
         api.alias.register({
           alias,
-          type: 'account',
-          network: api.network.getCurrentNetwork() as
-            | 'mainnet'
-            | 'testnet'
-            | 'previewnet',
+          type: AliasType.Account,
+          network: api.network.getCurrentNetwork(),
           entityId: result.accountId,
           publicKey,
           keyRefId,
@@ -68,10 +67,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
         solidityAddress: accountCreateResult.evmAddress,
         solidityAddressFull: accountCreateResult.evmAddress,
         keyRefId,
-        network: api.network.getCurrentNetwork() as
-          | 'mainnet'
-          | 'testnet'
-          | 'previewnet',
+        network: api.network.getCurrentNetwork() as AccountData['network'],
       };
 
       accountState.saveAccount(name, accountData);
