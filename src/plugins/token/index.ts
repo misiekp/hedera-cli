@@ -9,3 +9,4 @@ export { transferTokenHandler } from './commands/transfer';
 export { createTokenHandler } from './commands/create';
 export { associateTokenHandler } from './commands/associate';
 export { createTokenFromFileHandler } from './commands/createFromFile';
+export { listTokensHandler } from './commands/list';
