@@ -248,6 +248,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
   const initialSupply = validatedParams.initialSupply || 1000000;
   const supplyType = validatedParams.supplyType || 'INFINITE';
   const maxSupply = validatedParams.maxSupply;
+  const alias = validatedParams.alias;
 
   // Resolve treasury parameter (alias or treasury-id:treasury-key) if provided
   let treasuryId: string | undefined;
@@ -370,6 +371,18 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
 
     tokenState.saveToken(result.tokenId, tokenData);
     logger.log(`   Token data saved to state`);
+
+    // Register alias if provided
+    if (alias) {
+      api.alias.register({
+        alias,
+        type: 'token',
+        network: api.network.getCurrentNetwork(),
+        entityId: result.tokenId,
+        createdAt: new Date().toISOString(),
+      });
+      logger.log(`   Alias registered: ${alias}`);
+    }
 
     process.exit(0);
     return; // Ensure execution stops (for testing with mocked process.exit)

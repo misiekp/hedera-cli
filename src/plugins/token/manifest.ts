@@ -27,7 +27,12 @@ export const tokenPluginManifest: PluginManifest = {
       summary: 'Transfer a fungible token',
       description: 'Transfer a fungible token from one account to another',
       options: [
-        { name: 'token-id', type: 'string', required: true },
+        {
+          name: 'token-id',
+          type: 'string',
+          required: true,
+          description: 'Token: either a token alias or token-id',
+        },
         {
           name: 'to',
           type: 'string',
@@ -74,6 +79,12 @@ export const tokenPluginManifest: PluginManifest = {
         },
         { name: 'max-supply', type: 'number', required: false },
         { name: 'admin-key', type: 'string', required: false },
+        {
+          name: 'alias',
+          type: 'string',
+          required: false,
+          description: 'Optional alias to register for the token',
+        },
       ],
       handler: './commands/create',
     },
@@ -82,7 +93,12 @@ export const tokenPluginManifest: PluginManifest = {
       summary: 'Associate a token with an account',
       description: 'Associate a token with an account to enable transfers',
       options: [
-        { name: 'token-id', type: 'string', required: true },
+        {
+          name: 'token-id',
+          type: 'string',
+          required: true,
+          description: 'Token: either a token alias or token-id',
+        },
         {
           name: 'account',
           type: 'string',
