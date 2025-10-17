@@ -3,6 +3,8 @@
  * Reusable test data and constants
  */
 import type { AccountData } from '../../../schema';
+import type { AliasRecord } from '../../../../../core/services/alias/alias-service.interface';
+import { AliasType } from '../../../../../core/services/alias/alias-service.interface';
 
 /**
  * Mock Account IDs
@@ -20,6 +22,7 @@ export const mockAccountIds = {
  */
 export const mockAccountData = {
   default: {
+    keyRefId: 'kr_test123',
     name: 'default',
     accountId: mockAccountIds.default,
     type: 'ECDSA' as const,
@@ -27,10 +30,10 @@ export const mockAccountData = {
     evmAddress: '0x0000000000000000000000000000000000000000',
     solidityAddress: 'sa',
     solidityAddressFull: 'safull',
-    privateKey: 'priv',
     network: 'testnet',
   } satisfies AccountData,
   testAccount: {
+    keyRefId: 'kr_test456',
     name: 'test-account',
     accountId: mockAccountIds.testAccount,
     type: 'ECDSA' as const,
@@ -38,10 +41,10 @@ export const mockAccountData = {
     evmAddress: '0x0000000000000000000000000000000000000000',
     solidityAddress: 'sa',
     solidityAddressFull: 'safull',
-    privateKey: 'priv',
     network: 'testnet',
   } satisfies AccountData,
   ed25519Account: {
+    keyRefId: 'kr_test789',
     name: 'acc3',
     accountId: mockAccountIds.account3,
     type: 'ED25519' as const,
@@ -49,7 +52,6 @@ export const mockAccountData = {
     evmAddress: '0x0000000000000000000000000000000000000000',
     solidityAddress: 'sa',
     solidityAddressFull: 'safull',
-    privateKey: 'priv',
     network: 'testnet',
   } satisfies AccountData,
 };
@@ -119,5 +121,54 @@ export const mockAccountLists = {
   twoAccounts: [
     { ...mockAccountData.default, name: 'acc1', accountId: '0.0.1111' },
     { ...mockAccountData.default, name: 'acc2', accountId: '0.0.2222' },
+  ],
+};
+
+/**
+ * Mock Alias Records
+ * Example alias records for testing alias management
+ */
+export const mockAliasRecords = {
+  accountTestnet: {
+    alias: 'acc-alias-testnet',
+    type: AliasType.Account,
+    network: 'testnet' as const,
+    entityId: '0.0.7777',
+    createdAt: '2024-01-01T00:00:00.000Z',
+  } satisfies AliasRecord,
+  accountMainnet: {
+    alias: 'acc-alias-mainnet',
+    type: AliasType.Account,
+    network: 'mainnet' as const,
+    entityId: '0.0.7777',
+    createdAt: '2024-01-01T00:00:00.000Z',
+  } satisfies AliasRecord,
+  tokenTestnet: {
+    alias: 'token-alias-testnet',
+    type: AliasType.Token,
+    network: 'testnet' as const,
+    entityId: '0.0.7777',
+    createdAt: '2024-01-01T00:00:00.000Z',
+  } satisfies AliasRecord,
+  otherAccountTestnet: {
+    alias: 'other-acc-testnet',
+    type: AliasType.Account,
+    network: 'testnet' as const,
+    entityId: '0.0.8888',
+    createdAt: '2024-01-01T00:00:00.000Z',
+  } satisfies AliasRecord,
+};
+
+/**
+ * Mock Alias Record Lists
+ * Collections of alias records for different test scenarios
+ */
+export const mockAliasLists = {
+  empty: [],
+  multiNetworkMultiType: [
+    mockAliasRecords.accountTestnet,
+    mockAliasRecords.accountMainnet,
+    mockAliasRecords.tokenTestnet,
+    mockAliasRecords.otherAccountTestnet,
   ],
 };

@@ -8,12 +8,14 @@ import type { HederaMirrornodeService } from '../../../../../core/services/mirro
 import type { CoreAPI } from '../../../../../core/core-api/core-api.interface';
 import type { AccountData } from '../../../schema';
 import type { AccountService } from '../../../../../core/services/account/account-transaction-service.interface';
-import type { SigningService } from '../../../../../core/services/signing/signing-service.interface';
+import type { TransactionService } from '../../../../../core/services/signing/signing-service.interface';
 import type { NetworkService } from '../../../../../core/services/network/network-service.interface';
+import type { AliasManagementService } from '../../../../../core/services/alias/alias-service.interface';
 import {
   mockAccountData,
   mockTransactionResults,
   mockMirrorAccountData,
+  mockAliasLists,
 } from './fixtures';
 
 /**
@@ -70,19 +72,15 @@ export const makeAccountTransactionServiceMock = (
 });
 
 /**
- * Creates mock SigningService
+ * Creates mock TransactionService
  */
 export const makeSigningServiceMock = (
-  overrides?: Partial<jest.Mocked<SigningService>>,
-): jest.Mocked<SigningService> => ({
+  overrides?: Partial<jest.Mocked<TransactionService>>,
+): jest.Mocked<TransactionService> => ({
   signAndExecute: jest.fn().mockResolvedValue(mockTransactionResults.success),
-  signAndExecuteWithKey: jest
+  signAndExecuteWith: jest
     .fn()
     .mockResolvedValue(mockTransactionResults.success),
-  sign: jest.fn(),
-  signWithKey: jest.fn(),
-  execute: jest.fn(),
-  getStatus: jest.fn(),
   ...overrides,
 });
 
@@ -93,10 +91,24 @@ export const makeNetworkServiceMock = (
   network: 'testnet' | 'mainnet' | 'previewnet' = 'testnet',
 ): jest.Mocked<NetworkService> => ({
   getCurrentNetwork: jest.fn().mockReturnValue(network),
-  getAvailableNetworks: jest.fn(),
+  getAvailableNetworks: jest
+    .fn()
+    .mockReturnValue(['localnet', 'testnet', 'previewnet', 'mainnet']),
   switchNetwork: jest.fn(),
-  getNetworkConfig: jest.fn(),
-  isNetworkAvailable: jest.fn(),
+  getNetworkConfig: jest.fn().mockImplementation((name: string) => ({
+    name,
+    rpcUrl: `https://${name}.hashio.io/api`,
+    mirrorNodeUrl: `https://${name}.mirrornode.hedera.com/api/v1`,
+    chainId: name === 'mainnet' ? '0x127' : '0x128',
+    explorerUrl: `https://hashscan.io/${name}`,
+    isTestnet: name !== 'mainnet',
+  })),
+  isNetworkAvailable: jest.fn().mockReturnValue(true),
+  getLocalnetConfig: jest.fn().mockReturnValue({
+    localNodeAddress: '127.0.0.1:50211',
+    localNodeAccountId: '0.0.3',
+    localNodeMirrorAddressGRPC: '127.0.0.1:5600',
+  }),
 });
 
 /**
@@ -128,6 +140,31 @@ export const makeAccountStateHelperMock = (overrides?: {
   hasAccount: jest.fn().mockReturnValue(false),
   ...overrides,
 });
+
+/**
+ * Creates mock AliasManagementService
+ * By default, returns an empty list and supports filtering by network and type
+ */
+export const makeAliasServiceMock = (options?: {
+  records?: any[];
+}): jest.Mocked<AliasManagementService> => {
+  const records = options?.records ?? mockAliasLists.empty;
+
+  return {
+    register: jest.fn(),
+    resolve: jest.fn().mockReturnValue(null),
+    list: jest
+      .fn()
+      .mockImplementation((filter?: { network?: string; type?: string }) => {
+        return records.filter((r: any) => {
+          if (filter?.network && r.network !== filter.network) return false;
+          if (filter?.type && r.type !== filter.type) return false;
+          return true;
+        });
+      }),
+    remove: jest.fn(),
+  };
+};
 
 /**
  * Creates CommandHandlerArgs for testing command handlers
