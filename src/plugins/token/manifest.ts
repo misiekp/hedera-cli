@@ -104,6 +104,29 @@ export const tokenPluginManifest: PluginManifest = {
       ],
       handler: './commands/createFromFile',
     },
+    {
+      name: 'list',
+      summary: 'List all tokens',
+      description:
+        'List all tokens stored in state for the current network or a specified network',
+      options: [
+        {
+          name: 'keys',
+          type: 'boolean',
+          required: false,
+          default: false,
+          description: 'Show token key information (admin, supply, wipe, etc.)',
+        },
+        {
+          name: 'network',
+          type: 'string',
+          required: false,
+          description:
+            'Filter tokens by network (defaults to current active network)',
+        },
+      ],
+      handler: './commands/list',
+    },
   ],
   stateSchemas: [
     {
