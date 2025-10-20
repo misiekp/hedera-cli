@@ -54,6 +54,21 @@ const credentialsManifest: PluginManifest = {
       handler: 'commands/set',
     },
     {
+      name: 'get',
+      summary: 'Get default operator',
+      description:
+        'Show the default operator credentials for a specific network',
+      options: [
+        {
+          name: 'network',
+          type: 'string',
+          required: false,
+          description: 'Network name (defaults to current network)',
+        },
+      ],
+      handler: 'commands/get',
+    },
+    {
       name: 'list',
       summary: 'List all credentials',
       description: 'Show all stored credentials',
