@@ -381,7 +381,7 @@ export const setupZustandHelperMock = (
 ) => {
   MockedHelperClass.mockImplementation(() => ({
     listTokens: jest.fn().mockReturnValue(config.tokens || []),
-    getTokenStats: jest.fn().mockReturnValue(
+    getTokensWithStats: jest.fn().mockReturnValue(
       config.stats || {
         total: 0,
         byNetwork: {},
