@@ -73,30 +73,22 @@ function displayToken(
 
   // Optionally show key information
   if (showKeys && token.keys) {
-    if (token.keys.adminKey) {
-      logger.log(`   Admin Key: ✅ Present`);
-    }
-    if (token.keys.supplyKey) {
-      logger.log(`   Supply Key: ✅ Present`);
-    }
-    if (token.keys.wipeKey) {
-      logger.log(`   Wipe Key: ✅ Present`);
-    }
-    if (token.keys.kycKey) {
-      logger.log(`   KYC Key: ✅ Present`);
-    }
-    if (token.keys.freezeKey) {
-      logger.log(`   Freeze Key: ✅ Present`);
-    }
-    if (token.keys.pauseKey) {
-      logger.log(`   Pause Key: ✅ Present`);
-    }
-    if (token.keys.feeScheduleKey) {
-      logger.log(`   Fee Schedule Key: ✅ Present`);
-    }
-    if (token.keys.treasuryKey) {
-      logger.log(`   Treasury Key: ✅ Present`);
-    }
+    const keyMapping = [
+      { key: 'adminKey', label: 'Admin Key' },
+      { key: 'supplyKey', label: 'Supply Key' },
+      { key: 'wipeKey', label: 'Wipe Key' },
+      { key: 'kycKey', label: 'KYC Key' },
+      { key: 'freezeKey', label: 'Freeze Key' },
+      { key: 'pauseKey', label: 'Pause Key' },
+      { key: 'feeScheduleKey', label: 'Fee Schedule Key' },
+      { key: 'treasuryKey', label: 'Treasury Key' },
+    ] as const;
+
+    keyMapping.forEach(({ key, label }) => {
+      if (token.keys[key]) {
+        logger.log(`   ${label}: ✅ Present`);
+      }
+    });
   }
 }
 
