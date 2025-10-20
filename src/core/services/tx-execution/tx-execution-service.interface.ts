@@ -19,9 +19,6 @@ export interface TxExecutionService {
   ): Promise<TransactionResult>;
 }
 
-// Backwards compatibility during migration
-export type TransactionService = TxExecutionService;
-
 // Result types
 export interface TransactionResult {
   transactionId: string;

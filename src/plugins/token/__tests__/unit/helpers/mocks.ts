@@ -5,7 +5,7 @@
 import type { Logger } from '../../../../../core/services/logger/logger-service.interface';
 import type { CoreApi } from '../../../../../core/core-api/core-api.interface';
 import type { TokenService } from '../../../../../core/services/token/token-service.interface';
-import type { TransactionService } from '../../../../../core/services/tx-execution/tx-execution-service.interface';
+import type { TxExecutionService } from '../../../../../core/services/tx-execution/tx-execution-service.interface';
 import type { StateService } from '../../../../../core/services/state/state-service.interface';
 import type { KeyManagementService } from '../../../../../core/services/credentials-state/credentials-state-service.interface';
 import type { AliasService } from '../../../../../core/services/alias/alias-service.interface';
@@ -43,11 +43,11 @@ export const makeTokenServiceMock = (
 export const makeTokenTransactionServiceMock = makeTokenServiceMock;
 
 /**
- * Create a mocked TransactionService (SigningService)
+ * Create a mocked TxExecutionService
  */
 export const makeSigningServiceMock = (
-  overrides?: Partial<jest.Mocked<TransactionService>>,
-): jest.Mocked<TransactionService> => ({
+  overrides?: Partial<jest.Mocked<TxExecutionService>>,
+): jest.Mocked<TxExecutionService> => ({
   signAndExecute: jest.fn().mockResolvedValue(mockTransactionResults.success),
   signAndExecuteWith: jest
     .fn()
@@ -135,7 +135,7 @@ export const makeAccountTransactionServiceMock =
 interface ApiMocksConfig {
   tokens?: Partial<jest.Mocked<TokenService>>;
   tokenTransactions?: Partial<jest.Mocked<TokenService>>; // Deprecated, use 'tokens'
-  signing?: Partial<jest.Mocked<TransactionService>>;
+  signing?: Partial<jest.Mocked<TxExecutionService>>;
   credentialsState?: Partial<jest.Mocked<KeyManagementService>>;
   alias?: Partial<jest.Mocked<AliasService>>;
   state?: Partial<jest.Mocked<StateService>>;

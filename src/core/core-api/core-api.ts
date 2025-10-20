@@ -4,7 +4,7 @@
  */
 import { CoreApi } from './core-api.interface';
 import { AccountService } from '../services/account/account-transaction-service.interface';
-import { TransactionService } from '../services/tx-execution/tx-execution-service.interface';
+import { TxExecutionService } from '../services/tx-execution/tx-execution-service.interface';
 import { TopicService } from '../services/topic/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
@@ -32,7 +32,7 @@ import { TokenServiceImpl } from '../services/token/token-service';
 export class CoreApiImplementation implements CoreApi {
   public account: AccountService;
   public token: TokenService;
-  public txExecution: TransactionService;
+  public txExecution: TxExecutionService;
   public topic: TopicService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
@@ -64,7 +64,7 @@ export class CoreApiImplementation implements CoreApi {
 
     // Initialize all services with dependencies
     this.account = new AccountServiceImpl(this.logger);
-    this.token = new TokenServiceImpl(this.logger, this.txExecution);
+    this.token = new TokenServiceImpl(this.logger);
     this.topic = new TopicServiceImpl();
 
     // Convert network string to LedgerId

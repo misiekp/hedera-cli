@@ -11,7 +11,6 @@ export { CoreApiImplementation, createCoreApi } from './core-api';
 
 // Service interfaces
 export { AccountService } from '../services/account/account-transaction-service.interface';
-export { TransactionService } from '../services/tx-execution/tx-execution-service.interface';
 export { TxExecutionService } from '../services/tx-execution/tx-execution-service.interface';
 export { StateService as GenericStateService } from '../services/state/state-service.interface';
 export { NetworkService } from '../services/network/network-service.interface';
