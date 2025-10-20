@@ -379,6 +379,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
         type: 'token',
         network: api.network.getCurrentNetwork(),
         entityId: result.tokenId,
+        // @TODO take createdAt from transaction timestamp
         createdAt: new Date().toISOString(),
       });
       logger.log(`   Alias registered: ${alias}`);

@@ -31,7 +31,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
   // Use validated parameters
   const validatedParams = validationResult.data;
   const tokenIdOrAlias = validatedParams.token;
-  const account = validatedParams.account;
+  const accountIdOrAlias = validatedParams.account;
 
   const network = api.network.getCurrentNetwork();
 
@@ -49,12 +49,16 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
   // Resolve account parameter (alias or account-id:account-key) if provided
 
-  const resolvedAccount = resolveAccountParameter(account, api, network);
+  const resolvedAccount = resolveAccountParameter(
+    accountIdOrAlias,
+    api,
+    network,
+  );
 
   // Account was explicitly provided - it MUST resolve or fail
   if (!resolvedAccount) {
     throw new Error(
-      `Failed to resolve account parameter: ${account}. ` +
+      `Failed to resolve account parameter: ${accountIdOrAlias}. ` +
         `Expected format: account-alias OR account-id:account-key`,
     );
   }
@@ -65,7 +69,9 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
   // Get the account name for state storage
   // If it's an alias, use the alias name; if it's account-id:key format, use account ID
-  const accountName = account.includes(':') ? accountId : account;
+  const accountName = accountIdOrAlias.includes(':')
+    ? accountId
+    : accountIdOrAlias;
 
   logger.log(`🔑 Using account: ${accountId}`);
   logger.log(`🔑 Will sign with account key`);
