@@ -24,8 +24,8 @@ import { HbarService } from '../services/hbar/hbar-service.interface';
 import { HbarServiceImpl } from '../services/hbar/hbar-service';
 import { AliasService } from '../services/alias/alias-service.interface';
 import { AliasServiceImpl } from '../services/alias/alias-service';
-import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
-import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
+import { KmsService } from '../services/kms/kms-service.interface';
+import { KmsServiceImpl } from '../services/kms/kms-service';
 import { TokenService } from '../services/token/token-service.interface';
 import { TokenServiceImpl } from '../services/token/token-service';
 
@@ -40,7 +40,7 @@ export class CoreApiImplementation implements CoreApi {
   public config: ConfigService;
   public logger: Logger;
   public alias: AliasService;
-  public credentialsState: KeyManagementService;
+  public kms: KmsService;
   public hbar?: HbarService;
 
   constructor() {
@@ -51,14 +51,10 @@ export class CoreApiImplementation implements CoreApi {
 
     // Initialize new services
     this.alias = new AliasServiceImpl(this.state, this.logger);
-    this.credentialsState = new KeyManagementServiceImpl(
-      this.logger,
-      this.state,
-      this.network,
-    );
+    this.kms = new KmsServiceImpl(this.logger, this.state, this.network);
     this.txExecution = new TxExecutionServiceImpl(
       this.logger,
-      this.credentialsState,
+      this.kms,
       this.network,
     );
 

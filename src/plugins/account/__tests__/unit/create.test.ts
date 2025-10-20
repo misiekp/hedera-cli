@@ -7,7 +7,7 @@ import {
   makeLogger,
   makeArgs,
   makeNetworkMock,
-  makeCredentialsStateMock,
+  makeKmsMock,
   makeAliasMock,
   makeSigningMock,
   setupExitSpy,
@@ -38,7 +38,7 @@ const makeApiMocks = ({
 
   const signing = makeSigningMock({ signAndExecuteImpl });
   const networkMock = makeNetworkMock(network);
-  const credentialsState = makeCredentialsStateMock();
+  const credentialsState = makeKmsMock();
 
   // Override createLocalPrivateKey for create tests
   credentialsState.createLocalPrivateKey = jest.fn().mockReturnValue({
@@ -88,7 +88,7 @@ describe('account plugin - create command (unit)', () => {
       account,
       txExecution: signing,
       network: networkMock,
-      credentialsState,
+      kms: credentialsState,
       alias,
       logger,
     };

@@ -7,7 +7,7 @@ import type { CoreApi } from '../../../../../core/core-api/core-api.interface';
 import type { TokenService } from '../../../../../core/services/token/token-service.interface';
 import type { TransactionService } from '../../../../../core/services/tx-execution/tx-execution-service.interface';
 import type { StateService } from '../../../../../core/services/state/state-service.interface';
-import type { KeyManagementService } from '../../../../../core/services/credentials-state/credentials-state-service.interface';
+import type { KmsService } from '../../../../../core/services/kms/kms-service.interface';
 import type { AliasService } from '../../../../../core/services/alias/alias-service.interface';
 import type { AccountService } from '../../../../../core/services/account/account-transaction-service.interface';
 import type { NetworkService } from '../../../../../core/services/network/network-service.interface';
@@ -58,9 +58,9 @@ export const makeSigningServiceMock = (
 /**
  * Create a mocked KeyManagementService (CredentialsState)
  */
-export const makeCredentialsStateMock = (
-  overrides?: Partial<jest.Mocked<KeyManagementService>>,
-): jest.Mocked<KeyManagementService> => ({
+export const makeKmsMock = (
+  overrides?: Partial<jest.Mocked<KmsService>>,
+): jest.Mocked<KmsService> => ({
   createLocalPrivateKey: jest.fn(),
   importPrivateKey: jest.fn().mockReturnValue({
     keyRefId: 'mock-key-ref-id',
@@ -136,12 +136,12 @@ interface ApiMocksConfig {
   tokens?: Partial<jest.Mocked<TokenService>>;
   tokenTransactions?: Partial<jest.Mocked<TokenService>>; // Deprecated, use 'tokens'
   signing?: Partial<jest.Mocked<TransactionService>>;
-  credentialsState?: Partial<jest.Mocked<KeyManagementService>>;
+  credentialsState?: Partial<jest.Mocked<KmsService>>;
   alias?: Partial<jest.Mocked<AliasService>>;
   state?: Partial<jest.Mocked<StateService>>;
   network?: string;
   // Legacy support for old test patterns
-  credentials?: Partial<jest.Mocked<KeyManagementService>>;
+  credentials?: Partial<jest.Mocked<KmsService>>;
   createTransferImpl?: jest.Mock;
   signAndExecuteImpl?: jest.Mock;
 }
@@ -155,7 +155,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
     config?.tokens || config?.tokenTransactions,
   );
   const signing = makeSigningServiceMock(config?.signing);
-  const credentialsState = makeCredentialsStateMock(
+  const credentialsState = makeKmsMock(
     config?.credentialsState || config?.credentials,
   );
   const alias = makeAliasServiceMock(config?.alias);
@@ -167,7 +167,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
     token: tokens,
     topic: {} as unknown as any,
     txExecution: signing,
-    credentialsState,
+    kms: credentialsState,
     alias,
     state,
     mirror: {} as unknown as any,

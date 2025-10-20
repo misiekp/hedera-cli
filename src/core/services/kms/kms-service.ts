@@ -1,9 +1,9 @@
-import { KeyManagementService } from './credentials-state-service.interface';
+import { KmsService } from './kms-service.interface';
 import {
   CredentialType,
-  CredentialsRecord,
+  KmsCredentialRecord,
   KeyAlgorithm,
-} from './credentials-types.interface';
+} from './kms-types.interface';
 import { SupportedNetwork } from '../../types/shared.types';
 import { randomBytes } from 'crypto';
 import {
@@ -13,17 +13,17 @@ import {
   AccountId,
   Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
-import { LocalPrivateKeyCredentialsSignerService } from './local-private-key-credentials-signer-service';
-import { CredentialsStateSignerService } from './credentials-state-signer-service.interface';
+import { LocalPrivateKeyKmsSignerService } from './local-private-key-kms-signer-service';
+import { KmsSignerService } from './kms-signer-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { StateService } from '../state/state-service.interface';
 import { NetworkService } from '../network/network-service.interface';
-import { CredentialsStorageService } from './credentials-storage-service.interface';
-import { StateCredentialsStorageService } from './state-credentials-storage.service';
+import { KmsStorageServiceInterface } from './kms-storage-service.interface';
+import { KmsStorageService } from './state-kms-storage.service';
 
-export class KeyManagementServiceImpl implements KeyManagementService {
+export class KmsServiceImpl implements KmsService {
   private readonly logger: Logger;
-  private readonly storage: CredentialsStorageService;
+  private readonly storage: KmsStorageServiceInterface;
   private readonly networkService: NetworkService;
 
   constructor(
@@ -33,7 +33,7 @@ export class KeyManagementServiceImpl implements KeyManagementService {
   ) {
     this.logger = logger;
     this.networkService = networkService;
-    this.storage = new StateCredentialsStorageService(state);
+    this.storage = new KmsStorageService(state);
   }
 
   createLocalPrivateKey(labels?: string[]): {
@@ -96,12 +96,12 @@ export class KeyManagementServiceImpl implements KeyManagementService {
     return this.getRecord(keyRefId)?.publicKey || null;
   }
 
-  getSignerHandle(keyRefId: string): CredentialsStateSignerService {
+  getSignerHandle(keyRefId: string): KmsSignerService {
     const rec = this.getRecord(keyRefId);
     if (!rec) throw new Error(`Unknown keyRefId: ${keyRefId}`);
 
     // Directly create signer service - no provider needed
-    return new LocalPrivateKeyCredentialsSignerService(rec.publicKey, {
+    return new LocalPrivateKeyKmsSignerService(rec.publicKey, {
       keyRefId,
       storage: this.storage,
       keyAlgorithm: rec.keyAlgorithm || 'ed25519',
@@ -246,14 +246,14 @@ export class KeyManagementServiceImpl implements KeyManagementService {
     return `${prefix}_${randomBytes(8).toString('hex')}`;
   }
 
-  private saveRecord(record: CredentialsRecord): void {
+  private saveRecord(record: KmsCredentialRecord): void {
     this.storage.set(record.keyRefId, record);
     this.logger.debug(
       `[CRED] Saved keyRefId=${record.keyRefId} type=${record.type}`,
     );
   }
 
-  private getRecord(keyRefId: string): CredentialsRecord | undefined {
+  private getRecord(keyRefId: string): KmsCredentialRecord | undefined {
     return this.storage.get(keyRefId);
   }
 }

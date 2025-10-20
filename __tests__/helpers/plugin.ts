@@ -7,7 +7,7 @@ import type { Logger } from '../../src/core/services/logger/logger-service.inter
 import type { StateService } from '../../src/core/services/state/state-service.interface';
 import type { ConfigService } from '../../src/core/services/config/config-service.interface';
 import type { NetworkService } from '../../src/core/services/network/network-service.interface';
-import type { KeyManagementService } from '../../src/core/services/credentials-state/credentials-state-service.interface';
+import type { KmsService } from '../../src/core/services/kms/kms-service.interface';
 import type { AliasService } from '../../src/core/services/alias/alias-service.interface';
 import type { TransactionService } from '../../src/core/services/tx-execution/tx-execution-service.interface';
 import type { HederaMirrornodeService } from '../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
@@ -64,7 +64,7 @@ export const makeArgs = (
     config: {} as any,
     logger,
     alias: makeAliasMock(),
-    credentialsState: makeCredentialsStateMock(),
+    kms: makeKmsMock(),
     hbar: undefined,
     ...api,
   },
@@ -104,11 +104,11 @@ export const makeNetworkMock = (
 /**
  * Create a mocked KeyManagementService
  */
-export const makeCredentialsStateMock = (
+export const makeKmsMock = (
   options: {
     defaultOperator?: { accountId: string; keyRefId: string } | null;
   } = {},
-): jest.Mocked<KeyManagementService> => ({
+): jest.Mocked<KmsService> => ({
   createLocalPrivateKey: jest.fn(),
   importPrivateKey: jest.fn().mockReturnValue({
     keyRefId: 'kr_test123',

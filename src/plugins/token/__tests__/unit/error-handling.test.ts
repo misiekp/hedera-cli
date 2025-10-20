@@ -36,11 +36,7 @@ describe('Token Plugin Error Handling', () => {
   describe('network and connectivity errors', () => {
     test('should handle network timeout during token creation', async () => {
       // Arrange
-      const {
-        api,
-        tokenTransactions: _tokenTransactions,
-        credentialsState: _credentialsState,
-      } = makeApiMocks({
+      const { api, tokenTransactions: _tokenTransactions } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest.fn().mockImplementation(() => {
             throw new Error('Network timeout');

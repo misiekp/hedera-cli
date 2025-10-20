@@ -1,20 +1,18 @@
-import { CredentialsStateSignerService } from './credentials-state-signer-service.interface';
-import { CredentialsStorageService } from './credentials-storage-service.interface';
+import { KmsSignerService } from './kms-signer-service.interface';
+import { KmsStorageServiceInterface } from './kms-storage-service.interface';
 import { PrivateKey } from '@hashgraph/sdk';
 
-export class LocalPrivateKeyCredentialsSignerService
-  implements CredentialsStateSignerService
-{
+export class LocalPrivateKeyKmsSignerService implements KmsSignerService {
   private readonly pub: string;
   private readonly keyRefId?: string;
-  private readonly storage?: CredentialsStorageService;
+  private readonly storage?: KmsStorageServiceInterface;
   private readonly keyAlgorithm: 'ed25519' | 'ecdsa';
 
   constructor(
     publicKey: string,
     deps?: {
       keyRefId?: string;
-      storage?: CredentialsStorageService;
+      storage?: KmsStorageServiceInterface;
       keyAlgorithm?: 'ed25519' | 'ecdsa';
     },
   ) {

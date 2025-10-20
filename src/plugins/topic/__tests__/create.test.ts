@@ -6,7 +6,7 @@ import {
   makeLogger,
   makeArgs,
   makeNetworkMock,
-  makeCredentialsStateMock,
+  makeKmsMock,
   makeAliasMock,
   setupExitSpy,
 } from '../../../../__tests__/helpers/plugin';
@@ -45,7 +45,7 @@ const makeApiMocks = ({
   };
 
   const networkMock = makeNetworkMock(network);
-  const credentialsState = makeCredentialsStateMock();
+  const credentialsState = makeKmsMock();
   credentialsState.importPrivateKey.mockImplementation((key: string) => ({
     keyRefId: `kr_${key.slice(-5)}`,
     publicKey: 'mock-public-key',
@@ -90,7 +90,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      credentialsState: credentialsState as any,
+      kms: credentialsState,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -147,7 +147,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      credentialsState: credentialsState as any,
+      kms: credentialsState,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -209,7 +209,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      credentialsState: credentialsState as any,
+      kms: credentialsState,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -255,7 +255,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      credentialsState: credentialsState as any,
+      kms: credentialsState,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -286,7 +286,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      credentialsState: credentialsState as any,
+      kms: credentialsState,
       alias: alias as any,
       state: {} as any,
       logger,

@@ -6,7 +6,7 @@ import {
   makeLogger,
   makeArgs,
   makeNetworkMock,
-  makeCredentialsStateMock,
+  makeKmsMock,
   makeAliasMock,
   makeMirrorMock,
   setupExitSpy,
@@ -45,13 +45,13 @@ describe('account plugin - import command', () => {
 
     const mirrorMock = makeMirrorMock();
     const networkMock = makeNetworkMock();
-    const credentialsState = makeCredentialsStateMock();
+    const credentialsState = makeKmsMock();
     const alias = makeAliasMock();
 
     const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
-      credentialsState,
+      kms: credentialsState,
       alias,
       logger,
     };

@@ -8,7 +8,7 @@ import {
   makeAccountData,
   makeArgs,
   makeNetworkMock,
-  makeCredentialsStateMock,
+  makeKmsMock,
   makeAliasMock,
   makeSigningMock,
   makeStateMock,
@@ -38,7 +38,7 @@ const makeApiMocks = ({
 
   const signing = makeSigningMock({ signAndExecuteImpl });
   const networkMock = makeNetworkMock(network);
-  const credentialsState = makeCredentialsStateMock();
+  const credentialsState = makeKmsMock();
   const alias = makeAliasMock();
 
   MockedHelper.mockImplementation(() => ({
@@ -88,7 +88,7 @@ const setupTransferTest = (options: {
     hbar,
     txExecution: signing,
     network: networkMock,
-    credentialsState,
+    kms: credentialsState,
     alias,
     logger,
     state: stateMock as StateService,
