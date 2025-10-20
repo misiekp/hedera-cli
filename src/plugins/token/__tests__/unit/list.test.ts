@@ -1,9 +1,17 @@
 import { listTokensHandler } from '../../commands/list';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
-import type { TokenData } from '../../schema';
 import {
   makeLogger,
+  makeApiMocks,
+  setupZustandHelperMock,
+} from './helpers/mocks';
+import {
+  makeTokenData,
+  makeTokenStats,
+  mockListTokens,
+  mockTokenStats,
+} from './helpers/fixtures';
+import {
   makeArgs,
   setupExitSpy,
 } from '../../../../../__tests__/helpers/plugin';
@@ -15,31 +23,6 @@ jest.mock('../../zustand-state-helper', () => ({
 }));
 
 const MockedHelper = ZustandTokenStateHelper as jest.Mock;
-
-const makeTokenData = (overrides: Partial<TokenData> = {}): TokenData => ({
-  tokenId: '0.0.1234',
-  name: 'Test Token',
-  symbol: 'TST',
-  treasuryId: '0.0.5678',
-  decimals: 2,
-  initialSupply: 1000000,
-  supplyType: 'INFINITE',
-  maxSupply: 0,
-  keys: {
-    adminKey: 'test-admin-key',
-    supplyKey: '',
-    wipeKey: '',
-    kycKey: '',
-    freezeKey: '',
-    pauseKey: '',
-    feeScheduleKey: '',
-    treasuryKey: '',
-  },
-  network: 'testnet',
-  associations: [],
-  customFees: [],
-  ...overrides,
-});
 
 beforeAll(() => {
   exitSpy = setupExitSpy();
@@ -56,28 +39,17 @@ describe('token plugin - list command', () => {
 
   test('logs message when no tokens exist', () => {
     const logger = makeLogger();
+    setupZustandHelperMock(MockedHelper, {
+      tokens: mockListTokens.empty,
+      stats: mockTokenStats.empty,
+    });
 
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue([]),
-      getTokenStats: jest.fn().mockReturnValue({
-        total: 0,
-        byNetwork: {},
-        bySupplyType: {},
-        withAssociations: 0,
-        totalAssociations: 0,
-      }),
-    }));
-
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, {});
 
     listTokensHandler(args);
@@ -90,42 +62,17 @@ describe('token plugin - list command', () => {
 
   test('lists tokens without keys', () => {
     const logger = makeLogger();
-    const tokens = [
-      makeTokenData({
-        tokenId: '0.0.1111',
-        name: 'Token 1',
-        symbol: 'TK1',
-        network: 'testnet',
-      }),
-      makeTokenData({
-        tokenId: '0.0.2222',
-        name: 'Token 2',
-        symbol: 'TK2',
-        network: 'testnet',
-      }),
-    ];
+    setupZustandHelperMock(MockedHelper, {
+      tokens: mockListTokens.twoTokens,
+      stats: mockTokenStats.twoTokens,
+    });
 
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue(tokens),
-      getTokenStats: jest.fn().mockReturnValue({
-        total: 2,
-        byNetwork: { testnet: 2 },
-        bySupplyType: { INFINITE: 2 },
-        withAssociations: 0,
-        totalAssociations: 0,
-      }),
-    }));
-
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, {});
 
     listTokensHandler(args);
@@ -146,46 +93,17 @@ describe('token plugin - list command', () => {
 
   test('lists tokens with keys when flag is set', () => {
     const logger = makeLogger();
-    const tokens = [
-      makeTokenData({
-        tokenId: '0.0.3333',
-        name: 'Token 3',
-        symbol: 'TK3',
-        network: 'testnet',
-        keys: {
-          adminKey: 'admin-key-123',
-          supplyKey: 'supply-key-123',
-          wipeKey: '',
-          kycKey: '',
-          freezeKey: '',
-          pauseKey: '',
-          feeScheduleKey: '',
-          treasuryKey: '',
-        },
-      }),
-    ];
+    setupZustandHelperMock(MockedHelper, {
+      tokens: mockListTokens.withKeys,
+      stats: mockTokenStats.withKeys,
+    });
 
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue(tokens),
-      getTokenStats: jest.fn().mockReturnValue({
-        total: 1,
-        byNetwork: { testnet: 1 },
-        bySupplyType: { INFINITE: 1 },
-        withAssociations: 0,
-        totalAssociations: 0,
-      }),
-    }));
-
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, { keys: true });
 
     listTokensHandler(args);
@@ -198,44 +116,17 @@ describe('token plugin - list command', () => {
 
   test('filters tokens by current network', () => {
     const logger = makeLogger();
-    const tokens = [
-      makeTokenData({
-        tokenId: '0.0.4444',
-        name: 'Testnet Token',
-        symbol: 'TST',
-        network: 'testnet',
-      }),
-    ];
+    setupZustandHelperMock(MockedHelper, {
+      tokens: mockListTokens.multiNetwork,
+      stats: mockTokenStats.multiNetwork,
+    });
 
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue([
-        ...tokens,
-        makeTokenData({
-          tokenId: '0.0.5555',
-          name: 'Mainnet Token',
-          symbol: 'MNT',
-          network: 'mainnet',
-        }),
-      ]),
-      getTokenStats: jest.fn().mockReturnValue({
-        total: 2,
-        byNetwork: { testnet: 1, mainnet: 1 },
-        bySupplyType: { INFINITE: 2 },
-        withAssociations: 0,
-        totalAssociations: 0,
-      }),
-    }));
-
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, {});
 
     listTokensHandler(args);
@@ -250,41 +141,17 @@ describe('token plugin - list command', () => {
 
   test('filters tokens by specified network', () => {
     const logger = makeLogger();
+    setupZustandHelperMock(MockedHelper, {
+      tokens: mockListTokens.multiNetwork,
+      stats: mockTokenStats.multiNetwork,
+    });
 
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue([
-        makeTokenData({
-          tokenId: '0.0.4444',
-          name: 'Testnet Token',
-          symbol: 'TST',
-          network: 'testnet',
-        }),
-        makeTokenData({
-          tokenId: '0.0.5555',
-          name: 'Mainnet Token',
-          symbol: 'MNT',
-          network: 'mainnet',
-        }),
-      ]),
-      getTokenStats: jest.fn().mockReturnValue({
-        total: 2,
-        byNetwork: { testnet: 1, mainnet: 1 },
-        bySupplyType: { INFINITE: 2 },
-        withAssociations: 0,
-        totalAssociations: 0,
-      }),
-    }));
-
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, { network: 'mainnet' });
 
     listTokensHandler(args);
@@ -299,35 +166,28 @@ describe('token plugin - list command', () => {
 
   test('logs message when no tokens match network filter', () => {
     const logger = makeLogger();
-
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue([
+    setupZustandHelperMock(MockedHelper, {
+      tokens: [
         makeTokenData({
           tokenId: '0.0.5555',
           name: 'Testnet Token',
           symbol: 'TST',
           network: 'testnet',
         }),
-      ]),
-      getTokenStats: jest.fn().mockReturnValue({
+      ],
+      stats: makeTokenStats({
         total: 1,
         byNetwork: { testnet: 1 },
         bySupplyType: { INFINITE: 1 },
-        withAssociations: 0,
-        totalAssociations: 0,
       }),
-    }));
+    });
 
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, { network: 'mainnet' });
 
     listTokensHandler(args);
@@ -340,32 +200,24 @@ describe('token plugin - list command', () => {
 
   test('displays token aliases when available', () => {
     const logger = makeLogger();
-    const tokens = [
-      makeTokenData({
-        tokenId: '0.0.1111',
-        name: 'My Token',
-        symbol: 'MTK',
-        network: 'testnet',
-      }),
-    ];
-
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue(tokens),
-      getTokenStats: jest.fn().mockReturnValue({
+    setupZustandHelperMock(MockedHelper, {
+      tokens: [
+        makeTokenData({
+          tokenId: '0.0.1111',
+          name: 'My Token',
+          symbol: 'MTK',
+          network: 'testnet',
+        }),
+      ],
+      stats: makeTokenStats({
         total: 1,
         byNetwork: { testnet: 1 },
         bySupplyType: { INFINITE: 1 },
-        withAssociations: 0,
-        totalAssociations: 0,
       }),
-    }));
+    });
 
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([
           {
@@ -375,8 +227,8 @@ describe('token plugin - list command', () => {
             entityId: '0.0.1111',
           },
         ]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, {});
 
     listTokensHandler(args);
@@ -389,46 +241,17 @@ describe('token plugin - list command', () => {
 
   test('displays statistics correctly', () => {
     const logger = makeLogger();
-    const tokens = [
-      makeTokenData({
-        tokenId: '0.0.1111',
-        name: 'Token 1',
-        symbol: 'TK1',
-        network: 'testnet',
-        supplyType: 'INFINITE',
-        associations: [{ name: 'Account 1', accountId: '0.0.9999' }],
-      }),
-      makeTokenData({
-        tokenId: '0.0.2222',
-        name: 'Token 2',
-        symbol: 'TK2',
-        network: 'testnet',
-        supplyType: 'FINITE',
-        maxSupply: 1000000,
-      }),
-    ];
+    setupZustandHelperMock(MockedHelper, {
+      tokens: mockListTokens.withAssociations,
+      stats: mockTokenStats.withAssociations,
+    });
 
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue(tokens),
-      getTokenStats: jest.fn().mockReturnValue({
-        total: 2,
-        byNetwork: { testnet: 2 },
-        bySupplyType: { INFINITE: 1, FINITE: 1 },
-        withAssociations: 1,
-        totalAssociations: 1,
-      }),
-    }));
-
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, {});
 
     listTokensHandler(args);
@@ -448,38 +271,17 @@ describe('token plugin - list command', () => {
 
   test('displays max supply for FINITE tokens', () => {
     const logger = makeLogger();
-    const tokens = [
-      makeTokenData({
-        tokenId: '0.0.1111',
-        name: 'Finite Token',
-        symbol: 'FNT',
-        network: 'testnet',
-        supplyType: 'FINITE',
-        maxSupply: 500000,
-      }),
-    ];
+    setupZustandHelperMock(MockedHelper, {
+      tokens: mockListTokens.finiteSupply,
+      stats: mockTokenStats.finiteSupply,
+    });
 
-    MockedHelper.mockImplementation(() => ({
-      listTokens: jest.fn().mockReturnValue(tokens),
-      getTokenStats: jest.fn().mockReturnValue({
-        total: 1,
-        byNetwork: { testnet: 1 },
-        bySupplyType: { FINITE: 1 },
-        withAssociations: 0,
-        totalAssociations: 0,
-      }),
-    }));
-
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, {});
 
     listTokensHandler(args);
@@ -498,16 +300,12 @@ describe('token plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = {
-      state: {} as any,
-      logger,
-      network: {
-        getCurrentNetwork: jest.fn().mockReturnValue('testnet'),
-      } as any,
+    const { api } = makeApiMocks({
+      network: 'testnet',
       alias: {
         list: jest.fn().mockReturnValue([]),
-      } as any,
-    };
+      },
+    });
     const args = makeArgs(api, logger, {});
 
     listTokensHandler(args);
