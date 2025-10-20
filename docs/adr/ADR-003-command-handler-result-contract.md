@@ -109,11 +109,7 @@ Plugins may throw these as-is. The CLI will map them to exit codes and user-frie
 ### Exit Code Policy
 
 - 0 – Success (`status: 'success'`)
-- 10 – Partial success (`status: 'partial'`)
-- 20 – Handler-declared failure (`status: 'failure'` without Core exception)
-- 30 – Output schema validation error
-- 40 – Core-named exception (mapped per type)
-- 50 – Unexpected error (uncaught/unknown)
+- 1 – Handler-declared failure (`status: 'failure'` or Core exception)
 
 Exit codes within ranges may be refined later; the mapping lives centrally in Core/CLI.
 
