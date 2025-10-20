@@ -17,6 +17,8 @@ export interface TxExecutionService {
     tx: HederaTransaction,
     signer: SignerRef,
   ): Promise<TransactionResult>;
+
+  freezeTx(transaction: HederaTransaction): HederaTransaction;
 }
 
 // Result types

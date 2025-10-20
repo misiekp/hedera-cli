@@ -10,7 +10,10 @@ import { SupportedNetwork } from '../../../core/types/shared.types';
 import { Transaction as HederaTransaction } from '@hashgraph/sdk';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
 import { TokenData, safeValidateTokenCreateParams } from '../schema';
-import { resolveTreasuryParameter } from '../resolver-helper';
+import {
+  resolveTreasuryParameter,
+  resolveKeyParameter,
+} from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
 
 /**
@@ -81,30 +84,12 @@ function resolveTreasuryAccount(
 }
 
 /**
- * Resolves the admin public key for token creation
+ * Gets the operator's public key as a fallback
  * @param api - Core API instance
- * @param adminKey - Optional explicit admin key
- * @param treasuryPublicKey - Optional treasury public key
  * @param logger - Logger instance
- * @returns The resolved admin public key
+ * @returns The operator's public key
  */
-function resolveAdminKey(
-  api: CoreApi,
-  adminKey?: string,
-  treasuryPublicKey?: string,
-  logger?: Logger,
-): string {
-  // 1. Use explicit admin key if provided
-  if (adminKey) {
-    return adminKey;
-  }
-
-  // 2. Use treasury public key if available
-  if (treasuryPublicKey) {
-    return treasuryPublicKey;
-  }
-
-  // 3. Fall back to operator's public key
+function getOperatorPublicKey(api: CoreApi, logger?: Logger): string {
   const operator = api.kms.getDefaultOperator();
   if (!operator) {
     throw new Error('No operator credentials found');
@@ -136,7 +121,14 @@ async function executeTokenCreation(
   transaction: HederaTransaction,
   treasury: TreasuryResolution,
   logger: Logger,
+  adminKeyRefId?: string,
 ): Promise<TransactionResult> {
+  if (adminKeyRefId) {
+    const tx = api.signing.freezeTx(transaction);
+    // @TODO - Migrate from signTransaction to keep consistent with other usages
+    await api.credentialsState.signTransaction(tx, adminKeyRefId);
+  }
+
   if (treasury.useCustom && treasury.keyRefId) {
     logger.debug(`Signing with custom treasury key`);
     return await api.txExecution.signAndExecuteWith(transaction, {
@@ -304,16 +296,16 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       treasuryPublicKey,
     );
 
-    const adminPublicKey = resolveAdminKey(
-      api,
-      validatedParams.adminKey,
-      treasuryPublicKey,
-      logger,
-    );
+    // Resolve admin key - will use provided key or fall back to operator key
+    const adminKey = resolveKeyParameter(validatedParams.adminKey, api);
+
+    if (!adminKey) {
+      throw new Error('Unable to resolve any adminKey for the token');
+    }
 
     logger.debug('=== TOKEN PARAMS DEBUG ===');
     logger.debug(`Treasury ID: ${treasury.treasuryId}`);
-    logger.debug(`Admin Key (public): ${adminPublicKey}`);
+    logger.debug(`Admin Key (keyRefId): ${adminKey?.keyRefId}`);
     logger.debug(`Use Custom Treasury: ${treasury.useCustom}`);
     logger.debug('=========================');
 
@@ -326,7 +318,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       initialSupply,
       supplyType: supplyType.toUpperCase() as 'FINITE' | 'INFINITE',
       maxSupply: finalMaxSupply,
-      adminKey: adminPublicKey,
+      adminKey: adminKey.publicKey,
     };
 
     const tokenCreateTransaction =
@@ -337,6 +329,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       tokenCreateTransaction,
       treasury,
       logger,
+      adminKey.keyRefId,
     );
 
     // 3. Verify success and store token data
@@ -364,7 +357,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
       decimals,
       initialSupply,
       supplyType,
-      adminPublicKey,
+      adminPublicKey: adminKey.publicKey,
       treasuryPublicKey,
       network: api.network.getCurrentNetwork(),
     });
