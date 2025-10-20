@@ -32,7 +32,7 @@ describe('Token Plugin Structure', () => {
     );
     expect(tokenPluginManifest.capabilities).toContain('network:read');
     expect(tokenPluginManifest.capabilities).toContain('network:write');
-    expect(tokenPluginManifest.capabilities).toContain('signing:use');
+    expect(tokenPluginManifest.capabilities).toContain('tx-execution:use');
   });
 
   test('manifest should have state schema', () => {

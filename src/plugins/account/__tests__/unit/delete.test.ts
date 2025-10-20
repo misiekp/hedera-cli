@@ -1,6 +1,6 @@
 import { deleteAccountHandler } from '../../commands/delete';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import { setupExitSpy } from '../../../../../__tests__/helpers/plugin';
 import {
   makeLogger,
@@ -47,7 +47,7 @@ describe('account plugin - delete command', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
+    const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { name: 'acc1' });
 
     deleteAccountHandler(args);
@@ -73,7 +73,7 @@ describe('account plugin - delete command', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
+    const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { id: '0.0.2222' });
 
     deleteAccountHandler(args);
@@ -94,7 +94,7 @@ describe('account plugin - delete command', () => {
       deleteAccount: jest.fn(),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     deleteAccountHandler(args);
@@ -114,7 +114,7 @@ describe('account plugin - delete command', () => {
       deleteAccount: jest.fn(),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { name: 'missingAcc' });
 
     deleteAccountHandler(args);
@@ -136,7 +136,7 @@ describe('account plugin - delete command', () => {
       deleteAccount: jest.fn(),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { id: '0.0.4444' });
 
     deleteAccountHandler(args);
@@ -159,7 +159,7 @@ describe('account plugin - delete command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { name: 'acc5' });
 
     deleteAccountHandler(args);
@@ -190,7 +190,7 @@ describe('account plugin - delete command', () => {
     });
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
+    const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { name: 'acc-alias' });
 
     deleteAccountHandler(args);

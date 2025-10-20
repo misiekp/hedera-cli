@@ -83,9 +83,12 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
     // 2. Sign and execute transaction using the from account key
     logger.debug(`Using key ${signerKeyRefId} for signing transaction`);
-    const result = await api.signing.signAndExecuteWith(transferTransaction, {
-      keyRefId: signerKeyRefId,
-    });
+    const result = await api.txExecution.signAndExecuteWith(
+      transferTransaction,
+      {
+        keyRefId: signerKeyRefId,
+      },
+    );
 
     if (result.success) {
       logger.log(`✅ Token transfer successful!`);

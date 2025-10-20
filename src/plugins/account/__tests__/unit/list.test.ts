@@ -1,6 +1,6 @@
 import { listAccountsHandler } from '../../commands/list';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import {
   makeLogger,
   makeAccountData,
@@ -36,7 +36,7 @@ describe('account plugin - list command', () => {
       listAccounts: jest.fn().mockReturnValue([]),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     listAccountsHandler(args);
@@ -58,7 +58,7 @@ describe('account plugin - list command', () => {
       listAccounts: jest.fn().mockReturnValue(accounts),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     listAccountsHandler(args);
@@ -80,7 +80,7 @@ describe('account plugin - list command', () => {
       listAccounts: jest.fn().mockReturnValue(accounts),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { private: true });
 
     listAccountsHandler(args);
@@ -99,7 +99,7 @@ describe('account plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     listAccountsHandler(args);

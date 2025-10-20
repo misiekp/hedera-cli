@@ -15,7 +15,7 @@ import {
   Hbar,
 } from '@hashgraph/sdk';
 import { Logger } from '../logger/logger-service.interface';
-import { TransactionService } from '../signing/signing-service.interface';
+import { TransactionService } from '../tx-execution/tx-execution-service.interface';
 import { TokenService } from './token-service.interface';
 import type {
   TokenTransferParams,

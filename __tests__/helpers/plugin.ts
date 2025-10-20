@@ -2,14 +2,14 @@
  * Shared test helpers and fixtures for plugin unit tests
  */
 import type { CommandHandlerArgs } from '../../src/core/plugins/plugin.interface';
-import type { CoreAPI } from '../../src/core/core-api/core-api.interface';
+import type { CoreApi } from '../../src/core/core-api/core-api.interface';
 import type { Logger } from '../../src/core/services/logger/logger-service.interface';
 import type { StateService } from '../../src/core/services/state/state-service.interface';
 import type { ConfigService } from '../../src/core/services/config/config-service.interface';
 import type { NetworkService } from '../../src/core/services/network/network-service.interface';
 import type { KeyManagementService } from '../../src/core/services/credentials-state/credentials-state-service.interface';
-import type { AliasManagementService } from '../../src/core/services/alias/alias-service.interface';
-import type { TransactionService } from '../../src/core/services/signing/signing-service.interface';
+import type { AliasService } from '../../src/core/services/alias/alias-service.interface';
+import type { TransactionService } from '../../src/core/services/tx-execution/tx-execution-service.interface';
 import type { HederaMirrornodeService } from '../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { AccountData } from '../../src/plugins/account/schema';
 
@@ -46,11 +46,28 @@ export const makeAccountData = (
  * Create CommandHandlerArgs for testing
  */
 export const makeArgs = (
-  api: Partial<CoreAPI>,
+  api: Partial<CoreApi>,
   logger: jest.Mocked<Logger>,
   args: Record<string, unknown>,
 ): CommandHandlerArgs => ({
-  api: api as CoreAPI,
+  api: {
+    account: {} as any,
+    token: {} as any,
+    txExecution: makeSigningMock(),
+    topic: {
+      createTopic: jest.fn(),
+      submitMessage: jest.fn(),
+    } as any,
+    state: {} as any,
+    mirror: {} as any,
+    network: makeNetworkMock('testnet'),
+    config: {} as any,
+    logger,
+    alias: makeAliasMock(),
+    credentialsState: makeCredentialsStateMock(),
+    hbar: undefined,
+    ...api,
+  },
   logger,
   state: {} as StateService,
   config: {} as ConfigService,
@@ -112,9 +129,9 @@ export const makeCredentialsStateMock = (
 });
 
 /**
- * Create a mocked AliasManagementService
+ * Create a mocked AliasService
  */
-export const makeAliasMock = (): jest.Mocked<AliasManagementService> => ({
+export const makeAliasMock = (): jest.Mocked<AliasService> => ({
   register: jest.fn(),
   resolve: jest.fn().mockReturnValue(null), // No alias resolution by default
   list: jest.fn(),

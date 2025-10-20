@@ -3,9 +3,9 @@
  * Handles token creation operations using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { CoreAPI } from '../../../core/core-api/core-api.interface';
+import { CoreApi } from '../../../core/core-api/core-api.interface';
 import { Logger } from '../../../core/services/logger/logger-service.interface';
-import { TransactionResult } from '../../../core/services/signing/signing-service.interface';
+import { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
 import { SupportedNetwork } from '../../../core/types/shared.types';
 import { Transaction as HederaTransaction } from '@hashgraph/sdk';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
@@ -53,7 +53,7 @@ interface TreasuryResolution {
  * @returns Treasury resolution result
  */
 function resolveTreasuryAccount(
-  api: CoreAPI,
+  api: CoreApi,
   treasuryId?: string,
   treasuryKeyRefId?: string,
   treasuryPublicKey?: string,
@@ -89,7 +89,7 @@ function resolveTreasuryAccount(
  * @returns The resolved admin public key
  */
 function resolveAdminKey(
-  api: CoreAPI,
+  api: CoreApi,
   adminKey?: string,
   treasuryPublicKey?: string,
   logger?: Logger,
@@ -132,20 +132,20 @@ function resolveAdminKey(
  * @returns Transaction result
  */
 async function executeTokenCreation(
-  api: CoreAPI,
+  api: CoreApi,
   transaction: HederaTransaction,
   treasury: TreasuryResolution,
   logger: Logger,
 ): Promise<TransactionResult> {
   if (treasury.useCustom && treasury.keyRefId) {
     logger.debug(`Signing with custom treasury key`);
-    return await api.signing.signAndExecuteWith(transaction, {
+    return await api.txExecution.signAndExecuteWith(transaction, {
       keyRefId: treasury.keyRefId,
     });
   }
 
   logger.debug(`Signing with operator key`);
-  return await api.signing.signAndExecute(transaction);
+  return await api.txExecution.signAndExecute(transaction);
 }
 
 /**

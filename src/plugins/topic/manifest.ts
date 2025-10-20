@@ -19,7 +19,7 @@ export const topicPluginManifest: PluginManifest = {
     `state:namespace:${TOPIC_NAMESPACE}`,
     'network:read',
     'network:write',
-    'signing:use',
+    'tx-execution:use',
   ],
   commands: [
     {

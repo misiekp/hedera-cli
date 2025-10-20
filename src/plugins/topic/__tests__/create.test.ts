@@ -1,7 +1,7 @@
 import { createTopicHandler } from '../commands/create';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import type { CoreAPI } from '../../../core/core-api/core-api.interface';
-import type { TransactionResult } from '../../../core/services/signing/signing-service.interface';
+import type { CoreApi } from '../../../core/core-api/core-api.interface';
+import type { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
 import {
   makeLogger,
   makeArgs,
@@ -86,9 +86,9 @@ describe('topic plugin - create command', () => {
         } as TransactionResult),
       });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
@@ -143,9 +143,9 @@ describe('topic plugin - create command', () => {
         } as TransactionResult),
       });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
@@ -205,9 +205,9 @@ describe('topic plugin - create command', () => {
         } as TransactionResult),
       });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
@@ -251,9 +251,9 @@ describe('topic plugin - create command', () => {
         } as TransactionResult),
       });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,
@@ -282,9 +282,9 @@ describe('topic plugin - create command', () => {
         }),
       });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       credentialsState: credentialsState as any,
       alias: alias as any,

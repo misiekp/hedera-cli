@@ -4,7 +4,7 @@
  */
 import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { transferTokenHandler } from '../../commands/transfer';
-import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
+import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import { makeLogger, makeApiMocks } from './helpers/mocks';
 
 let exitSpy: jest.SpyInstance;

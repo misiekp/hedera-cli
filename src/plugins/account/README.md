@@ -123,7 +123,7 @@ interface AccountData {
 
 ## 🏷️ Alias Support
 
-- Per-network aliases via `AliasManagementService`
+- Per-network aliases via `AliasService`
 - Aliases resolve to account IDs and key references
 - Example: `myaccount` → `0.0.123456` on testnet
 - Registered during `create` and `import` when `--alias` provided

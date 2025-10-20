@@ -1,6 +1,6 @@
 import { listTopicsHandler } from '../commands/list';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import type { CoreAPI } from '../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../core/core-api/core-api.interface';
 import type { TopicData } from '../schema';
 import {
   makeLogger,
@@ -53,7 +53,7 @@ describe('topic plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     listTopicsHandler(args);
@@ -80,7 +80,7 @@ describe('topic plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     listTopicsHandler(args);
@@ -120,7 +120,7 @@ describe('topic plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { keys: true });
 
     listTopicsHandler(args);
@@ -158,7 +158,7 @@ describe('topic plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { network: 'mainnet' });
 
     listTopicsHandler(args);
@@ -191,7 +191,7 @@ describe('topic plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { network: 'mainnet' });
 
     listTopicsHandler(args);
@@ -230,7 +230,7 @@ describe('topic plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     listTopicsHandler(args);
@@ -251,7 +251,7 @@ describe('topic plugin - list command', () => {
       }),
     }));
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger };
+    const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
     listTopicsHandler(args);

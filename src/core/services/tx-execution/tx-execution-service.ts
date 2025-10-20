@@ -3,13 +3,13 @@
  * Uses Hedera SDK to sign and execute transactions
  */
 import {
-  TransactionService,
+  TxExecutionService,
   TransactionResult,
-} from './signing-service.interface';
+} from './tx-execution-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
 import { NetworkService } from '../network/network-service.interface';
-import type { SignerRef } from './signing-service.interface';
+import type { SignerRef } from './tx-execution-service.interface';
 import {
   Client,
   TransactionResponse,
@@ -18,7 +18,7 @@ import {
   Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
 
-export class TransactionServiceImpl implements TransactionService {
+export class TxExecutionServiceImpl implements TxExecutionService {
   private logger: Logger;
   private credentialsState: KeyManagementService;
   private networkService: NetworkService;
@@ -37,7 +37,7 @@ export class TransactionServiceImpl implements TransactionService {
    * Get a fresh Hedera client for the current network
    */
   private getClient(): Client {
-    this.logger.debug('[SIGNING] Creating client for current network');
+    this.logger.debug('[TX-EXECUTION] Creating client for current network');
 
     // Get current network from NetworkService
     const network = this.networkService.getCurrentNetwork();
@@ -52,7 +52,7 @@ export class TransactionServiceImpl implements TransactionService {
   async signAndExecute(
     transaction: HederaTransaction,
   ): Promise<TransactionResult> {
-    this.logger.debug(`[SIGNING] Signing and executing transaction`);
+    this.logger.debug(`[TX-EXECUTION] Signing and executing transaction`);
 
     try {
       // Get fresh client for current network
@@ -63,7 +63,7 @@ export class TransactionServiceImpl implements TransactionService {
         this.credentialsState.getDefaultOperator() ||
         this.credentialsState.ensureDefaultFromEnv();
       if (!mapping) {
-        throw new Error('[SIGNING] No default operator configured');
+        throw new Error('[TX-EXECUTION] No default operator configured');
       }
 
       transaction.freezeWith(client);
@@ -79,7 +79,7 @@ export class TransactionServiceImpl implements TransactionService {
       const receipt: TransactionReceipt = await response.getReceipt(client);
 
       this.logger.debug(
-        `[SIGNING] Transaction executed successfully: ${response.transactionId.toString()}`,
+        `[TX-EXECUTION] Transaction executed successfully: ${response.transactionId.toString()}`,
       );
 
       // Extract IDs from receipt based on transaction type
@@ -114,7 +114,7 @@ export class TransactionServiceImpl implements TransactionService {
         },
       };
     } catch (error) {
-      console.error(`[SIGNING] Transaction execution failed:`, error);
+      console.error(`[TX-EXECUTION] Transaction execution failed:`, error);
       throw error;
     }
   }
@@ -175,14 +175,14 @@ export class TransactionServiceImpl implements TransactionService {
    * Supports both keyRefId and publicKey directly.
    */
   private resolveSignerRef(signer: SignerRef): string {
-    if (!signer) throw new Error('[SIGNING] signer ref is required');
+    if (!signer) throw new Error('[TX-EXECUTION] signer ref is required');
 
     // If direct keyRefId provided, validate it exists
     if (signer.keyRefId) {
       const pub = this.credentialsState.getPublicKey(signer.keyRefId);
       if (!pub) {
         throw new Error(
-          `[SIGNING] Unknown keyRefId: ${signer.keyRefId}. Use 'hcli keys list' to inspect available keys.`,
+          `[TX-EXECUTION] Unknown keyRefId: ${signer.keyRefId}. Use 'hcli keys list' to inspect available keys.`,
         );
       }
       return signer.keyRefId;
@@ -193,14 +193,14 @@ export class TransactionServiceImpl implements TransactionService {
       const keyRefId = this.credentialsState.findByPublicKey(signer.publicKey);
       if (!keyRefId) {
         throw new Error(
-          `[SIGNING] No keyRefId found for public key: ${signer.publicKey}`,
+          `[TX-EXECUTION] No keyRefId found for public key: ${signer.publicKey}`,
         );
       }
       return keyRefId;
     }
 
     throw new Error(
-      '[SIGNING] SignerRef must provide either keyRefId or publicKey',
+      '[TX-EXECUTION] SignerRef must provide either keyRefId or publicKey',
     );
   }
 }

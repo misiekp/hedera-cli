@@ -5,12 +5,12 @@
 import type { CommandHandlerArgs } from '../../../../../core/plugins/plugin.interface';
 import type { Logger } from '../../../../../core/services/logger/logger-service.interface';
 import type { HederaMirrornodeService } from '../../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
-import type { CoreAPI } from '../../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../../core/core-api/core-api.interface';
 import type { AccountData } from '../../../schema';
 import type { AccountService } from '../../../../../core/services/account/account-transaction-service.interface';
-import type { TransactionService } from '../../../../../core/services/signing/signing-service.interface';
+import type { TransactionService } from '../../../../../core/services/tx-execution/tx-execution-service.interface';
 import type { NetworkService } from '../../../../../core/services/network/network-service.interface';
-import type { AliasManagementService } from '../../../../../core/services/alias/alias-service.interface';
+import type { AliasService } from '../../../../../core/services/alias/alias-service.interface';
 import {
   mockAccountData,
   mockTransactionResults,
@@ -142,12 +142,12 @@ export const makeAccountStateHelperMock = (overrides?: {
 });
 
 /**
- * Creates mock AliasManagementService
+ * Creates mock AliasService
  * By default, returns an empty list and supports filtering by network and type
  */
 export const makeAliasServiceMock = (options?: {
   records?: any[];
-}): jest.Mocked<AliasManagementService> => {
+}): jest.Mocked<AliasService> => {
   const records = options?.records ?? mockAliasLists.empty;
 
   return {
@@ -170,11 +170,11 @@ export const makeAliasServiceMock = (options?: {
  * Creates CommandHandlerArgs for testing command handlers
  */
 export const makeArgs = (
-  api: Partial<CoreAPI>,
+  api: Partial<CoreApi>,
   logger: jest.Mocked<Logger>,
   args: Record<string, unknown>,
 ): CommandHandlerArgs => ({
-  api: api as CoreAPI,
+  api: api as CoreApi,
   logger,
   state: {} as any,
   config: {} as any,

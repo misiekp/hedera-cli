@@ -3,14 +3,14 @@ export * from './plugin.types';
 
 export interface CommandHandlerArgs {
   args: Record<string, unknown>;
-  api: CoreAPI; // injected instance per execution
+  api: CoreApi; // injected instance per execution
   state: StateManager; // namespaced access provided by Core
   config: ConfigView;
   logger: Logger;
 }
 
 // Import types from other interfaces
-import { CoreAPI } from '../core-api/core-api.interface';
+import { CoreApi } from '../core-api/core-api.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';

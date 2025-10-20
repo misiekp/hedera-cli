@@ -3,19 +3,19 @@
  * This is the primary interface that plugins will use
  */
 import { AccountService } from '../services/account/account-transaction-service.interface';
-import { TransactionService } from '../services/signing/signing-service.interface';
-import { TopicService } from '../services/topics/topic-transaction-service.interface';
+import { TransactionService } from '../services/tx-execution/tx-execution-service.interface';
+import { TopicService } from '../services/topic/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { HbarService } from '../services/hbar/hbar-service.interface';
-import { AliasManagementService } from '../services/alias/alias-service.interface';
+import { AliasService } from '../services/alias/alias-service.interface';
 import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
 import { TokenService } from '../services/token/token-service.interface';
 
-export interface CoreAPI {
+export interface CoreApi {
   /**
    * Account operations
    */
@@ -32,9 +32,9 @@ export interface CoreAPI {
   topic: TopicService;
 
   /**
-   * Transaction signing and execution
+   * Transaction execution service
    */
-  signing: TransactionService;
+  txExecution: TransactionService;
 
   /**
    * State management with namespaced access
@@ -64,7 +64,7 @@ export interface CoreAPI {
   /**
    * Alias management (non-sensitive)
    */
-  alias: AliasManagementService;
+  alias: AliasService;
 
   /**
    * Key Management Service (KMS)

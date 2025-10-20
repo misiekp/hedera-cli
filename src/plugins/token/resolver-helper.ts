@@ -1,9 +1,9 @@
 /**
  * Token Plugin Parameter Resolvers
  * Helper functions to resolve command parameters (aliases, account IDs, keys)
- * using CoreAPI services
+ * using CoreApi services
  */
-import { CoreAPI } from '../../core';
+import { CoreApi } from '../../core';
 import { SupportedNetwork } from '../../core/types/shared.types';
 
 /**
@@ -26,7 +26,7 @@ export interface ResolvedTreasury {
  */
 function parseAccountIdKeyPair(
   idKeyPair: string,
-  api: CoreAPI,
+  api: CoreApi,
   entityType: 'treasury' | 'account',
 ): { accountId: string; keyRefId: string; publicKey: string } {
   const parts = idKeyPair.split(':');
@@ -69,7 +69,7 @@ function parseAccountIdKeyPair(
  */
 export function resolveTreasuryParameter(
   treasury: string | undefined,
-  api: CoreAPI,
+  api: CoreApi,
   network: SupportedNetwork,
 ): ResolvedTreasury | null {
   if (!treasury) {
@@ -145,7 +145,7 @@ export interface ResolvedAccount {
  */
 export function resolveAccountParameter(
   account: string | undefined,
-  api: CoreAPI,
+  api: CoreApi,
   network: SupportedNetwork,
 ): ResolvedAccount | null {
   if (!account) {
@@ -219,7 +219,7 @@ export interface ResolvedDestinationAccount {
  */
 export function resolveDestinationAccountParameter(
   account: string | undefined,
-  api: CoreAPI,
+  api: CoreApi,
   network: SupportedNetwork,
 ): ResolvedDestinationAccount | null {
   if (!account) {

@@ -5,7 +5,7 @@
 import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { createTokenHandler } from '../../commands/create';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
-import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
+import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import {
   makeLogger,
   makeApiMocks,
