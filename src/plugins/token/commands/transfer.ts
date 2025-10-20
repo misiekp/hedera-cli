@@ -27,7 +27,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
   // Use validated parameters
   const validatedParams = validationResult.data;
-  const tokenIdOrAlias = validatedParams.tokenId;
+  const tokenIdOrAlias = validatedParams.token;
   const from = validatedParams.from;
   const to = validatedParams.to;
   const amount = validatedParams.balance;

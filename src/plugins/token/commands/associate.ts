@@ -30,7 +30,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
   // Use validated parameters
   const validatedParams = validationResult.data;
-  const tokenIdOrAlias = validatedParams.tokenId;
+  const tokenIdOrAlias = validatedParams.token;
   const account = validatedParams.account;
 
   const network = api.network.getCurrentNetwork();

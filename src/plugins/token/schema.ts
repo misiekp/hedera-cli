@@ -197,9 +197,12 @@ export function safeValidateTokenCreateParams(data: unknown) {
   return TokenCreateCommandSchema.safeParse(data);
 }
 
+// TokenId or alias
+const tokenIdOrAlias = z.string().min(1, 'Token ID or alias is required');
+
 // Command parameter validation schema for associate command
 export const TokenAssociateCommandSchema = z.object({
-  tokenId: z.string().min(1, 'Token ID or alias is required'),
+  token: tokenIdOrAlias,
 
   account: z
     .string()
@@ -228,7 +231,7 @@ export function safeValidateTokenAssociateParams(data: unknown) {
 
 // Command parameter validation schema for transfer command
 export const TokenTransferCommandSchema = z.object({
-  tokenId: z.string().min(1, 'Token ID or alias is required'),
+  token: tokenIdOrAlias,
 
   from: z
     .string()

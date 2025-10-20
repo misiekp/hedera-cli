@@ -28,7 +28,7 @@ export const tokenPluginManifest: PluginManifest = {
       description: 'Transfer a fungible token from one account to another',
       options: [
         {
-          name: 'token-id',
+          name: 'token',
           type: 'string',
           required: true,
           description: 'Token: either a token alias or token-id',
@@ -94,7 +94,7 @@ export const tokenPluginManifest: PluginManifest = {
       description: 'Associate a token with an account to enable transfers',
       options: [
         {
-          name: 'token-id',
+          name: 'token',
           type: 'string',
           required: true,
           description: 'Token: either a token alias or token-id',
