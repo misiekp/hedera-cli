@@ -7,6 +7,7 @@ import { ZustandTokenStateHelper } from '../zustand-state-helper';
 import { TokenData } from '../schema';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
+import { CoreAPI } from '../../../core';
 
 /**
  * Resolves the token alias from the alias service
@@ -16,7 +17,7 @@ import { SupportedNetwork } from '../../../core/types/shared.types';
  * @returns The alias if found, null otherwise
  */
 function resolveTokenAlias(
-  api: CommandHandlerArgs['api'],
+  api: CoreAPI,
   tokenId: string,
   network: SupportedNetwork,
 ): string | null {
@@ -222,7 +223,7 @@ export function listTokensHandler(args: CommandHandlerArgs) {
     });
 
     // Display statistics
-    const stats = tokenState.getTokenStats();
+    const stats = tokenState.getTokensWithStats();
     displayStatistics(stats, logger);
 
     process.exit(0);

@@ -224,34 +224,9 @@ export class ZustandTokenStateHelper {
   }
 
   /**
-   * Find token by token ID
-   */
-  findTokenByTokenId(tokenId: string): TokenData | null {
-    try {
-      this.logger.debug(`[TOKEN STATE] Finding token by ID: ${tokenId}`);
-
-      const tokens = this.listTokens();
-      const token = tokens.find((t) => t.tokenId === tokenId);
-
-      if (token) {
-        this.logger.debug(`[TOKEN STATE] Found token: ${tokenId}`);
-        return token;
-      } else {
-        this.logger.debug(`[TOKEN STATE] Token not found: ${tokenId}`);
-        return null;
-      }
-    } catch (error) {
-      this.logger.error(
-        `[TOKEN STATE] Failed to find token ${tokenId}: ${toErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
-  /**
    * Get token statistics
    */
-  getTokenStats(): {
+  getTokensWithStats(): {
     total: number;
     byNetwork: Record<string, number>;
     bySupplyType: Record<string, number>;
