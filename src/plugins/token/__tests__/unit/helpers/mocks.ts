@@ -34,9 +34,6 @@ export const makeTokenServiceMock = (
   createTokenTransaction: jest.fn(),
   createTokenAssociationTransaction: jest.fn(),
   createTransferTransaction: jest.fn(),
-  createToken: jest.fn(),
-  associateToken: jest.fn(),
-  transfer: jest.fn(),
   ...overrides,
 });
 
@@ -363,4 +360,35 @@ export const makeFsMocks = () => {
     setupFsMocks,
     cleanupFsMocks,
   };
+};
+
+/**
+ * Setup mock implementation for ZustandTokenStateHelper for list tests
+ * Simplifies the repetitive mock setup across list test cases
+ */
+export const setupZustandHelperMock = (
+  MockedHelperClass: jest.Mock,
+  config: {
+    tokens?: any[];
+    stats?: {
+      total: number;
+      byNetwork: Record<string, number>;
+      bySupplyType: Record<string, number>;
+      withAssociations: number;
+      totalAssociations: number;
+    };
+  },
+) => {
+  MockedHelperClass.mockImplementation(() => ({
+    listTokens: jest.fn().mockReturnValue(config.tokens || []),
+    getTokensWithStats: jest.fn().mockReturnValue(
+      config.stats || {
+        total: 0,
+        byNetwork: {},
+        bySupplyType: {},
+        withAssociations: 0,
+        totalAssociations: 0,
+      },
+    ),
+  }));
 };
