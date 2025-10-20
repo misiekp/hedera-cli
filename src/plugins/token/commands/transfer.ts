@@ -7,6 +7,7 @@ import { safeValidateTokenTransferParams } from '../schema';
 import {
   resolveAccountParameter,
   resolveDestinationAccountParameter,
+  resolveTokenParameter,
 } from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
 
@@ -26,14 +27,27 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
   // Use validated parameters
   const validatedParams = validationResult.data;
-  const tokenId = validatedParams.tokenId;
+  const tokenIdOrAlias = validatedParams.token;
   const from = validatedParams.from;
   const to = validatedParams.to;
   const amount = validatedParams.balance;
 
+  const network = api.network.getCurrentNetwork();
+
+  // Resolve token ID from alias if provided
+  const resolvedToken = resolveTokenParameter(tokenIdOrAlias, api, network);
+
+  if (!resolvedToken) {
+    throw new Error(
+      `Failed to resolve token parameter: ${tokenIdOrAlias}. ` +
+        `Expected format: token-alias OR token-id`,
+    );
+  }
+
+  const tokenId = resolvedToken.tokenId;
+
   // Resolve from parameter (alias or account-id:private-key) if provided
 
-  const network = api.network.getCurrentNetwork();
   const resolvedFromAccount = resolveAccountParameter(from, api, network);
 
   // From account was explicitly provided - it MUST resolve or fail

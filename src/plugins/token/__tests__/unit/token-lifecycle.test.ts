@@ -40,7 +40,7 @@ describe('Token Lifecycle Integration', () => {
       // Arrange
       const mockAddToken = jest.fn();
       const mockAddAssociation = jest.fn();
-      const tokenId = '0.0.123456';
+      const token = '0.0.123456';
       const treasuryAccountId = '0.0.789012';
       const userAccountId = '0.0.345678';
       const treasuryKey = 'treasury-key';
@@ -80,12 +80,12 @@ describe('Token Lifecycle Integration', () => {
               if (transaction === mockTokenTransaction) {
                 return Promise.resolve({
                   success: true,
-                  transactionId: `${tokenId}@1234567890.123456789`,
-                  tokenId: tokenId,
+                  transactionId: `${token}@1234567890.123456789`,
+                  tokenId: token,
                   receipt: {
                     status: {
                       status: 'success',
-                      transactionId: `${tokenId}@1234567890.123456789`,
+                      transactionId: `${token}@1234567890.123456789`,
                     },
                   },
                 });
@@ -155,7 +155,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 2: Associate Token
       const associateArgs: CommandHandlerArgs = {
         args: {
-          tokenId,
+          token,
           account: `${userAccountId}:${userKey}`,
         },
         api,
@@ -171,7 +171,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 3: Transfer Token
       const transferArgs: CommandHandlerArgs = {
         args: {
-          tokenId,
+          token,
           from: `${treasuryAccountId}:${treasuryKey}`,
           to: userAccountId,
           balance: 100,
@@ -201,12 +201,12 @@ describe('Token Lifecycle Integration', () => {
       expect(
         tokenTransactions.createTokenAssociationTransaction,
       ).toHaveBeenCalledWith({
-        tokenId,
+        tokenId: token,
         accountId: userAccountId,
       });
 
       expect(tokenTransactions.createTransferTransaction).toHaveBeenCalledWith({
-        tokenId,
+        tokenId: token,
         fromAccountId: treasuryAccountId,
         toAccountId: userAccountId,
         amount: 100,
@@ -224,7 +224,7 @@ describe('Token Lifecycle Integration', () => {
     test('should handle partial failure in lifecycle', async () => {
       // Arrange
       const mockAddToken = jest.fn();
-      const tokenId = '0.0.123456';
+      const token = '0.0.123456';
       const treasuryAccountId = '0.0.789012';
       const userAccountId = '0.0.345678';
       const treasuryKey = 'treasury-key';
@@ -259,12 +259,12 @@ describe('Token Lifecycle Integration', () => {
               if (transaction === mockTokenTransaction) {
                 return Promise.resolve({
                   success: true,
-                  transactionId: `${tokenId}@1234567890.123456789`,
-                  tokenId: tokenId,
+                  transactionId: `${token}@1234567890.123456789`,
+                  tokenId: token,
                   receipt: {
                     status: {
                       status: 'success',
-                      transactionId: `${tokenId}@1234567890.123456789`,
+                      transactionId: `${token}@1234567890.123456789`,
                     },
                   },
                 });
@@ -314,7 +314,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 2: Associate Token (failure)
       const associateArgs: CommandHandlerArgs = {
         args: {
-          tokenId,
+          token,
           account: `${userAccountId}:${userKey}`,
         },
         api,
@@ -338,7 +338,7 @@ describe('Token Lifecycle Integration', () => {
       // Arrange
       const mockAddToken = jest.fn();
       const mockAddAssociation = jest.fn();
-      const tokenId = '0.0.123456';
+      const token = '0.0.123456';
       const treasuryAccountId = '0.0.789012';
       const userAccountId1 = '0.0.345678';
       const userAccountId2 = '0.0.456789';
@@ -426,7 +426,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 2: Associate with first user
       const associateArgs1: CommandHandlerArgs = {
         args: {
-          tokenId,
+          token,
           account: `${userAccountId1}:${userKey1}`,
         },
         api,
@@ -442,7 +442,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 3: Associate with second user
       const associateArgs2: CommandHandlerArgs = {
         args: {
-          tokenId,
+          token,
           account: `${userAccountId2}:${userKey2}`,
         },
         api,
@@ -468,7 +468,7 @@ describe('Token Lifecycle Integration', () => {
       // Arrange
       const mockAddToken = jest.fn();
       const mockAddAssociation = jest.fn();
-      const tokenId = '0.0.123456';
+      const token = '0.0.123456';
       const treasuryAccountId = '0.0.789012';
       const userAccountId = '0.0.345678';
 
@@ -526,7 +526,7 @@ describe('Token Lifecycle Integration', () => {
 
       const associateArgs: CommandHandlerArgs = {
         args: {
-          tokenId,
+          token,
           account: `${userAccountId}:user-key`,
         },
         api,

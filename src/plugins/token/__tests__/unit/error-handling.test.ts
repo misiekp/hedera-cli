@@ -90,7 +90,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:test-key',
         },
         api,
@@ -131,7 +131,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           from: '0.0.345678:test-key',
           to: '0.0.789012',
           balance: 100,
@@ -283,7 +283,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:insufficient-permissions-key',
         },
         api,
@@ -330,7 +330,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           from: '0.0.345678:test-key',
           to: '0.0.789012',
           balance: 1000000, // Large amount
@@ -697,7 +697,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           from: '0.0.345678:test-key',
           to: '0.0.789012',
           balance: 100,
@@ -838,7 +838,7 @@ describe('Token Plugin Error Handling', () => {
       // Act - Associate token (should fail)
       const associateArgs: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.345678:user-key',
         },
         api,

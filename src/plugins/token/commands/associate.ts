@@ -5,7 +5,10 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
 import { safeValidateTokenAssociateParams } from '../schema';
-import { resolveAccountParameter } from '../resolver-helper';
+import {
+  resolveAccountParameter,
+  resolveTokenParameter,
+} from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
 
 export async function associateTokenHandler(args: CommandHandlerArgs) {
@@ -27,18 +30,35 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
   // Use validated parameters
   const validatedParams = validationResult.data;
-  const tokenId = validatedParams.tokenId;
-  const account = validatedParams.account;
+  const tokenIdOrAlias = validatedParams.token;
+  const accountIdOrAlias = validatedParams.account;
+
+  const network = api.network.getCurrentNetwork();
+
+  // Resolve token ID from alias if provided
+  const resolvedToken = resolveTokenParameter(tokenIdOrAlias, api, network);
+
+  if (!resolvedToken) {
+    throw new Error(
+      `Failed to resolve token parameter: ${tokenIdOrAlias}. ` +
+        `Expected format: token-alias OR token-id`,
+    );
+  }
+
+  const tokenId = resolvedToken.tokenId;
 
   // Resolve account parameter (alias or account-id:account-key) if provided
 
-  const network = api.network.getCurrentNetwork();
-  const resolvedAccount = resolveAccountParameter(account, api, network);
+  const resolvedAccount = resolveAccountParameter(
+    accountIdOrAlias,
+    api,
+    network,
+  );
 
   // Account was explicitly provided - it MUST resolve or fail
   if (!resolvedAccount) {
     throw new Error(
-      `Failed to resolve account parameter: ${account}. ` +
+      `Failed to resolve account parameter: ${accountIdOrAlias}. ` +
         `Expected format: account-alias OR account-id:account-key`,
     );
   }
@@ -49,7 +69,9 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
   // Get the account name for state storage
   // If it's an alias, use the alias name; if it's account-id:key format, use account ID
-  const accountName = account.includes(':') ? accountId : account;
+  const accountName = accountIdOrAlias.includes(':')
+    ? accountId
+    : accountIdOrAlias;
 
   logger.log(`🔑 Using account: ${accountId}`);
   logger.log(`🔑 Will sign with account key`);

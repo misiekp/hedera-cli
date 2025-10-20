@@ -59,7 +59,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 100,
@@ -136,7 +136,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: 'alice',
           balance: 100,
@@ -216,7 +216,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: 'bob',
           from: '0.0.345678:test-from-key',
           balance: 100,
@@ -403,7 +403,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 100,
@@ -493,7 +493,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 100,
@@ -548,7 +548,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 999999999, // Large amount
@@ -613,7 +613,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 100,
@@ -675,7 +675,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.345678', // Same as from
           from: '0.0.345678:test-from-key',
           balance: 100,
@@ -738,7 +738,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 100.5, // Decimal amount
