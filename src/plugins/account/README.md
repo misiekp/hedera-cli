@@ -91,7 +91,7 @@ The plugin uses the Core API services:
 - `api.txExecution` - Transaction signing and execution
 - `api.state` - Namespaced state management
 - `api.network` - Network information
-- `api.credentialsState` - Secure key management
+- `api.kms` - Secure key management
 - `api.alias` - Alias registration and resolution
 - `api.mirror` - Mirror node queries
 - `api.logger` - Logging
@@ -116,7 +116,7 @@ interface AccountData {
 
 ## 🔐 Security
 
-- Private keys stored securely via `KeyManagementService` using `keyRefId` references
+- Private keys stored securely via `KmsService` using `keyRefId` references
 - No raw private keys in plugin state JSON
 - Secure key retrieval through Core API
 - Keys isolated in credentials storage namespace
