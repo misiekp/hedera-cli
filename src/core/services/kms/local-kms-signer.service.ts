@@ -2,7 +2,7 @@ import { KmsSignerService } from './kms-signer-service.interface';
 import { KmsStorageServiceInterface } from './kms-storage-service.interface';
 import { PrivateKey } from '@hashgraph/sdk';
 
-export class LocalPrivateKeyKmsSignerService implements KmsSignerService {
+export class LocalKmsSignerService implements KmsSignerService {
   private readonly pub: string;
   private readonly keyRefId?: string;
   private readonly storage?: KmsStorageServiceInterface;

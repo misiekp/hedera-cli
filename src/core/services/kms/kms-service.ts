@@ -13,13 +13,23 @@ import {
   AccountId,
   Transaction as HederaTransaction,
 } from '@hashgraph/sdk';
-import { LocalPrivateKeyKmsSignerService } from './local-private-key-kms-signer-service';
+import { LocalKmsSignerService } from './local-kms-signer.service';
 import { KmsSignerService } from './kms-signer-service.interface';
 import { Logger } from '../logger/logger-service.interface';
 import { StateService } from '../state/state-service.interface';
 import { NetworkService } from '../network/network-service.interface';
 import { KmsStorageServiceInterface } from './kms-storage-service.interface';
-import { KmsStorageService } from './state-kms-storage.service';
+import { KmsStorageService } from './kms-storage.service';
+
+/**
+ * @TODO: Consider reorganizing KMS folder structure
+ *
+ * Currently, the KMS folder contains more files than typical service folders
+ * (which usually have just interface + implementation). This was discussed
+ * during review and we decided not to change it now, but we should consider
+ * better organization in the future.
+ *
+ */
 
 export class KmsServiceImpl implements KmsService {
   private readonly logger: Logger;
@@ -101,7 +111,7 @@ export class KmsServiceImpl implements KmsService {
     if (!rec) throw new Error(`Unknown keyRefId: ${keyRefId}`);
 
     // Directly create signer service - no provider needed
-    return new LocalPrivateKeyKmsSignerService(rec.publicKey, {
+    return new LocalKmsSignerService(rec.publicKey, {
       keyRefId,
       storage: this.storage,
       keyAlgorithm: rec.keyAlgorithm || 'ed25519',
