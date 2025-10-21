@@ -35,7 +35,7 @@ describe('transferTokenHandler', () => {
         tokens,
         signing,
         alias: _alias,
-        credentialsState,
+        kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -48,7 +48,7 @@ describe('transferTokenHandler', () => {
         alias: {
           resolve: jest.fn().mockReturnValue(null), // No alias resolution needed for account-id:key format
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -93,9 +93,7 @@ describe('transferTokenHandler', () => {
         mockTransferTransaction,
         { keyRefId: 'imported-key-ref-id' },
       );
-      expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(
-        'test-from-key',
-      );
+      expect(kms.importPrivateKey).toHaveBeenCalledWith('test-from-key');
     });
 
     test('should transfer tokens using alias for from account', async () => {
@@ -112,7 +110,7 @@ describe('transferTokenHandler', () => {
         tokens,
         signing,
         alias,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -128,7 +126,7 @@ describe('transferTokenHandler', () => {
             keyRefId: 'alias-key-ref-id',
           }),
         },
-        credentialsState: {
+        kms: {
           getPublicKey: jest.fn().mockReturnValue('alias-public-key'),
         },
       });
@@ -184,7 +182,7 @@ describe('transferTokenHandler', () => {
         tokens,
         signing: _signing,
         alias,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -205,7 +203,7 @@ describe('transferTokenHandler', () => {
             return null;
           }),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -386,13 +384,13 @@ describe('transferTokenHandler', () => {
         api,
         tokens: _tokens,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         createTransferImpl: jest
           .fn()
           .mockResolvedValue(mockTransferTransaction),
         signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -429,12 +427,12 @@ describe('transferTokenHandler', () => {
       const {
         api,
         tokens: _tokens,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         createTransferImpl: jest
           .fn()
           .mockRejectedValue(new Error('Network error')),
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -470,7 +468,7 @@ describe('transferTokenHandler', () => {
         api,
         tokens: _tokens,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -482,7 +480,7 @@ describe('transferTokenHandler', () => {
             .fn()
             .mockRejectedValue(new Error('Invalid key')),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -527,7 +525,7 @@ describe('transferTokenHandler', () => {
         api,
         tokens,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -537,7 +535,7 @@ describe('transferTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -592,7 +590,7 @@ describe('transferTokenHandler', () => {
         api,
         tokens: _tokens,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -602,7 +600,7 @@ describe('transferTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -654,7 +652,7 @@ describe('transferTokenHandler', () => {
         api,
         tokens,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -664,7 +662,7 @@ describe('transferTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -717,7 +715,7 @@ describe('transferTokenHandler', () => {
         api,
         tokens,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokens: {
           createTransferTransaction: jest
@@ -727,7 +725,7 @@ describe('transferTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',

@@ -38,14 +38,14 @@ const makeApiMocks = ({
 
   const signing = makeSigningMock({ signAndExecuteImpl });
   const networkMock = makeNetworkMock(network);
-  const credentialsState = makeKmsMock();
+  const kms = makeKmsMock();
   const alias = makeAliasMock();
 
   MockedHelper.mockImplementation(() => ({
     getAccountsByNetwork: jest.fn().mockReturnValue(accounts),
   }));
 
-  return { hbar, signing, networkMock, credentialsState, alias };
+  return { hbar, signing, networkMock, kms, alias };
 };
 
 // Common test accounts
@@ -68,14 +68,14 @@ const setupTransferTest = (options: {
   defaultCredentials?: any;
 }) => {
   const logger = makeLogger();
-  const { hbar, signing, networkMock, credentialsState, alias } = makeApiMocks({
+  const { hbar, signing, networkMock, kms, alias } = makeApiMocks({
     transferImpl: options.transferImpl,
     signAndExecuteImpl: options.signAndExecuteImpl,
     accounts: options.accounts || [],
   });
 
   if (options.defaultCredentials) {
-    (credentialsState.getDefaultOperator as jest.Mock).mockReturnValue(
+    (kms.getDefaultOperator as jest.Mock).mockReturnValue(
       options.defaultCredentials,
     );
   }
@@ -88,13 +88,13 @@ const setupTransferTest = (options: {
     hbar,
     txExecution: signing,
     network: networkMock,
-    kms: credentialsState,
+    kms,
     alias,
     logger,
     state: stateMock as StateService,
   };
 
-  return { api, logger, hbar, signing, credentialsState, alias, stateMock };
+  return { api, logger, hbar, signing, kms, alias, stateMock };
 };
 
 describe('hbar plugin - transfer command (unit)', () => {

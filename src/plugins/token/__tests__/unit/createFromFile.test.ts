@@ -127,7 +127,7 @@ describe('createTokenFromFileHandler', () => {
             });
           }),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'treasury-key-ref-id',
             publicKey: 'treasury-key',
@@ -212,7 +212,7 @@ describe('createTokenFromFileHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'treasury-key-ref-id',
             publicKey: 'treasury-key',
@@ -299,7 +299,7 @@ describe('createTokenFromFileHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'treasury-key-ref-id',
             publicKey: 'treasury-key',
@@ -582,7 +582,7 @@ describe('createTokenFromFileHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'treasury-key-ref-id',
             publicKey: 'treasury-key',
@@ -653,7 +653,7 @@ describe('createTokenFromFileHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'treasury-key-ref-id',
             publicKey: 'treasury-key',
@@ -725,7 +725,7 @@ describe('createTokenFromFileHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'treasury-key-ref-id',
             publicKey: 'treasury-key',

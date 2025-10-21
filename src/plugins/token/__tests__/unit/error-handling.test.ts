@@ -42,7 +42,7 @@ describe('Token Plugin Error Handling', () => {
             throw new Error('Network timeout');
           }),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
@@ -109,14 +109,14 @@ describe('Token Plugin Error Handling', () => {
       const {
         api,
         tokenTransactions: _tokenTransactions,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokenTransactions: {
           createTransferTransaction: jest.fn().mockImplementation(() => {
             throw new Error('Network unreachable');
           }),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -151,8 +151,8 @@ describe('Token Plugin Error Handling', () => {
   describe('authentication and authorization errors', () => {
     test('should handle invalid credentials', async () => {
       // Arrange
-      const { api, credentialsState: _credentialsState } = makeApiMocks({
-        credentialsState: {
+      const { api, kms: _kms } = makeApiMocks({
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue(null),
           ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
         },
@@ -185,7 +185,7 @@ describe('Token Plugin Error Handling', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -216,7 +216,7 @@ describe('Token Plugin Error Handling', () => {
             },
           }),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'invalid-key-ref-id',
@@ -258,7 +258,7 @@ describe('Token Plugin Error Handling', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenAssociationTransaction: jest
@@ -268,7 +268,7 @@ describe('Token Plugin Error Handling', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
-        credentialsState: {
+        kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
             publicKey: 'imported-public-key',
@@ -428,7 +428,7 @@ describe('Token Plugin Error Handling', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -447,7 +447,7 @@ describe('Token Plugin Error Handling', () => {
             receipt: { status: { status: 'failed', transactionId: '' } },
           }),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
@@ -562,7 +562,7 @@ describe('Token Plugin Error Handling', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -593,7 +593,7 @@ describe('Token Plugin Error Handling', () => {
             },
           }),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
@@ -630,14 +630,14 @@ describe('Token Plugin Error Handling', () => {
       const {
         api,
         tokenTransactions: _tokenTransactions,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest.fn().mockImplementation(() => {
             throw new Error('Rate limit exceeded');
           }),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
@@ -734,7 +734,7 @@ describe('Token Plugin Error Handling', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentialsState: _credentialsState,
+        kms: _kms,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -745,7 +745,7 @@ describe('Token Plugin Error Handling', () => {
           signAndExecute: jest.fn().mockResolvedValue(_mockSignResult),
           signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',

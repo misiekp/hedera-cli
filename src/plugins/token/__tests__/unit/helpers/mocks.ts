@@ -136,12 +136,10 @@ interface ApiMocksConfig {
   tokens?: Partial<jest.Mocked<TokenService>>;
   tokenTransactions?: Partial<jest.Mocked<TokenService>>; // Deprecated, use 'tokens'
   signing?: Partial<jest.Mocked<TxExecutionService>>;
-  credentialsState?: Partial<jest.Mocked<KmsService>>;
+  kms?: Partial<jest.Mocked<KmsService>>;
   alias?: Partial<jest.Mocked<AliasService>>;
   state?: Partial<jest.Mocked<StateService>>;
   network?: string;
-  // Legacy support for old test patterns
-  credentials?: Partial<jest.Mocked<KmsService>>;
   createTransferImpl?: jest.Mock;
   signAndExecuteImpl?: jest.Mock;
 }
@@ -155,9 +153,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
     config?.tokens || config?.tokenTransactions,
   );
   const signing = makeTxExecutionServiceMock(config?.signing);
-  const credentialsState = makeKmsMock(
-    config?.credentialsState || config?.credentials,
-  );
+  const kms = makeKmsMock(config?.kms);
   const alias = makeAliasServiceMock(config?.alias);
   const state = makeStateServiceMock(config?.state);
   const account = makeAccountTransactionServiceMock();
@@ -167,7 +163,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
     token: tokens,
     topic: {} as unknown as any,
     txExecution: signing,
-    kms: credentialsState,
+    kms,
     alias,
     state,
     mirror: {} as unknown as any,
@@ -191,8 +187,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
     tokens,
     tokenTransactions: tokens, // Deprecated alias for backward compatibility
     signing,
-    credentialsState,
-    credentials: credentialsState, // Legacy alias for backward compatibility
+    kms,
     alias,
     state,
     account,

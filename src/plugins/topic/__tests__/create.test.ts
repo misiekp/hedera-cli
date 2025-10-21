@@ -45,14 +45,14 @@ const makeApiMocks = ({
   };
 
   const networkMock = makeNetworkMock(network);
-  const credentialsState = makeKmsMock();
-  credentialsState.importPrivateKey.mockImplementation((key: string) => ({
+  const kms = makeKmsMock();
+  kms.importPrivateKey.mockImplementation((key: string) => ({
     keyRefId: `kr_${key.slice(-5)}`,
     publicKey: 'mock-public-key',
   }));
   const alias = makeAliasMock();
 
-  return { topicTransactions, signing, networkMock, credentialsState, alias };
+  return { topicTransactions, signing, networkMock, kms, alias };
 };
 
 beforeAll(() => {
@@ -73,7 +73,7 @@ describe('topic plugin - create command', () => {
     const saveTopicMock = jest.fn();
     MockedHelper.mockImplementation(() => ({ saveTopic: saveTopicMock }));
 
-    const { topicTransactions, signing, networkMock, credentialsState, alias } =
+    const { topicTransactions, signing, networkMock, kms, alias } =
       makeApiMocks({
         createTopicImpl: jest.fn().mockReturnValue({
           transaction: {},
@@ -90,7 +90,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      kms: credentialsState,
+      kms,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -130,7 +130,7 @@ describe('topic plugin - create command', () => {
     const adminKey = '302e020100300506032b657004220420admin';
     const submitKey = '302e020100300506032b657004220420submit';
 
-    const { topicTransactions, signing, networkMock, credentialsState, alias } =
+    const { topicTransactions, signing, networkMock, kms, alias } =
       makeApiMocks({
         createTopicImpl: jest.fn().mockReturnValue({
           transaction: {},
@@ -147,7 +147,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      kms: credentialsState,
+      kms,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -166,8 +166,8 @@ describe('topic plugin - create command', () => {
       adminKey,
       submitKey,
     });
-    expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(adminKey);
-    expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(submitKey);
+    expect(kms.importPrivateKey).toHaveBeenCalledWith(adminKey);
+    expect(kms.importPrivateKey).toHaveBeenCalledWith(submitKey);
     expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
       {},
       {
@@ -192,7 +192,7 @@ describe('topic plugin - create command', () => {
     const saveTopicMock = jest.fn();
     MockedHelper.mockImplementation(() => ({ saveTopic: saveTopicMock }));
 
-    const { topicTransactions, signing, networkMock, credentialsState, alias } =
+    const { topicTransactions, signing, networkMock, kms, alias } =
       makeApiMocks({
         createTopicImpl: jest.fn().mockReturnValue({
           transaction: {},
@@ -209,7 +209,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      kms: credentialsState,
+      kms,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -239,7 +239,7 @@ describe('topic plugin - create command', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveTopic: jest.fn() }));
 
-    const { topicTransactions, signing, networkMock, credentialsState, alias } =
+    const { topicTransactions, signing, networkMock, kms, alias } =
       makeApiMocks({
         createTopicImpl: jest.fn().mockReturnValue({
           transaction: {},
@@ -255,7 +255,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      kms: credentialsState,
+      kms,
       alias: alias as any,
       state: {} as any,
       logger,
@@ -275,7 +275,7 @@ describe('topic plugin - create command', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveTopic: jest.fn() }));
 
-    const { topicTransactions, signing, networkMock, credentialsState, alias } =
+    const { topicTransactions, signing, networkMock, kms, alias } =
       makeApiMocks({
         createTopicImpl: jest.fn().mockImplementation(() => {
           throw new Error('network error');
@@ -286,7 +286,7 @@ describe('topic plugin - create command', () => {
       topic: topicTransactions,
       txExecution: signing,
       network: networkMock,
-      kms: credentialsState,
+      kms,
       alias: alias as any,
       state: {} as any,
       logger,
