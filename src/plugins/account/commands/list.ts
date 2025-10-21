@@ -1,12 +1,17 @@
 /**
  * Account List Command Handler
  * Handles listing all accounts using the Core API
+ * Follows ADR-003 contract: returns CommandExecutionResult
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../core/plugins/plugin.types';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { ListAccountsOutput } from '../output-schemas';
 
-export function listAccountsHandler(args: CommandHandlerArgs) {
+export function listAccountsHandler(
+  args: CommandHandlerArgs,
+): CommandExecutionResult {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -20,31 +25,28 @@ export function listAccountsHandler(args: CommandHandlerArgs) {
   try {
     const accounts = accountState.listAccounts();
 
-    if (accounts.length === 0) {
-      logger.log('📝 No accounts found in the address book');
-      process.exit(0);
-    }
+    // Prepare output data
+    const outputData: ListAccountsOutput = {
+      accounts: accounts.map((account) => ({
+        name: account.name,
+        accountId: account.accountId,
+        type: account.type,
+        network: account.network,
+        evmAddress: account.evmAddress,
+        // Only include keyRefId when --private flag is used
+        ...(showPrivateKeys && { keyRefId: account.keyRefId }),
+      })),
+      totalCount: accounts.length,
+    };
 
-    logger.log(`📝 Found ${accounts.length} account(s):`);
-    logger.log('');
-
-    accounts.forEach((account, index) => {
-      logger.log(`${index + 1}. Name: ${account.name}`);
-      logger.log(`   Account ID: ${account.accountId}`);
-      logger.log(`   Type: ${account.type}`);
-      logger.log(`   Network: ${account.network}`);
-      logger.log(`   EVM Address: ${account.evmAddress}`);
-
-      if (showPrivateKeys) {
-        logger.log(`   Key Reference ID: ${account.keyRefId}`);
-      }
-
-      logger.log('');
-    });
-
-    process.exit(0);
+    return {
+      status: 'success',
+      outputJson: JSON.stringify(outputData),
+    };
   } catch (error: unknown) {
-    logger.error(formatError('❌ Failed to list accounts', error));
-    process.exit(1);
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to list accounts', error),
+    };
   }
 }

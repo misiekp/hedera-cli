@@ -4,6 +4,10 @@
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
 import { ACCOUNT_JSON_SCHEMA, ACCOUNT_NAMESPACE } from './schema';
+import {
+  LIST_ACCOUNTS_OUTPUT_JSON_SCHEMA,
+  LIST_ACCOUNTS_TEMPLATE,
+} from './output-schemas';
 
 export const accountPluginManifest: PluginManifest = {
   name: 'account',
@@ -59,6 +63,12 @@ export const accountPluginManifest: PluginManifest = {
         { name: 'private', type: 'boolean', required: false, default: false },
       ],
       handler: './index',
+      output: {
+        schema: LIST_ACCOUNTS_OUTPUT_JSON_SCHEMA,
+        humanTemplate: {
+          inline: LIST_ACCOUNTS_TEMPLATE,
+        },
+      },
     },
     {
       name: 'import',

@@ -282,6 +282,63 @@ export class PluginManager {
       throw new Error(`Handler for ${commandSpec.name} is not a function`);
     }
 
-    await handler(handlerArgs);
+    // Execute handler
+    const result = await handler(handlerArgs);
+
+    // ADR-003: If command has output spec, expect handler to return result
+    if (commandSpec.output) {
+      if (!result) {
+        logger.error(
+          `Handler for ${commandSpec.name} must return CommandExecutionResult when output spec is defined`,
+        );
+        process.exit(1);
+      }
+
+      const executionResult = result;
+
+      // Handle failure or partial success
+      if (executionResult.status !== 'success') {
+        if (executionResult.errorMessage) {
+          logger.error(executionResult.errorMessage);
+        }
+        // Exit with code 1 for both 'failure' and 'partial' status
+        process.exit(1);
+      }
+
+      // Handle successful execution with output
+      if (executionResult.outputJson) {
+        try {
+          // Parse and validate JSON
+          const outputData: unknown = JSON.parse(executionResult.outputJson);
+
+          // TODO: Validate outputData against commandSpec.output.schema
+
+          // For now, use a simple output handler (pretty-print JSON)
+          // TODO: Support multiple output formats (--format flag) and templates
+          this.handleOutput(outputData);
+        } catch (error) {
+          logger.error(
+            `Failed to parse output JSON from ${commandSpec.name}: ${formatError('', error)}`,
+          );
+          process.exit(1);
+        }
+      }
+
+      // Success - exit with code 0
+      process.exit(0);
+    }
+
+    // Legacy behavior: handler returns void, no output processing
+    // Handler is responsible for its own output and error handling
+  }
+
+  /**
+   * Handle command output
+   * TODO: Support multiple formats (json, yaml, xml) and templates
+   * TODO: Support --output flag to write to file
+   */
+  private handleOutput(data: unknown): void {
+    // For now, pretty-print JSON to stdout
+    console.log(JSON.stringify(data, null, 2));
   }
 }
