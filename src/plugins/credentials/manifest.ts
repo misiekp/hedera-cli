@@ -45,25 +45,38 @@ const credentialsManifest: PluginManifest = {
       name: 'set',
       summary: 'Set operator credentials',
       description:
-        'Set the default operator credentials for signing transactions',
+        'Set operator credentials for signing transactions on a specific network',
       options: [
         { name: 'accountId', type: 'string', required: true },
         { name: 'privateKey', type: 'string', required: true },
-        { name: 'network', type: 'string', required: false },
+        {
+          name: 'network',
+          type: 'string',
+          required: false,
+          description: 'Target network (defaults to current network)',
+        },
       ],
       handler: 'commands/set',
     },
     {
       name: 'list',
       summary: 'List all credentials',
-      description: 'Show all stored credentials',
+      description: 'Show all stored credentials and network operators',
       handler: 'commands/list',
     },
     {
       name: 'remove',
       summary: 'Remove credentials',
       description: 'Remove credentials for a specific keyRefId',
-      options: [{ name: 'keyRefId', type: 'string', required: true }],
+      options: [
+        { name: 'keyRefId', type: 'string', required: true },
+        {
+          name: 'network',
+          type: 'string',
+          required: false,
+          description: 'Target network (defaults to current network)',
+        },
+      ],
       handler: 'commands/remove',
     },
   ],

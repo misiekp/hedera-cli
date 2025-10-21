@@ -34,6 +34,22 @@ export interface KmsService {
   getDefaultOperator(): { accountId: string; keyRefId: string } | null;
   ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null;
 
+  // Network-aware operator management
+  setOperator(
+    accountId: string,
+    keyRefId: string,
+    network: SupportedNetwork,
+  ): void;
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null;
+  removeOperator(network: SupportedNetwork): void;
+  listOperators(): Array<{
+    network: SupportedNetwork;
+    accountId: string;
+    keyRefId: string;
+  }>;
+
   // Client operations that don't expose private keys
   createClient(network: SupportedNetwork): Client;
   signTransaction(

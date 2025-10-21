@@ -2,6 +2,7 @@
  * Set Credentials Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { SupportedNetwork } from '../../../core/types/shared.types';
 import { formatError } from '../../../utils/errors';
 
 export function setHandler(args: CommandHandlerArgs): void {
@@ -9,10 +10,14 @@ export function setHandler(args: CommandHandlerArgs): void {
   const { accountId, privateKey, network } = args.args as {
     accountId: string;
     privateKey: string;
-    network?: string;
+    network?: SupportedNetwork;
   };
 
+  // Determine target network
+  const targetNetwork = network || api.network.getCurrentNetwork();
+
   logger.log(`🔐 Setting credentials for account: ${accountId}`);
+  logger.log(`   Network: ${targetNetwork}`);
 
   try {
     // Import the private key and get the keyRefId
@@ -20,11 +25,11 @@ export function setHandler(args: CommandHandlerArgs): void {
       'default-operator',
     ]);
 
-    // Set as default operator
-    api.kms.setDefaultOperator(accountId, keyRefId);
+    // Set operator for the specified network
+    api.kms.setOperator(accountId, keyRefId, targetNetwork);
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
-    logger.log(`   Network: ${network || 'testnet'}`);
+    logger.log(`   Network: ${targetNetwork}`);
     logger.log(`   Key Reference ID: ${keyRefId}`);
     logger.log(`   Public Key: ${publicKey}`);
   } catch (error) {

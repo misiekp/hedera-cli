@@ -17,4 +17,14 @@ export interface KmsStorageServiceInterface {
   // Default operator mapping (metadata)
   setDefaultOperator(mapping: { accountId: string; keyRefId: string }): void;
   getDefaultOperator(): { accountId: string; keyRefId: string } | null;
+
+  // Network-aware operator management
+  setOperator(accountId: string, keyRefId: string, network: string): void;
+  getOperator(network: string): { accountId: string; keyRefId: string } | null;
+  removeOperator(network: string): void;
+  listOperators(): Array<{
+    network: string;
+    accountId: string;
+    keyRefId: string;
+  }>;
 }

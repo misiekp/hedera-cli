@@ -53,4 +53,53 @@ export class KmsStorageService implements KmsStorageServiceInterface {
       ) || null
     );
   }
+
+  // Network-aware operator management
+  setOperator(accountId: string, keyRefId: string, network: string): void {
+    this.state.set('kms-operators', network, { accountId, keyRefId });
+  }
+
+  getOperator(network: string): { accountId: string; keyRefId: string } | null {
+    return (
+      this.state.get<{ accountId: string; keyRefId: string }>(
+        'kms-operators',
+        network,
+      ) || null
+    );
+  }
+
+  removeOperator(network: string): void {
+    this.state.delete('kms-operators', network);
+  }
+
+  listOperators(): Array<{
+    network: string;
+    accountId: string;
+    keyRefId: string;
+  }> {
+    const operators: Array<{
+      network: string;
+      accountId: string;
+      keyRefId: string;
+    }> = [];
+
+    // Get all keys in the kms-operators namespace
+    const keys = this.state.getKeys('kms-operators');
+
+    for (const key of keys) {
+      const operator = this.state.get<{ accountId: string; keyRefId: string }>(
+        'kms-operators',
+        key,
+      );
+      if (operator) {
+        operators.push({
+          network: key,
+          accountId: operator.accountId,
+          keyRefId: operator.keyRefId,
+        });
+      }
+    }
+
+    return operators;
+  }
 }

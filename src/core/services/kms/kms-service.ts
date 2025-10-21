@@ -160,6 +160,41 @@ export class KmsServiceImpl implements KmsService {
     return null;
   }
 
+  // Network-aware operator management
+  setOperator(
+    accountId: string,
+    keyRefId: string,
+    network: SupportedNetwork,
+  ): void {
+    this.storage.setOperator(accountId, keyRefId, network);
+    this.logger.debug(
+      `[CRED] Operator set for network ${network}: ${accountId}`,
+    );
+  }
+
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null {
+    return this.storage.getOperator(network);
+  }
+
+  removeOperator(network: SupportedNetwork): void {
+    this.storage.removeOperator(network);
+    this.logger.debug(`[CRED] Operator removed for network ${network}`);
+  }
+
+  listOperators(): Array<{
+    network: SupportedNetwork;
+    accountId: string;
+    keyRefId: string;
+  }> {
+    const storageOperators = this.storage.listOperators();
+    return storageOperators.map((op) => ({
+      ...op,
+      network: op.network as SupportedNetwork,
+    }));
+  }
+
   createClient(network: SupportedNetwork): Client {
     const mapping = this.getDefaultOperator() || this.ensureDefaultFromEnv();
     if (!mapping) {

@@ -7,30 +7,74 @@ import { formatError } from '../../../utils/errors';
 export function listHandler(args: CommandHandlerArgs): Promise<void> {
   const { logger, api } = args;
 
-  logger.log('🔐 Stored Credentials:');
+  logger.log('🔐 Network Operators:');
+  logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   try {
+    const operators = api.kms.listOperators();
     const credentials = api.kms.list();
 
-    if (credentials.length === 0) {
-      logger.log('   No credentials stored');
-      logger.log('   Use "credentials set" to add credentials');
+    if (operators.length === 0) {
+      logger.log('   No network operators configured');
       logger.log(
-        '   Or set HEDERA_ACCOUNT_ID and HEDERA_PRIVATE_KEY environment variables',
+        '   Use "credentials set" to add operators for specific networks',
       );
     } else {
-      credentials.forEach((cred, index) => {
-        logger.log(`   ${index + 1}. Key Reference ID: ${cred.keyRefId}`);
-        logger.log(`      Type: ${cred.type}`);
-        logger.log(`      Public Key: ${cred.publicKey}`);
-        if (cred.labels && cred.labels.length > 0) {
-          logger.log(`      Labels: ${cred.labels.join(', ')}`);
-        }
-        logger.log('');
+      // Group operators by network
+      const operatorsByNetwork = operators.reduce(
+        (acc, op) => {
+          if (!acc[op.network]) {
+            acc[op.network] = [];
+          }
+          acc[op.network].push(op);
+          return acc;
+        },
+        {} as Record<string, typeof operators>,
+      );
+
+      // Display operators grouped by network
+      Object.entries(operatorsByNetwork).forEach(
+        ([network, networkOperators]) => {
+          logger.log(`   ${network}:`);
+          networkOperators.forEach((op) => {
+            const credential = credentials.find(
+              (c) => c.keyRefId === op.keyRefId,
+            );
+
+            if (!credential) {
+              logger.log(
+                `     ${op.accountId} (key: MISSING - ${op.keyRefId})`,
+              );
+            } else {
+              const keyType = credential.type;
+              const publicKeyShort =
+                credential.publicKey.substring(0, 12) + '...';
+              logger.log(
+                `     ${op.accountId} (key: ${keyType}_${publicKeyShort})`,
+              );
+            }
+          });
+        },
+      );
+    }
+
+    logger.log('');
+    logger.log('Available Keys:');
+    logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+    if (credentials.length === 0) {
+      logger.log('   No keys stored');
+      logger.log('   Use "credentials set" to add keys');
+    } else {
+      credentials.forEach((cred) => {
+        const keyType =
+          cred.type === 'localPrivateKey' ? 'ECDSA' : cred.type.toUpperCase();
+        const publicKeyShort = cred.publicKey.substring(0, 12) + '...';
+        logger.log(`   ${publicKeyShort} | ${keyType} | ${cred.keyRefId}`);
       });
     }
   } catch (error) {
-    logger.error(formatError('❌ Failed to list credentials: ${error}', error));
+    logger.error(formatError('❌ Failed to list credentials: ', error));
     throw error;
   }
 

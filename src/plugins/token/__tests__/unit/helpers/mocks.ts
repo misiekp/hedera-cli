@@ -80,6 +80,13 @@ export const makeKmsMock = (
     accountId: '0.0.100000',
     keyRefId: 'operator-key-ref-id',
   }),
+  setOperator: jest.fn(),
+  getOperator: jest.fn().mockReturnValue({
+    accountId: '0.0.100000',
+    keyRefId: 'operator-key-ref-id',
+  }),
+  removeOperator: jest.fn(),
+  listOperators: jest.fn().mockReturnValue([]),
   createClient: jest.fn(),
   signTransaction: jest.fn(),
   ...overrides,
