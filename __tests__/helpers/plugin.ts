@@ -9,7 +9,7 @@ import type { ConfigService } from '../../src/core/services/config/config-servic
 import type { NetworkService } from '../../src/core/services/network/network-service.interface';
 import type { KmsService } from '../../src/core/services/kms/kms-service.interface';
 import type { AliasService } from '../../src/core/services/alias/alias-service.interface';
-import type { TransactionService } from '../../src/core/services/tx-execution/tx-execution-service.interface';
+import type { TxExecutionService } from '../../src/core/services/tx-execution/tx-execution-service.interface';
 import type { HederaMirrornodeService } from '../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { AccountData } from '../../src/plugins/account/schema';
 
@@ -139,13 +139,13 @@ export const makeAliasMock = (): jest.Mocked<AliasService> => ({
 });
 
 /**
- * Create a mocked TransactionService
+ * Create a mocked TxExecutionService
  */
 export const makeSigningMock = (
   options: {
     signAndExecuteImpl?: jest.Mock;
   } = {},
-): jest.Mocked<TransactionService> => ({
+): jest.Mocked<TxExecutionService> => ({
   signAndExecute:
     options.signAndExecuteImpl ||
     jest.fn().mockResolvedValue({

@@ -3,7 +3,7 @@
  * This is the primary interface that plugins will use
  */
 import { AccountService } from '../services/account/account-transaction-service.interface';
-import { TransactionService } from '../services/tx-execution/tx-execution-service.interface';
+import { TxExecutionService } from '../services/tx-execution/tx-execution-service.interface';
 import { TopicService } from '../services/topic/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
@@ -34,7 +34,7 @@ export interface CoreApi {
   /**
    * Transaction execution service
    */
-  txExecution: TransactionService;
+  txExecution: TxExecutionService;
 
   /**
    * State management with namespaced access

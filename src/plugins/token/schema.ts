@@ -175,6 +175,8 @@ export const TokenCreateCommandSchema = z.object({
     .optional(),
 
   adminKey: z.string().min(1, 'Admin key is required').optional(),
+
+  alias: z.string().min(1, 'Alias must be at least 1 character').optional(),
 });
 
 export type TokenCreateCommandParams = z.infer<typeof TokenCreateCommandSchema>;
@@ -195,11 +197,12 @@ export function safeValidateTokenCreateParams(data: unknown) {
   return TokenCreateCommandSchema.safeParse(data);
 }
 
+// TokenId or alias
+const tokenIdOrAlias = z.string().min(1, 'Token ID or alias is required');
+
 // Command parameter validation schema for associate command
 export const TokenAssociateCommandSchema = z.object({
-  tokenId: z
-    .string()
-    .regex(/^0\.0\.[0-9]+$/, 'Token ID must be in format 0.0.123456'),
+  token: tokenIdOrAlias,
 
   account: z
     .string()
@@ -228,9 +231,7 @@ export function safeValidateTokenAssociateParams(data: unknown) {
 
 // Command parameter validation schema for transfer command
 export const TokenTransferCommandSchema = z.object({
-  tokenId: z
-    .string()
-    .regex(/^0\.0\.[0-9]+$/, 'Token ID must be in format 0.0.123456'),
+  token: tokenIdOrAlias,
 
   from: z
     .string()

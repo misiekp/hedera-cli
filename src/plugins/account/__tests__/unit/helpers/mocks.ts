@@ -8,7 +8,7 @@ import type { HederaMirrornodeService } from '../../../../../core/services/mirro
 import type { CoreApi } from '../../../../../core/core-api/core-api.interface';
 import type { AccountData } from '../../../schema';
 import type { AccountService } from '../../../../../core/services/account/account-transaction-service.interface';
-import type { TransactionService } from '../../../../../core/services/tx-execution/tx-execution-service.interface';
+import type { TxExecutionService } from '../../../../../core/services/tx-execution/tx-execution-service.interface';
 import type { NetworkService } from '../../../../../core/services/network/network-service.interface';
 import type { AliasService } from '../../../../../core/services/alias/alias-service.interface';
 import {
@@ -72,11 +72,11 @@ export const makeAccountTransactionServiceMock = (
 });
 
 /**
- * Creates mock TransactionService
+ * Creates mock TxExecutionService
  */
-export const makeSigningServiceMock = (
-  overrides?: Partial<jest.Mocked<TransactionService>>,
-): jest.Mocked<TransactionService> => ({
+export const makeTxExecutionServiceMock = (
+  overrides?: Partial<jest.Mocked<TxExecutionService>>,
+): jest.Mocked<TxExecutionService> => ({
   signAndExecute: jest.fn().mockResolvedValue(mockTransactionResults.success),
   signAndExecuteWith: jest
     .fn()

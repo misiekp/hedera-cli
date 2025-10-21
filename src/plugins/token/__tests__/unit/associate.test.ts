@@ -66,7 +66,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:test-account-key',
         },
         api,
@@ -132,7 +132,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: 'alice',
         },
         api,
@@ -309,7 +309,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:test-account-key',
         },
         api,
@@ -441,7 +441,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:test-account-key',
         },
         api,
@@ -518,7 +518,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: 'my-account-alias',
         },
         api,

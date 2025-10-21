@@ -27,7 +27,12 @@ export const tokenPluginManifest: PluginManifest = {
       summary: 'Transfer a fungible token',
       description: 'Transfer a fungible token from one account to another',
       options: [
-        { name: 'token-id', type: 'string', required: true },
+        {
+          name: 'token',
+          type: 'string',
+          required: true,
+          description: 'Token: either a token alias or token-id',
+        },
         {
           name: 'to',
           type: 'string',
@@ -74,6 +79,12 @@ export const tokenPluginManifest: PluginManifest = {
         },
         { name: 'max-supply', type: 'number', required: false },
         { name: 'admin-key', type: 'string', required: false },
+        {
+          name: 'alias',
+          type: 'string',
+          required: false,
+          description: 'Optional alias to register for the token',
+        },
       ],
       handler: './commands/create',
     },
@@ -82,7 +93,12 @@ export const tokenPluginManifest: PluginManifest = {
       summary: 'Associate a token with an account',
       description: 'Associate a token with an account to enable transfers',
       options: [
-        { name: 'token-id', type: 'string', required: true },
+        {
+          name: 'token',
+          type: 'string',
+          required: true,
+          description: 'Token: either a token alias or token-id',
+        },
         {
           name: 'account',
           type: 'string',
@@ -103,6 +119,29 @@ export const tokenPluginManifest: PluginManifest = {
         { name: 'args', type: 'string', required: false },
       ],
       handler: './commands/createFromFile',
+    },
+    {
+      name: 'list',
+      summary: 'List all tokens',
+      description:
+        'List all tokens stored in state for the current network or a specified network',
+      options: [
+        {
+          name: 'keys',
+          type: 'boolean',
+          required: false,
+          default: false,
+          description: 'Show token key information (admin, supply, wipe, etc.)',
+        },
+        {
+          name: 'network',
+          type: 'string',
+          required: false,
+          description:
+            'Filter tokens by network (defaults to current active network)',
+        },
+      ],
+      handler: './commands/list',
     },
   ],
   stateSchemas: [

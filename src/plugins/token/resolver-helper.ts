@@ -254,3 +254,59 @@ export function resolveDestinationAccountParameter(
     accountId: aliasRecord.entityId,
   };
 }
+
+/**
+ * Resolved token information
+ */
+export interface ResolvedToken {
+  tokenId: string;
+}
+
+/**
+ * Parse and resolve token parameter
+ * Can be:
+ * - An alias (resolved via alias service)
+ * - A token-id (used directly)
+ *
+ * @param tokenIdOrAlias - Token ID or alias from command
+ * @param api - Core API instance
+ * @param network - Current network
+ * @returns Resolved token information
+ */
+export function resolveTokenParameter(
+  tokenIdOrAlias: string | undefined,
+  api: CoreApi,
+  network: SupportedNetwork,
+): ResolvedToken | null {
+  if (!tokenIdOrAlias) {
+    return null;
+  }
+
+  // Check if it's already a token-id (format: 0.0.123456)
+  const tokenIdPattern = /^0\.0\.\d+$/;
+  if (tokenIdPattern.test(tokenIdOrAlias)) {
+    return {
+      tokenId: tokenIdOrAlias,
+    };
+  }
+
+  // Try to resolve as an alias
+  const aliasRecord = api.alias.resolve(tokenIdOrAlias, 'token', network);
+  if (!aliasRecord) {
+    throw new Error(
+      `Token alias "${tokenIdOrAlias}" not found for network ${network}. ` +
+        'Please provide either a valid token alias or token-id.',
+    );
+  }
+
+  // Get the token ID from the alias
+  if (!aliasRecord.entityId) {
+    throw new Error(
+      `Token alias "${tokenIdOrAlias}" does not have an associated token ID`,
+    );
+  }
+
+  return {
+    tokenId: aliasRecord.entityId,
+  };
+}

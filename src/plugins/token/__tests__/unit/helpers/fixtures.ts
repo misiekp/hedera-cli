@@ -530,3 +530,191 @@ export const invalidTokenDataForValidation = {
   name: 'TestToken',
   symbol: 'TEST',
 };
+
+/**
+ * Factory function to create TokenData for list tests
+ * Provides sensible defaults with override support
+ */
+export const makeTokenData = (
+  overrides: Partial<{
+    tokenId: string;
+    name: string;
+    symbol: string;
+    treasuryId: string;
+    decimals: number;
+    initialSupply: number;
+    supplyType: 'FINITE' | 'INFINITE';
+    maxSupply: number;
+    keys: {
+      adminKey: string;
+      supplyKey: string;
+      wipeKey: string;
+      kycKey: string;
+      freezeKey: string;
+      pauseKey: string;
+      feeScheduleKey: string;
+      treasuryKey: string;
+    };
+    network: 'mainnet' | 'testnet' | 'previewnet' | 'localnet';
+    associations: Array<{ name: string; accountId: string }>;
+    customFees: any[];
+  }> = {},
+) => ({
+  tokenId: '0.0.1234',
+  name: 'Test Token',
+  symbol: 'TST',
+  treasuryId: '0.0.5678',
+  decimals: 2,
+  initialSupply: 1000000,
+  supplyType: 'INFINITE' as const,
+  maxSupply: 0,
+  keys: {
+    adminKey: 'test-admin-key',
+    supplyKey: '',
+    wipeKey: '',
+    kycKey: '',
+    freezeKey: '',
+    pauseKey: '',
+    feeScheduleKey: '',
+    treasuryKey: '',
+  },
+  network: 'testnet' as const,
+  associations: [],
+  customFees: [],
+  ...overrides,
+});
+
+/**
+ * Factory function to create token statistics for list tests
+ */
+export const makeTokenStats = (
+  overrides: Partial<{
+    total: number;
+    byNetwork: Record<string, number>;
+    bySupplyType: Record<string, number>;
+    withAssociations: number;
+    totalAssociations: number;
+  }> = {},
+) => ({
+  total: 0,
+  byNetwork: {},
+  bySupplyType: {},
+  withAssociations: 0,
+  totalAssociations: 0,
+  ...overrides,
+});
+
+/**
+ * Pre-configured token list fixtures for common scenarios
+ */
+export const mockListTokens = {
+  empty: [],
+  twoTokens: [
+    makeTokenData({
+      tokenId: '0.0.1111',
+      name: 'Token 1',
+      symbol: 'TK1',
+      network: 'testnet',
+    }),
+    makeTokenData({
+      tokenId: '0.0.2222',
+      name: 'Token 2',
+      symbol: 'TK2',
+      network: 'testnet',
+    }),
+  ],
+  withKeys: [
+    makeTokenData({
+      tokenId: '0.0.3333',
+      name: 'Token 3',
+      symbol: 'TK3',
+      network: 'testnet',
+      keys: {
+        adminKey: 'admin-key-123',
+        supplyKey: 'supply-key-123',
+        wipeKey: '',
+        kycKey: '',
+        freezeKey: '',
+        pauseKey: '',
+        feeScheduleKey: '',
+        treasuryKey: '',
+      },
+    }),
+  ],
+  multiNetwork: [
+    makeTokenData({
+      tokenId: '0.0.4444',
+      name: 'Testnet Token',
+      symbol: 'TST',
+      network: 'testnet',
+    }),
+    makeTokenData({
+      tokenId: '0.0.5555',
+      name: 'Mainnet Token',
+      symbol: 'MNT',
+      network: 'mainnet',
+    }),
+  ],
+  withAssociations: [
+    makeTokenData({
+      tokenId: '0.0.1111',
+      name: 'Token 1',
+      symbol: 'TK1',
+      network: 'testnet',
+      supplyType: 'INFINITE',
+      associations: [{ name: 'Account 1', accountId: '0.0.9999' }],
+    }),
+    makeTokenData({
+      tokenId: '0.0.2222',
+      name: 'Token 2',
+      symbol: 'TK2',
+      network: 'testnet',
+      supplyType: 'FINITE',
+      maxSupply: 1000000,
+    }),
+  ],
+  finiteSupply: [
+    makeTokenData({
+      tokenId: '0.0.1111',
+      name: 'Finite Token',
+      symbol: 'FNT',
+      network: 'testnet',
+      supplyType: 'FINITE',
+      maxSupply: 500000,
+    }),
+  ],
+};
+
+/**
+ * Pre-configured token statistics fixtures
+ */
+export const mockTokenStats = {
+  empty: makeTokenStats(),
+  twoTokens: makeTokenStats({
+    total: 2,
+    byNetwork: { testnet: 2 },
+    bySupplyType: { INFINITE: 2 },
+  }),
+  withKeys: makeTokenStats({
+    total: 1,
+    byNetwork: { testnet: 1 },
+    bySupplyType: { INFINITE: 1 },
+  }),
+  multiNetwork: makeTokenStats({
+    total: 2,
+    byNetwork: { testnet: 1, mainnet: 1 },
+    bySupplyType: { INFINITE: 2 },
+  }),
+  withAssociations: makeTokenStats({
+    total: 2,
+    byNetwork: { testnet: 2 },
+    bySupplyType: { INFINITE: 1, FINITE: 1 },
+    withAssociations: 1,
+    totalAssociations: 1,
+  }),
+  finiteSupply: makeTokenStats({
+    total: 1,
+    byNetwork: { testnet: 1 },
+    bySupplyType: { FINITE: 1 },
+  }),
+};
