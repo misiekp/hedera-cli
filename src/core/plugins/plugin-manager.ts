@@ -5,7 +5,7 @@
  */
 import * as path from 'path';
 import { Command } from 'commander';
-import { CoreAPI } from '../core-api/core-api.interface';
+import { CoreApi } from '../core-api/core-api.interface';
 import { CommandHandlerArgs, PluginManifest } from './plugin.interface';
 import { CommandSpec, CommandHandler } from './plugin.types';
 import { formatError } from '../../utils/errors';
@@ -19,12 +19,12 @@ interface LoadedPlugin {
 }
 
 export class PluginManager {
-  private coreAPI: CoreAPI;
+  private coreApi: CoreApi;
   private loadedPlugins: Map<string, LoadedPlugin> = new Map();
   private defaultPlugins: string[] = [];
 
-  constructor(coreAPI: CoreAPI) {
-    this.coreAPI = coreAPI;
+  constructor(coreApi: CoreApi) {
+    this.coreApi = coreApi;
   }
 
   /**
@@ -254,10 +254,10 @@ export class PluginManager {
         ...options,
         _: commandArgs,
       },
-      api: this.coreAPI,
-      state: this.coreAPI.state,
-      config: this.coreAPI.config,
-      logger: this.coreAPI.logger,
+      api: this.coreApi,
+      state: this.coreApi.state,
+      config: this.coreApi.config,
+      logger: this.coreApi.logger,
     };
 
     const handlerPath = commandSpec.handler;
@@ -309,11 +309,11 @@ export class PluginManager {
       if (executionResult.outputJson) {
         try {
           // Use OutputHandlerService to format and display output
-          this.coreAPI.output.handleCommandOutput({
+          this.coreApi.output.handleCommandOutput({
             outputJson: executionResult.outputJson,
             schema: commandSpec.output.schema,
             template: commandSpec.output.humanTemplate,
-            format: this.coreAPI.output.getFormat(),
+            format: this.coreApi.output.getFormat(),
           });
         } catch (error) {
           logger.error(

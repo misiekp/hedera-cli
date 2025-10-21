@@ -22,7 +22,7 @@ export interface AliasRecord {
   updatedAt?: string;
 }
 
-export interface AliasManagementService {
+export interface AliasService {
   register(record: AliasRecord): void;
   resolve(
     ref: string,

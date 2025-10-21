@@ -47,7 +47,7 @@ export const accountPluginManifest: PluginManifest = {
     `state:namespace:${ACCOUNT_NAMESPACE}`,
     'network:read',
     'network:write',
-    'signing:use',
+    'tx-execution:use',
   ],
   commands: [
     {

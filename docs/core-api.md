@@ -9,9 +9,9 @@ The Core API provides a stable, typed interface for plugins to interact with Hed
 ## 🏗️ Core API Structure
 
 ```typescript
-interface CoreAPI {
+interface CoreApi {
   account: AccountTransactionService;
-  signing: SigningService;
+  txExecution: TxExecutionService;
   state: StateService;
   mirror: HederaMirrornodeService;
   network: NetworkService;
@@ -56,12 +56,12 @@ const result = await api.account.createAccount({
 });
 ```
 
-### Signing Service
+### TxExecutionService
 
 Manages transaction signing and execution.
 
 ```typescript
-interface SigningService {
+interface TxExecutionService {
   signAndExecute(transaction: Transaction): Promise<TransactionReceipt>;
   getTransactionStatus(transactionId: string): Promise<TransactionStatus>;
 }
@@ -70,8 +70,8 @@ interface SigningService {
 **Usage Example:**
 
 ```typescript
-const receipt = await api.signing.signAndExecute(transaction);
-const status = await api.signing.getTransactionStatus(transactionId);
+const receipt = await api.txExecution.signAndExecute(transaction);
+const status = await api.txExecution.getTransactionStatus(transactionId);
 ```
 
 ### State Service
@@ -381,7 +381,7 @@ All command handlers receive this interface:
 ```typescript
 interface CommandHandlerArgs {
   args: Record<string, unknown>;
-  api: CoreAPI;
+  api: CoreApi;
   state: StateService;
   config: ConfigService;
   logger: Logger;
@@ -419,9 +419,9 @@ export async function myCommandHandler(
 ### Mocking Services
 
 ```typescript
-import { CoreAPI } from '../core/core-api/core-api.interface';
+import { CoreApi } from '../core/core-api/core-api.interface';
 
-const mockCoreAPI: Partial<CoreAPI> = {
+const mockCoreApi: Partial<CoreApi> = {
   account: {
     createAccount: jest.fn().mockResolvedValue({
       accountId: '0.0.123456',
@@ -459,7 +459,7 @@ describe('My Command Handler', () => {
   it('should process command successfully', async () => {
     const mockArgs = {
       args: { name: 'test', value: 'value' },
-      api: mockCoreAPI,
+      api: mockCoreApi,
       state: mockState,
       config: mockConfig,
       logger: mockLogger,

@@ -1,7 +1,7 @@
 import deleteAccountHandler from '../../commands/delete/handler';
 import type { DeleteAccountOutput } from '../../commands/delete';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import {
   makeLogger,
   makeAccountData,
@@ -37,7 +37,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
+    const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { name: 'acc1' });
 
     const result = deleteAccountHandler(args);
@@ -65,7 +65,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
+    const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { id: '0.0.2222' });
 
     const result = deleteAccountHandler(args);
@@ -91,7 +91,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       state: {} as any,
       logger,
       alias,
@@ -118,7 +118,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       state: {} as any,
       logger,
       alias,
@@ -149,7 +149,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       state: {} as any,
       logger,
       alias,
@@ -181,7 +181,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const alias = makeAliasServiceMock();
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       state: {} as any,
       logger,
       alias,
@@ -217,7 +217,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     });
     const network = makeNetworkServiceMock('testnet');
 
-    const api: Partial<CoreAPI> = { state: {} as any, logger, alias, network };
+    const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { name: 'acc-alias' });
 
     const result = deleteAccountHandler(args);

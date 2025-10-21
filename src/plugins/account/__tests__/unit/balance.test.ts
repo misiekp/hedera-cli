@@ -1,7 +1,7 @@
 import getAccountBalanceHandler from '../../commands/balance/handler';
 import type { AccountBalanceOutput } from '../../commands/balance';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import {
   makeLogger,
@@ -34,7 +34,7 @@ describe('account plugin - balance command (ADR-003)', () => {
 
     const mirrorMock = makeMirrorMock({ hbarBalance: 123456n });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,
@@ -75,7 +75,7 @@ describe('account plugin - balance command (ADR-003)', () => {
       ],
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,
@@ -118,7 +118,7 @@ describe('account plugin - balance command (ADR-003)', () => {
 
     const mirrorMock = makeMirrorMock({ hbarBalance: 42n, tokenBalances: [] });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,
@@ -152,7 +152,7 @@ describe('account plugin - balance command (ADR-003)', () => {
       tokenError: new Error('mirror error'),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,
@@ -180,7 +180,7 @@ describe('account plugin - balance command (ADR-003)', () => {
       getAccountHBarBalance: jest.fn(),
     };
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,

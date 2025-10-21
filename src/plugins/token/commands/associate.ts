@@ -87,9 +87,12 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
 
     // 2. Sign and execute transaction using the account key
     logger.debug(`Using key ${accountKeyRefId} for signing transaction`);
-    const result = await api.signing.signAndExecuteWith(associateTransaction, {
-      keyRefId: accountKeyRefId,
-    });
+    const result = await api.txExecution.signAndExecuteWith(
+      associateTransaction,
+      {
+        keyRefId: accountKeyRefId,
+      },
+    );
 
     if (result.success) {
       logger.log(`✅ Token association successful!`);

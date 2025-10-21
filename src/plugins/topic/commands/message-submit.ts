@@ -2,7 +2,8 @@
  * Topic Message Submit Command Handler
  * Handles submitting messages to topics
  */
-import { CommandHandlerArgs, TransactionResult } from '../../../core';
+import { CommandHandlerArgs } from '../../../core';
+import type { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
 
@@ -49,14 +50,16 @@ export async function submitMessageHandler(args: CommandHandlerArgs) {
 
     // 2. If we have a submit key, sign the transaction with it and execute else execute
     if (topicData.submitKeyRefId) {
-      txResult = await api.signing.signAndExecuteWith(
+      txResult = await api.txExecution.signAndExecuteWith(
         messageSubmitTx.transaction,
         {
           keyRefId: topicData.submitKeyRefId,
         },
       );
     } else {
-      txResult = await api.signing.signAndExecute(messageSubmitTx.transaction);
+      txResult = await api.txExecution.signAndExecute(
+        messageSubmitTx.transaction,
+      );
     }
 
     if (txResult.success) {

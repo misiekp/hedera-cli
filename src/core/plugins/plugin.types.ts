@@ -2,7 +2,7 @@
  * Plugin System Type Definitions
  * Types specific to the plugin architecture
  */
-import { CoreAPI } from '../core-api/core-api.interface';
+import { CoreApi } from '../core-api/core-api.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
@@ -70,7 +70,7 @@ export interface CommandOption {
  * Plugin context
  */
 export interface PluginContext {
-  api: CoreAPI;
+  api: CoreApi;
   state: StateService;
   config: ConfigService;
   logger: Logger;

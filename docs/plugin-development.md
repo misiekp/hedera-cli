@@ -197,11 +197,11 @@ const result = await api.account.createAccount({
 });
 ```
 
-#### 2. Signing Service
+#### 2. TxExecutionService
 
 ```typescript
 // Sign and execute transactions
-const receipt = await api.signing.signAndExecute(transaction);
+const receipt = await api.txExecution.signAndExecute(transaction);
 ```
 
 #### 3. State Service

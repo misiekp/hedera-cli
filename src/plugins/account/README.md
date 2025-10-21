@@ -88,7 +88,7 @@ hcli account clear
 The plugin uses the Core API services:
 
 - `api.account` - Account transaction creation
-- `api.signing` - Transaction signing and execution
+- `api.txExecution` - Transaction signing and execution
 - `api.state` - Namespaced state management
 - `api.network` - Network information
 - `api.credentialsState` - Secure key management
@@ -123,7 +123,7 @@ interface AccountData {
 
 ## 🏷️ Alias Support
 
-- Per-network aliases via `AliasManagementService`
+- Per-network aliases via `AliasService`
 - Aliases resolve to account IDs and key references
 - Example: `myaccount` → `0.0.123456` on testnet
 - Registered during `create` and `import` when `--alias` provided

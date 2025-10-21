@@ -1,7 +1,7 @@
 import { submitMessageHandler } from '../commands/message-submit';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import type { CoreAPI } from '../../../core/core-api/core-api.interface';
-import type { TransactionResult } from '../../../core/services/signing/signing-service.interface';
+import type { CoreApi } from '../../../core/core-api/core-api.interface';
+import type { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
 import type { TopicData } from '../schema';
 import {
   makeLogger,
@@ -103,9 +103,9 @@ describe('topic plugin - message-submit command', () => {
       } as TransactionResult),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       alias: alias as any,
       state: {} as any,
@@ -156,9 +156,9 @@ describe('topic plugin - message-submit command', () => {
       } as TransactionResult),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       alias: alias as any,
       state: {} as any,
@@ -189,9 +189,9 @@ describe('topic plugin - message-submit command', () => {
 
     const { topicTransactions, signing, networkMock, alias } = makeApiMocks({});
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       alias: alias as any,
       state: {} as any,
@@ -230,9 +230,9 @@ describe('topic plugin - message-submit command', () => {
       } as TransactionResult),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       alias: alias as any,
       state: {} as any,
@@ -266,9 +266,9 @@ describe('topic plugin - message-submit command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       topic: topicTransactions,
-      signing,
+      txExecution: signing,
       network: networkMock,
       alias: alias as any,
       state: {} as any,

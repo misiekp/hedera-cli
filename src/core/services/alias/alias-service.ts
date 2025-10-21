@@ -1,5 +1,5 @@
 import {
-  AliasManagementService,
+  AliasService,
   AliasRecord,
   AliasType,
 } from './alias-service.interface';
@@ -9,7 +9,7 @@ import { Logger } from '../logger/logger-service.interface';
 
 const NAMESPACE = 'aliases';
 
-export class AliasManagementServiceImpl implements AliasManagementService {
+export class AliasServiceImpl implements AliasService {
   private readonly state: StateService;
   private readonly logger: Logger;
 

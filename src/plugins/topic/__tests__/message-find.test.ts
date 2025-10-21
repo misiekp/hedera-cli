@@ -1,5 +1,5 @@
 import { findMessageHandler } from '../commands/message-find';
-import type { CoreAPI } from '../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import {
   makeLogger,
@@ -72,7 +72,7 @@ describe('topic plugin - message-find command', () => {
       getTopicMessageImpl: jest.fn().mockResolvedValue(mockMessage),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -112,7 +112,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -157,7 +157,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -198,7 +198,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -234,7 +234,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -270,7 +270,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -309,7 +309,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -339,7 +339,7 @@ describe('topic plugin - message-find command', () => {
 
     const { mirror, networkMock, alias } = makeApiMocks({});
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -367,7 +367,7 @@ describe('topic plugin - message-find command', () => {
         .mockRejectedValue(new Error('network error')),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -396,7 +396,7 @@ describe('topic plugin - message-find command', () => {
         .mockRejectedValue(new Error('network error')),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -426,7 +426,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,
@@ -456,7 +456,7 @@ describe('topic plugin - message-find command', () => {
       }),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror,
       network: networkMock,
       alias: alias as any,

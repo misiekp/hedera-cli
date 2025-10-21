@@ -1,7 +1,7 @@
 import viewAccountHandler from '../../commands/view/handler';
 import type { ViewAccountOutput } from '../../commands/view';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import {
   makeLogger,
@@ -37,7 +37,7 @@ describe('account plugin - view command (ADR-003)', () => {
         accountPublicKey: 'pubKey',
       },
     });
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,
@@ -73,7 +73,7 @@ describe('account plugin - view command (ADR-003)', () => {
         accountPublicKey: 'pubKey2',
       },
     });
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,
@@ -104,7 +104,7 @@ describe('account plugin - view command (ADR-003)', () => {
     const mirrorMock = makeMirrorMock({
       getAccountImpl: jest.fn().mockRejectedValue(new Error('mirror down')),
     });
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,
@@ -129,7 +129,7 @@ describe('account plugin - view command (ADR-003)', () => {
     }));
 
     const mirrorMock = makeMirrorMock();
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
       state: {} as any,

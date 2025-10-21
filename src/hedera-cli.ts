@@ -10,7 +10,7 @@ import { installGlobalErrorHandlers } from './utils/errors';
 import { Logger } from './utils/logger';
 import { setGlobalOutputMode } from './utils/output';
 import { PluginManager } from './core/plugins/plugin-manager';
-import { createCoreAPI } from './core/core-api';
+import { createCoreApi } from './core/core-api';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };
@@ -32,8 +32,8 @@ program
 // Apply logging options and store format preference
 let globalFormat: 'human' | 'json' = 'human';
 
-// Store coreAPI instance to access in preAction hook
-let coreAPIInstance: ReturnType<typeof createCoreAPI> | null = null;
+// Store coreApi instance to access in preAction hook
+let coreApiInstance: ReturnType<typeof createCoreApi> | null = null;
 
 program.hook('preAction', () => {
   const opts = program.opts();
@@ -50,9 +50,9 @@ program.hook('preAction', () => {
   globalFormat = format as 'human' | 'json';
   setGlobalOutputMode({ json: format === 'json' });
 
-  // Update output format on coreAPI if available
-  if (coreAPIInstance) {
-    coreAPIInstance.output.setFormat(globalFormat);
+  // Update output format on coreApi if available
+  if (coreApiInstance) {
+    coreApiInstance.output.setFormat(globalFormat);
   }
 });
 
@@ -66,13 +66,13 @@ async function initializeCLI() {
     console.error('🚀 Starting Hedera CLI...');
 
     // Create plugin manager
-    const coreAPI = createCoreAPI();
-    coreAPIInstance = coreAPI;
+    const coreApi = createCoreApi();
+    coreApiInstance = coreApi;
 
     // Set initial output format
-    coreAPI.output.setFormat(globalFormat);
+    coreApi.output.setFormat(globalFormat);
 
-    const pluginManager = new PluginManager(coreAPI);
+    const pluginManager = new PluginManager(coreApi);
 
     // Set default plugins
     pluginManager.setDefaultPlugins([

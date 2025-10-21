@@ -1,7 +1,7 @@
 import importAccountHandler from '../../commands/import/handler';
 import type { ImportAccountOutput } from '../../commands/import';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import {
   makeLogger,
@@ -38,7 +38,7 @@ describe('account plugin - import command (ADR-003)', () => {
     const credentialsState = makeCredentialsStateMock();
     const alias = makeAliasMock();
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
       credentialsState,
@@ -102,7 +102,7 @@ describe('account plugin - import command (ADR-003)', () => {
     const credentialsState = makeCredentialsStateMock();
     const alias = makeAliasMock();
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
       credentialsState,
@@ -141,7 +141,7 @@ describe('account plugin - import command (ADR-003)', () => {
     const credentialsState = makeCredentialsStateMock();
     const alias = makeAliasMock();
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
       credentialsState,

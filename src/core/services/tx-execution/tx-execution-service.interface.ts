@@ -1,10 +1,10 @@
 import type { Transaction as HederaTransaction } from '@hashgraph/sdk';
 
 /**
- * Interface for transaction signing and execution
+ * Interface for transaction execution
  * All transaction services must implement this interface
  */
-export interface TransactionService {
+export interface TxExecutionService {
   /**
    * Sign and execute a transaction in one operation
    */

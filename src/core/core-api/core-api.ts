@@ -2,18 +2,18 @@
  * Core API Implementation
  * Combines all services into a single Core API instance
  */
-import { CoreAPI } from './core-api.interface';
+import { CoreApi } from './core-api.interface';
 import { AccountService } from '../services/account/account-transaction-service.interface';
-import { TransactionService } from '../services/signing/signing-service.interface';
-import { TopicService } from '../services/topics/topic-transaction-service.interface';
+import { TxExecutionService } from '../services/tx-execution/tx-execution-service.interface';
+import { TopicService } from '../services/topic/topic-transaction-service.interface';
 import { StateService } from '../services/state/state-service.interface';
 import { HederaMirrornodeService } from '../services/mirrornode/hedera-mirrornode-service.interface';
 import { NetworkService } from '../services/network/network-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { AccountServiceImpl } from '../services/account/account-transaction-service';
-import { TransactionServiceImpl } from '../services/signing/signing-service';
-import { TopicServiceImpl } from '../services/topics/topic-transaction-service';
+import { TxExecutionServiceImpl } from '../services/tx-execution/tx-execution-service';
+import { TopicServiceImpl } from '../services/topic/topic-transaction-service';
 import { ZustandGenericStateServiceImpl } from '../services/state/state-service';
 import { HederaMirrornodeServiceDefaultImpl } from '../services/mirrornode/hedera-mirrornode-service';
 import { LedgerId } from '@hashgraph/sdk';
@@ -22,8 +22,8 @@ import { MockConfigService } from '../services/config/config-service';
 import { MockLoggerService } from '../services/logger/logger-service';
 import { HbarService } from '../services/hbar/hbar-service.interface';
 import { HbarServiceImpl } from '../services/hbar/hbar-service';
-import { AliasManagementService } from '../services/alias/alias-service.interface';
-import { AliasManagementServiceImpl } from '../services/alias/alias-service';
+import { AliasService } from '../services/alias/alias-service.interface';
+import { AliasServiceImpl } from '../services/alias/alias-service';
 import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
 import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
 import { TokenService } from '../services/token/token-service.interface';
@@ -31,17 +31,17 @@ import { TokenServiceImpl } from '../services/token/token-service';
 import { OutputService } from '../services/output/output-service.interface';
 import { OutputServiceImpl } from '../services/output/output-service';
 
-export class CoreAPIImplementation implements CoreAPI {
+export class CoreApiImplementation implements CoreApi {
   public account: AccountService;
   public token: TokenService;
-  public signing: TransactionService;
+  public txExecution: TxExecutionService;
   public topic: TopicService;
   public state: StateService;
   public mirror: HederaMirrornodeService;
   public network: NetworkService;
   public config: ConfigService;
   public logger: Logger;
-  public alias: AliasManagementService;
+  public alias: AliasService;
   public credentialsState: KeyManagementService;
   public hbar?: HbarService;
   public output: OutputService;
@@ -53,13 +53,13 @@ export class CoreAPIImplementation implements CoreAPI {
     this.network = new NetworkServiceImpl(this.state, this.logger);
 
     // Initialize new services
-    this.alias = new AliasManagementServiceImpl(this.state, this.logger);
+    this.alias = new AliasServiceImpl(this.state, this.logger);
     this.credentialsState = new KeyManagementServiceImpl(
       this.logger,
       this.state,
       this.network,
     );
-    this.signing = new TransactionServiceImpl(
+    this.txExecution = new TxExecutionServiceImpl(
       this.logger,
       this.credentialsState,
       this.network,
@@ -67,7 +67,7 @@ export class CoreAPIImplementation implements CoreAPI {
 
     // Initialize all services with dependencies
     this.account = new AccountServiceImpl(this.logger);
-    this.token = new TokenServiceImpl(this.logger, this.signing);
+    this.token = new TokenServiceImpl(this.logger);
     this.topic = new TopicServiceImpl();
 
     // Convert network string to LedgerId
@@ -98,6 +98,6 @@ export class CoreAPIImplementation implements CoreAPI {
 /**
  * Factory function to create a Core API instance
  */
-export function createCoreAPI(): CoreAPI {
-  return new CoreAPIImplementation();
+export function createCoreApi(): CoreApi {
+  return new CoreApiImplementation();
 }
