@@ -14,6 +14,7 @@ import { HbarService } from '../services/hbar/hbar-service.interface';
 import { AliasManagementService } from '../services/alias/alias-service.interface';
 import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
 import { TokenService } from '../services/token/token-service.interface';
+import { OutputService } from '../services/output/output-service.interface';
 
 export interface CoreAPI {
   /**
@@ -75,4 +76,9 @@ export interface CoreAPI {
    * HBAR operations
    */
   hbar?: HbarService;
+
+  /**
+   * Output handling and formatting
+   */
+  output: OutputService;
 }

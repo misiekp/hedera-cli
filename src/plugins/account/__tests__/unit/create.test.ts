@@ -1,4 +1,5 @@
-import { createAccountHandler } from '../../commands/create';
+import createAccountHandler from '../../commands/create/handler';
+import type { CreateAccountOutput } from '../../commands/create';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
 import type { AccountService } from '../../../../core/services/account/account-transaction-service.interface';
@@ -10,10 +11,7 @@ import {
   makeCredentialsStateMock,
   makeAliasMock,
   makeSigningMock,
-  setupExitSpy,
 } from '../../../../../__tests__/helpers/plugin';
-
-let exitSpy: jest.SpyInstance;
 
 jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
@@ -51,15 +49,7 @@ const makeApiMocks = ({
   return { account, signing, networkMock, credentialsState, alias };
 };
 
-beforeAll(() => {
-  exitSpy = setupExitSpy();
-});
-
-afterAll(() => {
-  exitSpy.mockRestore();
-});
-
-describe('account plugin - create command (unit)', () => {
+describe('account plugin - create command (ADR-003)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -99,7 +89,7 @@ describe('account plugin - create command (unit)', () => {
       alias: 'myAccount',
     });
 
-    await createAccountHandler(args);
+    const result = await createAccountHandler(args);
 
     expect(credentialsState.createLocalPrivateKey).toHaveBeenCalled();
     expect(account.createAccount).toHaveBeenCalledWith({
@@ -129,71 +119,87 @@ describe('account plugin - create command (unit)', () => {
         keyRefId: 'kr_test123',
       }),
     );
-    expect(logger.log).toHaveBeenCalledWith(
-      '✅ Account created successfully: 0.0.9999',
+
+    // Verify ADR-003 result
+    expect(result.status).toBe('success');
+    expect(result.outputJson).toBeDefined();
+
+    const output: CreateAccountOutput = JSON.parse(result.outputJson!);
+    expect(output.accountId).toBe('0.0.9999');
+    expect(output.name).toBe('myAccount');
+    expect(output.type).toBe('ECDSA');
+    expect(output.alias).toBe('myAccount');
+    expect(output.network).toBe('testnet');
+    expect(output.transactionId).toBe('tx-123');
+    expect(output.evmAddress).toBe(
+      '0x000000000000000000000000000000000000abcd',
     );
-    expect(exitSpy).toHaveBeenCalledWith(0);
+    expect(output.publicKey).toBe('pub-key-test');
   });
 
-  test('logs error and exits when signAndExecute returns failure', async () => {
+  test('returns failure when signAndExecute returns failure', async () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { account, signing, networkMock } = makeApiMocks({
-      createAccountImpl: jest.fn().mockResolvedValue({
-        transaction: {},
-        privateKey: 'priv',
-        publicKey: 'pub',
-        evmAddress: '0x000000000000000000000000000000000000abcd',
-      }),
-      signAndExecuteImpl: jest.fn().mockResolvedValue({
-        transactionId: 'tx-123',
-        success: false,
-        receipt: {} as any,
-      } as TransactionResult),
-    });
+    const { account, signing, networkMock, credentialsState, alias } =
+      makeApiMocks({
+        createAccountImpl: jest.fn().mockResolvedValue({
+          transaction: {},
+          privateKey: 'priv',
+          publicKey: 'pub',
+          evmAddress: '0x000000000000000000000000000000000000abcd',
+        }),
+        signAndExecuteImpl: jest.fn().mockResolvedValue({
+          transactionId: 'tx-123',
+          success: false,
+          receipt: {} as any,
+        } as TransactionResult),
+      });
 
     const api: Partial<CoreAPI> = {
       account,
       signing,
       network: networkMock,
+      credentialsState,
+      alias,
       logger,
     };
 
     const args = makeArgs(api, logger, { name: 'failAccount' });
 
-    await createAccountHandler(args);
+    const result = await createAccountHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to create account'),
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toBe('Failed to create account');
   });
 
-  test('logs error and exits when createAccount throws', async () => {
+  test('returns failure when createAccount throws', async () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { account, signing, networkMock } = makeApiMocks({
-      createAccountImpl: jest
-        .fn()
-        .mockRejectedValue(new Error('network error')),
-    });
+    const { account, signing, networkMock, credentialsState, alias } =
+      makeApiMocks({
+        createAccountImpl: jest
+          .fn()
+          .mockRejectedValue(new Error('network error')),
+      });
 
     const api: Partial<CoreAPI> = {
       account,
       signing,
       network: networkMock,
+      credentialsState,
+      alias,
       logger,
     };
 
     const args = makeArgs(api, logger, { name: 'errorAccount' });
 
-    await createAccountHandler(args);
+    const result = await createAccountHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to create account'),
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toBeDefined();
+    expect(result.errorMessage).toContain('Failed to create account');
+    expect(result.errorMessage).toContain('network error');
   });
 });

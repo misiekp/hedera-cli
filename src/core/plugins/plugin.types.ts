@@ -35,8 +35,8 @@ export interface PluginManifest {
 export interface CommandOutputSpec {
   /** JSON Schema for the command's output */
   schema: unknown;
-  /** Optional human-readable template name or inline template */
-  humanTemplate?: { name?: string; inline?: string };
+  /** Optional human-readable Handlebars template string */
+  humanTemplate?: string;
 }
 
 /**

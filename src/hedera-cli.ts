@@ -22,10 +22,19 @@ program
   .option('-v, --verbose', 'Enable verbose logging')
   .option('-q, --quiet', 'Quiet mode (only errors)')
   .option('--debug', 'Enable debug logging')
-  .option('--json', 'Machine-readable JSON output')
+  .option(
+    '--json',
+    'Machine-readable JSON output (deprecated, use --format json)',
+  )
+  .option('--format <type>', 'Output format: human (default) or json')
   .option('--no-color', 'Disable ANSI colors');
 
-// Apply logging options
+// Apply logging options and store format preference
+let globalFormat: 'human' | 'json' = 'human';
+
+// Store coreAPI instance to access in preAction hook
+let coreAPIInstance: ReturnType<typeof createCoreAPI> | null = null;
+
 program.hook('preAction', () => {
   const opts = program.opts();
 
@@ -34,16 +43,35 @@ program.hook('preAction', () => {
   if (opts.quiet) logger.setLevel('quiet');
 
   setColorEnabled(opts.color !== false);
-  setGlobalOutputMode({ json: Boolean(opts.json) });
+
+  // Handle --json flag (deprecated) and --format flag
+  const formatOption = opts.format as string | undefined;
+  const format: string = formatOption || (opts.json ? 'json' : 'human');
+  globalFormat = format as 'human' | 'json';
+  setGlobalOutputMode({ json: format === 'json' });
+
+  // Update output format on coreAPI if available
+  if (coreAPIInstance) {
+    coreAPIInstance.output.setFormat(globalFormat);
+  }
 });
+
+export function getGlobalFormat(): 'human' | 'json' {
+  return globalFormat;
+}
 
 // Initialize the simplified plugin system
 async function initializeCLI() {
   try {
-    console.log('🚀 Starting Hedera CLI...');
+    console.error('🚀 Starting Hedera CLI...');
 
     // Create plugin manager
     const coreAPI = createCoreAPI();
+    coreAPIInstance = coreAPI;
+
+    // Set initial output format
+    coreAPI.output.setFormat(globalFormat);
+
     const pluginManager = new PluginManager(coreAPI);
 
     // Set default plugins
@@ -64,7 +92,7 @@ async function initializeCLI() {
     // Register plugin commands
     pluginManager.registerCommands(program);
 
-    console.log('✅ CLI ready');
+    console.error('✅ CLI ready');
 
     // Parse arguments and execute command
     installGlobalErrorHandlers();

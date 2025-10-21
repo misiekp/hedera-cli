@@ -1,6 +1,5 @@
 /**
- * Account Plugin Output Schemas
- * Defines output schemas for account commands following ADR-003
+ * List Accounts Command Output Schema and Template
  */
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -25,7 +24,7 @@ export const ListAccountsOutputSchema = z.object({
 export type ListAccountsOutput = z.infer<typeof ListAccountsOutputSchema>;
 
 // JSON Schema for manifest
-export const LIST_ACCOUNTS_OUTPUT_JSON_SCHEMA = zodToJsonSchema(
+export const LIST_ACCOUNTS_OUTPUT_SCHEMA = zodToJsonSchema(
   ListAccountsOutputSchema,
   {
     name: 'ListAccountsOutput',

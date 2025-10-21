@@ -1,14 +1,19 @@
 /**
  * Account Create Command Handler
  * Handles account creation using the Core API
+ * Follows ADR-003 contract: returns CommandExecutionResult
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import type { AccountData } from '../schema';
-import { AliasType } from '../../../core/services/alias/alias-service.interface';
-import { formatError } from '../../../utils/errors';
-import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import type { AccountData } from '../../schema';
+import { AliasType } from '../../../../core/services/alias/alias-service.interface';
+import { formatError } from '../../../../utils/errors';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { CreateAccountOutput } from './output';
 
-export async function createAccountHandler(args: CommandHandlerArgs) {
+export default async function createAccountHandler(
+  args: CommandHandlerArgs,
+): Promise<CommandExecutionResult> {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -16,7 +21,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
 
   // Extract command arguments
   const balance =
-    args.args.balance !== undefined ? (args.args.balance as number) : 10000;
+    args.args.balance !== undefined ? (args.args.balance as number) : 1;
   const autoAssociations = (args.args['auto-associations'] as number) || 0;
   const alias = (args.args.alias as string) || '';
 
@@ -72,24 +77,32 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
 
       accountState.saveAccount(name, accountData);
 
-      logger.log(`✅ Account created successfully: ${accountData.accountId}`);
-      logger.log(`   Name: ${accountData.name}`);
-      logger.log(`   Type: ${accountData.type}`);
-      if (alias) {
-        logger.log(`   Alias: ${alias}`);
-      }
-      logger.log(`   Network: ${accountData.network}`);
-      logger.log(`   Transaction ID: ${result.transactionId}`);
+      // Prepare output data
+      const outputData: CreateAccountOutput = {
+        accountId: accountData.accountId,
+        name: accountData.name,
+        type: accountData.type,
+        ...(alias && { alias }),
+        network: accountData.network,
+        transactionId: result.transactionId || '',
+        evmAddress: accountData.evmAddress,
+        publicKey: accountData.publicKey,
+      };
 
-      process.exit(0);
+      return {
+        status: 'success',
+        outputJson: JSON.stringify(outputData),
+      };
     } else {
-      throw new Error('Failed to create account');
+      return {
+        status: 'failure',
+        errorMessage: 'Failed to create account',
+      };
     }
   } catch (error: unknown) {
-    logger.error(formatError('❌ Failed to create account', error));
-    process.exit(1);
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to create account', error),
+    };
   }
 }
-
-// Default export for plugin manager
-export default createAccountHandler;

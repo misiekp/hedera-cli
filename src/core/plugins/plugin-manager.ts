@@ -308,17 +308,16 @@ export class PluginManager {
       // Handle successful execution with output
       if (executionResult.outputJson) {
         try {
-          // Parse and validate JSON
-          const outputData: unknown = JSON.parse(executionResult.outputJson);
-
-          // TODO: Validate outputData against commandSpec.output.schema
-
-          // For now, use a simple output handler (pretty-print JSON)
-          // TODO: Support multiple output formats (--format flag) and templates
-          this.handleOutput(outputData);
+          // Use OutputHandlerService to format and display output
+          this.coreAPI.output.handleCommandOutput({
+            outputJson: executionResult.outputJson,
+            schema: commandSpec.output.schema,
+            template: commandSpec.output.humanTemplate,
+            format: this.coreAPI.output.getFormat(),
+          });
         } catch (error) {
           logger.error(
-            `Failed to parse output JSON from ${commandSpec.name}: ${formatError('', error)}`,
+            `Failed to handle output from ${commandSpec.name}: ${formatError('', error)}`,
           );
           process.exit(1);
         }
@@ -330,15 +329,5 @@ export class PluginManager {
 
     // Legacy behavior: handler returns void, no output processing
     // Handler is responsible for its own output and error handling
-  }
-
-  /**
-   * Handle command output
-   * TODO: Support multiple formats (json, yaml, xml) and templates
-   * TODO: Support --output flag to write to file
-   */
-  private handleOutput(data: unknown): void {
-    // For now, pretty-print JSON to stdout
-    console.log(JSON.stringify(data, null, 2));
   }
 }

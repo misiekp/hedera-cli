@@ -1,12 +1,17 @@
 /**
  * Account Import Command Handler
  * Handles importing existing accounts using the Core API
+ * Follows ADR-003 contract: returns CommandExecutionResult
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { formatError } from '../../../utils/errors';
-import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { formatError } from '../../../../utils/errors';
+import { ZustandAccountStateHelper } from '../../zustand-state-helper';
+import { ImportAccountOutput } from './output';
 
-export async function importAccountHandler(args: CommandHandlerArgs) {
+export default async function importAccountHandler(
+  args: CommandHandlerArgs,
+): Promise<CommandExecutionResult> {
   const { api, logger } = args;
 
   // Initialize Zustand state helper
@@ -74,20 +79,25 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
     // Store account in state using the helper
     accountState.saveAccount(name, account);
 
-    logger.log(`✅ Account imported successfully: ${accountId}`);
-    logger.log(`   Name: ${account.name}`);
-    logger.log(`   Type: ${account.type}`);
-    logger.log(`   Network: ${account.network}`);
-    if (alias) {
-      logger.log(`   Alias: ${alias}`);
-    }
-    logger.log(`   Balance: ${accountInfo.balance.balance} tinybars`);
+    // Prepare output data
+    const outputData: ImportAccountOutput = {
+      accountId,
+      name: account.name,
+      type: account.type,
+      ...(alias && { alias }),
+      network: account.network,
+      balance: accountInfo.balance.balance.toString(),
+      evmAddress: account.evmAddress,
+    };
 
-    process.exit(0);
+    return {
+      status: 'success',
+      outputJson: JSON.stringify(outputData),
+    };
   } catch (error: unknown) {
-    logger.error(formatError('❌ Failed to import account', error));
-    process.exit(1);
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to import account', error),
+    };
   }
 }
-
-export default importAccountHandler;

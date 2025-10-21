@@ -28,6 +28,8 @@ import { KeyManagementService } from '../services/credentials-state/credentials-
 import { KeyManagementServiceImpl } from '../services/credentials-state/credentials-state-service';
 import { TokenService } from '../services/token/token-service.interface';
 import { TokenServiceImpl } from '../services/token/token-service';
+import { OutputService } from '../services/output/output-service.interface';
+import { OutputServiceImpl } from '../services/output/output-service';
 
 export class CoreAPIImplementation implements CoreAPI {
   public account: AccountService;
@@ -42,6 +44,7 @@ export class CoreAPIImplementation implements CoreAPI {
   public alias: AliasManagementService;
   public credentialsState: KeyManagementService;
   public hbar?: HbarService;
+  public output: OutputService;
 
   constructor() {
     this.logger = new MockLoggerService();
@@ -88,6 +91,7 @@ export class CoreAPIImplementation implements CoreAPI {
     this.config = new MockConfigService();
 
     this.hbar = new HbarServiceImpl(this.logger);
+    this.output = new OutputServiceImpl();
   }
 }
 

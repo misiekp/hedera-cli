@@ -1,7 +1,7 @@
-import { listAccountsHandler } from '../../commands/list';
+import listAccountsHandler from '../../commands/list/handler';
+import type { ListAccountsOutput } from '../../commands/list';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
-import type { ListAccountsOutput } from '../../output-schemas';
 import {
   makeLogger,
   makeAccountData,
