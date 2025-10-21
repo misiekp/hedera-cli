@@ -8,7 +8,7 @@ import { associateTokenHandler } from '../../commands/associate';
 import { transferTokenHandler } from '../../commands/transfer';
 import { createTokenFromFileHandler } from '../../commands/createFromFile';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
-import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
+import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import {
   makeLogger,
   makeApiMocks,

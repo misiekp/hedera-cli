@@ -89,7 +89,7 @@ The plugin supports flexible account parameter formats:
 The plugin uses the Core API services:
 
 - `api.tokens` - Token transaction creation and management
-- `api.signing` - Transaction signing and execution
+- `api.txExecution` - Transaction signing and execution
 - `api.credentialsState` - Account credentials and key management
 - `api.alias` - Account alias resolution
 - `api.state` - Namespaced state management

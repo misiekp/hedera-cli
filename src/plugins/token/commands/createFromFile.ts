@@ -3,9 +3,9 @@
  * Handles token creation from JSON file definitions using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { CoreAPI } from '../../../core/core-api/core-api.interface';
+import { CoreApi } from '../../../core/core-api/core-api.interface';
 import { Logger } from '../../../core/services/logger/logger-service.interface';
-import { TransactionResult } from '../../../core/services/signing/signing-service.interface';
+import { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
 import { SupportedNetwork } from '../../../core/types/shared.types';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
 import { TokenData } from '../schema';
@@ -155,7 +155,7 @@ async function readAndValidateTokenFile(
  */
 function resolveTreasuryFromDefinition(
   treasuryDef: string | { accountId: string; key: string },
-  api: CoreAPI,
+  api: CoreApi,
   network: SupportedNetwork,
   logger: Logger,
 ): TreasuryFromFileResolution {
@@ -271,7 +271,7 @@ function logTokenCreationSuccessFromFile(
 async function processTokenAssociations(
   tokenId: string,
   associations: Array<{ accountId: string; key: string }>,
-  api: CoreAPI,
+  api: CoreApi,
   logger: Logger,
 ): Promise<Array<{ name: string; accountId: string }>> {
   if (associations.length === 0) {
@@ -293,7 +293,7 @@ async function processTokenAssociations(
       const associationImported = api.credentialsState.importPrivateKey(
         association.key,
       );
-      const associateResult = await api.signing.signAndExecuteWith(
+      const associateResult = await api.txExecution.signAndExecuteWith(
         associateTransaction,
         { keyRefId: associationImported.keyRefId },
       );
@@ -368,7 +368,7 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
     });
 
     logger.log(`🔑 Using treasury key for signing transaction`);
-    const result = await api.signing.signAndExecuteWith(
+    const result = await api.txExecution.signAndExecuteWith(
       tokenCreateTransaction,
       { keyRefId: treasury.treasuryKeyRefId },
     );

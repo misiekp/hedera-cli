@@ -17,7 +17,7 @@ export function infoHandler(args: CommandHandlerArgs): void {
       '   Commands: create, list, balance, import, clear, delete, view',
     );
     logger.log(
-      '   Capabilities: network:read, network:write, state:namespace:accounts, signing:use',
+      '   Capabilities: network:read, network:write, state:namespace:accounts, tx-execution:use',
     );
   } else if (name === 'plugin-management') {
     logger.log('   Name: plugin-management');

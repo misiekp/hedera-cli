@@ -19,7 +19,7 @@ export const tokenPluginManifest: PluginManifest = {
     `state:namespace:${TOKEN_NAMESPACE}`,
     'network:read',
     'network:write',
-    'signing:use',
+    'tx-execution:use',
   ],
   commands: [
     {

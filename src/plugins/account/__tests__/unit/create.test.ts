@@ -1,8 +1,8 @@
 import { createAccountHandler } from '../../commands/create';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { AccountService } from '../../../../core/services/account/account-transaction-service.interface';
-import type { TransactionResult } from '../../../../core/services/signing/signing-service.interface';
+import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import {
   makeLogger,
   makeArgs,
@@ -84,9 +84,9 @@ describe('account plugin - create command (unit)', () => {
         } as TransactionResult),
       });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       account,
-      signing,
+      txExecution: signing,
       network: networkMock,
       credentialsState,
       alias,
@@ -153,9 +153,9 @@ describe('account plugin - create command (unit)', () => {
       } as TransactionResult),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       account,
-      signing,
+      txExecution: signing,
       network: networkMock,
       logger,
     };
@@ -180,9 +180,9 @@ describe('account plugin - create command (unit)', () => {
         .mockRejectedValue(new Error('network error')),
     });
 
-    const api: Partial<CoreAPI> = {
+    const api: Partial<CoreApi> = {
       account,
-      signing,
+      txExecution: signing,
       network: networkMock,
       logger,
     };

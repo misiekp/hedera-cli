@@ -15,7 +15,6 @@ import {
   Hbar,
 } from '@hashgraph/sdk';
 import { Logger } from '../logger/logger-service.interface';
-import { TransactionService } from '../signing/signing-service.interface';
 import { TokenService } from './token-service.interface';
 import type {
   TokenTransferParams,
@@ -27,11 +26,9 @@ import { parsePrivateKey } from '../../../utils/keys';
 
 export class TokenServiceImpl implements TokenService {
   private logger: Logger;
-  private transactionService?: TransactionService;
 
-  constructor(logger: Logger, transactionService?: TransactionService) {
+  constructor(logger: Logger) {
     this.logger = logger;
-    this.transactionService = transactionService;
   }
 
   /**

@@ -39,7 +39,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
     });
 
     // 2. Sign and execute transaction with default operator
-    const result = await api.signing.signAndExecute(
+    const result = await api.txExecution.signAndExecute(
       accountCreateResult.transaction,
     );
 

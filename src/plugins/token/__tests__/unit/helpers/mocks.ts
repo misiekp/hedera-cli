@@ -3,12 +3,12 @@
  * Provides reusable mocks for services, APIs, and common test utilities
  */
 import type { Logger } from '../../../../../core/services/logger/logger-service.interface';
-import type { CoreAPI } from '../../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../../core/core-api/core-api.interface';
 import type { TokenService } from '../../../../../core/services/token/token-service.interface';
-import type { TransactionService } from '../../../../../core/services/signing/signing-service.interface';
+import type { TxExecutionService } from '../../../../../core/services/tx-execution/tx-execution-service.interface';
 import type { StateService } from '../../../../../core/services/state/state-service.interface';
 import type { KeyManagementService } from '../../../../../core/services/credentials-state/credentials-state-service.interface';
-import type { AliasManagementService } from '../../../../../core/services/alias/alias-service.interface';
+import type { AliasService } from '../../../../../core/services/alias/alias-service.interface';
 import type { AccountService } from '../../../../../core/services/account/account-transaction-service.interface';
 import type { NetworkService } from '../../../../../core/services/network/network-service.interface';
 import type { ConfigService } from '../../../../../core/services/config/config-service.interface';
@@ -43,11 +43,11 @@ export const makeTokenServiceMock = (
 export const makeTokenTransactionServiceMock = makeTokenServiceMock;
 
 /**
- * Create a mocked TransactionService (SigningService)
+ * Create a mocked TxExecutionService
  */
-export const makeSigningServiceMock = (
-  overrides?: Partial<jest.Mocked<TransactionService>>,
-): jest.Mocked<TransactionService> => ({
+export const makeTxExecutionServiceMock = (
+  overrides?: Partial<jest.Mocked<TxExecutionService>>,
+): jest.Mocked<TxExecutionService> => ({
   signAndExecute: jest.fn().mockResolvedValue(mockTransactionResults.success),
   signAndExecuteWith: jest
     .fn()
@@ -86,11 +86,11 @@ export const makeCredentialsStateMock = (
 });
 
 /**
- * Create a mocked AliasManagementService
+ * Create a mocked AliasService
  */
 export const makeAliasServiceMock = (
-  overrides?: Partial<jest.Mocked<AliasManagementService>>,
-): jest.Mocked<AliasManagementService> => ({
+  overrides?: Partial<jest.Mocked<AliasService>>,
+): jest.Mocked<AliasService> => ({
   register: jest.fn(),
   resolve: jest.fn().mockReturnValue(null),
   list: jest.fn().mockReturnValue([]),
@@ -135,9 +135,9 @@ export const makeAccountTransactionServiceMock =
 interface ApiMocksConfig {
   tokens?: Partial<jest.Mocked<TokenService>>;
   tokenTransactions?: Partial<jest.Mocked<TokenService>>; // Deprecated, use 'tokens'
-  signing?: Partial<jest.Mocked<TransactionService>>;
+  signing?: Partial<jest.Mocked<TxExecutionService>>;
   credentialsState?: Partial<jest.Mocked<KeyManagementService>>;
-  alias?: Partial<jest.Mocked<AliasManagementService>>;
+  alias?: Partial<jest.Mocked<AliasService>>;
   state?: Partial<jest.Mocked<StateService>>;
   network?: string;
   // Legacy support for old test patterns
@@ -147,14 +147,14 @@ interface ApiMocksConfig {
 }
 
 /**
- * Create a complete mocked CoreAPI with configurable services
+ * Create a complete mocked CoreApi with configurable services
  */
 export const makeApiMocks = (config?: ApiMocksConfig) => {
   // Support both 'tokens' and 'tokenTransactions' for backward compatibility
   const tokens = makeTokenServiceMock(
     config?.tokens || config?.tokenTransactions,
   );
-  const signing = makeSigningServiceMock(config?.signing);
+  const signing = makeTxExecutionServiceMock(config?.signing);
   const credentialsState = makeCredentialsStateMock(
     config?.credentialsState || config?.credentials,
   );
@@ -162,11 +162,11 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
   const state = makeStateServiceMock(config?.state);
   const account = makeAccountTransactionServiceMock();
 
-  const api: jest.Mocked<CoreAPI> = {
+  const api: jest.Mocked<CoreApi> = {
     account,
     token: tokens,
     topic: {} as unknown as any,
-    signing,
+    txExecution: signing,
     credentialsState,
     alias,
     state,

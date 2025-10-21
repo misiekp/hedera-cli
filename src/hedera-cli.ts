@@ -10,7 +10,7 @@ import { installGlobalErrorHandlers } from './utils/errors';
 import { Logger } from './utils/logger';
 import { setGlobalOutputMode } from './utils/output';
 import { PluginManager } from './core/plugins/plugin-manager';
-import { createCoreAPI } from './core/core-api';
+import { createCoreApi } from './core/core-api';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };
@@ -43,7 +43,7 @@ async function initializeCLI() {
     console.log('🚀 Starting Hedera CLI...');
 
     // Create plugin manager
-    const coreAPI = createCoreAPI();
+    const coreAPI = createCoreApi();
     const pluginManager = new PluginManager(coreAPI);
 
     // Set default plugins

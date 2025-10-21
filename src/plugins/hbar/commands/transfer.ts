@@ -98,10 +98,10 @@ export default async function transferHandler(
     }
 
     const result = fromKeyRefId
-      ? await api.signing.signAndExecuteWith(transferResult.transaction, {
+      ? await api.txExecution.signAndExecuteWith(transferResult.transaction, {
           keyRefId: fromKeyRefId,
         })
-      : await api.signing.signAndExecute(transferResult.transaction);
+      : await api.txExecution.signAndExecute(transferResult.transaction);
 
     if (result.success) {
       logger.log(

@@ -1,6 +1,6 @@
 import transferHandler from '../../commands/transfer';
 import { ZustandAccountStateHelper } from '../../../account/zustand-state-helper';
-import type { CoreAPI } from '../../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HbarService } from '../../../../core/services/hbar/hbar-service.interface';
 import type { AccountData } from '../../../account/schema';
 import {
@@ -84,9 +84,9 @@ const setupTransferTest = (options: {
     listData: options.accounts || [],
   });
 
-  const api: Partial<CoreAPI> = {
+  const api: Partial<CoreApi> = {
     hbar,
-    signing,
+    txExecution: signing,
     network: networkMock,
     credentialsState,
     alias,

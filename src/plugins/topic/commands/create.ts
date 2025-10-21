@@ -82,14 +82,16 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
 
     // 4. Sign and execute transaction
     if (topicAdminKeyAlias?.publicKey || adminKey) {
-      result = await api.signing.signAndExecuteWith(
+      result = await api.txExecution.signAndExecuteWith(
         topicCreateResult.transaction,
         {
           keyRefId: adminKeyRefId,
         },
       );
     } else {
-      result = await api.signing.signAndExecute(topicCreateResult.transaction);
+      result = await api.txExecution.signAndExecute(
+        topicCreateResult.transaction,
+      );
     }
 
     if (result.success) {

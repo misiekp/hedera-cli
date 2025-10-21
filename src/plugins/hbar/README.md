@@ -70,7 +70,7 @@ hcli hbar transfer -b 100000 -t myaccount
 The plugin uses the Core API services:
 
 - `api.hbar` - HBAR transfer operations
-- `api.signing` - Transaction signing and execution
+- `api.txExecution` - Transaction signing and execution
 - `api.credentialsState` - Secure key management
 - `api.alias` - Alias resolution
 - `api.state` - Account lookup in state
@@ -137,9 +137,9 @@ When resolving `--from` or `--to`:
 ```typescript
 if (fromKeyRefId) {
   // Use specific key for sender account
-  await api.signing.signAndExecuteWith(tx, { keyRefId: fromKeyRefId });
+  await api.txExecution.signAndExecuteWith(tx, { keyRefId: fromKeyRefId });
 } else {
   // Use default operator key
-  await api.signing.signAndExecute(tx);
+  await api.txExecution.signAndExecute(tx);
 }
 ```

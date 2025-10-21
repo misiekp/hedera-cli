@@ -8,7 +8,7 @@ export * from './core-api';
 
 // Services
 export * from './services/account/account-transaction-service.interface';
-export * from './services/signing/signing-service.interface';
+export * from './services/tx-execution/tx-execution-service.interface';
 export * from './services/state/state-service.interface';
 export * from './services/mirrornode/hedera-mirrornode-service.interface';
 export { NetworkService } from './services/network/network-service.interface';

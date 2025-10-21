@@ -353,7 +353,7 @@ export const expectedPluginManifest = {
     'state:namespace:token-tokens',
     'network:read',
     'network:write',
-    'signing:use',
+    'tx-execution:use',
   ],
 };
 
