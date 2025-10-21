@@ -45,7 +45,7 @@ export const makeTokenTransactionServiceMock = makeTokenServiceMock;
 /**
  * Create a mocked TxExecutionService
  */
-export const makeSigningServiceMock = (
+export const makeTxExecutionServiceMock = (
   overrides?: Partial<jest.Mocked<TxExecutionService>>,
 ): jest.Mocked<TxExecutionService> => ({
   signAndExecute: jest.fn().mockResolvedValue(mockTransactionResults.success),
@@ -154,7 +154,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
   const tokens = makeTokenServiceMock(
     config?.tokens || config?.tokenTransactions,
   );
-  const signing = makeSigningServiceMock(config?.signing);
+  const signing = makeTxExecutionServiceMock(config?.signing);
   const credentialsState = makeCredentialsStateMock(
     config?.credentialsState || config?.credentials,
   );

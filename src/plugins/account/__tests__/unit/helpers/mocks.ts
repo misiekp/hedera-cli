@@ -74,7 +74,7 @@ export const makeAccountTransactionServiceMock = (
 /**
  * Creates mock TxExecutionService
  */
-export const makeSigningServiceMock = (
+export const makeTxExecutionServiceMock = (
   overrides?: Partial<jest.Mocked<TxExecutionService>>,
 ): jest.Mocked<TxExecutionService> => ({
   signAndExecute: jest.fn().mockResolvedValue(mockTransactionResults.success),

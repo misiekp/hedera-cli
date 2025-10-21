@@ -17,7 +17,7 @@ The Hedera CLI is built on a plugin-based architecture that follows the ADR-001 
 ├─────────────────────────────────────────────────────────────┤
 │  Core Services Layer                                       │
 │  ├── Account Transaction Service                           │
-│  ├── Signing Service                                       │
+│  ├── TxExecutionService                                   │
 │  ├── State Service (Zustand)                               │
 │  ├── Mirror Node Service                                   │
 │  ├── Network Service                                       │
@@ -88,7 +88,7 @@ interface AccountTransactionService {
 }
 ```
 
-### 2. Signing Service
+### 2. TxExecutionService
 
 **Purpose**: Manages transaction signing and execution.
 
@@ -101,7 +101,7 @@ interface AccountTransactionService {
 **Interface**:
 
 ```typescript
-interface SigningService {
+interface TxExecutionService {
   signAndExecute(transaction: Transaction): Promise<TransactionReceipt>;
   // ... other methods
 }
@@ -244,7 +244,7 @@ interface HederaMirrornodeService {
 ```
 Core API
 ├── Account Transaction Service
-├── Signing Service
+├── TxExecutionService
 │   └── Credentials Service
 ├── State Service (Zustand)
 ├── Mirror Node Service

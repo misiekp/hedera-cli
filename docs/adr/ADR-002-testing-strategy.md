@@ -110,7 +110,7 @@ We will implement a **two-tier testing strategy**:
 
 ### Phase 2: Unit Test Coverage
 
-- Add unit tests for Core services (`AccountTransactionService`, `SigningService`, `HederaMirrornodeService`).
+- Add unit tests for Core services (`AccountTransactionService`, `TxExecutionService`, `HederaMirrornodeService`).
 - Mocks and test utilities will be centralized in a dedicated testing module (e.g. `__tests__/helpers` or `__tests__/unit/mocks`), to avoid duplication across unit and e2e tests.
 - Validate plugin lifecycle in isolation with mocked contexts.
 

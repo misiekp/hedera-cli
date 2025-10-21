@@ -11,7 +11,7 @@ The Core API provides a stable, typed interface for plugins to interact with Hed
 ```typescript
 interface CoreAPI {
   account: AccountTransactionService;
-  signing: SigningService;
+  txExecution: TxExecutionService;
   state: StateService;
   mirror: HederaMirrornodeService;
   network: NetworkService;
@@ -56,12 +56,12 @@ const result = await api.account.createAccount({
 });
 ```
 
-### Signing Service
+### TxExecutionService
 
 Manages transaction signing and execution.
 
 ```typescript
-interface SigningService {
+interface TxExecutionService {
   signAndExecute(transaction: Transaction): Promise<TransactionReceipt>;
   getTransactionStatus(transactionId: string): Promise<TransactionStatus>;
 }
@@ -70,8 +70,8 @@ interface SigningService {
 **Usage Example:**
 
 ```typescript
-const receipt = await api.signing.signAndExecute(transaction);
-const status = await api.signing.getTransactionStatus(transactionId);
+const receipt = await api.txExecution.signAndExecute(transaction);
+const status = await api.txExecution.getTransactionStatus(transactionId);
 ```
 
 ### State Service
