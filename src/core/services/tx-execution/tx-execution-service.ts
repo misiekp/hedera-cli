@@ -25,11 +25,11 @@ export class TxExecutionServiceImpl implements TxExecutionService {
 
   constructor(
     logger: Logger,
-    credentialsState: KmsService,
+    kmsState: KmsService,
     networkService: NetworkService,
   ) {
     this.logger = logger;
-    this.kms = credentialsState;
+    this.kms = kmsState;
     this.networkService = networkService;
   }
 
