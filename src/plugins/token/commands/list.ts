@@ -7,7 +7,7 @@ import { ZustandTokenStateHelper } from '../zustand-state-helper';
 import { TokenData } from '../schema';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
-import { CoreAPI } from '../../../core';
+import { CoreApi } from '../../../core';
 
 /**
  * Resolves the token alias from the alias service
@@ -17,7 +17,7 @@ import { CoreAPI } from '../../../core';
  * @returns The alias if found, null otherwise
  */
 function resolveTokenAlias(
-  api: CoreAPI,
+  api: CoreApi,
   tokenId: string,
   network: SupportedNetwork,
 ): string | null {

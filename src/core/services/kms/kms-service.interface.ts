@@ -1,9 +1,9 @@
-import type { CredentialType } from './credentials-types.interface';
-import { CredentialsStateSignerService } from './credentials-state-signer-service.interface';
+import type { CredentialType } from './kms-types.interface';
+import { KmsSignerService } from './kms-signer-service.interface';
 import { Client, Transaction as HederaTransaction } from '@hashgraph/sdk';
 import { SupportedNetwork } from '../../types/shared.types';
 
-export interface KeyManagementService {
+export interface KmsService {
   createLocalPrivateKey(labels?: string[]): {
     keyRefId: string;
     publicKey: string;
@@ -13,7 +13,7 @@ export interface KeyManagementService {
     labels?: string[],
   ): { keyRefId: string; publicKey: string };
   getPublicKey(keyRefId: string): string | null;
-  getSignerHandle(keyRefId: string): CredentialsStateSignerService;
+  getSignerHandle(keyRefId: string): KmsSignerService;
 
   // Find key by publicKey (for commands that resolve aliases to publicKeys)
   findByPublicKey(publicKey: string): string | null; // Returns keyRefId or null

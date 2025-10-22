@@ -18,7 +18,7 @@ export { ConfigService } from '../services/config/config-service.interface';
 export { Logger } from '../services/logger/logger-service.interface';
 export { HbarService } from '../services/hbar/hbar-service.interface';
 export { AliasService } from '../services/alias/alias-service.interface';
-export { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
+export { KmsService } from '../services/kms/kms-service.interface';
 
 // Plugin interfaces (ADR-001 compliant)
 export { CommandHandlerArgs } from '../plugins/plugin.interface';

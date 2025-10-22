@@ -47,7 +47,7 @@ function parseAccountIdKeyPair(
   }
 
   // Import the private key
-  const imported = api.credentialsState.importPrivateKey(privateKey);
+  const imported = api.kms.importPrivateKey(privateKey);
 
   return {
     accountId,
@@ -109,7 +109,7 @@ export function resolveTreasuryParameter(
   }
 
   // Get the public key
-  const publicKey = api.credentialsState.getPublicKey(aliasRecord.keyRefId);
+  const publicKey = api.kms.getPublicKey(aliasRecord.keyRefId);
   if (!publicKey) {
     throw new Error(
       `Treasury alias "${treasury}" key not found in credentials state`,
@@ -185,7 +185,7 @@ export function resolveAccountParameter(
   }
 
   // Get the public key
-  const publicKey = api.credentialsState.getPublicKey(aliasRecord.keyRefId);
+  const publicKey = api.kms.getPublicKey(aliasRecord.keyRefId);
   if (!publicKey) {
     throw new Error(
       `Account alias "${account}" key not found in credentials state`,
@@ -275,7 +275,7 @@ export interface ResolvedToken {
  */
 export function resolveTokenParameter(
   tokenIdOrAlias: string | undefined,
-  api: CoreAPI,
+  api: CoreApi,
   network: SupportedNetwork,
 ): ResolvedToken | null {
   if (!tokenIdOrAlias) {

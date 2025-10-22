@@ -181,7 +181,7 @@ function resolveTreasuryFromDefinition(
   }
 
   // Legacy format: object with accountId and key
-  const imported = api.credentialsState.importPrivateKey(treasuryDef.key);
+  const imported = api.kms.importPrivateKey(treasuryDef.key);
   logger.log(`🏦 Using treasury (legacy format): ${treasuryDef.accountId}`);
 
   return {
@@ -290,9 +290,7 @@ async function processTokenAssociations(
       });
 
       // Sign and execute with the account's key
-      const associationImported = api.credentialsState.importPrivateKey(
-        association.key,
-      );
+      const associationImported = api.kms.importPrivateKey(association.key);
       const associateResult = await api.txExecution.signAndExecuteWith(
         associateTransaction,
         { keyRefId: associationImported.keyRefId },

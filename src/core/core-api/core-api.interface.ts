@@ -12,7 +12,7 @@ import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { HbarService } from '../services/hbar/hbar-service.interface';
 import { AliasService } from '../services/alias/alias-service.interface';
-import { KeyManagementService } from '../services/credentials-state/credentials-state-service.interface';
+import { KmsService } from '../services/kms/kms-service.interface';
 import { TokenService } from '../services/token/token-service.interface';
 
 export interface CoreApi {
@@ -69,7 +69,7 @@ export interface CoreApi {
   /**
    * Key Management Service (KMS)
    */
-  credentialsState: KeyManagementService;
+  kms: KmsService;
 
   /**
    * HBAR operations

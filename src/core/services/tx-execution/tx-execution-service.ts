@@ -7,7 +7,7 @@ import {
   TransactionResult,
 } from './tx-execution-service.interface';
 import { Logger } from '../logger/logger-service.interface';
-import { KeyManagementService } from '../credentials-state/credentials-state-service.interface';
+import { KmsService } from '../kms/kms-service.interface';
 import { NetworkService } from '../network/network-service.interface';
 import type { SignerRef } from './tx-execution-service.interface';
 import {
@@ -20,16 +20,16 @@ import {
 
 export class TxExecutionServiceImpl implements TxExecutionService {
   private logger: Logger;
-  private credentialsState: KeyManagementService;
+  private kms: KmsService;
   private networkService: NetworkService;
 
   constructor(
     logger: Logger,
-    credentialsState: KeyManagementService,
+    kmsState: KmsService,
     networkService: NetworkService,
   ) {
     this.logger = logger;
-    this.credentialsState = credentialsState;
+    this.kms = kmsState;
     this.networkService = networkService;
   }
 
@@ -43,7 +43,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
     const network = this.networkService.getCurrentNetwork();
 
     // Use credentials-state to create client without exposing private keys
-    return this.credentialsState.createClient(network);
+    return this.kms.createClient(network);
   }
 
   /**
@@ -60,8 +60,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
 
       // Get default operator keyRefId for signing
       const mapping =
-        this.credentialsState.getDefaultOperator() ||
-        this.credentialsState.ensureDefaultFromEnv();
+        this.kms.getDefaultOperator() || this.kms.ensureDefaultFromEnv();
       if (!mapping) {
         throw new Error('[TX-EXECUTION] No default operator configured');
       }
@@ -69,10 +68,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
       transaction.freezeWith(client);
 
       // Sign using credentials-state without exposing private key
-      await this.credentialsState.signTransaction(
-        transaction,
-        mapping.keyRefId,
-      );
+      await this.kms.signTransaction(transaction, mapping.keyRefId);
 
       // Execute the transaction
       const response: TransactionResponse = await transaction.execute(client);
@@ -131,7 +127,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
     transaction.freezeWith(client);
 
     // Sign using credentials-state without exposing private key
-    await this.credentialsState.signTransaction(transaction, keyRefId);
+    await this.kms.signTransaction(transaction, keyRefId);
 
     // Execute the transaction
     const response: TransactionResponse = await transaction.execute(client);
@@ -179,7 +175,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
 
     // If direct keyRefId provided, validate it exists
     if (signer.keyRefId) {
-      const pub = this.credentialsState.getPublicKey(signer.keyRefId);
+      const pub = this.kms.getPublicKey(signer.keyRefId);
       if (!pub) {
         throw new Error(
           `[TX-EXECUTION] Unknown keyRefId: ${signer.keyRefId}. Use 'hcli keys list' to inspect available keys.`,
@@ -190,7 +186,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
 
     // If publicKey provided, find the corresponding keyRefId
     if (signer.publicKey) {
-      const keyRefId = this.credentialsState.findByPublicKey(signer.publicKey);
+      const keyRefId = this.kms.findByPublicKey(signer.publicKey);
       if (!keyRefId) {
         throw new Error(
           `[TX-EXECUTION] No keyRefId found for public key: ${signer.publicKey}`,

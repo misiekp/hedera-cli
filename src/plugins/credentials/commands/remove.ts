@@ -11,7 +11,7 @@ export function removeHandler(args: CommandHandlerArgs): Promise<void> {
   logger.log(`🗑️  Removing credentials for keyRefId: ${keyRefId}`);
 
   try {
-    api.credentialsState.remove(keyRefId);
+    api.kms.remove(keyRefId);
     logger.log(`✅ Credentials removed for keyRefId: ${keyRefId}`);
   } catch (error) {
     logger.error(formatError('❌ Failed to remove credentials: ', error));

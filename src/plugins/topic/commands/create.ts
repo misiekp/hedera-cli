@@ -69,12 +69,12 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
     let submitKeyRefId: string | undefined = topicSubmitKeyAlias?.keyRefId;
 
     if (adminKey && !topicAdminKeyAlias) {
-      const { keyRefId } = api.credentialsState.importPrivateKey(adminKey);
+      const { keyRefId } = api.kms.importPrivateKey(adminKey);
       adminKeyRefId = keyRefId;
     }
 
     if (submitKey && !topicSubmitKeyAlias) {
-      const { keyRefId } = api.credentialsState.importPrivateKey(submitKey);
+      const { keyRefId } = api.kms.importPrivateKey(submitKey);
       submitKeyRefId = keyRefId;
     }
 
