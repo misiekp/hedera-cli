@@ -42,7 +42,7 @@ export const tokenPluginManifest: PluginManifest = {
         {
           name: 'from',
           type: 'string',
-          required: true,
+          required: false,
           description:
             'Source account: either an alias or account-id:private-key pair',
         },
