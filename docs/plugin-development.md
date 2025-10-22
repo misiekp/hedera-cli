@@ -247,11 +247,20 @@ api.logger.error('Error message');
 api.logger.warn('Warning message');
 ```
 
-#### 8. Credentials Service
+#### 8. Network Service (Operator Management)
 
 ```typescript
-// Get credentials
-const operator = api.kms.getOperator();
+// Get current network
+const network = api.network.getCurrentNetwork();
+
+// Get operator for current network
+const operator = api.network.getOperator(network);
+
+// Set operator for specific network
+api.network.setOperator('testnet', {
+  accountId: '0.0.123456',
+  keyRefId: 'kr_test123',
+});
 ```
 
 ## 🧪 Testing Plugins
