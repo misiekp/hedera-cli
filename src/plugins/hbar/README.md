@@ -71,7 +71,7 @@ The plugin uses the Core API services:
 
 - `api.hbar` - HBAR transfer operations
 - `api.txExecution` - Transaction signing and execution
-- `api.credentialsState` - Secure key management
+- `api.kms` - Secure key management
 - `api.alias` - Alias resolution
 - `api.state` - Account lookup in state
 - `api.network` - Network information

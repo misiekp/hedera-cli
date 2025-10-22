@@ -8,7 +8,7 @@ import {
   makeLogger,
   makeArgs,
   makeNetworkMock,
-  makeCredentialsStateMock,
+  makeKmsMock,
   makeAliasMock,
   makeSigningMock,
 } from '../../../../../__tests__/helpers/plugin';
@@ -36,17 +36,17 @@ const makeApiMocks = ({
 
   const signing = makeSigningMock({ signAndExecuteImpl });
   const networkMock = makeNetworkMock(network);
-  const credentialsState = makeCredentialsStateMock();
+  const kms = makeKmsMock();
 
   // Override createLocalPrivateKey for create tests
-  credentialsState.createLocalPrivateKey = jest.fn().mockReturnValue({
+  kms.createLocalPrivateKey = jest.fn().mockReturnValue({
     keyRefId: 'kr_test123',
     publicKey: 'pub-key-test',
   });
 
   const alias = makeAliasMock();
 
-  return { account, signing, networkMock, credentialsState, alias };
+  return { account, signing, networkMock, kms, alias };
 };
 
 describe('account plugin - create command (ADR-003)', () => {
@@ -59,26 +59,25 @@ describe('account plugin - create command (ADR-003)', () => {
     const saveAccountMock = jest.fn();
     MockedHelper.mockImplementation(() => ({ saveAccount: saveAccountMock }));
 
-    const { account, signing, networkMock, credentialsState, alias } =
-      makeApiMocks({
-        createAccountImpl: jest.fn().mockResolvedValue({
-          transaction: {},
-          publicKey: 'pub-key-test',
-          evmAddress: '0x000000000000000000000000000000000000abcd',
-        }),
-        signAndExecuteImpl: jest.fn().mockResolvedValue({
-          transactionId: 'tx-123',
-          success: true,
-          accountId: '0.0.9999',
-          receipt: {} as any,
-        } as TransactionResult),
-      });
+    const { account, signing, networkMock, kms, alias } = makeApiMocks({
+      createAccountImpl: jest.fn().mockResolvedValue({
+        transaction: {},
+        publicKey: 'pub-key-test',
+        evmAddress: '0x000000000000000000000000000000000000abcd',
+      }),
+      signAndExecuteImpl: jest.fn().mockResolvedValue({
+        transactionId: 'tx-123',
+        success: true,
+        accountId: '0.0.9999',
+        receipt: {} as any,
+      } as TransactionResult),
+    });
 
     const api: Partial<CoreApi> = {
       account,
       txExecution: signing,
       network: networkMock,
-      credentialsState,
+      kms,
       alias,
       logger,
     };
@@ -91,7 +90,7 @@ describe('account plugin - create command (ADR-003)', () => {
 
     const result = await createAccountHandler(args);
 
-    expect(credentialsState.createLocalPrivateKey).toHaveBeenCalled();
+    expect(kms.createLocalPrivateKey).toHaveBeenCalled();
     expect(account.createAccount).toHaveBeenCalledWith({
       balance: 5000,
       maxAutoAssociations: 3,

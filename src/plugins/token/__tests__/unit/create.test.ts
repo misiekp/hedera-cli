@@ -51,28 +51,39 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, credentialsState } =
-        makeApiMocks({
-          tokenTransactions: {
-            createTokenTransaction: jest
-              .fn()
-              .mockReturnValue(mockTransactions.token),
-          },
-          signing: {
-            signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
-          },
-          credentialsState: {
-            getDefaultOperator: jest.fn().mockReturnValue({
-              accountId: mockAccountIds.operator,
-              keyRefId: 'operator-key-ref-id',
-            }),
-            getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
-            importPrivateKey: jest.fn().mockReturnValue({
-              keyRefId: 'treasury-key-ref-id',
-              publicKey: 'treasury-public-key',
-            }),
-          },
-        });
+      const { api, tokenTransactions, signing, kms } = makeApiMocks({
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockReturnValue(mockTransactions.token),
+        },
+        signing: {
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        kms: {
+          getDefaultOperator: jest.fn().mockReturnValue({
+            accountId: mockAccountIds.operator,
+            keyRefId: 'operator-key-ref-id',
+          }),
+          getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'treasury-key-ref-id',
+            publicKey: 'treasury-public-key',
+          }),
+        },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'test-admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'test-admin-key',
+              };
+            }
+            return null;
+          }),
+        },
+      });
 
       const logger = makeLogger();
       const args = makeTokenCreateCommandArgs({ api, logger });
@@ -81,9 +92,7 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
-      expect(credentialsState.importPrivateKey).toHaveBeenCalledWith(
-        'test-private-key',
-      );
+      expect(kms.importPrivateKey).toHaveBeenCalledWith('test-private-key');
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith(
         expectedTokenTransactionParams,
       );
@@ -106,24 +115,23 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, credentialsState } =
-        makeApiMocks({
-          tokenTransactions: {
-            createTokenTransaction: jest
-              .fn()
-              .mockReturnValue(mockTransactions.token),
-          },
-          signing: {
-            signAndExecute: jest.fn().mockResolvedValue(mockSignResult),
-          },
-          credentialsState: {
-            getDefaultOperator: jest.fn().mockReturnValue({
-              accountId: '0.0.100000',
-              keyRefId: 'operator-key-ref-id',
-            }),
-            getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
-          },
-        });
+      const { api, tokenTransactions, signing, kms } = makeApiMocks({
+        tokenTransactions: {
+          createTokenTransaction: jest
+            .fn()
+            .mockReturnValue(mockTransactions.token),
+        },
+        signing: {
+          signAndExecute: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        kms: {
+          getDefaultOperator: jest.fn().mockReturnValue({
+            accountId: '0.0.100000',
+            keyRefId: 'operator-key-ref-id',
+          }),
+          getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
+        },
+      });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -141,7 +149,7 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
-      expect(credentialsState.getDefaultOperator).toHaveBeenCalled();
+      expect(kms.getDefaultOperator).toHaveBeenCalled();
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith({
         name: 'TestToken',
         symbol: 'TEST',
@@ -189,7 +197,7 @@ describe('createTokenHandler', () => {
     test('should exit with error when no credentials found', async () => {
       // Arrange
       const { api } = makeApiMocks({
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue(null),
           ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
         },
@@ -250,7 +258,7 @@ describe('createTokenHandler', () => {
             .fn()
             .mockResolvedValue(mockSignResult as TransactionResult),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.100000',
             keyRefId: 'operator-key-ref-id',
@@ -290,7 +298,7 @@ describe('createTokenHandler', () => {
             throw new Error('Service error');
           }),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.100000',
             keyRefId: 'operator-key-ref-id',
@@ -350,12 +358,24 @@ describe('createTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
-        credentialsState: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: '0.0.100000',
             keyRefId: 'operator-key-ref-id',
           }),
           getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
+        },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'test-admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'test-admin-key',
+              };
+            }
+            return null;
+          }),
         },
       });
 

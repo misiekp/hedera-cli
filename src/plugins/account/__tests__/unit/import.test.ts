@@ -7,7 +7,7 @@ import {
   makeLogger,
   makeArgs,
   makeNetworkMock,
-  makeCredentialsStateMock,
+  makeKmsMock,
   makeAliasMock,
   makeMirrorMock,
 } from '../../../../../__tests__/helpers/plugin';
@@ -35,13 +35,13 @@ describe('account plugin - import command (ADR-003)', () => {
 
     const mirrorMock = makeMirrorMock();
     const networkMock = makeNetworkMock();
-    const credentialsState = makeCredentialsStateMock();
+    const kms = makeKmsMock();
     const alias = makeAliasMock();
 
     const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
-      credentialsState,
+      kms,
       alias,
       logger,
     };
@@ -54,7 +54,7 @@ describe('account plugin - import command (ADR-003)', () => {
 
     const result = await importAccountHandler(args);
 
-    expect(credentialsState.importPrivateKey).toHaveBeenCalledWith('privKey', [
+    expect(kms.importPrivateKey).toHaveBeenCalledWith('privKey', [
       'account:imported',
     ]);
     expect(mirrorMock.getAccount).toHaveBeenCalledWith('0.0.9999');

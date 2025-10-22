@@ -16,13 +16,12 @@ export function setHandler(args: CommandHandlerArgs): void {
 
   try {
     // Import the private key and get the keyRefId
-    const { keyRefId, publicKey } = api.credentialsState.importPrivateKey(
-      privateKey,
-      ['default-operator'],
-    );
+    const { keyRefId, publicKey } = api.kms.importPrivateKey(privateKey, [
+      'default-operator',
+    ]);
 
     // Set as default operator
-    api.credentialsState.setDefaultOperator(accountId, keyRefId);
+    api.kms.setDefaultOperator(accountId, keyRefId);
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
     logger.log(`   Network: ${network || 'testnet'}`);

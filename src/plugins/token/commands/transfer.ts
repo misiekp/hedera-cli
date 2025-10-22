@@ -48,14 +48,32 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
   // Resolve from parameter (alias or account-id:private-key) if provided
 
-  const resolvedFromAccount = resolveAccountParameter(from, api, network);
+  let resolvedFromAccount = resolveAccountParameter(from, api, network);
 
-  // From account was explicitly provided - it MUST resolve or fail
+  // If from account wasn't provided, use operator as default
   if (!resolvedFromAccount) {
-    throw new Error(
-      `Failed to resolve from account parameter: ${from}. ` +
-        `Expected format: account-alias OR account-id:private-key`,
-    );
+    const operator = api.kms.getDefaultOperator();
+
+    if (!operator) {
+      throw new Error('No from account provided and no default operator set.');
+    }
+
+    const operatorPublicKey = api.kms.getPublicKey(operator.keyRefId);
+
+    if (!operatorPublicKey) {
+      // This should not happen - credentials state should ensure operator keys exist
+      throw new Error(
+        'No from account provided and cant resolve public key of default operator set.',
+      );
+    }
+
+    logger.log("No 'from' account provided, using default operator account.");
+
+    resolvedFromAccount = {
+      accountId: operator.accountId,
+      accountKeyRefId: operator.keyRefId,
+      accountPublicKey: operatorPublicKey,
+    };
   }
 
   // Use resolved from account from alias or account-id:private-key

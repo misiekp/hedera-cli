@@ -59,7 +59,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -121,10 +121,22 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
-        credentials: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
+          }),
+        },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
           }),
         },
       });
@@ -242,7 +254,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -283,10 +295,22 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
-        credentials: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
+          }),
+        },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
           }),
         },
       });
@@ -359,7 +383,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -395,10 +419,22 @@ describe('Token Lifecycle Integration', () => {
             });
           }),
         },
-        credentials: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
+          }),
+        },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
           }),
         },
       });
@@ -483,7 +519,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest.fn().mockReturnValue({}),
@@ -496,7 +532,7 @@ describe('Token Lifecycle Integration', () => {
             receipt: {},
           }),
         },
-        credentials: {
+        kms: {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             keyRefId: 'treasury-key-ref-id',

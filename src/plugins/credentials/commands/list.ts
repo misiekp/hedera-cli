@@ -10,7 +10,7 @@ export function listHandler(args: CommandHandlerArgs): Promise<void> {
   logger.log('🔐 Stored Credentials:');
 
   try {
-    const credentials = api.credentialsState.list();
+    const credentials = api.kms.list();
 
     if (credentials.length === 0) {
       logger.log('   No credentials stored');

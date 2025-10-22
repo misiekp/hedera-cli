@@ -3,9 +3,8 @@ export type CredentialType =
   | 'mnemonic'
   | 'hardware'
   | 'kms';
-// Removed CredentialsProvider - using CredentialsStateSignerService instead
 
-export interface CredentialsRecord {
+export interface KmsCredentialRecord {
   keyRefId: string;
   type: CredentialType;
   publicKey: string;
@@ -15,7 +14,7 @@ export interface CredentialsRecord {
 
 export type KeyAlgorithm = 'ed25519' | 'ecdsa';
 
-export interface CredentialSecret {
+export interface KmsCredentialSecret {
   keyAlgorithm: KeyAlgorithm;
   privateKey?: string; // raw, temporary until encryption/KMS
   mnemonic?: string; // optional seed

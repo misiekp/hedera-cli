@@ -90,7 +90,7 @@ The plugin uses the Core API services:
 
 - `api.tokens` - Token transaction creation and management
 - `api.txExecution` - Transaction signing and execution
-- `api.credentialsState` - Account credentials and key management
+- `api.kms` - Account credentials and key management
 - `api.alias` - Account alias resolution
 - `api.state` - Namespaced state management
 - `api.network` - Network information

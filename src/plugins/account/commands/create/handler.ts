@@ -32,8 +32,7 @@ export default async function createAccountHandler(
 
   try {
     // 1. Generate a new key pair for the account
-    const { keyRefId, publicKey } =
-      api.credentialsState.createLocalPrivateKey();
+    const { keyRefId, publicKey } = api.kms.createLocalPrivateKey();
 
     // 2. Create transaction using Core API
     const accountCreateResult = await api.account.createAccount({

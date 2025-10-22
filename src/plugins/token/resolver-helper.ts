@@ -47,7 +47,7 @@ function parseAccountIdKeyPair(
   }
 
   // Import the private key
-  const imported = api.credentialsState.importPrivateKey(privateKey);
+  const imported = api.kms.importPrivateKey(privateKey);
 
   return {
     accountId,
@@ -109,7 +109,7 @@ export function resolveTreasuryParameter(
   }
 
   // Get the public key
-  const publicKey = api.credentialsState.getPublicKey(aliasRecord.keyRefId);
+  const publicKey = api.kms.getPublicKey(aliasRecord.keyRefId);
   if (!publicKey) {
     throw new Error(
       `Treasury alias "${treasury}" key not found in credentials state`,
@@ -185,7 +185,7 @@ export function resolveAccountParameter(
   }
 
   // Get the public key
-  const publicKey = api.credentialsState.getPublicKey(aliasRecord.keyRefId);
+  const publicKey = api.kms.getPublicKey(aliasRecord.keyRefId);
   if (!publicKey) {
     throw new Error(
       `Account alias "${account}" key not found in credentials state`,
@@ -309,4 +309,73 @@ export function resolveTokenParameter(
   return {
     tokenId: aliasRecord.entityId,
   };
+}
+
+type ResolvedKey = {
+  publicKey: string;
+  keyRefId?: string;
+};
+
+export function resolveKeyParameter(
+  keyOrAlias: string | undefined,
+  api: CoreApi,
+): ResolvedKey | null {
+  const network = api.network.getCurrentNetwork();
+
+  // If a key/alias is explicitly provided, try to resolve it
+  if (keyOrAlias) {
+    // Try to resolve as an account alias first
+    const accountAlias = api.alias.resolve(keyOrAlias, 'account', network);
+
+    if (accountAlias?.keyRefId) {
+      const adminPublicKey = api.kms.getPublicKey(accountAlias.keyRefId);
+
+      if (!adminPublicKey) {
+        throw new Error(
+          `Found account alias ${accountAlias.alias} but key not found in credentials`,
+        );
+      }
+
+      return {
+        keyRefId: accountAlias.keyRefId,
+        publicKey: adminPublicKey,
+      };
+    }
+
+    // Try to resolve as a key alias
+    const keyAlias = api.alias.resolve(keyOrAlias, 'key', network);
+    if (keyAlias?.keyRefId && keyAlias.publicKey) {
+      return {
+        keyRefId: keyAlias.keyRefId,
+        publicKey: keyAlias.publicKey,
+      };
+    }
+
+    const publicKeyRefId = api.kms.findByPublicKey(keyOrAlias);
+    if (publicKeyRefId) {
+      return {
+        keyRefId: publicKeyRefId,
+        publicKey: keyOrAlias,
+      };
+    }
+
+    throw new Error(
+      `We could not resolve the provided key or alias: ${keyOrAlias} \nor public key not found in credentials`,
+    );
+  }
+
+  // Fall back to operator key (whether keyOrAlias was undefined or resolution failed)
+  const operator = api.kms.getDefaultOperator();
+  if (operator?.keyRefId) {
+    const operatorPubKey = api.kms.getPublicKey(operator.keyRefId);
+    if (!operatorPubKey) {
+      throw new Error('Operator key not found in credentials');
+    }
+    return {
+      keyRefId: operator.keyRefId,
+      publicKey: operatorPubKey,
+    };
+  }
+
+  return null;
 }

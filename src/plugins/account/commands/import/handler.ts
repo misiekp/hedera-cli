@@ -38,10 +38,9 @@ export default async function importAccountHandler(
     const accountInfo = await api.mirror.getAccount(accountId);
 
     // Securely store the private key in credentials storage
-    const { keyRefId, publicKey } = api.credentialsState.importPrivateKey(
-      privateKey,
-      [`account:${name}`],
-    );
+    const { keyRefId, publicKey } = api.kms.importPrivateKey(privateKey, [
+      `account:${name}`,
+    ]);
 
     // Register alias if provided
     if (alias) {
