@@ -42,7 +42,7 @@ export const accountPluginManifest: PluginManifest = {
           required: false,
           default: 0,
         },
-        { name: 'alias', type: 'string', required: false },
+        { name: 'alias', short: 'n', type: 'string', required: false },
         { name: 'payer', short: 'p', type: 'string', required: false },
       ],
       handler: './index',
@@ -53,6 +53,7 @@ export const accountPluginManifest: PluginManifest = {
       description: 'Retrieve the balance for an account ID, name, or alias',
       options: [
         {
+          // @TODO Find all long option names and rename
           name: 'account-id-or-name-or-alias',
           short: 'a',
           type: 'string',
@@ -91,7 +92,7 @@ export const accountPluginManifest: PluginManifest = {
       options: [
         { name: 'id', short: 'i', type: 'string', required: true },
         { name: 'key', short: 'k', type: 'string', required: false },
-        { name: 'alias', type: 'string', required: false },
+        { name: 'alias', short: 'n', type: 'string', required: false },
       ],
       handler: './index',
     },
@@ -107,7 +108,7 @@ export const accountPluginManifest: PluginManifest = {
       summary: 'Delete an account',
       description: 'Delete an account from the address book',
       options: [
-        { name: 'name', short: 'n', type: 'string', required: false },
+        { name: 'name', short: 'N', type: 'string', required: false },
         { name: 'id', short: 'i', type: 'string', required: false },
       ],
       handler: './index',

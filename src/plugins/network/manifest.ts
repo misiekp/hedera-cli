@@ -31,7 +31,7 @@ export const networkPluginManifest: PluginManifest = {
       options: [
         {
           name: 'network',
-          short: 'n',
+          short: 'N',
           type: 'string',
           required: true,
           description: 'Network name (testnet, mainnet, previewnet, localnet)',

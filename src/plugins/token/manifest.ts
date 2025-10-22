@@ -36,12 +36,14 @@ export const tokenPluginManifest: PluginManifest = {
         },
         {
           name: 'to',
+          short: 'T',
           type: 'string',
           required: true,
           description: 'Destination account: either an alias or account-id',
         },
         {
           name: 'from',
+          short: 'f',
           type: 'string',
           required: true,
           description:
@@ -56,7 +58,7 @@ export const tokenPluginManifest: PluginManifest = {
       summary: 'Create a new fungible token',
       description: 'Create a new fungible token with specified properties',
       options: [
-        { name: 'name', short: 'n', type: 'string', required: true },
+        { name: 'name', short: 'N', type: 'string', required: true },
         { name: 'symbol', short: 's', type: 'string', required: true },
         {
           name: 'treasury',
@@ -83,6 +85,7 @@ export const tokenPluginManifest: PluginManifest = {
         {
           name: 'supply-type',
           type: 'string',
+          short: 'S',
           required: false,
           default: 'INFINITE',
         },
@@ -90,6 +93,7 @@ export const tokenPluginManifest: PluginManifest = {
         { name: 'admin-key', short: 'a', type: 'string', required: false },
         {
           name: 'alias',
+          short: 'n',
           type: 'string',
           required: false,
           description: 'Optional alias to register for the token',
