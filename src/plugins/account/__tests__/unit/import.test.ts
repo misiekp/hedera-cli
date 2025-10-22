@@ -99,13 +99,13 @@ describe('account plugin - import command (ADR-003)', () => {
 
     const mirrorMock = makeMirrorMock();
     const networkMock = makeNetworkMock();
-    const credentialsState = makeCredentialsStateMock();
+    const kms = makeKmsMock();
     const alias = makeAliasMock();
 
     const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
-      credentialsState,
+      kms,
       alias,
       logger,
       state: {} as any,
@@ -138,13 +138,13 @@ describe('account plugin - import command (ADR-003)', () => {
       getAccountImpl: jest.fn().mockRejectedValue(new Error('mirror down')),
     });
     const networkMock = makeNetworkMock();
-    const credentialsState = makeCredentialsStateMock();
+    const kms = makeKmsMock();
     const alias = makeAliasMock();
 
     const api: Partial<CoreApi> = {
       mirror: mirrorMock as HederaMirrornodeService,
       network: networkMock as NetworkService,
-      credentialsState,
+      kms,
       alias,
       logger,
       state: {} as any,

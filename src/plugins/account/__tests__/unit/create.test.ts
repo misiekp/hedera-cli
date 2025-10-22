@@ -140,26 +140,25 @@ describe('account plugin - create command (ADR-003)', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { account, signing, networkMock, credentialsState, alias } =
-      makeApiMocks({
-        createAccountImpl: jest.fn().mockResolvedValue({
-          transaction: {},
-          privateKey: 'priv',
-          publicKey: 'pub',
-          evmAddress: '0x000000000000000000000000000000000000abcd',
-        }),
-        signAndExecuteImpl: jest.fn().mockResolvedValue({
-          transactionId: 'tx-123',
-          success: false,
-          receipt: {} as any,
-        } as TransactionResult),
-      });
+    const { account, signing, networkMock, kms, alias } = makeApiMocks({
+      createAccountImpl: jest.fn().mockResolvedValue({
+        transaction: {},
+        privateKey: 'priv',
+        publicKey: 'pub',
+        evmAddress: '0x000000000000000000000000000000000000abcd',
+      }),
+      signAndExecuteImpl: jest.fn().mockResolvedValue({
+        transactionId: 'tx-123',
+        success: false,
+        receipt: {} as any,
+      } as TransactionResult),
+    });
 
     const api: Partial<CoreApi> = {
       account,
       txExecution: signing,
       network: networkMock,
-      credentialsState,
+      kms,
       alias,
       logger,
     };
@@ -176,18 +175,17 @@ describe('account plugin - create command (ADR-003)', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { account, signing, networkMock, credentialsState, alias } =
-      makeApiMocks({
-        createAccountImpl: jest
-          .fn()
-          .mockRejectedValue(new Error('network error')),
-      });
+    const { account, signing, networkMock, kms, alias } = makeApiMocks({
+      createAccountImpl: jest
+        .fn()
+        .mockRejectedValue(new Error('network error')),
+    });
 
     const api: Partial<CoreApi> = {
       account,
       txExecution: signing,
       network: networkMock,
-      credentialsState,
+      kms,
       alias,
       logger,
     };
