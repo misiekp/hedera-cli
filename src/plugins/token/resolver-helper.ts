@@ -275,7 +275,7 @@ export interface ResolvedToken {
  */
 export function resolveTokenParameter(
   tokenIdOrAlias: string | undefined,
-  api: CoreAPI,
+  api: CoreApi,
   network: SupportedNetwork,
 ): ResolvedToken | null {
   if (!tokenIdOrAlias) {

@@ -235,10 +235,8 @@ export const TokenTransferCommandSchema = z.object({
 
   from: z
     .string()
-    .min(
-      1,
-      'From account is required (either alias or account-id:private-key)',
-    ),
+    .min(1, 'From account is required (either alias or account-id:private-key)')
+    .optional(),
 
   to: z.string().min(1, 'To account is required (either alias or account-id)'),
 
