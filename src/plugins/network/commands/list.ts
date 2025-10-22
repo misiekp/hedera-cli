@@ -3,6 +3,7 @@
  * Handles listing all available networks using the Core API
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { SupportedNetwork } from '../../../core/types/shared.types';
 import { formatError } from '../../../utils/errors';
 import { color, heading } from '../../../utils/color';
 import { isJsonOutput, printOutput } from '../../../utils/output';
@@ -18,11 +19,13 @@ export async function listHandler(args: CommandHandlerArgs) {
     if (isJsonOutput()) {
       const networksWithConfig = networkNames.map((name) => {
         const config = api.network.getNetworkConfig(name);
+        const operator = api.network.getOperator(name as SupportedNetwork);
         return {
           name,
           isActive: name === currentNetwork,
           mirrorNodeUrl: config.mirrorNodeUrl,
           rpcUrl: config.rpcUrl,
+          operatorId: operator?.accountId || '',
         };
       });
       printOutput('networks', {
@@ -36,9 +39,17 @@ export async function listHandler(args: CommandHandlerArgs) {
     for (const name of networkNames) {
       const isActive = name === currentNetwork;
       const config = api.network.getNetworkConfig(name);
+      const operator = api.network.getOperator(name as SupportedNetwork);
       const networkLine = `${color.green('-')} ${color.magenta(name)}`;
       const activeIndicator = isActive ? ` ${color.yellow('(active)')}` : '';
       logger.log(`${networkLine}${activeIndicator}`);
+
+      // Show operator info for each network
+      if (operator) {
+        logger.log(`  Operator: ${color.cyan(operator.accountId)}`);
+      } else {
+        logger.log(`  Operator: ${color.dim('Not configured')}`);
+      }
 
       if (isActive) {
         const mirrorStatus = await checkMirrorNodeHealth(config.mirrorNodeUrl);

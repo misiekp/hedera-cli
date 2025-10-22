@@ -147,23 +147,8 @@ export class KmsServiceImpl implements KmsService {
 
   // Removed registerProvider - no longer needed
 
-  setOperator(
-    network: SupportedNetwork,
-    accountId: string,
-    keyRefId: string,
-  ): void {
-    this.storage.setOperator(network, { accountId, keyRefId });
-    this.logger.debug(`[CRED] Operator set for ${network}: ${accountId}`);
-  }
-
-  getOperator(
-    network: SupportedNetwork,
-  ): { accountId: string; keyRefId: string } | null {
-    return this.storage.getOperator(network);
-  }
-
   createClient(network: SupportedNetwork): Client {
-    const mapping = this.getOperator(network);
+    const mapping = this.networkService.getOperator(network);
     if (!mapping) {
       throw new Error(`[CRED] No operator configured for network: ${network}`);
     }

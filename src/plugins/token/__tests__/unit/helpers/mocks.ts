@@ -71,11 +71,7 @@ export const makeKmsMock = (
   findByPublicKey: jest.fn(),
   list: jest.fn().mockReturnValue([]),
   remove: jest.fn(),
-  setOperator: jest.fn(),
-  getOperator: jest.fn().mockReturnValue({
-    accountId: '0.0.100000',
-    keyRefId: 'operator-key-ref-id',
-  }),
+
   createClient: jest.fn(),
   signTransaction: jest.fn(),
   ...overrides,
@@ -167,6 +163,11 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
       getCurrentNetwork: jest
         .fn()
         .mockReturnValue(config?.network || 'testnet'),
+      getOperator: jest.fn().mockReturnValue({
+        accountId: '0.0.100000',
+        keyRefId: 'operator-key-ref-id',
+      }),
+      setOperator: jest.fn(),
     } as unknown as NetworkService,
     config: {} as unknown as ConfigService,
     logger: {

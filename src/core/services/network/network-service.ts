@@ -86,7 +86,7 @@ export class NetworkServiceImpl implements NetworkService {
     return DEFAULT_LOCALNET_NODE;
   }
 
-  setNetworkOperator(
+  setOperator(
     network: SupportedNetwork,
     operator: { accountId: string; keyRefId: string },
   ): void {
@@ -96,7 +96,7 @@ export class NetworkServiceImpl implements NetworkService {
     this.state.set(NAMESPACE, `${network}Operator`, operator);
   }
 
-  getNetworkOperator(
+  getOperator(
     network: SupportedNetwork,
   ): { accountId: string; keyRefId: string } | null {
     const operator = this.state.get<{ accountId: string; keyRefId: string }>(

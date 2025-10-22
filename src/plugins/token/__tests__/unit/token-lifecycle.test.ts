@@ -41,7 +41,7 @@ describe('Token Lifecycle Integration', () => {
       const mockAddToken = jest.fn();
       const mockAddAssociation = jest.fn();
       const token = '0.0.123456';
-      const treasuryAccountId = '0.0.789012';
+      const _treasuryAccountId = '0.0.789012';
       const userAccountId = '0.0.345678';
       const treasuryKey = 'treasury-key';
       const userKey = 'user-key';
@@ -121,12 +121,6 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
-        kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: treasuryAccountId,
-            privateKey: treasuryKey,
-          }),
-        },
       });
 
       const logger = makeLogger();
@@ -139,7 +133,7 @@ describe('Token Lifecycle Integration', () => {
           decimals: 2,
           initialSupply: 1000,
           supplyType: 'FINITE',
-          treasury: `${treasuryAccountId}:${treasuryKey}`,
+          treasury: `${_treasuryAccountId}:${treasuryKey}`,
           adminKey: 'admin-key',
         },
         api,
@@ -172,7 +166,7 @@ describe('Token Lifecycle Integration', () => {
       const transferArgs: CommandHandlerArgs = {
         args: {
           token,
-          from: `${treasuryAccountId}:${treasuryKey}`,
+          from: `${_treasuryAccountId}:${treasuryKey}`,
           to: userAccountId,
           balance: 100,
         },
@@ -194,7 +188,7 @@ describe('Token Lifecycle Integration', () => {
         initialSupply: 1000,
         supplyType: 'FINITE',
         maxSupply: 1000,
-        treasuryId: treasuryAccountId,
+        treasuryId: _treasuryAccountId,
         adminKey: 'admin-key',
       });
 
@@ -207,7 +201,7 @@ describe('Token Lifecycle Integration', () => {
 
       expect(tokenTransactions.createTransferTransaction).toHaveBeenCalledWith({
         tokenId: token,
-        fromAccountId: treasuryAccountId,
+        fromAccountId: _treasuryAccountId,
         toAccountId: userAccountId,
         amount: 100,
       });
@@ -225,7 +219,6 @@ describe('Token Lifecycle Integration', () => {
       // Arrange
       const mockAddToken = jest.fn();
       const token = '0.0.123456';
-      const treasuryAccountId = '0.0.789012';
       const userAccountId = '0.0.345678';
       const treasuryKey = 'treasury-key';
       const userKey = 'user-key';
@@ -283,12 +276,6 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
-        kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: treasuryAccountId,
-            privateKey: treasuryKey,
-          }),
-        },
       });
 
       const logger = makeLogger();
@@ -339,7 +326,6 @@ describe('Token Lifecycle Integration', () => {
       const mockAddToken = jest.fn();
       const mockAddAssociation = jest.fn();
       const token = '0.0.123456';
-      const treasuryAccountId = '0.0.789012';
       const userAccountId1 = '0.0.345678';
       const userAccountId2 = '0.0.456789';
       const treasuryKey = 'treasury-key';
@@ -393,12 +379,6 @@ describe('Token Lifecycle Integration', () => {
               transactionId: '',
               receipt: null,
             });
-          }),
-        },
-        kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: treasuryAccountId,
-            privateKey: treasuryKey,
           }),
         },
       });
@@ -469,7 +449,6 @@ describe('Token Lifecycle Integration', () => {
       const mockAddToken = jest.fn();
       const mockAddAssociation = jest.fn();
       const token = '0.0.123456';
-      const treasuryAccountId = '0.0.789012';
       const userAccountId = '0.0.345678';
 
       const stateHelper = {
@@ -494,12 +473,6 @@ describe('Token Lifecycle Integration', () => {
             success: true,
             transactionId: '0.0.123@1234567890.123456789',
             receipt: {},
-          }),
-        },
-        kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: treasuryAccountId,
-            keyRefId: 'treasury-key-ref-id',
           }),
         },
       });

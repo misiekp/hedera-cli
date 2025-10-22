@@ -22,7 +22,7 @@ export function setHandler(args: CommandHandlerArgs): void {
 
     // Set as operator for current network
     const currentNetwork = api.network.getCurrentNetwork();
-    api.kms.setOperator(currentNetwork, accountId, keyRefId);
+    api.network.setOperator(currentNetwork, { accountId, keyRefId });
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
     logger.log(`   Network: ${network || 'testnet'}`);

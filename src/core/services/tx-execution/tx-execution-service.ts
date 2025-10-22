@@ -60,7 +60,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
 
       // Get operator keyRefId for signing
       const currentNetwork = this.networkService.getCurrentNetwork();
-      const mapping = this.kms.getOperator(currentNetwork);
+      const mapping = this.networkService.getOperator(currentNetwork);
       if (!mapping) {
         throw new Error('[TX-EXECUTION] No default operator configured');
       }

@@ -28,7 +28,7 @@ export default async function transferHandler(
   // Fallback to operator from env if from not provided
   if (!from) {
     const currentNetwork = api.network.getCurrentNetwork();
-    const operator = api.kms.getOperator(currentNetwork);
+    const operator = api.network.getOperator(currentNetwork);
     if (operator) {
       from = operator.accountId;
       logger.log(`[HBAR] Using default operator as from: ${from}`);

@@ -38,7 +38,7 @@ export interface NetworkService {
   /**
    * Set operator for a specific network
    */
-  setNetworkOperator(
+  setOperator(
     network: SupportedNetwork,
     operator: { accountId: string; keyRefId: string },
   ): void;
@@ -46,7 +46,7 @@ export interface NetworkService {
   /**
    * Get operator for a specific network
    */
-  getNetworkOperator(
+  getOperator(
     network: SupportedNetwork,
   ): { accountId: string; keyRefId: string } | null;
 }

@@ -51,7 +51,7 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, kms } = makeApiMocks({
+      const { api, tokenTransactions, signing } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
@@ -61,10 +61,6 @@ describe('createTokenHandler', () => {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
         kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: mockAccountIds.operator,
-            keyRefId: 'operator-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'treasury-key-ref-id',
@@ -80,7 +76,7 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
-      expect(kms.importPrivateKey).toHaveBeenCalledWith('test-private-key');
+      expect(api.kms.importPrivateKey).toHaveBeenCalledWith('test-private-key');
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith(
         expectedTokenTransactionParams,
       );
@@ -103,7 +99,7 @@ describe('createTokenHandler', () => {
         saveToken: mockSaveToken,
       }));
 
-      const { api, tokenTransactions, signing, kms } = makeApiMocks({
+      const { api, tokenTransactions, signing } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
             .fn()
@@ -113,10 +109,6 @@ describe('createTokenHandler', () => {
           signAndExecute: jest.fn().mockResolvedValue(mockSignResult),
         },
         kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.100000',
-            keyRefId: 'operator-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
         },
       });
@@ -137,7 +129,7 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
-      expect(kms.getOperator).toHaveBeenCalled();
+      expect(api.network.getOperator).toHaveBeenCalled();
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith({
         name: 'TestToken',
         symbol: 'TEST',
@@ -184,11 +176,9 @@ describe('createTokenHandler', () => {
 
     test('should exit with error when no credentials found', async () => {
       // Arrange
-      const { api } = makeApiMocks({
-        kms: {
-          getOperator: jest.fn().mockReturnValue(null),
-        },
-      });
+      const { api } = makeApiMocks();
+
+      (api.network.getOperator as jest.Mock).mockReturnValue(null);
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -246,10 +236,6 @@ describe('createTokenHandler', () => {
             .mockResolvedValue(mockSignResult as TransactionResult),
         },
         kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.100000',
-            keyRefId: 'operator-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
         },
       });
@@ -286,10 +272,6 @@ describe('createTokenHandler', () => {
           }),
         },
         kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.100000',
-            keyRefId: 'operator-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
         },
       });
@@ -346,10 +328,6 @@ describe('createTokenHandler', () => {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
         kms: {
-          getOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.100000',
-            keyRefId: 'operator-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('operator-public-key'),
         },
       });

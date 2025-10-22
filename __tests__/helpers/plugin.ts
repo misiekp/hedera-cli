@@ -99,18 +99,14 @@ export const makeNetworkMock = (
     localNodeAccountId: '0.0.3',
     localNodeMirrorAddressGRPC: '127.0.0.1:5600',
   }),
-  setNetworkOperator: jest.fn(),
-  getNetworkOperator: jest.fn().mockReturnValue(null),
+  setOperator: jest.fn(),
+  getOperator: jest.fn().mockReturnValue(null),
 });
 
 /**
  * Create a mocked KeyManagementService
  */
-export const makeKmsMock = (
-  options: {
-    defaultOperator?: { accountId: string; keyRefId: string } | null;
-  } = {},
-): jest.Mocked<KmsService> => ({
+export const makeKmsMock = (): jest.Mocked<KmsService> => ({
   createLocalPrivateKey: jest.fn(),
   importPrivateKey: jest.fn().mockReturnValue({
     keyRefId: 'kr_test123',
@@ -121,8 +117,6 @@ export const makeKmsMock = (
   findByPublicKey: jest.fn(),
   list: jest.fn(),
   remove: jest.fn(),
-  setOperator: jest.fn(),
-  getOperator: jest.fn().mockReturnValue(options.defaultOperator ?? null),
   createClient: jest.fn(),
   signTransaction: jest.fn(),
 });
