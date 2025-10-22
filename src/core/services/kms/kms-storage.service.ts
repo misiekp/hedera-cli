@@ -46,7 +46,7 @@ export class KmsStorageService implements KmsStorageServiceInterface {
     network: SupportedNetwork,
     mapping: { accountId: string; keyRefId: string },
   ): void {
-    this.state.set('kms-operators', `operator-${network}`, mapping);
+    this.state.set('network-config', `${network}Operator`, mapping);
   }
 
   getOperator(
@@ -54,8 +54,8 @@ export class KmsStorageService implements KmsStorageServiceInterface {
   ): { accountId: string; keyRefId: string } | null {
     return (
       this.state.get<{ accountId: string; keyRefId: string }>(
-        'kms-operators',
-        `operator-${network}`,
+        'network-config',
+        `${network}Operator`,
       ) || null
     );
   }
