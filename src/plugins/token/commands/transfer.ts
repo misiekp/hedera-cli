@@ -52,15 +52,13 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
   // If from account wasn't provided, use operator as default
   if (!resolvedFromAccount) {
-    const operator = api.credentialsState.getDefaultOperator();
+    const operator = api.kms.getDefaultOperator();
 
     if (!operator) {
       throw new Error('No from account provided and no default operator set.');
     }
 
-    const operatorPublicKey = api.credentialsState.getPublicKey(
-      operator.keyRefId,
-    );
+    const operatorPublicKey = api.kms.getPublicKey(operator.keyRefId);
 
     if (!operatorPublicKey) {
       // This should not happen - credentials state should ensure operator keys exist
