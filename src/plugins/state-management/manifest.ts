@@ -20,7 +20,9 @@ const stateManagementManifest: PluginManifest = {
       name: 'list',
       summary: 'List all state data',
       description: 'Show all stored state data across plugins',
-      options: [{ name: 'namespace', type: 'string', required: false }],
+      options: [
+        { name: 'namespace', short: 'n', type: 'string', required: false },
+      ],
       handler: 'commands/list',
     },
     {
@@ -28,8 +30,8 @@ const stateManagementManifest: PluginManifest = {
       summary: 'Clear state data',
       description: 'Clear state data for a specific namespace or all data',
       options: [
-        { name: 'namespace', type: 'string', required: false },
-        { name: 'confirm', type: 'boolean', required: false },
+        { name: 'namespace', short: 'n', type: 'string', required: false },
+        { name: 'confirm', short: 'c', type: 'boolean', required: false },
       ],
       handler: 'commands/clear',
     },

@@ -29,24 +29,27 @@ export const tokenPluginManifest: PluginManifest = {
       options: [
         {
           name: 'token',
+          short: 't',
           type: 'string',
           required: true,
           description: 'Token: either a token alias or token-id',
         },
         {
           name: 'to',
+          short: 'T',
           type: 'string',
           required: true,
           description: 'Destination account: either an alias or account-id',
         },
         {
           name: 'from',
+          short: 'f',
           type: 'string',
           required: false,
           description:
             'Source account: either an alias or account-id:private-key pair',
         },
-        { name: 'balance', type: 'number', required: true },
+        { name: 'balance', short: 'b', type: 'number', required: true },
       ],
       handler: './commands/transfer',
     },
@@ -55,18 +58,26 @@ export const tokenPluginManifest: PluginManifest = {
       summary: 'Create a new fungible token',
       description: 'Create a new fungible token with specified properties',
       options: [
-        { name: 'name', type: 'string', required: true },
-        { name: 'symbol', type: 'string', required: true },
+        { name: 'name', short: 'N', type: 'string', required: true },
+        { name: 'symbol', short: 's', type: 'string', required: true },
         {
           name: 'treasury',
+          short: 't',
           type: 'string',
           required: false,
           description:
             'Treasury account: either an alias or treasury-id:treasury-key pair',
         },
-        { name: 'decimals', type: 'number', required: false, default: 0 },
+        {
+          name: 'decimals',
+          short: 'd',
+          type: 'number',
+          required: false,
+          default: 0,
+        },
         {
           name: 'initial-supply',
+          short: 'i',
           type: 'number',
           required: false,
           default: 1000000,
@@ -74,13 +85,15 @@ export const tokenPluginManifest: PluginManifest = {
         {
           name: 'supply-type',
           type: 'string',
+          short: 'S',
           required: false,
           default: 'INFINITE',
         },
-        { name: 'max-supply', type: 'number', required: false },
-        { name: 'admin-key', type: 'string', required: false },
+        { name: 'max-supply', short: 'm', type: 'number', required: false },
+        { name: 'admin-key', short: 'a', type: 'string', required: false },
         {
           name: 'alias',
+          short: 'n',
           type: 'string',
           required: false,
           description: 'Optional alias to register for the token',
@@ -95,12 +108,14 @@ export const tokenPluginManifest: PluginManifest = {
       options: [
         {
           name: 'token',
+          short: 't',
           type: 'string',
           required: true,
           description: 'Token: either a token alias or token-id',
         },
         {
           name: 'account',
+          short: 'a',
           type: 'string',
           required: true,
           description:
@@ -115,8 +130,8 @@ export const tokenPluginManifest: PluginManifest = {
       description:
         'Create a new token from a JSON file definition with advanced features',
       options: [
-        { name: 'file', type: 'string', required: true },
-        { name: 'args', type: 'string', required: false },
+        { name: 'file', short: 'f', type: 'string', required: true },
+        { name: 'args', short: 'a', type: 'string', required: false },
       ],
       handler: './commands/createFromFile',
     },
@@ -128,6 +143,7 @@ export const tokenPluginManifest: PluginManifest = {
       options: [
         {
           name: 'keys',
+          short: 'k',
           type: 'boolean',
           required: false,
           default: false,
@@ -135,6 +151,7 @@ export const tokenPluginManifest: PluginManifest = {
         },
         {
           name: 'network',
+          short: 'n',
           type: 'string',
           required: false,
           description:
