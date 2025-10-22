@@ -63,7 +63,9 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
     );
 
     if (!operatorPublicKey) {
-      throw new Error("Failed to retrieve operator's public key.");
+      throw new Error(
+        'Incorrect operator state, operator exists but has no assigned public key',
+      );
     }
 
     logger.log("No 'from' account provided, using default operator account.");
