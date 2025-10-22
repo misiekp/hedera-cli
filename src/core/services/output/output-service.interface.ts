@@ -11,11 +11,6 @@ export interface OutputService {
   handleCommandOutput(options: OutputHandlerOptions): void;
 
   /**
-   * Set the output format (can be overridden by command-line flags)
-   */
-  setFormat(format: 'human' | 'json'): void;
-
-  /**
    * Get the current output format
    */
   getFormat(): 'human' | 'json';

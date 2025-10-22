@@ -30,6 +30,7 @@ import { TokenService } from '../services/token/token-service.interface';
 import { TokenServiceImpl } from '../services/token/token-service';
 import { OutputService } from '../services/output/output-service.interface';
 import { OutputServiceImpl } from '../services/output/output-service';
+import { CoreApiConfig } from './core-api-config';
 
 export class CoreApiImplementation implements CoreApi {
   public account: AccountService;
@@ -46,7 +47,7 @@ export class CoreApiImplementation implements CoreApi {
   public hbar?: HbarService;
   public output: OutputService;
 
-  constructor() {
+  constructor(config: CoreApiConfig) {
     this.logger = new MockLoggerService();
     this.state = new ZustandGenericStateServiceImpl(this.logger);
 
@@ -91,13 +92,13 @@ export class CoreApiImplementation implements CoreApi {
     this.config = new MockConfigService();
 
     this.hbar = new HbarServiceImpl(this.logger);
-    this.output = new OutputServiceImpl();
+    this.output = new OutputServiceImpl(config.format);
   }
 }
 
 /**
  * Factory function to create a Core API instance
  */
-export function createCoreApi(): CoreApi {
-  return new CoreApiImplementation();
+export function createCoreApi(config: CoreApiConfig): CoreApi {
+  return new CoreApiImplementation(config);
 }

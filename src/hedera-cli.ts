@@ -11,6 +11,7 @@ import { Logger } from './utils/logger';
 import { setGlobalOutputMode } from './utils/output';
 import { PluginManager } from './core/plugins/plugin-manager';
 import { createCoreApi } from './core/core-api';
+import { CoreApiConfig } from './core/core-api/core-api-config';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };
@@ -32,9 +33,6 @@ program
 // Apply logging options and store format preference
 let globalFormat: 'human' | 'json' = 'human';
 
-// Store coreApi instance to access in preAction hook
-let coreApiInstance: ReturnType<typeof createCoreApi> | null = null;
-
 program.hook('preAction', () => {
   const opts = program.opts();
 
@@ -44,16 +42,8 @@ program.hook('preAction', () => {
 
   setColorEnabled(opts.color !== false);
 
-  // Handle --json flag (deprecated) and --format flag
-  const formatOption = opts.format as string | undefined;
-  const format: string = formatOption || (opts.json ? 'json' : 'human');
-  globalFormat = format as 'human' | 'json';
-  setGlobalOutputMode({ json: format === 'json' });
-
-  // Update output format on coreApi if available
-  if (coreApiInstance) {
-    coreApiInstance.output.setFormat(globalFormat);
-  }
+  // Set global output mode based on already parsed format
+  setGlobalOutputMode({ json: globalFormat === 'json' });
 });
 
 export function getGlobalFormat(): 'human' | 'json' {
@@ -65,12 +55,24 @@ async function initializeCLI() {
   try {
     console.error('🚀 Starting Hedera CLI...');
 
-    // Create plugin manager
-    const coreApi = createCoreApi();
-    coreApiInstance = coreApi;
+    // Pre-parse arguments to get format before creating core API
+    program.parseOptions(process.argv.slice(2));
+    const opts = program.opts();
 
-    // Set initial output format
-    coreApi.output.setFormat(globalFormat);
+    const formatOption = opts.format as string | undefined;
+    const format: string = formatOption || (opts.json ? 'json' : 'human');
+    const initialFormat = format as 'human' | 'json';
+
+    // Update global format
+    globalFormat = initialFormat;
+
+    // Create core API config
+    const coreApiConfig: CoreApiConfig = {
+      format: initialFormat,
+    };
+
+    // Create plugin manager
+    const coreApi = createCoreApi(coreApiConfig);
 
     const pluginManager = new PluginManager(coreApi);
 

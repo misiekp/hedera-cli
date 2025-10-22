@@ -9,17 +9,14 @@ import { OutputHandlerOptions, OutputFormat } from './types';
 import { JsonFormatter, TemplateFormatter } from './formatters';
 
 export class OutputServiceImpl implements OutputService {
-  private currentFormat: OutputFormat = 'human';
+  private currentFormat: OutputFormat;
   private jsonFormatter: JsonFormatter;
   private templateFormatter: TemplateFormatter;
 
-  constructor() {
+  constructor(format: OutputFormat = 'human') {
+    this.currentFormat = format;
     this.jsonFormatter = new JsonFormatter();
     this.templateFormatter = new TemplateFormatter();
-  }
-
-  setFormat(format: OutputFormat): void {
-    this.currentFormat = format;
   }
 
   getFormat(): OutputFormat {
