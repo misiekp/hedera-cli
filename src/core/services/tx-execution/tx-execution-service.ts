@@ -58,9 +58,9 @@ export class TxExecutionServiceImpl implements TxExecutionService {
       // Get fresh client for current network
       const client = this.getClient();
 
-      // Get default operator keyRefId for signing
-      const mapping =
-        this.kms.getOperator() || this.kms.ensureOperatorFromEnv();
+      // Get operator keyRefId for signing
+      const currentNetwork = this.networkService.getCurrentNetwork();
+      const mapping = this.kms.getOperator(currentNetwork);
       if (!mapping) {
         throw new Error('[TX-EXECUTION] No default operator configured');
       }

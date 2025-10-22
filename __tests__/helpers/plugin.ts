@@ -121,7 +121,6 @@ export const makeKmsMock = (
   remove: jest.fn(),
   setOperator: jest.fn(),
   getOperator: jest.fn().mockReturnValue(options.defaultOperator ?? null),
-  ensureOperatorFromEnv: jest.fn(),
   createClient: jest.fn(),
   signTransaction: jest.fn(),
 });

@@ -259,9 +259,14 @@ Manages operator credentials and key management securely.
 
 ```typescript
 interface KmsService {
-  setOperator(accountId: string, keyRefId: string): void;
-  getOperator(): { accountId: string; keyRefId: string } | null;
-  ensureOperatorFromEnv(): { accountId: string; keyRefId: string } | null;
+  setOperator(
+    network: SupportedNetwork,
+    accountId: string,
+    keyRefId: string,
+  ): void;
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null;
   createLocalPrivateKey(labels?: string[]): {
     keyRefId: string;
     publicKey: string;

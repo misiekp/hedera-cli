@@ -187,7 +187,6 @@ describe('createTokenHandler', () => {
       const { api } = makeApiMocks({
         kms: {
           getOperator: jest.fn().mockReturnValue(null),
-          ensureOperatorFromEnv: jest.fn().mockReturnValue(null),
         },
       });
 

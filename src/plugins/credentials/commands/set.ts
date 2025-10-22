@@ -20,8 +20,9 @@ export function setHandler(args: CommandHandlerArgs): void {
       'default-operator',
     ]);
 
-    // Set as default operator
-    api.kms.setOperator(accountId, keyRefId);
+    // Set as operator for current network
+    const currentNetwork = api.network.getCurrentNetwork();
+    api.kms.setOperator(currentNetwork, accountId, keyRefId);
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
     logger.log(`   Network: ${network || 'testnet'}`);

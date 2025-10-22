@@ -154,7 +154,6 @@ describe('Token Plugin Error Handling', () => {
       const { api, kms: _kms } = makeApiMocks({
         kms: {
           getOperator: jest.fn().mockReturnValue(null),
-          ensureOperatorFromEnv: jest.fn().mockReturnValue(null),
         },
       });
 
