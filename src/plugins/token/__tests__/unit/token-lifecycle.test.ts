@@ -59,7 +59,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -121,8 +121,8 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
-        credentials: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+        kms: {
+          getOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
           }),
@@ -242,7 +242,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -283,8 +283,8 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
-        credentials: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+        kms: {
+          getOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
           }),
@@ -359,7 +359,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest
@@ -395,8 +395,8 @@ describe('Token Lifecycle Integration', () => {
             });
           }),
         },
-        credentials: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+        kms: {
+          getOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
           }),
@@ -483,7 +483,7 @@ describe('Token Lifecycle Integration', () => {
         api,
         tokenTransactions: _tokenTransactions,
         signing: _signing,
-        credentials: _credentials,
+        kms: _credentials,
       } = makeApiMocks({
         tokenTransactions: {
           createTokenTransaction: jest.fn().mockReturnValue({}),
@@ -496,8 +496,8 @@ describe('Token Lifecycle Integration', () => {
             receipt: {},
           }),
         },
-        credentials: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+        kms: {
+          getOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             keyRefId: 'treasury-key-ref-id',
           }),

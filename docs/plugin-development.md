@@ -251,7 +251,7 @@ api.logger.warn('Warning message');
 
 ```typescript
 // Get credentials
-const credentials = await api.credentials.getDefaultCredentials();
+const operator = api.kms.getOperator();
 ```
 
 ## 🧪 Testing Plugins

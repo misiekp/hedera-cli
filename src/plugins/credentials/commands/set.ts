@@ -21,7 +21,7 @@ export function setHandler(args: CommandHandlerArgs): void {
     ]);
 
     // Set as default operator
-    api.kms.setDefaultOperator(accountId, keyRefId);
+    api.kms.setOperator(accountId, keyRefId);
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
     logger.log(`   Network: ${network || 'testnet'}`);

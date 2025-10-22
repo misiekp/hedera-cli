@@ -43,7 +43,7 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
           }),
@@ -153,8 +153,8 @@ describe('Token Plugin Error Handling', () => {
       // Arrange
       const { api, kms: _kms } = makeApiMocks({
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue(null),
-          ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
+          getOperator: jest.fn().mockReturnValue(null),
+          ensureOperatorFromEnv: jest.fn().mockReturnValue(null),
         },
       });
 
@@ -217,7 +217,7 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'invalid-key-ref-id',
           }),
@@ -448,7 +448,7 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
           }),
@@ -594,7 +594,7 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
           }),
@@ -638,7 +638,7 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
           }),
@@ -746,7 +746,7 @@ describe('Token Plugin Error Handling', () => {
           signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.123456',
             keyRefId: 'test-key-ref-id',
           }),

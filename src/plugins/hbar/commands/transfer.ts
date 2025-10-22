@@ -27,10 +27,9 @@ export default async function transferHandler(
 
   // Fallback to default operator from env if from not provided
   if (!from) {
-    const defaultOp =
-      api.kms.getDefaultOperator() || api.kms.ensureDefaultFromEnv();
-    if (defaultOp) {
-      from = defaultOp.accountId;
+    const operator = api.kms.getOperator() || api.kms.ensureOperatorFromEnv();
+    if (operator) {
+      from = operator.accountId;
       logger.log(`[HBAR] Using default operator as from: ${from}`);
     } else {
       throw new Error(

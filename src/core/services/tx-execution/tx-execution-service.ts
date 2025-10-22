@@ -60,7 +60,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
 
       // Get default operator keyRefId for signing
       const mapping =
-        this.kms.getDefaultOperator() || this.kms.ensureDefaultFromEnv();
+        this.kms.getOperator() || this.kms.ensureOperatorFromEnv();
       if (!mapping) {
         throw new Error('[TX-EXECUTION] No default operator configured');
       }

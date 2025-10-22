@@ -119,11 +119,9 @@ export const makeKmsMock = (
   findByPublicKey: jest.fn(),
   list: jest.fn(),
   remove: jest.fn(),
-  setDefaultOperator: jest.fn(),
-  getDefaultOperator: jest
-    .fn()
-    .mockReturnValue(options.defaultOperator ?? null),
-  ensureDefaultFromEnv: jest.fn(),
+  setOperator: jest.fn(),
+  getOperator: jest.fn().mockReturnValue(options.defaultOperator ?? null),
+  ensureOperatorFromEnv: jest.fn(),
   createClient: jest.fn(),
   signTransaction: jest.fn(),
 });

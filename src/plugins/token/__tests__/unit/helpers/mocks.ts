@@ -71,12 +71,12 @@ export const makeKmsMock = (
   findByPublicKey: jest.fn(),
   list: jest.fn().mockReturnValue([]),
   remove: jest.fn(),
-  setDefaultOperator: jest.fn(),
-  getDefaultOperator: jest.fn().mockReturnValue({
+  setOperator: jest.fn(),
+  getOperator: jest.fn().mockReturnValue({
     accountId: '0.0.100000',
     keyRefId: 'operator-key-ref-id',
   }),
-  ensureDefaultFromEnv: jest.fn().mockReturnValue({
+  ensureOperatorFromEnv: jest.fn().mockReturnValue({
     accountId: '0.0.100000',
     keyRefId: 'operator-key-ref-id',
   }),

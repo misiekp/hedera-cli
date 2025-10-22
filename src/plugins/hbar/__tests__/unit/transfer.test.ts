@@ -75,9 +75,7 @@ const setupTransferTest = (options: {
   });
 
   if (options.defaultCredentials) {
-    (kms.getDefaultOperator as jest.Mock).mockReturnValue(
-      options.defaultCredentials,
-    );
+    (kms.getOperator as jest.Mock).mockReturnValue(options.defaultCredentials);
   }
 
   const stateMock = makeStateMock({

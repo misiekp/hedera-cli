@@ -147,33 +147,33 @@ export class KmsServiceImpl implements KmsService {
 
   // Removed registerProvider - no longer needed
 
-  setDefaultOperator(accountId: string, keyRefId: string): void {
-    this.storage.setDefaultOperator({ accountId, keyRefId });
-    this.logger.debug(`[CRED] Default operator set: ${accountId}`);
+  setOperator(accountId: string, keyRefId: string): void {
+    this.storage.setOperator({ accountId, keyRefId });
+    this.logger.debug(`[CRED] Operator set: ${accountId}`);
   }
 
-  getDefaultOperator(): { accountId: string; keyRefId: string } | null {
-    return this.storage.getDefaultOperator();
+  getOperator(): { accountId: string; keyRefId: string } | null {
+    return this.storage.getOperator();
   }
 
-  ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null {
-    const existing = this.getDefaultOperator();
+  ensureOperatorFromEnv(): { accountId: string; keyRefId: string } | null {
+    const existing = this.getOperator();
     if (existing) return existing;
     // TODO: Improve environment variable handling to support multiple networks (not just Testnet)
     const accountId = process.env.TESTNET_OPERATOR_ID;
     const privateKey = process.env.TESTNET_OPERATOR_KEY;
     if (accountId && privateKey) {
       const { keyRefId } = this.importPrivateKey(privateKey, ['env-default']);
-      this.setDefaultOperator(accountId, keyRefId);
+      this.setOperator(accountId, keyRefId);
       return { accountId, keyRefId };
     }
     return null;
   }
 
   createClient(network: SupportedNetwork): Client {
-    const mapping = this.getDefaultOperator() || this.ensureDefaultFromEnv();
+    const mapping = this.getOperator() || this.ensureOperatorFromEnv();
     if (!mapping) {
-      throw new Error('[CRED] No default operator configured');
+      throw new Error('[CRED] No operator configured');
     }
 
     const { accountId, keyRefId } = mapping;

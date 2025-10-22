@@ -61,7 +61,7 @@ describe('createTokenHandler', () => {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: mockAccountIds.operator,
             keyRefId: 'operator-key-ref-id',
           }),
@@ -113,7 +113,7 @@ describe('createTokenHandler', () => {
           signAndExecute: jest.fn().mockResolvedValue(mockSignResult),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.100000',
             keyRefId: 'operator-key-ref-id',
           }),
@@ -137,7 +137,7 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
-      expect(kms.getDefaultOperator).toHaveBeenCalled();
+      expect(kms.getOperator).toHaveBeenCalled();
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith({
         name: 'TestToken',
         symbol: 'TEST',
@@ -186,8 +186,8 @@ describe('createTokenHandler', () => {
       // Arrange
       const { api } = makeApiMocks({
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue(null),
-          ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
+          getOperator: jest.fn().mockReturnValue(null),
+          ensureOperatorFromEnv: jest.fn().mockReturnValue(null),
         },
       });
 
@@ -247,7 +247,7 @@ describe('createTokenHandler', () => {
             .mockResolvedValue(mockSignResult as TransactionResult),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.100000',
             keyRefId: 'operator-key-ref-id',
           }),
@@ -287,7 +287,7 @@ describe('createTokenHandler', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.100000',
             keyRefId: 'operator-key-ref-id',
           }),
@@ -347,7 +347,7 @@ describe('createTokenHandler', () => {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
+          getOperator: jest.fn().mockReturnValue({
             accountId: '0.0.100000',
             keyRefId: 'operator-key-ref-id',
           }),

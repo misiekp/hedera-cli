@@ -41,11 +41,11 @@ export class KmsStorageService implements KmsStorageServiceInterface {
     this.state.delete('kms-secrets', keyRefId);
   }
 
-  setDefaultOperator(mapping: { accountId: string; keyRefId: string }): void {
+  setOperator(mapping: { accountId: string; keyRefId: string }): void {
     this.state.set('kms-operators', 'operator', mapping);
   }
 
-  getDefaultOperator(): { accountId: string; keyRefId: string } | null {
+  getOperator(): { accountId: string; keyRefId: string } | null {
     return (
       this.state.get<{ accountId: string; keyRefId: string }>(
         'kms-operators',

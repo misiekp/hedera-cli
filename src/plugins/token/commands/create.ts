@@ -67,7 +67,7 @@ function resolveTreasuryAccount(
   }
 
   // No treasury provided - get operator info (required for token creation)
-  const operator = api.kms.getDefaultOperator();
+  const operator = api.kms.getOperator();
   if (!operator) {
     throw new Error(
       'No operator credentials found. Please set up your Hedera account credentials or provide a treasury account.',
@@ -105,7 +105,7 @@ function resolveAdminKey(
   }
 
   // 3. Fall back to operator's public key
-  const operator = api.kms.getDefaultOperator();
+  const operator = api.kms.getOperator();
   if (!operator) {
     throw new Error('No operator credentials found');
   }

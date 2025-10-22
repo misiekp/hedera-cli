@@ -17,7 +17,7 @@ interface CoreAPI {
   network: NetworkService;
   config: ConfigService;
   logger: Logger;
-  credentials: CredentialsService;
+  kms: KmsService;
 }
 ```
 
@@ -253,33 +253,44 @@ api.logger.info('Operation completed');
 api.logger.debug('Debug information:', data);
 ```
 
-### Credentials Service
+### KMS Service
 
-Manages operator credentials securely.
+Manages operator credentials and key management securely.
 
 ```typescript
-interface CredentialsService {
-  getDefaultCredentials(): Promise<Credentials>;
-  getCredentials(accountId: string): Promise<Credentials | null>;
-  setCredentials(credentials: Credentials): Promise<void>;
-  removeCredentials(accountId: string): Promise<void>;
-  listCredentials(): Promise<Credentials[]>;
-}
-
-interface Credentials {
-  accountId: string;
-  privateKey: string;
-  network: string;
-  isDefault: boolean;
-  createdAt: string;
+interface KmsService {
+  setOperator(accountId: string, keyRefId: string): void;
+  getOperator(): { accountId: string; keyRefId: string } | null;
+  ensureOperatorFromEnv(): { accountId: string; keyRefId: string } | null;
+  createLocalPrivateKey(labels?: string[]): {
+    keyRefId: string;
+    publicKey: string;
+  };
+  importPrivateKey(
+    privateKey: string,
+    labels?: string[],
+  ): { keyRefId: string; publicKey: string };
+  getPublicKey(keyRefId: string): string | null;
+  list(): Array<{
+    keyRefId: string;
+    type: CredentialType;
+    publicKey: string;
+    labels?: string[];
+  }>;
+  remove(keyRefId: string): void;
+  createClient(network: SupportedNetwork): Client;
+  signTransaction(
+    transaction: HederaTransaction,
+    keyRefId: string,
+  ): Promise<void>;
 }
 ```
 
 **Usage Example:**
 
 ```typescript
-const credentials = await api.credentials.getDefaultCredentials();
-const allCredentials = await api.credentials.listCredentials();
+const operator = api.kms.getOperator();
+const allKeys = api.kms.list();
 ```
 
 ## 📊 Type Definitions
@@ -539,7 +550,7 @@ export async function complexOperation(
   logger.log(`Operating on network: ${network}`);
 
   // Get credentials
-  const credentials = await api.credentials.getDefaultCredentials();
+  const operator = api.kms.getOperator();
 
   // Create account
   const account = await api.account.createAccount({
