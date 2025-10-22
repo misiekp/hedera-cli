@@ -23,6 +23,22 @@ jest.mock('../../zustand-state-helper', () => ({
 const MockedHelper = ZustandTokenStateHelper as jest.Mock;
 const { setupExit, cleanupExit, getExitSpy } = mockProcessExitThrows();
 
+/**
+ * Helper to create alias mock that resolves test key strings
+ */
+const makeTestAliasService = () => ({
+  resolve: jest.fn().mockImplementation((alias, type) => {
+    // Mock key alias resolution for test keys
+    if (type === 'key' && alias === 'admin-key') {
+      return {
+        keyRefId: 'admin-key-ref-id',
+        publicKey: 'admin-key',
+      };
+    }
+    return null;
+  }),
+});
+
 describe('Token Plugin Error Handling', () => {
   beforeEach(() => {
     setupExit();
@@ -45,6 +61,7 @@ describe('Token Plugin Error Handling', () => {
         kms: {
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
+        alias: makeTestAliasService(),
       });
 
       const logger = makeLogger();
@@ -210,6 +227,7 @@ describe('Token Plugin Error Handling', () => {
         kms: {
           getPublicKey: jest.fn().mockReturnValue('invalid-public-key'),
         },
+        alias: makeTestAliasService(),
       });
 
       const logger = makeLogger();
@@ -437,6 +455,7 @@ describe('Token Plugin Error Handling', () => {
         kms: {
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
+        alias: makeTestAliasService(),
       });
 
       const logger = makeLogger();
@@ -579,6 +598,7 @@ describe('Token Plugin Error Handling', () => {
         kms: {
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
+        alias: makeTestAliasService(),
       });
 
       const logger = makeLogger();
@@ -619,6 +639,7 @@ describe('Token Plugin Error Handling', () => {
         kms: {
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
+        alias: makeTestAliasService(),
       });
 
       const logger = makeLogger();
@@ -723,6 +744,7 @@ describe('Token Plugin Error Handling', () => {
         kms: {
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
+        alias: makeTestAliasService(),
       });
 
       const logger = makeLogger();

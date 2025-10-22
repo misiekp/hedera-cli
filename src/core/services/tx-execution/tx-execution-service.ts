@@ -65,7 +65,9 @@ export class TxExecutionServiceImpl implements TxExecutionService {
         throw new Error('[TX-EXECUTION] No default operator configured');
       }
 
-      transaction.freezeWith(client);
+      if (!transaction.isFrozen()) {
+        transaction.freezeWith(client);
+      }
 
       // Sign using credentials-state without exposing private key
       await this.kms.signTransaction(transaction, mapping.keyRefId);
@@ -124,7 +126,9 @@ export class TxExecutionServiceImpl implements TxExecutionService {
     const client = this.getClient();
     const keyRefId = this.resolveSignerRef(signer);
 
-    transaction.freezeWith(client);
+    if (!transaction.isFrozen()) {
+      transaction.freezeWith(client);
+    }
 
     // Sign using credentials-state without exposing private key
     await this.kms.signTransaction(transaction, keyRefId);
@@ -164,6 +168,11 @@ export class TxExecutionServiceImpl implements TxExecutionService {
         },
       },
     };
+  }
+
+  freezeTx(transaction: HederaTransaction) {
+    const client = this.getClient();
+    return transaction.freezeWith(client);
   }
 
   /**

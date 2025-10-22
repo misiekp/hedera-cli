@@ -121,6 +121,18 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -276,6 +288,18 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -379,6 +403,18 @@ describe('Token Lifecycle Integration', () => {
               transactionId: '',
               receipt: null,
             });
+          }),
+        },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
           }),
         },
       });
