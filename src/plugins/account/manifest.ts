@@ -61,7 +61,7 @@ export const accountPluginManifest: PluginManifest = {
         },
         {
           name: 'only-hbar',
-          short: 'h',
+          short: 'H',
           type: 'boolean',
           required: false,
           default: false,
