@@ -63,8 +63,9 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
     );
 
     if (!operatorPublicKey) {
+      // This should not happen - credentials state should ensure operator keys exist
       throw new Error(
-        'Incorrect operator state, operator exists but has no assigned public key',
+        'No from account provided and cant resolve public key of default operator set.',
       );
     }
 
