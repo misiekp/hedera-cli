@@ -1,3 +1,5 @@
+import { NetworkConfig } from '../network/network-service.interface';
+
 /**
  * Interface for configuration access
  * Provides read-only access to CLI configuration
@@ -27,13 +29,4 @@ export interface ConfigService {
    * Get operator private key for current network
    */
   getOperatorKey(): string;
-}
-
-export interface NetworkConfig {
-  name: string;
-  rpcUrl: string;
-  mirrorNodeUrl: string;
-  chainId: string;
-  explorerUrl?: string;
-  isTestnet: boolean;
 }
