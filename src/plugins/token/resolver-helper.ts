@@ -311,28 +311,6 @@ export function resolveTokenParameter(
   };
 }
 
-/**
- * Validates if a string is a valid Hedera public key format
- * Uses Hedera SDK to validate - supports all formats (DER, raw hex, ED25519, ECDSA)
- * This is a read-only operation with no side effects.
- *
- * @param keyString - String to validate as public key
- * @returns Object with validation result and normalized public key if valid
- */
-function validatePublicKeyFormat(
-  keyString: string,
-): { valid: true; publicKey: string } | { valid: false; error: string } {
-  try {
-    // Let Hedera SDK validate the key format
-    // This supports all formats: DER, raw hex, ED25519, ECDSA
-    const publicKey = PublicKey.fromString(keyString);
-    return { valid: true, publicKey: publicKey.toStringRaw() };
-  } catch (error) {
-    // Not a valid public key format
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return { valid: false, error: message };
-  }
-}
 type ResolvedKey = {
   publicKey: string;
   keyRefId?: string;
@@ -350,9 +328,7 @@ export function resolveKeyParameter(
     const accountAlias = api.alias.resolve(keyOrAlias, 'account', network);
 
     if (accountAlias?.keyRefId) {
-      const adminPublicKey = api.credentialsState.getPublicKey(
-        accountAlias.keyRefId,
-      );
+      const adminPublicKey = api.kms.getPublicKey(accountAlias.keyRefId);
 
       if (!adminPublicKey) {
         throw new Error(
@@ -375,7 +351,7 @@ export function resolveKeyParameter(
       };
     }
 
-    const publicKeyRefId = api.credentialsState.findByPublicKey(keyOrAlias);
+    const publicKeyRefId = api.kms.findByPublicKey(keyOrAlias);
     if (publicKeyRefId) {
       return {
         keyRefId: publicKeyRefId,
@@ -389,9 +365,9 @@ export function resolveKeyParameter(
   }
 
   // Fall back to operator key (whether keyOrAlias was undefined or resolution failed)
-  const operator = api.credentialsState.getDefaultOperator();
+  const operator = api.kms.getDefaultOperator();
   if (operator?.keyRefId) {
-    const operatorPubKey = api.credentialsState.getPublicKey(operator.keyRefId);
+    const operatorPubKey = api.kms.getPublicKey(operator.keyRefId);
     if (!operatorPubKey) {
       throw new Error('Operator key not found in credentials');
     }

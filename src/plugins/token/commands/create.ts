@@ -2,10 +2,10 @@
  * Token Create Command Handler
  * Handles token creation operations using the Core API
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { CoreApi } from '../../../core/core-api/core-api.interface';
-import { Logger } from '../../../core/services/logger/logger-service.interface';
-import { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
+import { CommandHandlerArgs } from '../../../core';
+import { CoreApi } from '../../../core';
+import { Logger } from '../../../core';
+import { TransactionResult } from '../../../core';
 import { SupportedNetwork } from '../../../core/types/shared.types';
 import { Transaction as HederaTransaction } from '@hashgraph/sdk';
 import { ZustandTokenStateHelper } from '../zustand-state-helper';
@@ -84,36 +84,12 @@ function resolveTreasuryAccount(
 }
 
 /**
- * Gets the operator's public key as a fallback
- * @param api - Core API instance
- * @param logger - Logger instance
- * @returns The operator's public key
- */
-function getOperatorPublicKey(api: CoreApi, logger?: Logger): string {
-  const operator = api.kms.getDefaultOperator();
-  if (!operator) {
-    throw new Error('No operator credentials found');
-  }
-
-  const pubKey = api.kms.getPublicKey(operator.keyRefId);
-  if (logger) {
-    logger.debug(`operator.keyRefId: ${operator.keyRefId}`);
-    logger.debug(`pubKey: ${pubKey}`);
-  }
-
-  if (!pubKey) {
-    throw new Error(`Operator key not found: ${operator.keyRefId}`);
-  }
-
-  return pubKey;
-}
-
-/**
  * Executes the token creation transaction
  * @param api - Core API instance
  * @param transaction - Token creation transaction
  * @param treasury - Treasury resolution result
  * @param logger - Logger instance
+ * @param adminKeyRefId - Optional admin key reference Id
  * @returns Transaction result
  */
 async function executeTokenCreation(
@@ -124,9 +100,9 @@ async function executeTokenCreation(
   adminKeyRefId?: string,
 ): Promise<TransactionResult> {
   if (adminKeyRefId) {
-    const tx = api.signing.freezeTx(transaction);
+    const tx = api.txExecution.freezeTx(transaction);
     // @TODO - Migrate from signTransaction to keep consistent with other usages
-    await api.credentialsState.signTransaction(tx, adminKeyRefId);
+    await api.kms.signTransaction(tx, adminKeyRefId);
   }
 
   if (treasury.useCustom && treasury.keyRefId) {
