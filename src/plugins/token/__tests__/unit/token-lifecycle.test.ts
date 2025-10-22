@@ -127,6 +127,18 @@ describe('Token Lifecycle Integration', () => {
             privateKey: treasuryKey,
           }),
         },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -289,6 +301,18 @@ describe('Token Lifecycle Integration', () => {
             privateKey: treasuryKey,
           }),
         },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
+          }),
+        },
       });
 
       const logger = makeLogger();
@@ -399,6 +423,18 @@ describe('Token Lifecycle Integration', () => {
           getDefaultOperator: jest.fn().mockReturnValue({
             accountId: treasuryAccountId,
             privateKey: treasuryKey,
+          }),
+        },
+        alias: {
+          resolve: jest.fn().mockImplementation((alias, type) => {
+            // Mock key alias resolution for test keys
+            if (type === 'key' && alias === 'admin-key') {
+              return {
+                keyRefId: 'admin-key-ref-id',
+                publicKey: 'admin-key',
+              };
+            }
+            return null;
           }),
         },
       });

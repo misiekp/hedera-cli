@@ -52,6 +52,7 @@ export const makeTxExecutionServiceMock = (
   signAndExecuteWith: jest
     .fn()
     .mockResolvedValue(mockTransactionResults.success),
+  freezeTx: jest.fn().mockImplementation((tx) => tx),
   ...overrides,
 });
 
@@ -68,7 +69,26 @@ export const makeKmsMock = (
   }),
   getPublicKey: jest.fn().mockReturnValue('mock-public-key'),
   getSignerHandle: jest.fn(),
-  findByPublicKey: jest.fn(),
+  findByPublicKey: jest.fn().mockImplementation((publicKey) => {
+    // Return a keyRefId for any public key by default
+    // Tests can override this behavior as needed
+    if (publicKey === 'operator-public-key') {
+      return 'operator-key-ref-id';
+    }
+    if (publicKey === 'admin-key') {
+      return 'admin-key-ref-id';
+    }
+    if (publicKey === 'test-admin-key') {
+      return 'admin-key-ref-id';
+    }
+    if (publicKey === 'test-public-key') {
+      return 'test-key-ref-id';
+    }
+    if (publicKey === 'treasury-public-key') {
+      return 'treasury-key-ref-id';
+    }
+    return undefined;
+  }),
   list: jest.fn().mockReturnValue([]),
   remove: jest.fn(),
   setDefaultOperator: jest.fn(),
