@@ -36,35 +36,46 @@ export async function listHandler(args: CommandHandlerArgs) {
     }
 
     logger.log(heading('Available networks:'));
-    for (const name of networkNames) {
+    logger.log(''); // Empty line for better spacing
+
+    for (let i = 0; i < networkNames.length; i++) {
+      const name = networkNames[i];
       const isActive = name === currentNetwork;
       const config = api.network.getNetworkConfig(name);
       const operator = api.network.getOperator(name as SupportedNetwork);
-      const networkLine = `${color.green('-')} ${color.magenta(name)}`;
-      const activeIndicator = isActive ? ` ${color.yellow('(active)')}` : '';
+
+      const networkLine = `${color.green('●')} ${color.magenta(name.toUpperCase())}`;
+      const activeIndicator = isActive ? ` ${color.yellow('(ACTIVE)')}` : '';
       logger.log(`${networkLine}${activeIndicator}`);
 
-      // Show operator info for each network
       if (operator) {
-        logger.log(`  Operator: ${color.cyan(operator.accountId)}`);
+        logger.log(
+          `   ${color.dim('└─')} Operator: ${color.cyan(operator.accountId)}`,
+        );
       } else {
-        logger.log(`  Operator: ${color.dim('Not configured')}`);
+        logger.log(
+          `   ${color.dim('└─')} Operator: ${color.dim('Not configured')}`,
+        );
       }
 
       if (isActive) {
         const mirrorStatus = await checkMirrorNodeHealth(config.mirrorNodeUrl);
         logger.log(
-          `  Mirror Node: ${color.cyan(config.mirrorNodeUrl)} ${mirrorStatus.status} ${
+          `   ${color.dim('└─')} Mirror Node: ${color.cyan(config.mirrorNodeUrl)} ${mirrorStatus.status} ${
             mirrorStatus.code ? `(${mirrorStatus.code})` : ''
           }`,
         );
 
         const rpcStatus = await checkRpcHealth(config.rpcUrl);
         logger.log(
-          `  RPC URL: ${color.cyan(config.rpcUrl)} ${rpcStatus.status} ${
+          `   ${color.dim('└─')} RPC URL: ${color.cyan(config.rpcUrl)} ${rpcStatus.status} ${
             rpcStatus.code ? `(${rpcStatus.code})` : ''
           }`,
         );
+      }
+
+      if (i < networkNames.length - 1) {
+        logger.log('');
       }
     }
 
