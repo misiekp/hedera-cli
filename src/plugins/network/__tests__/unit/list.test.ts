@@ -66,15 +66,17 @@ describe('network plugin - list command', () => {
       expect.stringContaining('Available networks:'),
     );
     expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('localnet'),
+      expect.stringContaining('● LOCALNET'),
     );
     expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('- testnet (active)'),
+      expect.stringContaining('● TESTNET (ACTIVE)'),
     );
     expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('previewnet'),
+      expect.stringContaining('● PREVIEWNET'),
     );
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('mainnet'));
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('● MAINNET'),
+    );
   });
 
   test('shows health checks for active network', async () => {
