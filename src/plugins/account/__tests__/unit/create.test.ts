@@ -10,6 +10,7 @@ import {
   makeKmsMock,
   makeAliasMock,
   makeSigningMock,
+  makeMirrorMock,
   setupExitSpy,
 } from '../../../../../__tests__/helpers/plugin';
 
@@ -21,15 +22,37 @@ jest.mock('../../zustand-state-helper', () => ({
 
 const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 
+/**
+ * Balance constants for testing (in Tinybars)
+ * These represent realistic Hbar amounts:
+ * - OPERATOR_SUFFICIENT_BALANCE: 1000 Hbar (1000 * 10^8 tinybars)
+ * - ACCOUNT_REQUEST_BALANCE: 10 Hbar (typical account creation)
+ */
+const OPERATOR_SUFFICIENT_BALANCE = 100_000_000_000n; // 1000 Hbar in tinybars
+const OPERATOR_ACCOUNT_ID = '0.0.123';
+const OPERATOR_KEY_REF_ID = 'kr_operator_test';
+
+interface ApiMocksConfig {
+  createAccountImpl?: jest.Mock;
+  signAndExecuteImpl?: jest.Mock;
+  network?: 'testnet' | 'mainnet' | 'previewnet';
+  operatorBalance?: bigint;
+}
+
+/**
+ * Factory function to create consistent API mocks for account creation tests
+ * Follows Web3 testing best practices:
+ * - Centralizes mock configuration
+ * - Uses realistic balance values
+ * - Provides sensible defaults
+ * - Ensures all required dependencies are mocked
+ */
 const makeApiMocks = ({
   createAccountImpl,
   signAndExecuteImpl,
   network = 'testnet',
-}: {
-  createAccountImpl?: jest.Mock;
-  signAndExecuteImpl?: jest.Mock;
-  network?: 'testnet' | 'mainnet' | 'previewnet';
-}) => {
+  operatorBalance = OPERATOR_SUFFICIENT_BALANCE,
+}: ApiMocksConfig) => {
   const account: jest.Mocked<AccountService> = {
     createAccount: createAccountImpl || jest.fn(),
     getAccountInfo: jest.fn(),
@@ -38,17 +61,29 @@ const makeApiMocks = ({
 
   const signing = makeSigningMock({ signAndExecuteImpl });
   const networkMock = makeNetworkMock(network);
+
+  // Configure network mock to return a valid operator for balance checks
+  networkMock.getOperator = jest.fn().mockReturnValue({
+    accountId: OPERATOR_ACCOUNT_ID,
+    keyRefId: OPERATOR_KEY_REF_ID,
+  });
+
   const kms = makeKmsMock();
 
-  // Override createLocalPrivateKey for create tests
+  // Override createLocalPrivateKey for account creation tests
   kms.createLocalPrivateKey = jest.fn().mockReturnValue({
     keyRefId: 'kr_test123',
     publicKey: 'pub-key-test',
   });
 
+  // Configure mirror node mock with sufficient operator balance
+  const mirror = makeMirrorMock({
+    hbarBalance: operatorBalance,
+  });
+
   const alias = makeAliasMock();
 
-  return { account, signing, networkMock, kms, alias };
+  return { account, signing, networkMock, kms, alias, mirror };
 };
 
 beforeAll(() => {
@@ -69,7 +104,7 @@ describe('account plugin - create command (unit)', () => {
     const saveAccountMock = jest.fn();
     MockedHelper.mockImplementation(() => ({ saveAccount: saveAccountMock }));
 
-    const { account, signing, networkMock, kms, alias } = makeApiMocks({
+    const { account, signing, networkMock, kms, alias, mirror } = makeApiMocks({
       createAccountImpl: jest.fn().mockResolvedValue({
         transaction: {},
         publicKey: 'pub-key-test',
@@ -89,6 +124,7 @@ describe('account plugin - create command (unit)', () => {
       network: networkMock,
       kms,
       alias,
+      mirror: mirror as any,
       logger,
     };
 
@@ -138,7 +174,7 @@ describe('account plugin - create command (unit)', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { account, signing, networkMock } = makeApiMocks({
+    const { account, signing, networkMock, kms, mirror } = makeApiMocks({
       createAccountImpl: jest.fn().mockResolvedValue({
         transaction: {},
         privateKey: 'priv',
@@ -156,6 +192,8 @@ describe('account plugin - create command (unit)', () => {
       account,
       txExecution: signing,
       network: networkMock,
+      kms,
+      mirror: mirror as any,
       logger,
     };
 
@@ -173,7 +211,7 @@ describe('account plugin - create command (unit)', () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveAccount: jest.fn() }));
 
-    const { account, signing, networkMock } = makeApiMocks({
+    const { account, signing, networkMock, kms, mirror } = makeApiMocks({
       createAccountImpl: jest
         .fn()
         .mockRejectedValue(new Error('network error')),
@@ -183,6 +221,8 @@ describe('account plugin - create command (unit)', () => {
       account,
       txExecution: signing,
       network: networkMock,
+      kms,
+      mirror: mirror as any,
       logger,
     };
 

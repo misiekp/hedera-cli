@@ -8,6 +8,40 @@ import { AliasType } from '../../../core/services/alias/alias-service.interface'
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 import { processBalanceInput } from '../../../core/utils/process-balance-input';
+import { CoreApi } from '../../../core';
+import { Hbar } from '@hashgraph/sdk';
+
+type OperatorBalanceResult = {
+  sufficient: boolean;
+  balance: string;
+};
+
+async function checkIfEnoughBalance(
+  api: CoreApi,
+  requestedBalance: number,
+): Promise<OperatorBalanceResult> {
+  const network = api.network.getCurrentNetwork();
+  const operator = api.network.getOperator(network);
+
+  if (!operator) {
+    // This should never happen as the CLI ensures an operator is set before executing commands
+    throw new Error('Default operator not set.');
+  }
+
+  const balanceTinyBars = await api.mirror.getAccountHBarBalance(
+    operator.accountId,
+  );
+
+  const balance = Hbar.fromTinybars(balanceTinyBars).toBigNumber();
+
+  const hbarBalance = balance.toString();
+  const isBalanceSufficient = balance.gt(requestedBalance);
+
+  return {
+    sufficient: isBalanceSufficient,
+    balance: hbarBalance,
+  };
+}
 
 export async function createAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -40,6 +74,17 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   // Check if alias already exists on the current network
   const network = api.network.getCurrentNetwork();
   api.alias.availableOrThrow(alias, network);
+
+  const operatorBalance = await checkIfEnoughBalance(api, balance);
+
+  if (!operatorBalance.sufficient) {
+    logger.log(
+      `Insufficient balance in operator account to create a new account.
+            Requested balance: ${balance}
+            Operator balance: ${operatorBalance.balance}`,
+    );
+    process.exit(1);
+  }
 
   const name = alias || `account-${Date.now()}`;
 

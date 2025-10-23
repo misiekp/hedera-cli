@@ -39,7 +39,7 @@ export const accountPluginManifest: PluginManifest = {
           name: 'balance',
           short: 'b',
           type: 'string',
-          required: false,
+          required: true,
           default: 10000,
           description:
             'Initial HBAR balance. Default: display units. Add "t" for base units. Default: 10000 display units (1000000000 tinybar)',
