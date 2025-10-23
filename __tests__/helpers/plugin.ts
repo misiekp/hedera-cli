@@ -136,6 +136,7 @@ export const makeAliasMock = (): jest.Mocked<AliasService> => ({
   resolve: jest.fn().mockReturnValue(null), // No alias resolution by default
   list: jest.fn(),
   remove: jest.fn(),
+  exists: jest.fn().mockReturnValue(false), // Alias doesn't exist by default
 });
 
 /**

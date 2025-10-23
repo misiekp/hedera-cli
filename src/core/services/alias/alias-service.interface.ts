@@ -34,4 +34,5 @@ export interface AliasService {
     type?: AliasType;
   }): AliasRecord[];
   remove(alias: string, network: SupportedNetwork): void;
+  exists(alias: string, network: SupportedNetwork): boolean;
 }

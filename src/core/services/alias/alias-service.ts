@@ -66,7 +66,7 @@ export class AliasServiceImpl implements AliasService {
     this.logger.debug(`[ALIAS] Removed ${alias} on ${network}`);
   }
 
-  private exists(alias: string, network: SupportedNetwork): boolean {
+  exists(alias: string, network: SupportedNetwork): boolean {
     const key = this.composeKey(network, alias);
     return this.state.has(NAMESPACE, key);
   }
