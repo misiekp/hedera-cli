@@ -28,15 +28,22 @@ export const accountPluginManifest: PluginManifest = {
       description:
         'Create a new Hedera account with specified balance and settings',
       options: [
-        { name: 'balance', type: 'number', required: false, default: 10000 },
+        {
+          name: 'balance',
+          short: 'b',
+          type: 'number',
+          required: false,
+          default: 10000,
+        },
         {
           name: 'auto-associations',
+          short: 'a',
           type: 'number',
           required: false,
           default: 0,
         },
-        { name: 'alias', type: 'string', required: false },
-        { name: 'payer', type: 'string', required: false },
+        { name: 'alias', short: 'n', type: 'string', required: false },
+        { name: 'payer', short: 'p', type: 'string', required: false },
       ],
       handler: './index',
     },
@@ -45,9 +52,21 @@ export const accountPluginManifest: PluginManifest = {
       summary: 'Get account balance',
       description: 'Retrieve the balance for an account ID, name, or alias',
       options: [
-        { name: 'account-id-or-name-or-alias', type: 'string', required: true },
-        { name: 'only-hbar', type: 'boolean', required: false, default: false },
-        { name: 'token-id', type: 'string', required: false },
+        {
+          // @TODO Find all long option names and rename
+          name: 'account-id-or-name-or-alias',
+          short: 'a',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'only-hbar',
+          short: 'H',
+          type: 'boolean',
+          required: false,
+          default: false,
+        },
+        { name: 'token-id', short: 't', type: 'string', required: false },
       ],
       handler: './index',
     },
@@ -56,7 +75,13 @@ export const accountPluginManifest: PluginManifest = {
       summary: 'List all accounts',
       description: 'List all accounts stored in the address book',
       options: [
-        { name: 'private', type: 'boolean', required: false, default: false },
+        {
+          name: 'private',
+          short: 'p',
+          type: 'boolean',
+          required: false,
+          default: false,
+        },
       ],
       handler: './index',
     },
@@ -65,9 +90,9 @@ export const accountPluginManifest: PluginManifest = {
       summary: 'Import an existing account',
       description: 'Import an existing account into the CLI tool',
       options: [
-        { name: 'id', type: 'string', required: true },
-        { name: 'key', type: 'string', required: false },
-        { name: 'alias', type: 'string', required: false },
+        { name: 'id', short: 'i', type: 'string', required: true },
+        { name: 'key', short: 'k', type: 'string', required: false },
+        { name: 'alias', short: 'n', type: 'string', required: false },
       ],
       handler: './index',
     },
@@ -83,8 +108,8 @@ export const accountPluginManifest: PluginManifest = {
       summary: 'Delete an account',
       description: 'Delete an account from the address book',
       options: [
-        { name: 'name', type: 'string', required: false },
-        { name: 'id', type: 'string', required: false },
+        { name: 'name', short: 'N', type: 'string', required: false },
+        { name: 'id', short: 'i', type: 'string', required: false },
       ],
       handler: './index',
     },
@@ -93,7 +118,12 @@ export const accountPluginManifest: PluginManifest = {
       summary: 'View account details',
       description: 'View detailed information about an account',
       options: [
-        { name: 'account-id-or-name-or-alias', type: 'string', required: true },
+        {
+          name: 'account-id-or-name-or-alias',
+          short: 'a',
+          type: 'string',
+          required: true,
+        },
       ],
       handler: './index',
     },

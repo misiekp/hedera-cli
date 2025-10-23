@@ -47,9 +47,9 @@ const credentialsManifest: PluginManifest = {
       description:
         'Set the default operator credentials for signing transactions',
       options: [
-        { name: 'accountId', type: 'string', required: true },
-        { name: 'privateKey', type: 'string', required: true },
-        { name: 'network', type: 'string', required: false },
+        { name: 'account-id', short: 'a', type: 'string', required: true },
+        { name: 'private-key', short: 'p', type: 'string', required: true },
+        { name: 'network', short: 'n', type: 'string', required: false },
       ],
       handler: 'commands/set',
     },
@@ -63,7 +63,9 @@ const credentialsManifest: PluginManifest = {
       name: 'remove',
       summary: 'Remove credentials',
       description: 'Remove credentials for a specific keyRefId',
-      options: [{ name: 'keyRefId', type: 'string', required: true }],
+      options: [
+        { name: 'key-ref-id', short: 'k', type: 'string', required: true },
+      ],
       handler: 'commands/remove',
     },
   ],

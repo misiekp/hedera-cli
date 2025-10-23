@@ -237,8 +237,9 @@ export const TokenTransferCommandSchema = z.object({
     .string()
     .min(
       1,
-      'From account is required (either alias or account-id:private-key)',
-    ),
+      'Invalid --from parameter. To use the default operator, omit this argument or specify a valid alias or account-id:private-key',
+    )
+    .optional(),
 
   to: z.string().min(1, 'To account is required (either alias or account-id)'),
 
