@@ -218,6 +218,18 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
   const maxSupply = validatedParams.maxSupply;
   const alias = validatedParams.alias;
 
+  // Check if alias already exists on the current network
+  const network = api.network.getCurrentNetwork();
+  if (alias) {
+    const isAliasExist = api.alias.exists(alias, network);
+
+    if (isAliasExist) {
+      throw new Error(
+        `Alias "${alias}" already exists on network "${network}"`,
+      );
+    }
+  }
+
   // Resolve treasury parameter (alias or treasury-id:treasury-key) if provided
   let treasuryId: string | undefined;
   let treasuryKeyRefId: string | undefined;

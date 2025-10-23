@@ -20,6 +20,18 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const autoAssociations = (args.args['auto-associations'] as number) || 0;
   const alias = (args.args.alias as string) || '';
 
+  // Check if alias already exists on the current network
+  const network = api.network.getCurrentNetwork();
+  if (alias) {
+    const isAliasExist = api.alias.exists(alias, network);
+
+    if (isAliasExist) {
+      throw new Error(
+        `Alias "${alias}" already exists on network "${network}"`,
+      );
+    }
+  }
+
   const name = alias || `account-${Date.now()}`;
 
   // Generate a unique name for the account
@@ -48,7 +60,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
         api.alias.register({
           alias,
           type: AliasType.Account,
-          network: api.network.getCurrentNetwork(),
+          network,
           entityId: result.accountId,
           publicKey,
           keyRefId,
