@@ -3,6 +3,7 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
+import { SupportedNetwork } from '../../../core/types/shared.types';
 
 export function setHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
@@ -20,12 +21,13 @@ export function setHandler(args: CommandHandlerArgs): void {
       'default-operator',
     ]);
 
-    // Set as operator for current network
-    const currentNetwork = api.network.getCurrentNetwork();
-    api.network.setOperator(currentNetwork, { accountId, keyRefId });
+    // Set as operator for specified network or current network
+    const targetNetwork =
+      (network as SupportedNetwork) || api.network.getCurrentNetwork();
+    api.network.setOperator(targetNetwork, { accountId, keyRefId });
 
     logger.log(`✅ Credentials set successfully for account: ${accountId}`);
-    logger.log(`   Network: ${network || 'testnet'}`);
+    logger.log(`   Network: ${targetNetwork}`);
     logger.log(`   Key Reference ID: ${keyRefId}`);
     logger.log(`   Public Key: ${publicKey}`);
   } catch (error) {
