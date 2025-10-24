@@ -27,10 +27,6 @@ export interface KmsService {
   }>;
   remove(keyRefId: string): void;
 
-  // Removed registerProvider - no longer needed
-
-  // Operator management
-
   // Client operations that don't expose private keys
   createClient(network: SupportedNetwork): Client;
   signTransaction(
