@@ -101,6 +101,8 @@ export const makeNetworkMock = (
   }),
   setOperator: jest.fn(),
   getOperator: jest.fn().mockReturnValue(null),
+  removeOperator: jest.fn(),
+  findNetworksUsingKey: jest.fn().mockReturnValue([]),
 });
 
 /**
@@ -111,6 +113,14 @@ export const makeKmsMock = (): jest.Mocked<KmsService> => ({
   importPrivateKey: jest.fn().mockReturnValue({
     keyRefId: 'kr_test123',
     publicKey: 'pub-key-test',
+  }),
+  parseAccountIdKeyPair: jest.fn().mockImplementation((idKeyPair: string) => {
+    const [accountId] = idKeyPair.split(':');
+    return {
+      accountId,
+      keyRefId: 'kr_test123',
+      publicKey: 'pub-key-test',
+    };
   }),
   getPublicKey: jest.fn(),
   getSignerHandle: jest.fn(),
@@ -153,6 +163,7 @@ export const makeSigningMock = (
       transactionId: 'mock-tx-id',
       receipt: { status: { status: 'success' } },
     }),
+  freezeTx: jest.fn().mockImplementation((transaction) => transaction),
 });
 
 /**

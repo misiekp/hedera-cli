@@ -102,6 +102,37 @@ export class KmsServiceImpl implements KmsService {
     return { keyRefId, publicKey };
   }
 
+  parseAccountIdKeyPair(
+    idKeyPair: string,
+    entityType: 'treasury' | 'account',
+  ): { accountId: string; keyRefId: string; publicKey: string } {
+    const parts = idKeyPair.split(':');
+    if (parts.length !== 2) {
+      throw new Error(
+        `Invalid ${entityType} format. Expected either an alias or ${entityType}-id:${entityType}-key`,
+      );
+    }
+
+    const [accountId, privateKey] = parts;
+
+    // Validate account ID format
+    const accountIdPattern = /^0\.0\.\d+$/;
+    if (!accountIdPattern.test(accountId)) {
+      throw new Error(
+        `Invalid ${entityType} ID format: ${accountId}. Expected format: 0.0.123456`,
+      );
+    }
+
+    // Import the private key
+    const imported = this.importPrivateKey(privateKey);
+
+    return {
+      accountId,
+      keyRefId: imported.keyRefId,
+      publicKey: imported.publicKey,
+    };
+  }
+
   getPublicKey(keyRefId: string): string | null {
     return this.getRecord(keyRefId)?.publicKey || null;
   }

@@ -50,7 +50,7 @@ export async function listHandler(args: CommandHandlerArgs) {
 
       if (operator) {
         logger.log(
-          `   ${color.dim('└─')} Operator: ${color.cyan(operator.accountId)}`,
+          `   ${color.dim('└─')} Operator: ${color.cyan(operator.accountId)} (${color.dim(operator.keyRefId)})`,
         );
       } else {
         logger.log(

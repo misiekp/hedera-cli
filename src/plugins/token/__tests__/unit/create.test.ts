@@ -88,13 +88,16 @@ describe('createTokenHandler', () => {
       await createTokenHandler(args);
 
       // Assert
-      expect(api.kms.importPrivateKey).toHaveBeenCalledWith('test-private-key');
+      expect(api.kms.parseAccountIdKeyPair).toHaveBeenCalledWith(
+        '0.0.123456:test-private-key',
+        'treasury',
+      );
       expect(tokenTransactions.createTokenTransaction).toHaveBeenCalledWith(
         expectedTokenTransactionParams,
       );
       expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockTransactions.token,
-        { keyRefId: 'treasury-key-ref-id' },
+        { keyRefId: 'imported-key-ref-id' },
       );
       expect(mockSaveToken).toHaveBeenCalled();
       expect(getExitSpy()).toHaveBeenCalledWith(0);

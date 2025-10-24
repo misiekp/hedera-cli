@@ -16,47 +16,6 @@ export interface ResolvedTreasury {
 }
 
 /**
- * Parse and validate an account-id:private-key pair
- *
- * @param idKeyPair - The colon-separated account-id:private-key string
- * @param api - Core API instance for importing the key
- * @param entityType - The type of entity (for error messages)
- * @returns Object with accountId, keyRefId, and publicKey
- * @throws Error if the format is invalid or account ID doesn't match expected pattern
- */
-function parseAccountIdKeyPair(
-  idKeyPair: string,
-  api: CoreApi,
-  entityType: 'treasury' | 'account',
-): { accountId: string; keyRefId: string; publicKey: string } {
-  const parts = idKeyPair.split(':');
-  if (parts.length !== 2) {
-    throw new Error(
-      `Invalid ${entityType} format. Expected either an alias or ${entityType}-id:${entityType}-key`,
-    );
-  }
-
-  const [accountId, privateKey] = parts;
-
-  // Validate account ID format
-  const accountIdPattern = /^0\.0\.\d+$/;
-  if (!accountIdPattern.test(accountId)) {
-    throw new Error(
-      `Invalid ${entityType} ID format: ${accountId}. Expected format: 0.0.123456`,
-    );
-  }
-
-  // Import the private key
-  const imported = api.kms.importPrivateKey(privateKey);
-
-  return {
-    accountId,
-    keyRefId: imported.keyRefId,
-    publicKey: imported.publicKey,
-  };
-}
-
-/**
  * Parse and resolve treasury parameter
  * Can be:
  * - An alias (resolved via alias service)
@@ -78,7 +37,7 @@ export function resolveTreasuryParameter(
 
   // Check if it's a treasury-id:treasury-key pair
   if (treasury.includes(':')) {
-    const parsed = parseAccountIdKeyPair(treasury, api, 'treasury');
+    const parsed = api.kms.parseAccountIdKeyPair(treasury, 'treasury');
     return {
       treasuryId: parsed.accountId,
       treasuryKeyRefId: parsed.keyRefId,
@@ -154,7 +113,7 @@ export function resolveAccountParameter(
 
   // Check if it's an account-id:account-key pair
   if (account.includes(':')) {
-    const parsed = parseAccountIdKeyPair(account, api, 'account');
+    const parsed = api.kms.parseAccountIdKeyPair(account, 'account');
     return {
       accountId: parsed.accountId,
       accountKeyRefId: parsed.keyRefId,
