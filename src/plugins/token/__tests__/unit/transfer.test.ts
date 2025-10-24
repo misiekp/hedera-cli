@@ -93,7 +93,10 @@ describe('transferTokenHandler', () => {
         mockTransferTransaction,
         { keyRefId: 'imported-key-ref-id' },
       );
-      expect(kms.importPrivateKey).toHaveBeenCalledWith('test-from-key');
+      expect(kms.parseAccountIdKeyPair).toHaveBeenCalledWith(
+        '0.0.345678:test-from-key',
+        'account',
+      );
     });
 
     test('should transfer tokens using alias for from account', async () => {
