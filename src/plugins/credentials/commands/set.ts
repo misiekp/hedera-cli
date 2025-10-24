@@ -13,7 +13,7 @@ export function setHandler(args: CommandHandlerArgs): void {
     network?: string;
   };
 
-  logger.log(`🔐 Setting credentials for account: ${accountId}`);
+  logger.log(`🔐 Setting operator for account: ${accountId}`);
 
   try {
     // Import the private key and get the keyRefId
@@ -26,12 +26,14 @@ export function setHandler(args: CommandHandlerArgs): void {
       (network as SupportedNetwork) || api.network.getCurrentNetwork();
     api.network.setOperator(targetNetwork, { accountId, keyRefId });
 
-    logger.log(`✅ Credentials set successfully for account: ${accountId}`);
+    logger.log(
+      `✅ Operator set successfully for account: ${accountId} on network: ${targetNetwork}`,
+    );
     logger.log(`   Network: ${targetNetwork}`);
     logger.log(`   Key Reference ID: ${keyRefId}`);
     logger.log(`   Public Key: ${publicKey}`);
   } catch (error) {
-    logger.error(formatError('❌ Failed to set credentials: ', error));
+    logger.error(formatError('❌ Failed to set operator: ', error));
     throw error;
   }
 
