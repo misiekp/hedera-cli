@@ -7,6 +7,39 @@ import type { AccountData } from '../schema';
 import { AliasType } from '../../../core/services/alias/alias-service.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { CoreApi } from '../../../core';
+import { Hbar } from '@hashgraph/sdk';
+
+type OperatorBalanceResult = {
+  sufficient: boolean;
+  balance: string;
+};
+
+async function checkIfEnoughBalance(
+  api: CoreApi,
+  requestedBalance: number,
+): Promise<OperatorBalanceResult> {
+  const operator = api.kms.getDefaultOperator();
+
+  if (!operator) {
+    // This should never happen as the CLI ensures an operator is set before executing commands
+    throw new Error('Default operator not set.');
+  }
+
+  const balanceTinyBars = await api.mirror.getAccountHBarBalance(
+    operator.accountId,
+  );
+
+  const balance = Hbar.fromTinybars(balanceTinyBars).toBigNumber();
+
+  const hbarBalance = balance.toString();
+  const isBalanceSufficient = balance.gt(requestedBalance);
+
+  return {
+    sufficient: isBalanceSufficient,
+    balance: hbarBalance,
+  };
+}
 
 export async function createAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -15,10 +48,20 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const balance =
-    args.args.balance !== undefined ? (args.args.balance as number) : 10000;
+  const balance = args.args.balance as number;
   const autoAssociations = (args.args['auto-associations'] as number) || 0;
   const alias = (args.args.alias as string) || '';
+
+  const operatorBalance = await checkIfEnoughBalance(api, balance);
+
+  if (!operatorBalance.sufficient) {
+    logger.log(
+      `Insufficient balance in operator account to create a new account.
+            Requested balance: ${balance}
+            Operator balance: ${operatorBalance.balance}`,
+    );
+    process.exit(1);
+  }
 
   const name = alias || `account-${Date.now()}`;
 

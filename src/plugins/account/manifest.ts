@@ -32,7 +32,7 @@ export const accountPluginManifest: PluginManifest = {
           name: 'balance',
           short: 'b',
           type: 'number',
-          required: false,
+          required: true,
           default: 10000,
         },
         {
