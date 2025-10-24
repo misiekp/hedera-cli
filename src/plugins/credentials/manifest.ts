@@ -42,23 +42,6 @@ const credentialsManifest: PluginManifest = {
   ],
   commands: [
     {
-      name: 'set',
-      summary: 'Set operator credentials',
-      description: 'Set operator credentials for signing transactions.',
-      options: [
-        {
-          name: 'operator',
-          short: 'o',
-          type: 'string',
-          required: true,
-          description:
-            'Operator credentials: alias or account-id:private-key pair',
-        },
-        { name: 'network', short: 'n', type: 'string', required: false },
-      ],
-      handler: 'commands/set',
-    },
-    {
       name: 'list',
       summary: 'List all credentials',
       description: 'Show all stored credentials',

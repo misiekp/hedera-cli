@@ -39,6 +39,30 @@ export const networkPluginManifest: PluginManifest = {
       ],
       handler: './commands/use',
     },
+    {
+      name: 'set-operator',
+      summary: 'Set operator for a network',
+      description:
+        'Set operator credentials for signing transactions on a specific network',
+      options: [
+        {
+          name: 'operator',
+          short: 'o',
+          type: 'string',
+          required: true,
+          description:
+            'Operator credentials: alias or account-id:private-key pair',
+        },
+        {
+          name: 'network',
+          short: 'n',
+          type: 'string',
+          required: false,
+          description: 'Target network (defaults to current network)',
+        },
+      ],
+      handler: './commands/set-operator',
+    },
   ],
 };
 

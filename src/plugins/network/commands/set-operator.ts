@@ -1,11 +1,11 @@
 /**
- * Set Credentials Command Handler
+ * Set Operator Command Handler
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
 
-export function setHandler(args: CommandHandlerArgs): void {
+export function setOperatorHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
   const { operator, network } = args.args as {
     operator: string;
@@ -55,11 +55,11 @@ export function setHandler(args: CommandHandlerArgs): void {
 
     if (operator.includes(':')) {
       logger.log(
-        `🔐 Setting operator credentials using account-id:private-key format: ${resolvedAccountId}`,
+        `🔐 Setting operator using account-id:private-key format: ${resolvedAccountId}`,
       );
     } else {
       logger.log(
-        `🔐 Setting operator credentials using alias: ${operator} → ${resolvedAccountId}`,
+        `🔐 Setting operator using alias: ${operator} → ${resolvedAccountId}`,
       );
     }
 
@@ -82,7 +82,7 @@ export function setHandler(args: CommandHandlerArgs): void {
     });
 
     logger.log(
-      `✅ Credentials set successfully for account: ${resolvedAccountId}`,
+      `✅ Operator set successfully for account: ${resolvedAccountId}`,
     );
     logger.log(`   Network: ${targetNetwork}`);
     logger.log(`   Key Reference ID: ${resolvedKeyRefId}`);
@@ -95,4 +95,4 @@ export function setHandler(args: CommandHandlerArgs): void {
   process.exit(0);
 }
 
-export default setHandler;
+export default setOperatorHandler;
