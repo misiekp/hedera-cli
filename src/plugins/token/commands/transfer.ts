@@ -52,7 +52,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
 
   // If from account wasn't provided, use operator as default
   if (!resolvedFromAccount) {
-    const operator = api.kms.getDefaultOperator();
+    const operator = api.network.getOperator(network);
 
     if (!operator) {
       throw new Error('No from account provided and no default operator set.');

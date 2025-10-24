@@ -3,6 +3,7 @@
  */
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
+import { SupportedNetwork } from '../../../core/types/shared.types';
 
 export function setHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
@@ -12,7 +13,7 @@ export function setHandler(args: CommandHandlerArgs): void {
     network?: string;
   };
 
-  logger.log(`🔐 Setting credentials for account: ${accountId}`);
+  logger.log(`🔐 Setting operator for account: ${accountId}`);
 
   try {
     // Import the private key and get the keyRefId
@@ -20,15 +21,19 @@ export function setHandler(args: CommandHandlerArgs): void {
       'default-operator',
     ]);
 
-    // Set as default operator
-    api.kms.setDefaultOperator(accountId, keyRefId);
+    // Set as operator for specified network or current network
+    const targetNetwork =
+      (network as SupportedNetwork) || api.network.getCurrentNetwork();
+    api.network.setOperator(targetNetwork, { accountId, keyRefId });
 
-    logger.log(`✅ Credentials set successfully for account: ${accountId}`);
-    logger.log(`   Network: ${network || 'testnet'}`);
+    logger.log(
+      `✅ Operator set successfully for account: ${accountId} on network: ${targetNetwork}`,
+    );
+    logger.log(`   Network: ${targetNetwork}`);
     logger.log(`   Key Reference ID: ${keyRefId}`);
     logger.log(`   Public Key: ${publicKey}`);
   } catch (error) {
-    logger.error(formatError('❌ Failed to set credentials: ', error));
+    logger.error(formatError('❌ Failed to set operator: ', error));
     throw error;
   }
 

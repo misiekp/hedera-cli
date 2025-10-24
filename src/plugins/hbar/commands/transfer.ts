@@ -25,12 +25,12 @@ export default async function transferHandler(
     throw new Error('--to-id-or-name-or-alias is required');
   }
 
-  // Fallback to default operator from env if from not provided
+  // Fallback to operator from env if from not provided
   if (!from) {
-    const defaultOp =
-      api.kms.getDefaultOperator() || api.kms.ensureDefaultFromEnv();
-    if (defaultOp) {
-      from = defaultOp.accountId;
+    const currentNetwork = api.network.getCurrentNetwork();
+    const operator = api.network.getOperator(currentNetwork);
+    if (operator) {
+      from = operator.accountId;
       logger.log(`[HBAR] Using default operator as from: ${from}`);
     } else {
       throw new Error(

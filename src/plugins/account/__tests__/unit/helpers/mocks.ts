@@ -110,6 +110,8 @@ export const makeNetworkServiceMock = (
     localNodeAccountId: '0.0.3',
     localNodeMirrorAddressGRPC: '127.0.0.1:5600',
   }),
+  setOperator: jest.fn(),
+  getOperator: jest.fn().mockReturnValue(null),
 });
 
 /**
