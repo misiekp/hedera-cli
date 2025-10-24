@@ -30,8 +30,12 @@ export type {
   PluginManifest,
   CommandSpec,
   CommandOption,
+  CommandOutputSpec,
   PluginContext,
   PluginStateSchema,
+  CommandStatus,
+  CommandExecutionResult,
+  CommandHandler,
 } from './plugins/plugin.types';
 
 // Plugins

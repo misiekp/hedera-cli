@@ -9,7 +9,7 @@ The Core API provides a stable, typed interface for plugins to interact with Hed
 ## 🏗️ Core API Structure
 
 ```typescript
-interface CoreAPI {
+interface CoreApi {
   account: AccountTransactionService;
   txExecution: TxExecutionService;
   state: StateService;
@@ -431,7 +431,7 @@ All command handlers receive this interface:
 ```typescript
 interface CommandHandlerArgs {
   args: Record<string, unknown>;
-  api: CoreAPI;
+  api: CoreApi;
   state: StateService;
   config: ConfigService;
   logger: Logger;
@@ -469,9 +469,9 @@ export async function myCommandHandler(
 ### Mocking Services
 
 ```typescript
-import { CoreAPI } from '../core/core-api/core-api.interface';
+import { CoreApi } from '../core/core-api/core-api.interface';
 
-const mockCoreAPI: Partial<CoreAPI> = {
+const mockCoreApi: Partial<CoreApi> = {
   account: {
     createAccount: jest.fn().mockResolvedValue({
       accountId: '0.0.123456',
@@ -509,7 +509,7 @@ describe('My Command Handler', () => {
   it('should process command successfully', async () => {
     const mockArgs = {
       args: { name: 'test', value: 'value' },
-      api: mockCoreAPI,
+      api: mockCoreApi,
       state: mockState,
       config: mockConfig,
       logger: mockLogger,

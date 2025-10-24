@@ -42,6 +42,7 @@ const makeApiMocks = ({
     execute: jest.fn(),
     getStatus: jest.fn(),
     freezeTransaction: jest.fn(),
+    freezeTx: jest.fn().mockImplementation((transaction) => transaction),
   };
 
   const networkMock = makeNetworkMock(network);
