@@ -13,8 +13,4 @@ export interface KmsStorageServiceInterface {
   writeSecret(keyRefId: string, secret: KmsCredentialSecret): void;
   readSecret(keyRefId: string): KmsCredentialSecret | null;
   removeSecret(keyRefId: string): void;
-
-  // Default operator mapping (metadata)
-  setDefaultOperator(mapping: { accountId: string; keyRefId: string }): void;
-  getDefaultOperator(): { accountId: string; keyRefId: string } | null;
 }

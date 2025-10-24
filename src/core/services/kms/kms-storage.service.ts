@@ -40,17 +40,4 @@ export class KmsStorageService implements KmsStorageServiceInterface {
   removeSecret(keyRefId: string): void {
     this.state.delete('kms-secrets', keyRefId);
   }
-
-  setDefaultOperator(mapping: { accountId: string; keyRefId: string }): void {
-    this.state.set('kms-operators', 'operator', mapping);
-  }
-
-  getDefaultOperator(): { accountId: string; keyRefId: string } | null {
-    return (
-      this.state.get<{ accountId: string; keyRefId: string }>(
-        'kms-operators',
-        'operator',
-      ) || null
-    );
-  }
 }

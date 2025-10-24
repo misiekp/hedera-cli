@@ -365,7 +365,7 @@ export function resolveKeyParameter(
   }
 
   // Fall back to operator key (whether keyOrAlias was undefined or resolution failed)
-  const operator = api.kms.getDefaultOperator();
+  const operator = api.network.getOperator(network);
   if (operator?.keyRefId) {
     const operatorPubKey = api.kms.getPublicKey(operator.keyRefId);
     if (!operatorPubKey) {

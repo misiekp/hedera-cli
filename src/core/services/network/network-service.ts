@@ -85,4 +85,27 @@ export class NetworkServiceImpl implements NetworkService {
     this.logger.debug(`[NETWORK] Getting localnet configuration`);
     return DEFAULT_LOCALNET_NODE;
   }
+
+  setOperator(
+    network: SupportedNetwork,
+    operator: { accountId: string; keyRefId: string },
+  ): void {
+    this.logger.debug(
+      `[NETWORK] Setting operator for network ${network}: ${operator.accountId}`,
+    );
+    this.state.set(NAMESPACE, `${network}Operator`, operator);
+  }
+
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null {
+    const operator = this.state.get<{ accountId: string; keyRefId: string }>(
+      NAMESPACE,
+      `${network}Operator`,
+    );
+    this.logger.debug(
+      `[NETWORK] Getting operator for network ${network}: ${operator ? operator.accountId : 'none'}`,
+    );
+    return operator || null;
+  }
 }

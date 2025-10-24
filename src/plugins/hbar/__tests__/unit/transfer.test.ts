@@ -74,12 +74,6 @@ const setupTransferTest = (options: {
     accounts: options.accounts || [],
   });
 
-  if (options.defaultCredentials) {
-    (kms.getDefaultOperator as jest.Mock).mockReturnValue(
-      options.defaultCredentials,
-    );
-  }
-
   const stateMock = makeStateMock({
     listData: options.accounts || [],
   });
@@ -93,6 +87,12 @@ const setupTransferTest = (options: {
     logger,
     state: stateMock as StateService,
   };
+
+  if (options.defaultCredentials && api.network) {
+    (api.network.getOperator as jest.Mock).mockReturnValue(
+      options.defaultCredentials,
+    );
+  }
 
   return { api, logger, hbar, signing, kms, alias, stateMock };
 };

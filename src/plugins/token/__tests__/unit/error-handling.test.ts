@@ -59,10 +59,6 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.123456',
-            keyRefId: 'test-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
         alias: makeTestAliasService(),
@@ -168,12 +164,7 @@ describe('Token Plugin Error Handling', () => {
   describe('authentication and authorization errors', () => {
     test('should handle invalid credentials', async () => {
       // Arrange
-      const { api, kms: _kms } = makeApiMocks({
-        kms: {
-          getDefaultOperator: jest.fn().mockReturnValue(null),
-          ensureDefaultFromEnv: jest.fn().mockReturnValue(null),
-        },
-      });
+      const { api, kms: _kms } = makeApiMocks();
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -234,10 +225,6 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.123456',
-            keyRefId: 'invalid-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('invalid-public-key'),
         },
         alias: makeTestAliasService(),
@@ -466,10 +453,6 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.123456',
-            keyRefId: 'test-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
         alias: makeTestAliasService(),
@@ -613,10 +596,6 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.123456',
-            keyRefId: 'test-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
         alias: makeTestAliasService(),
@@ -658,10 +637,6 @@ describe('Token Plugin Error Handling', () => {
           }),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.123456',
-            keyRefId: 'test-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
         alias: makeTestAliasService(),
@@ -767,10 +742,6 @@ describe('Token Plugin Error Handling', () => {
           signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
         },
         kms: {
-          getDefaultOperator: jest.fn().mockReturnValue({
-            accountId: '0.0.123456',
-            keyRefId: 'test-key-ref-id',
-          }),
           getPublicKey: jest.fn().mockReturnValue('test-public-key'),
         },
         alias: makeTestAliasService(),

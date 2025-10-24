@@ -34,6 +34,21 @@ export interface NetworkService {
    * Get localnet-specific configuration
    */
   getLocalnetConfig(): LocalnetConfig;
+
+  /**
+   * Set operator for a specific network
+   */
+  setOperator(
+    network: SupportedNetwork,
+    operator: { accountId: string; keyRefId: string },
+  ): void;
+
+  /**
+   * Get operator for a specific network
+   */
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null;
 }
 
 // Network configuration types
@@ -44,6 +59,10 @@ export interface NetworkConfig {
   chainId: string;
   explorerUrl?: string;
   isTestnet: boolean;
+  operator?: {
+    accountId: string;
+    keyRefId: string;
+  };
 }
 
 export interface LocalnetConfig {

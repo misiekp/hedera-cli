@@ -17,7 +17,7 @@ interface CoreAPI {
   network: NetworkService;
   config: ConfigService;
   logger: Logger;
-  credentials: CredentialsService;
+  kms: KmsService;
 }
 ```
 
@@ -174,21 +174,36 @@ console.log(`Messages: ${messages.messages.length}`);
 
 ### Network Service
 
-Manages network configuration and selection.
+Manages network configuration, selection, and per-network operator credentials.
 
 ```typescript
 interface NetworkService {
-  getCurrentNetwork(): string;
+  getCurrentNetwork(): SupportedNetwork;
   getAvailableNetworks(): string[];
   getNetworkConfig(network: string): NetworkConfig;
-  setCurrentNetwork(network: string): void;
+  switchNetwork(network: string): void;
+  isNetworkAvailable(network: string): boolean;
+  getLocalnetConfig(): LocalnetConfig;
+  setOperator(
+    network: SupportedNetwork,
+    operator: { accountId: string; keyRefId: string },
+  ): void;
+  getOperator(
+    network: SupportedNetwork,
+  ): { accountId: string; keyRefId: string } | null;
 }
 
 interface NetworkConfig {
   name: string;
+  rpcUrl: string;
   mirrorNodeUrl: string;
-  consensusNodes: string[];
-  networkId: string;
+  chainId: string;
+  explorerUrl?: string;
+  isTestnet: boolean;
+  operator?: {
+    accountId: string;
+    keyRefId: string;
+  };
 }
 ```
 
@@ -198,6 +213,15 @@ interface NetworkConfig {
 const currentNetwork = api.network.getCurrentNetwork();
 const config = api.network.getNetworkConfig(currentNetwork);
 const availableNetworks = api.network.getAvailableNetworks();
+
+// Set operator for specific network
+api.network.setOperator('testnet', {
+  accountId: '0.0.123456',
+  keyRefId: 'kr_test123',
+});
+
+// Get operator for current network
+const operator = api.network.getOperator(currentNetwork);
 ```
 
 ### Config Service
@@ -253,33 +277,53 @@ api.logger.info('Operation completed');
 api.logger.debug('Debug information:', data);
 ```
 
-### Credentials Service
+### KMS Service
 
-Manages operator credentials securely.
+Manages operator credentials and key management securely.
 
 ```typescript
-interface CredentialsService {
-  getDefaultCredentials(): Promise<Credentials>;
-  getCredentials(accountId: string): Promise<Credentials | null>;
-  setCredentials(credentials: Credentials): Promise<void>;
-  removeCredentials(accountId: string): Promise<void>;
-  listCredentials(): Promise<Credentials[]>;
-}
-
-interface Credentials {
-  accountId: string;
-  privateKey: string;
-  network: string;
-  isDefault: boolean;
-  createdAt: string;
+interface KmsService {
+  createLocalPrivateKey(labels?: string[]): {
+    keyRefId: string;
+    publicKey: string;
+  };
+  importPrivateKey(
+    privateKey: string,
+    labels?: string[],
+  ): { keyRefId: string; publicKey: string };
+  getPublicKey(keyRefId: string): string | null;
+  getSignerHandle(keyRefId: string): SignerHandle;
+  findByPublicKey(publicKey: string): string | null;
+  list(): Array<{
+    keyRefId: string;
+    type: CredentialType;
+    publicKey: string;
+    labels?: string[];
+  }>;
+  remove(keyRefId: string): void;
+  createClient(network: SupportedNetwork): Client;
+  signTransaction(
+    transaction: HederaTransaction,
+    keyRefId: string,
+  ): Promise<void>;
 }
 ```
 
 **Usage Example:**
 
 ```typescript
-const credentials = await api.credentials.getDefaultCredentials();
-const allCredentials = await api.credentials.listCredentials();
+// Create and import keys
+const keyPair = api.kms.createLocalPrivateKey(['my-key']);
+const imported = api.kms.importPrivateKey('private-key-string');
+
+// Get public key
+const publicKey = api.kms.getPublicKey(keyPair.keyRefId);
+
+// List all keys
+const allKeys = api.kms.list();
+
+// Create Hedera client (automatically uses network-specific operator)
+const client = api.kms.createClient('testnet');
 ```
 
 ## 📊 Type Definitions
@@ -323,9 +367,15 @@ interface Topic {
 // Network types
 interface NetworkConfig {
   name: string;
+  rpcUrl: string;
   mirrorNodeUrl: string;
-  consensusNodes: string[];
-  networkId: string;
+  chainId: string;
+  explorerUrl?: string;
+  isTestnet: boolean;
+  operator?: {
+    accountId: string;
+    keyRefId: string;
+  };
 }
 ```
 
@@ -538,8 +588,8 @@ export async function complexOperation(
   const network = api.network.getCurrentNetwork();
   logger.log(`Operating on network: ${network}`);
 
-  // Get credentials
-  const credentials = await api.credentials.getDefaultCredentials();
+  // Get operator for current network
+  const operator = api.network.getOperator(network);
 
   // Create account
   const account = await api.account.createAccount({

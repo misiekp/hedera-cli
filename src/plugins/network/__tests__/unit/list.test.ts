@@ -27,6 +27,7 @@ jest.mock('../../../../utils/color', () => ({
     magenta: (str: string) => str,
     yellow: (str: string) => str,
     cyan: (str: string) => str,
+    dim: (str: string) => str,
   },
   heading: (str: string) => str,
 }));
@@ -65,15 +66,17 @@ describe('network plugin - list command', () => {
       expect.stringContaining('Available networks:'),
     );
     expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('localnet'),
+      expect.stringContaining('● LOCALNET'),
     );
     expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('- testnet (active)'),
+      expect.stringContaining('● TESTNET (ACTIVE)'),
     );
     expect(logger.log).toHaveBeenCalledWith(
-      expect.stringContaining('previewnet'),
+      expect.stringContaining('● PREVIEWNET'),
     );
-    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining('mainnet'));
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('● MAINNET'),
+    );
   });
 
   test('shows health checks for active network', async () => {
@@ -132,6 +135,12 @@ describe('network plugin - list command', () => {
       explorerUrl: `https://hashscan.io/${name}`,
       isTestnet: name !== 'mainnet',
     }));
+    networkService.getOperator = jest.fn().mockImplementation((name) => {
+      if (name === 'mainnet') {
+        return { accountId: '0.0.1001', keyRefId: 'kr_mainnet' };
+      }
+      return null;
+    });
     const args = makeArgs({ network: networkService }, logger, { json: true });
 
     await listHandler(args);
@@ -143,6 +152,7 @@ describe('network plugin - list command', () => {
           isActive: true,
           mirrorNodeUrl: 'https://mainnet.mirrornode.hedera.com/api/v1',
           rpcUrl: 'https://mainnet.hashio.io/api',
+          operatorId: '0.0.1001',
         }),
       ]),
       activeNetwork: 'mainnet',
@@ -198,5 +208,42 @@ describe('network plugin - list command', () => {
     await listHandler(args);
 
     expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
+  test('shows operator information for each network', async () => {
+    const logger = makeLogger();
+    const networkService = makeNetworkMock('testnet');
+    networkService.getOperator = jest.fn().mockImplementation((name) => {
+      if (name === 'testnet') {
+        return { accountId: '0.0.1001', keyRefId: 'kr_testnet' };
+      }
+      if (name === 'mainnet') {
+        return { accountId: '0.0.2001', keyRefId: 'kr_mainnet' };
+      }
+      return null;
+    });
+    const args = makeArgs({ network: networkService }, logger, {});
+
+    await listHandler(args);
+
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('Operator: 0.0.1001'),
+    );
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('Operator: Not configured'),
+    );
+  });
+
+  test('shows "Not configured" when no operator is set', async () => {
+    const logger = makeLogger();
+    const networkService = makeNetworkMock('testnet');
+    networkService.getOperator = jest.fn().mockReturnValue(null);
+    const args = makeArgs({ network: networkService }, logger, {});
+
+    await listHandler(args);
+
+    expect(logger.log).toHaveBeenCalledWith(
+      expect.stringContaining('Operator: Not configured'),
+    );
   });
 });

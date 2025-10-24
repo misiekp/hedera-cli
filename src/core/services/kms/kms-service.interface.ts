@@ -27,13 +27,6 @@ export interface KmsService {
   }>;
   remove(keyRefId: string): void;
 
-  // Removed registerProvider - no longer needed
-
-  // Default operator management
-  setDefaultOperator(accountId: string, keyRefId: string): void;
-  getDefaultOperator(): { accountId: string; keyRefId: string } | null;
-  ensureDefaultFromEnv(): { accountId: string; keyRefId: string } | null;
-
   // Client operations that don't expose private keys
   createClient(network: SupportedNetwork): Client;
   signTransaction(

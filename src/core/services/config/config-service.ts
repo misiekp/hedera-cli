@@ -2,7 +2,8 @@
  * Mock implementation of Config Service
  * This is a placeholder implementation for testing the architecture
  */
-import { ConfigService, NetworkConfig } from './config-service.interface';
+import { ConfigService } from './config-service.interface';
+import { NetworkConfig } from '../network/network-service.interface';
 
 export class MockConfigService implements ConfigService {
   private currentNetwork: string = 'testnet';
@@ -31,6 +32,10 @@ export class MockConfigService implements ConfigService {
       chainId: network === 'mainnet' ? '0x127' : '0x128',
       explorerUrl: `https://hashscan.io/${network}`,
       isTestnet: network !== 'mainnet',
+      operator: {
+        accountId: this.operatorId,
+        keyRefId: 'mock-key-ref',
+      },
     };
   }
 
