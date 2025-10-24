@@ -12,6 +12,10 @@ export interface KmsService {
     privateKey: string,
     labels?: string[],
   ): { keyRefId: string; publicKey: string };
+  parseAccountIdKeyPair(
+    idKeyPair: string,
+    entityType: 'treasury' | 'account',
+  ): { accountId: string; keyRefId: string; publicKey: string };
   getPublicKey(keyRefId: string): string | null;
   getSignerHandle(keyRefId: string): KmsSignerService;
 

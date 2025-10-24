@@ -114,6 +114,14 @@ export const makeKmsMock = (): jest.Mocked<KmsService> => ({
     keyRefId: 'kr_test123',
     publicKey: 'pub-key-test',
   }),
+  parseAccountIdKeyPair: jest.fn().mockImplementation((idKeyPair: string) => {
+    const [accountId] = idKeyPair.split(':');
+    return {
+      accountId,
+      keyRefId: 'kr_test123',
+      publicKey: 'pub-key-test',
+    };
+  }),
   getPublicKey: jest.fn(),
   getSignerHandle: jest.fn(),
   findByPublicKey: jest.fn(),

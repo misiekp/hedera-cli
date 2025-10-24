@@ -44,11 +44,15 @@ const credentialsManifest: PluginManifest = {
     {
       name: 'set',
       summary: 'Set operator credentials',
-      description:
-        'Set the default operator credentials for signing transactions',
+      description: 'Set operator credentials for signing transactions.',
       options: [
-        { name: 'account-id', short: 'a', type: 'string', required: true },
-        { name: 'private-key', short: 'p', type: 'string', required: true },
+        {
+          name: 'operator',
+          short: 'o',
+          type: 'string',
+          required: true,
+          description: 'Operator credentials pair: account-id:private-key',
+        },
         { name: 'network', short: 'n', type: 'string', required: false },
       ],
       handler: 'commands/set',
