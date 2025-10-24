@@ -60,8 +60,8 @@ export class TxExecutionServiceImpl implements TxExecutionService {
 
       // Get operator keyRefId for signing
       const currentNetwork = this.networkService.getCurrentNetwork();
-      const mapping = this.networkService.getOperator(currentNetwork);
-      if (!mapping) {
+      const operator = this.networkService.getOperator(currentNetwork);
+      if (!operator) {
         throw new Error('[TX-EXECUTION] No default operator configured');
       }
 
@@ -70,7 +70,7 @@ export class TxExecutionServiceImpl implements TxExecutionService {
       }
 
       // Sign using credentials-state without exposing private key
-      await this.kms.signTransaction(transaction, mapping.keyRefId);
+      await this.kms.signTransaction(transaction, operator.keyRefId);
 
       // Execute the transaction
       const response: TransactionResponse = await transaction.execute(client);

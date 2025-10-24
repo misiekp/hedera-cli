@@ -88,7 +88,7 @@ export function setHandler(args: CommandHandlerArgs): void {
     logger.log(`   Key Reference ID: ${resolvedKeyRefId}`);
     logger.log(`   Public Key: ${resolvedPublicKey}`);
   } catch (error) {
-    logger.error(formatError('❌ Failed to set credentials: ', error));
+    logger.error(formatError('❌ Failed to set operator: ', error));
     throw error;
   }
 

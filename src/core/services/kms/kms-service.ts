@@ -179,12 +179,12 @@ export class KmsServiceImpl implements KmsService {
   // Removed registerProvider - no longer needed
 
   createClient(network: SupportedNetwork): Client {
-    const mapping = this.networkService.getOperator(network);
-    if (!mapping) {
+    const operator = this.networkService.getOperator(network);
+    if (!operator) {
       throw new Error(`[CRED] No operator configured for network: ${network}`);
     }
 
-    const { accountId, keyRefId } = mapping;
+    const { accountId, keyRefId } = operator;
     const privateKeyString = this.getPrivateKeyString(keyRefId);
     if (!privateKeyString) {
       throw new Error('[CRED] Default operator keyRef missing private key');
