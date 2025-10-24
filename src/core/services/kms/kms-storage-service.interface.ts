@@ -2,7 +2,6 @@ import type {
   KmsCredentialRecord,
   KmsCredentialSecret,
 } from './kms-types.interface';
-import { SupportedNetwork } from '../../types/shared.types';
 
 export interface KmsStorageServiceInterface {
   get(key: string): KmsCredentialRecord | undefined;
@@ -14,13 +13,4 @@ export interface KmsStorageServiceInterface {
   writeSecret(keyRefId: string, secret: KmsCredentialSecret): void;
   readSecret(keyRefId: string): KmsCredentialSecret | null;
   removeSecret(keyRefId: string): void;
-
-  // Operator mapping (metadata)
-  setOperator(
-    network: SupportedNetwork,
-    mapping: { accountId: string; keyRefId: string },
-  ): void;
-  getOperator(
-    network: SupportedNetwork,
-  ): { accountId: string; keyRefId: string } | null;
 }

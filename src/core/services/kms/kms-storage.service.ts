@@ -4,7 +4,6 @@ import type {
   KmsCredentialRecord,
   KmsCredentialSecret,
 } from './kms-types.interface';
-import { SupportedNetwork } from '../../types/shared.types';
 
 export class KmsStorageService implements KmsStorageServiceInterface {
   private readonly state: StateService;
@@ -40,23 +39,5 @@ export class KmsStorageService implements KmsStorageServiceInterface {
 
   removeSecret(keyRefId: string): void {
     this.state.delete('kms-secrets', keyRefId);
-  }
-
-  setOperator(
-    network: SupportedNetwork,
-    mapping: { accountId: string; keyRefId: string },
-  ): void {
-    this.state.set('network-config', `${network}Operator`, mapping);
-  }
-
-  getOperator(
-    network: SupportedNetwork,
-  ): { accountId: string; keyRefId: string } | null {
-    return (
-      this.state.get<{ accountId: string; keyRefId: string }>(
-        'network-config',
-        `${network}Operator`,
-      ) || null
-    );
   }
 }
