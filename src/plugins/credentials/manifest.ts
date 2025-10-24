@@ -51,7 +51,8 @@ const credentialsManifest: PluginManifest = {
           short: 'o',
           type: 'string',
           required: true,
-          description: 'Operator credentials pair: account-id:private-key',
+          description:
+            'Operator credentials: alias or account-id:private-key pair',
         },
         { name: 'network', short: 'n', type: 'string', required: false },
       ],

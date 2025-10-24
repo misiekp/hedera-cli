@@ -13,24 +13,55 @@ export function setHandler(args: CommandHandlerArgs): void {
   };
 
   if (!operator) {
-    logger.error('❌ Must specify --operator in account-id:private-key format');
+    logger.error(
+      '❌ Must specify --operator (alias or account-id:private-key format)',
+    );
     process.exit(1);
   }
 
   try {
-    // Parse account-id:private-key format
-    const resolved = api.kms.parseAccountIdKeyPair(operator, 'account');
-    const resolvedAccountId = resolved.accountId;
-    const resolvedKeyRefId = resolved.keyRefId;
-    const resolvedPublicKey = resolved.publicKey;
-
-    logger.log(
-      `🔐 Setting operator credentials using account-id:private-key format: ${resolvedAccountId}`,
-    );
-
     // Set as operator for specified network or current network
     const targetNetwork =
       (network as SupportedNetwork) || api.network.getCurrentNetwork();
+
+    const {
+      accountId: resolvedAccountId,
+      keyRefId: resolvedKeyRefId,
+      publicKey: resolvedPublicKey,
+    } = operator.includes(':')
+      ? api.kms.parseAccountIdKeyPair(operator, 'account')
+      : (() => {
+          const aliasRecord = api.alias.resolve(
+            operator,
+            'account',
+            targetNetwork,
+          );
+          if (!aliasRecord) {
+            logger.error(
+              `❌ Alias '${operator}' not found for network ${targetNetwork}`,
+            );
+            process.exit(1);
+          }
+          if (!aliasRecord.keyRefId) {
+            logger.error(`❌ No key found for account ${aliasRecord.entityId}`);
+            process.exit(1);
+          }
+          return {
+            accountId: aliasRecord.entityId!,
+            keyRefId: aliasRecord.keyRefId,
+            publicKey: aliasRecord.publicKey || '',
+          };
+        })();
+
+    if (operator.includes(':')) {
+      logger.log(
+        `🔐 Setting operator credentials using account-id:private-key format: ${resolvedAccountId}`,
+      );
+    } else {
+      logger.log(
+        `🔐 Setting operator credentials using alias: ${operator} → ${resolvedAccountId}`,
+      );
+    }
 
     // Check if operator already exists for this network
     const existingOperator = api.network.getOperator(targetNetwork);
