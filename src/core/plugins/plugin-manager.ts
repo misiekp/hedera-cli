@@ -282,6 +282,52 @@ export class PluginManager {
       throw new Error(`Handler for ${commandSpec.name} is not a function`);
     }
 
-    await handler(handlerArgs);
+    // Execute handler
+    const result = await handler(handlerArgs);
+
+    // ADR-003: If command has output spec, expect handler to return result
+    if (commandSpec.output) {
+      if (!result) {
+        logger.error(
+          `Handler for ${commandSpec.name} must return CommandExecutionResult when output spec is defined`,
+        );
+        process.exit(1);
+      }
+
+      const executionResult = result;
+
+      // Handle failure or partial success
+      if (executionResult.status !== 'success') {
+        if (executionResult.errorMessage) {
+          logger.error(executionResult.errorMessage);
+        }
+        // Exit with code 1 for both 'failure' and 'partial' status
+        process.exit(1);
+      }
+
+      // Handle successful execution with output
+      if (executionResult.outputJson) {
+        try {
+          // Use OutputHandlerService to format and display output
+          this.coreApi.output.handleCommandOutput({
+            outputJson: executionResult.outputJson,
+            schema: commandSpec.output.schema,
+            template: commandSpec.output.humanTemplate,
+            format: this.coreApi.output.getFormat(),
+          });
+        } catch (error) {
+          logger.error(
+            `Failed to handle output from ${commandSpec.name}: ${formatError('', error)}`,
+          );
+          process.exit(1);
+        }
+      }
+
+      // Success - exit with code 0
+      process.exit(0);
+    }
+
+    // Legacy behavior: handler returns void, no output processing
+    // Handler is responsible for its own output and error handling
   }
 }

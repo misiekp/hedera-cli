@@ -81,14 +81,14 @@ export interface CommandSpec {
 
 export interface CommandHandlerArgs {
   args: Record<string, unknown>;
-  api: CoreAPI; // injected instance per execution
+  api: CoreApi; // injected instance per execution
   state: StateManager; // namespaced access provided by Core
   config: ConfigView;
   logger: Logger;
 }
 
 export interface PluginContext {
-  api: CoreAPI; // injected instance for plugin lifecycle
+  api: CoreApi; // injected instance for plugin lifecycle
   state: StateManager; // namespaced access provided by Core
   config: ConfigView;
   logger: Logger;
