@@ -34,11 +34,4 @@ export class OutputFormatterFactory {
         throw new Error(`Unsupported output format: ${String(format)}`);
     }
   }
-
-  /**
-   * Clear cached strategies (useful for testing)
-   */
-  static clearCache(): void {
-    this.strategies.clear();
-  }
 }
