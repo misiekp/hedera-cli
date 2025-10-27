@@ -6,7 +6,7 @@ import {
   EntityIdSchema,
   KeyTypeSchema,
   NetworkSchema,
-  TinybarBalanceSchema,
+  TinybarSchema,
   EvmAddressSchema,
 } from '../../../../core/schemas/common-schemas';
 
@@ -19,7 +19,7 @@ export const ImportAccountOutputSchema = z.object({
   type: KeyTypeSchema,
   alias: z.string().describe('Account alias').optional(),
   network: NetworkSchema,
-  balance: TinybarBalanceSchema,
+  balance: TinybarSchema,
   evmAddress: EvmAddressSchema,
 });
 

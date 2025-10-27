@@ -8,6 +8,143 @@
  */
 import { z } from 'zod';
 
+// ======================================================
+// 1. ECDSA (secp256k1) Keys
+// ======================================================
+
+// Public key — 33 bytes (compressed) or DER (~70 bytes)
+export const EcdsaPublicKeySchema = z
+  .string()
+  .trim()
+  .regex(
+    /^(?:0[2-3][0-9a-fA-F]{64}|30[0-9a-fA-F]{68,150})$/,
+    'Invalid ECDSA public key: must be 33-byte compressed hex or valid DER encoding',
+  );
+
+// Private key — 32 bytes (hex) or DER (~120 bytes)
+export const EcdsaPrivateKeySchema = z
+  .string()
+  .trim()
+  .regex(
+    /^(?:[0-9a-fA-F]{64}|30[0-9a-fA-F]{100,180})$/,
+    'Invalid ECDSA private key: must be 32-byte hex or DER encoding',
+  );
+
+// ======================================================
+// 2. Ed25519 Keys
+// ======================================================
+
+// Public key — 32 bytes (hex) or DER (~44 bytes)
+export const Ed25519PublicKeySchema = z
+  .string()
+  .trim()
+  .regex(
+    /^(?:[0-9a-fA-F]{64}|30[0-9a-fA-F]{60,120})$/,
+    'Invalid Ed25519 public key: must be 32-byte hex or DER encoding',
+  );
+
+// Private key — 32 or 64 bytes (hex) or DER (~80 bytes)
+export const Ed25519PrivateKeySchema = z
+  .string()
+  .trim()
+  .regex(
+    /^(?:[0-9a-fA-F]{64}|[0-9a-fA-F]{128}|30[0-9a-fA-F]{80,160})$/,
+    'Invalid Ed25519 private key: must be 32/64-byte hex or DER encoding',
+  );
+
+// ======================================================
+// 3. HBAR balances (in HBARs, decimal format)
+// ======================================================
+
+// 1 HBAR = 100,000,000 tinybars (8 decimals)
+// Safe 64-bit signed tinybar limit = 9,223,372,036,854,775,807 tinybars
+const MAX_TINYBARS = 9_223_372_036_854_775_807n;
+const MIN_TINYBARS = -9_223_372_036_854_775_808n;
+
+export const HbarDecimalSchema = z
+  .number()
+  .min(Number(MIN_TINYBARS / 100_000_000n))
+  .max(Number(MAX_TINYBARS / 100_000_000n))
+  .refine(
+    (val) => Number.isFinite(val),
+    'Invalid HBAR value: must be finite number',
+  );
+
+// ======================================================
+// 4. Tinybar balances (base unit integer)
+// ======================================================
+export const TinybarSchema = z
+  .union([
+    z.string().regex(/^-?\d+$/, 'Tinybars must be integer string'),
+    z.number().int(),
+    z.bigint(),
+  ])
+  .transform((val) => BigInt(val))
+  .refine(
+    (val) => val >= MIN_TINYBARS && val <= MAX_TINYBARS,
+    `Tinybars out of int64 range (${MIN_TINYBARS}..${MAX_TINYBARS})`,
+  );
+
+// ======================================================
+// 5. HTS Token Balances
+// ======================================================
+
+// HTS decimals: 0–8 allowed (immutable after token creation)
+export const HtsDecimalsSchema = z.number().int().min(0).max(8);
+
+// HTS base unit (integer form)
+export const HtsBaseUnitSchema = z
+  .union([
+    z.string().regex(/^\d+$/, 'Base unit must be integer string'),
+    z.number().int(),
+    z.bigint(),
+  ])
+  .transform((val) => BigInt(val))
+  .refine(
+    (val) => val >= 0n && val <= MAX_TINYBARS,
+    `HTS base unit out of int64 range`,
+  );
+
+// HTS decimal number (human-readable, e.g. 1.23 tokens)
+export const HtsDecimalSchema = z
+  .object({
+    amount: z.number().nonnegative(),
+    decimals: HtsDecimalsSchema,
+  })
+  .refine(
+    ({ amount, decimals }) => amount * 10 ** decimals <= Number(MAX_TINYBARS),
+    'HTS token amount exceeds int64 base unit range',
+  );
+
+// ======================================================
+// 6. EVM Token Balances (ERC-20 style)
+// ======================================================
+
+// Standard ERC-20 decimals: usually 18
+export const EvmDecimalsSchema = z.number().int().min(0).max(36);
+
+// Base unit (wei-like integer)
+export const EvmBaseUnitSchema = z
+  .union([
+    z.string().regex(/^\d+$/, 'Base unit must be integer string'),
+    z.number().int(),
+    z.bigint(),
+  ])
+  .transform((val) => BigInt(val))
+  .refine((val) => val >= 0n, 'EVM base unit cannot be negative');
+
+// Decimal number (human-readable, e.g. 1.5 tokens)
+export const EvmDecimalSchema = z
+  .object({
+    amount: z.number().nonnegative(),
+    decimals: EvmDecimalsSchema,
+  })
+  .refine(({ decimals }) => decimals <= 36, 'Too many decimals for EVM token');
+
+// ======================================================
+// 7. Legacy Schemas (for backward compatibility)
+// ======================================================
+
 /**
  * Hedera Entity ID pattern
  * Format: 0.0.12345
@@ -48,63 +185,6 @@ export const TransactionIdSchema = z
   .describe('Hedera transaction ID in format {accountId}@{timestamp}');
 
 /**
- * Token Balance Amount Schema
- * Accepts both BigInt and string inputs, validates int64 range
- */
-export const TokenAmountSchema = z
-  .union([
-    z.bigint(),
-    z
-      .string()
-      .regex(/^\d+$/)
-      .transform((v) => BigInt(v)),
-  ])
-  .refine((v) => v >= 0n && v <= int64Max, {
-    message: 'Token amount out of range for int64',
-  })
-  .describe('Token amount in base units');
-
-/**
- * Token Balance with metadata
- * Includes base unit amount, token name, and decimals for proper display
- */
-export const TokenBalanceSchema = z
-  .object({
-    baseUnitAmount: TokenAmountSchema,
-    name: z.string().describe('Token name or symbol'),
-    decimals: z
-      .number()
-      .int()
-      .min(0)
-      .max(18)
-      .describe('Number of decimal places for the token'),
-  })
-  .describe('Token balance with denomination information');
-
-/**
- * Maximum value for int64 (2^63 - 1)
- */
-export const int64Max = 9223372036854775807n;
-
-/**
- * Tinybar Balance
- * Tinybars are the smallest unit of HBAR (1 HBAR = 100,000,000 tinybars)
- * Accepts both BigInt and string inputs, validates int64 range
- */
-export const TinybarBalanceSchema = z
-  .union([
-    z.bigint(),
-    z
-      .string()
-      .regex(/^\d+$/)
-      .transform((v) => BigInt(v)),
-  ])
-  .refine((v) => v >= 0n && v <= int64Max, {
-    message: 'Tinybar value out of range for int64',
-  })
-  .describe('Tinybar balance (1 HBAR = 100,000,000 tinybars)');
-
-/**
  * EVM Address (Ethereum-compatible address)
  * Format: 0x followed by 40 hexadecimal characters
  */
@@ -115,17 +195,6 @@ export const EvmAddressSchema = z
     'EVM address must be 0x followed by 40 hexadecimal characters',
   )
   .describe('EVM-compatible address');
-
-/**
- * Public Key (ECDSA or ED25519)
- * Hexadecimal string representation
- */
-export const PublicKeySchema = z
-  .string()
-  .regex(/^[0-9a-fA-F]+$/, 'Public key must be a hexadecimal string')
-  .min(64, 'Public key must be at least 64 characters')
-  .max(132, 'Public key must be at most 132 characters')
-  .describe('Public key in hexadecimal format (ECDSA or ED25519)');
 
 /**
  * Network name
@@ -159,6 +228,10 @@ export const IsoTimestampSchema = z
   .datetime()
   .describe('ISO 8601 timestamp');
 
+// ======================================================
+// 8. Composite Schemas
+// ======================================================
+
 /**
  * Account Data (Full)
  * Complete account information
@@ -170,8 +243,10 @@ export const AccountDataSchema = z
     type: KeyTypeSchema,
     network: NetworkSchema,
     evmAddress: EvmAddressSchema.nullable(),
-    publicKey: PublicKeySchema.nullable(),
-    balance: TinybarBalanceSchema.nullable(),
+    publicKey: z
+      .union([EcdsaPublicKeySchema, Ed25519PublicKeySchema])
+      .nullable(),
+    balance: TinybarSchema.nullable(),
   })
   .describe('Complete account information');
 
@@ -184,7 +259,7 @@ export const TokenDataSchema = z
     tokenId: EntityIdSchema,
     name: z.string().describe('Token name'),
     symbol: z.string().describe('Token symbol'),
-    decimals: z.number().int().min(0).max(18).describe('Token decimals'),
+    decimals: HtsDecimalsSchema,
     initialSupply: z.string().describe('Initial supply in base units'),
     supplyType: SupplyTypeSchema,
     treasuryId: EntityIdSchema,
@@ -218,10 +293,53 @@ export const TransactionResultSchema = z
   })
   .describe('Standard transaction execution result');
 
+// ======================================================
+// 9. Legacy Compatibility Exports
+// ======================================================
+
+// For backward compatibility
+export const TokenAmountSchema = HtsBaseUnitSchema;
+export const TokenBalanceSchema = z
+  .object({
+    baseUnitAmount: HtsBaseUnitSchema,
+    name: z.string().describe('Token name or symbol'),
+    decimals: HtsDecimalsSchema,
+  })
+  .describe('Token balance with denomination information');
+
+export const TinybarBalanceSchema = TinybarSchema;
+
+// Generic public key schema for backward compatibility
+export const PublicKeySchema = z.union([
+  EcdsaPublicKeySchema,
+  Ed25519PublicKeySchema,
+]);
+
 /**
  * Export all Zod schemas as a single object for easy import
  */
 export const COMMON_ZOD_SCHEMAS = {
+  // New cryptographic schemas
+  ecdsaPublicKey: EcdsaPublicKeySchema,
+  ecdsaPrivateKey: EcdsaPrivateKeySchema,
+  ed25519PublicKey: Ed25519PublicKeySchema,
+  ed25519PrivateKey: Ed25519PrivateKeySchema,
+
+  // HBAR schemas
+  hbarDecimal: HbarDecimalSchema,
+  tinybar: TinybarSchema,
+
+  // HTS schemas
+  htsDecimals: HtsDecimalsSchema,
+  htsBaseUnit: HtsBaseUnitSchema,
+  htsDecimal: HtsDecimalSchema,
+
+  // EVM schemas
+  evmDecimals: EvmDecimalsSchema,
+  evmBaseUnit: EvmBaseUnitSchema,
+  evmDecimal: EvmDecimalSchema,
+
+  // Legacy schemas
   entityId: EntityIdSchema,
   timestamp: TimestampSchema,
   transactionId: TransactionIdSchema,
@@ -243,6 +361,20 @@ export const COMMON_ZOD_SCHEMAS = {
 /**
  * Type exports for TypeScript inference
  */
+export type EcdsaPublicKey = z.infer<typeof EcdsaPublicKeySchema>;
+export type EcdsaPrivateKey = z.infer<typeof EcdsaPrivateKeySchema>;
+export type Ed25519PublicKey = z.infer<typeof Ed25519PublicKeySchema>;
+export type Ed25519PrivateKey = z.infer<typeof Ed25519PrivateKeySchema>;
+export type HbarDecimal = z.infer<typeof HbarDecimalSchema>;
+export type Tinybar = z.infer<typeof TinybarSchema>;
+export type HtsDecimals = z.infer<typeof HtsDecimalsSchema>;
+export type HtsBaseUnit = z.infer<typeof HtsBaseUnitSchema>;
+export type HtsDecimal = z.infer<typeof HtsDecimalSchema>;
+export type EvmDecimals = z.infer<typeof EvmDecimalsSchema>;
+export type EvmBaseUnit = z.infer<typeof EvmBaseUnitSchema>;
+export type EvmDecimal = z.infer<typeof EvmDecimalSchema>;
+
+// Legacy types
 export type EntityId = z.infer<typeof EntityIdSchema>;
 export type Timestamp = z.infer<typeof TimestampSchema>;
 export type TransactionId = z.infer<typeof TransactionIdSchema>;

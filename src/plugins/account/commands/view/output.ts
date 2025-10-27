@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import {
   EntityIdSchema,
-  TinybarBalanceSchema,
+  TinybarSchema,
   EvmAddressSchema,
   PublicKeySchema,
   TimestampSchema,
@@ -15,7 +15,7 @@ import {
  */
 export const ViewAccountOutputSchema = z.object({
   accountId: EntityIdSchema,
-  balance: TinybarBalanceSchema,
+  balance: TinybarSchema,
   evmAddress: EvmAddressSchema.optional(),
   publicKey: PublicKeySchema.optional(),
   balanceTimestamp: TimestampSchema,

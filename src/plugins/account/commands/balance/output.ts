@@ -4,8 +4,8 @@
 import { z } from 'zod';
 import {
   EntityIdSchema,
-  TinybarBalanceSchema,
-  TokenAmountSchema,
+  TinybarSchema,
+  HtsBaseUnitSchema,
 } from '../../../../core/schemas/common-schemas';
 
 /**
@@ -13,12 +13,12 @@ import {
  */
 export const AccountBalanceOutputSchema = z.object({
   accountId: EntityIdSchema,
-  hbarBalance: TinybarBalanceSchema,
+  hbarBalance: TinybarSchema,
   tokenBalances: z
     .array(
       z.object({
         tokenId: EntityIdSchema,
-        balance: TokenAmountSchema,
+        balance: HtsBaseUnitSchema,
       }),
     )
     .optional(),
