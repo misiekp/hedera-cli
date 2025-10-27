@@ -23,7 +23,7 @@ export function removeHandler(args: CommandHandlerArgs): void {
     logger.log(`✅ Credentials removed for keyRefId: ${keyRefId}`);
   } catch (error) {
     logger.error(formatError('❌ Failed to remove credentials: ', error));
-    throw error;
+    process.exit(1);
   }
 
   process.exit(0);
