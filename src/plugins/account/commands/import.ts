@@ -19,15 +19,7 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
 
   // Check if alias already exists on the current network
   const network = api.network.getCurrentNetwork();
-  if (alias) {
-    const isAliasExist = api.alias.exists(alias, network);
-
-    if (isAliasExist) {
-      throw new Error(
-        `Alias "${alias}" already exists on network "${network}"`,
-      );
-    }
-  }
+  api.alias.availableOrThrow(alias, network);
 
   // Generate a unique name for the account
   const name = alias || `imported-${accountId.replace(/\./g, '-')}`;

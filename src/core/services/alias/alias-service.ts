@@ -71,6 +71,17 @@ export class AliasServiceImpl implements AliasService {
     return this.state.has(NAMESPACE, key);
   }
 
+  availableOrThrow(alias: string | undefined, network: SupportedNetwork): void {
+    if (!alias) return;
+
+    const exists = this.exists(alias, network);
+    if (exists) {
+      throw new Error(
+        `Alias "${alias}" already exists on network "${network}"`,
+      );
+    }
+  }
+
   private composeKey(network: SupportedNetwork, alias: string): string {
     return `${network}:${alias}`;
   }

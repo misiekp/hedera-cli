@@ -22,15 +22,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
 
   // Check if alias already exists on the current network
   const network = api.network.getCurrentNetwork();
-  if (alias) {
-    const isAliasExist = api.alias.exists(alias, network);
-
-    if (isAliasExist) {
-      throw new Error(
-        `Alias "${alias}" already exists on network "${network}"`,
-      );
-    }
-  }
+  api.alias.availableOrThrow(alias, network);
 
   const name = alias || `account-${Date.now()}`;
 

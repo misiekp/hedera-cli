@@ -115,6 +115,8 @@ export const makeAliasServiceMock = (
   resolve: jest.fn().mockReturnValue(null),
   list: jest.fn().mockReturnValue([]),
   remove: jest.fn(),
+  availableOrThrow: jest.fn(),
+  exists: jest.fn(),
   ...overrides,
 });
 
