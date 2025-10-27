@@ -1,22 +1,18 @@
 /**
  * Output Service Implementation
- * Handles command output formatting and rendering
+ * Handles command output formatting and rendering using the strategy pattern
  */
 import * as fs from 'fs';
 import * as path from 'path';
 import { OutputService } from './output-service.interface';
 import { OutputHandlerOptions, OutputFormat } from './types';
-import { JsonFormatter, TemplateFormatter } from './formatters';
+import { OutputFormatterFactory, FormatStrategyOptions } from './strategies';
 
 export class OutputServiceImpl implements OutputService {
   private currentFormat: OutputFormat;
-  private jsonFormatter: JsonFormatter;
-  private templateFormatter: TemplateFormatter;
 
   constructor(format: OutputFormat = 'human') {
     this.currentFormat = format;
-    this.jsonFormatter = new JsonFormatter();
-    this.templateFormatter = new TemplateFormatter();
   }
 
   getFormat(): OutputFormat {
@@ -41,20 +37,14 @@ export class OutputServiceImpl implements OutputService {
     //   this.validateOutput(data, options.schema);
     // }
 
-    // Format the data based on the requested format
-    let formattedOutput: string;
+    // Format the data using the appropriate strategy
+    const formatter = OutputFormatterFactory.getStrategy(format);
+    const formatOptions: FormatStrategyOptions = {
+      template,
+      pretty: true,
+    };
 
-    if (format === 'json') {
-      formattedOutput = this.jsonFormatter.format(data, true);
-    } else {
-      // format === 'human'
-      if (template) {
-        formattedOutput = this.templateFormatter.format(data, template);
-      } else {
-        // No template provided, use default formatting
-        formattedOutput = this.templateFormatter.formatDefault(data);
-      }
-    }
+    const formattedOutput = formatter.format(data, formatOptions);
 
     // Output to destination
     if (outputPath) {
