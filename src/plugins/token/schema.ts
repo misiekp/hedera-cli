@@ -133,51 +133,70 @@ export function safeParseTokenData(data: unknown) {
 }
 
 // Command parameter validation schemas
-export const TokenCreateCommandSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Token name is required')
-    .max(100, 'Token name must be 100 characters or less'),
+export const TokenCreateCommandSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, 'Token name is required')
+      .max(100, 'Token name must be 100 characters or less'),
 
-  symbol: z
-    .string()
-    .min(1, 'Token symbol is required')
-    .max(10, 'Token symbol must be 10 characters or less'),
+    symbol: z
+      .string()
+      .min(1, 'Token symbol is required')
+      .max(10, 'Token symbol must be 10 characters or less'),
 
-  treasury: z
-    .string()
-    .min(1, 'Treasury is required (either alias or treasury-id:treasury-key)')
-    .optional(),
+    treasury: z
+      .string()
+      .min(1, 'Treasury is required (either alias or treasury-id:treasury-key)')
+      .optional(),
 
-  decimals: z
-    .number()
-    .int('Decimals must be an integer')
-    .min(0, 'Decimals must be non-negative')
-    .max(255, 'Decimals must be 255 or less')
-    .optional(),
+    decimals: z
+      .number()
+      .int('Decimals must be an integer')
+      .min(0, 'Decimals must be non-negative')
+      .max(255, 'Decimals must be 255 or less')
+      .optional(),
 
-  initialSupply: z
-    .number()
-    .int('Initial supply must be an integer')
-    .min(0, 'Initial supply must be non-negative')
-    .optional(),
+    // @TODO Add validation to allow only int(1), float(2.25) or base units(1000t)
+    initialSupply: z
+      .string()
+      .min(1, 'Initial supply must be non-negative')
+      .optional(),
 
-  supplyType: z
-    .string()
-    .transform((val) => val.toUpperCase())
-    .pipe(z.enum(['FINITE', 'INFINITE']))
-    .optional(),
+    supplyType: z
+      .string()
+      .transform((val) => val.toUpperCase())
+      .pipe(z.enum(['FINITE', 'INFINITE']))
+      .optional(),
 
-  maxSupply: z
-    .number()
-    .int('Max supply must be an integer')
-    .min(0, 'Max supply must be non-negative')
-    .optional(),
+    // @TODO Add validation to allow only int(1), float(2.25) or base units(1000t)
+    maxSupply: z.string().min(1, 'Max supply must be non-negative').optional(),
 
-  adminKey: z.string().min(1, 'Admin key is required').optional(),
+    adminKey: z.string().min(1, 'Admin key is required').optional(),
 
-  alias: z.string().min(1, 'Alias must be at least 1 character').optional(),
-});
+    alias: z.string().min(1, 'Alias must be at least 1 character').optional(),
+  })
+  // @TODO Move this validation into shared file in core for reuse
+  .superRefine((val, ctx) => {
+    const isFinite = val.supplyType === 'FINITE';
+
+    if (isFinite && !val.maxSupply) {
+      ctx.addIssue({
+        message: 'Max supply is required when supply type is FINITE',
+        code: z.ZodIssueCode.custom,
+        path: ['maxSupply', 'supplyType'],
+      });
+    }
+
+    if (!isFinite && val.maxSupply) {
+      ctx.addIssue({
+        message:
+          'Max supply should not be provided when supply type is INFINITE, set supply type to FINITE to specify max supply',
+        code: z.ZodIssueCode.custom,
+        path: ['supplyType', 'maxSupply'],
+      });
+    }
+  });
 
 export type TokenCreateCommandParams = z.infer<typeof TokenCreateCommandSchema>;
 
@@ -243,7 +262,8 @@ export const TokenTransferCommandSchema = z.object({
 
   to: z.string().min(1, 'To account is required (either alias or account-id)'),
 
-  balance: z.number().positive('Balance must be a positive number'),
+  // @TODO Add validation to allow only int(1), float(2.25) or base units(1000t)
+  balance: z.union([z.number().positive(), z.string().min(1)]),
 });
 
 export type TokenTransferCommandParams = z.infer<

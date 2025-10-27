@@ -25,9 +25,10 @@ export const hbarPluginManifest: PluginManifest = {
         {
           name: 'balance',
           short: 'b',
-          type: 'number',
+          type: 'string',
           required: true,
-          description: 'Amount of tinybars to transfer',
+          description:
+            'Amount in HBAR (fine units by default, add "t" for tinybar). Default: fine units. Example: "1" = 1 HBAR, "100t" = 100 tinybar',
         },
         {
           name: 'to-id-or-name-or-alias',

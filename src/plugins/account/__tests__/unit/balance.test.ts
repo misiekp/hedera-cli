@@ -56,7 +56,9 @@ describe('account plugin - balance command (unit)', () => {
     await getAccountBalanceHandler(args);
 
     expect(mirrorMock.getAccountHBarBalance).toHaveBeenCalledWith('0.0.1001');
-    expect(logger.log).toHaveBeenCalledWith('💰 Hbar Balance: 123456 tinybars');
+    expect(logger.log).toHaveBeenCalledWith(
+      '💰 Hbar Balance: 0.00123456 HBAR (123456 tinybar)',
+    );
     expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
@@ -90,9 +92,11 @@ describe('account plugin - balance command (unit)', () => {
     expect(mirrorMock.getAccountHBarBalance).toHaveBeenCalledWith('0.0.2002');
     expect(mirrorMock.getAccountTokenBalances).toHaveBeenCalledWith('0.0.2002');
     expect(logger.log).toHaveBeenCalledWith(
-      '💰 Account Balance: 5000 tinybars',
+      '💰 Account Balance: 0.00005 HBAR (5000 tinybar)',
     );
-    expect(logger.log).toHaveBeenCalledWith('🪙 Token Balances:');
+    expect(logger.log).toHaveBeenCalledWith(
+      '🪙 Token Balances (in raw units):',
+    );
     expect(logger.log).toHaveBeenCalledWith('   0.0.3003: 100');
     expect(logger.log).toHaveBeenCalledWith('   0.0.4004: 200');
     expect(exitSpy).toHaveBeenCalledWith(0);
@@ -121,7 +125,9 @@ describe('account plugin - balance command (unit)', () => {
 
     await getAccountBalanceHandler(args);
 
-    expect(logger.log).toHaveBeenCalledWith('💰 Account Balance: 42 tinybars');
+    expect(logger.log).toHaveBeenCalledWith(
+      '💰 Account Balance: 0.00000042 HBAR (42 tinybar)',
+    );
     expect(logger.log).toHaveBeenCalledWith('   No token balances found');
     expect(exitSpy).toHaveBeenCalledWith(0);
   });

@@ -9,6 +9,7 @@ import {
   AccountBalanceQuery,
   AccountId,
   PublicKey,
+  Hbar,
 } from '@hashgraph/sdk';
 import {
   AccountService,
@@ -31,10 +32,12 @@ export class AccountServiceImpl implements AccountService {
       `[ACCOUNT TX] Creating account with params: ${JSON.stringify(params)}`,
     );
 
+    const balance = Hbar.fromTinybars(params.balanceRaw);
+
     // Create the account creation transaction
     const transaction = new AccountCreateTransaction()
       .setECDSAKeyWithAlias(PublicKey.fromString(params.publicKey))
-      .setInitialBalance(params.balance || 0);
+      .setInitialBalance(balance || 0);
 
     // Set max automatic token associations if specified
     if (params.maxAutoAssociations && params.maxAutoAssociations > 0) {

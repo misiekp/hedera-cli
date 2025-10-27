@@ -6,6 +6,7 @@ import { TokenBalance } from '../../../../types';
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { normalizeBalance } from '../../../core/utils/normalize-balance';
 
 export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -39,9 +40,15 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
     const hbarBalance = await api.mirror.getAccountHBarBalance(accountId);
 
     if (onlyHbar) {
-      logger.log(`💰 Hbar Balance: ${hbarBalance.toString()} tinybars`);
+      const hbarDisplay = normalizeBalance(hbarBalance, 8);
+      logger.log(
+        `💰 Hbar Balance: ${hbarDisplay} HBAR (${hbarBalance.toString()} tinybar)`,
+      );
     } else {
-      logger.log(`💰 Account Balance: ${hbarBalance.toString()} tinybars`);
+      const hbarDisplay = normalizeBalance(hbarBalance, 8);
+      logger.log(
+        `💰 Account Balance: ${hbarDisplay} HBAR (${hbarBalance.toString()} tinybar)`,
+      );
 
       // Get token balances if not only HBAR
       if (!tokenId) {
@@ -49,10 +56,13 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
           const tokenBalances =
             await api.mirror.getAccountTokenBalances(accountId);
           if (tokenBalances.tokens && tokenBalances.tokens.length > 0) {
-            logger.log(`🪙 Token Balances:`);
+            logger.log(`🪙 Token Balances (in raw units):`);
             tokenBalances.tokens.forEach((token: TokenBalance) => {
               logger.log(`   ${token.token_id}: ${token.balance}`);
             });
+            logger.log(
+              `   Note: Token balances shown in raw base units. Use token decimals with normalizeBalance() to see display values.`,
+            );
           } else {
             logger.log(`   No token balances found`);
           }

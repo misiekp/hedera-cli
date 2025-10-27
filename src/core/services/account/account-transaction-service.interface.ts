@@ -30,7 +30,7 @@ export interface AccountCreateResult {
 
 // Parameter types for account operations
 export interface CreateAccountParams {
-  balance: number;
+  balanceRaw: number;
   maxAutoAssociations?: number;
   publicKey: string;
   keyType?: 'ECDSA' | 'ED25519';

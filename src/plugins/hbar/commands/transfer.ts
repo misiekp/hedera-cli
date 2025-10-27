@@ -1,11 +1,22 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { processBalanceInput } from '../../../core/utils/process-balance-input';
 
 export async function hbarTransferHandler(
   args: CommandHandlerArgs,
 ): Promise<void> {
   const { api, logger } = args;
 
-  const amount = Number(args.args.balance);
+  let amount: bigint;
+  try {
+    // Convert balance input: fine units (default) or raw units (with 't' suffix)
+    // HBAR uses 8 decimals
+    amount = processBalanceInput(args.args.balance as string | number, 8);
+  } catch (error) {
+    throw new Error(
+      `Invalid balance parameter: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
   const to = args.args.toIdOrNameOrAlias
     ? (args.args.toIdOrNameOrAlias as string)
     : '';
@@ -15,11 +26,6 @@ export async function hbarTransferHandler(
   const memo = args.args.memo ? (args.args.memo as string) : '';
 
   logger.log('[HBAR] Transfer command invoked');
-
-  // Basic validation
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error('Invalid balance: provide a positive number of tinybars');
-  }
 
   if (!to) {
     throw new Error('--to-id-or-name-or-alias is required');
@@ -74,8 +80,9 @@ export async function hbarTransferHandler(
 
   if (api.hbar) {
     // Create the transfer transaction
+    // Convert HBAR to tinybar (8 decimals: multiply by 10^8)
     const transferResult = await api.hbar.transferTinybar({
-      amount,
+      amount: Number(amount),
       from: fromAccountId,
       to: toAccountId,
       memo,

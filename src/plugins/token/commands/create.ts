@@ -15,6 +15,8 @@ import {
   resolveKeyParameter,
 } from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
+import { processBalanceInput } from '../../../core/utils/process-balance-input';
+import { TokenCreateParams } from '../../../core/types/token.types';
 
 /**
  * Determines the final max supply value for FINITE supply tokens
@@ -206,6 +208,8 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
     return; // Ensure execution stops (for testing with mocked process.exit)
   }
 
+  console.log({ result: validationResult.data });
+
   // Initialize token state helper
   const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
@@ -214,9 +218,13 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
   const name = validatedParams.name;
   const symbol = validatedParams.symbol;
   const decimals = validatedParams.decimals || 0;
-  const initialSupply = validatedParams.initialSupply || 1000000;
+  const rawInitialSupply = validatedParams.initialSupply || 1000000;
+  // Convert fine units to raw token units
+  const initialSupply = Number(processBalanceInput(rawInitialSupply, decimals));
   const supplyType = validatedParams.supplyType || 'INFINITE';
-  const maxSupply = validatedParams.maxSupply;
+  const maxSupply = validatedParams.maxSupply
+    ? Number(processBalanceInput(validatedParams.maxSupply, decimals))
+    : undefined;
   const alias = validatedParams.alias;
 
   // Check if alias already exists on the current network
@@ -291,14 +299,14 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
     logger.debug('=========================');
 
     // 2. Create and execute token transaction
-    const tokenCreateParams = {
+    const tokenCreateParams: TokenCreateParams = {
       name,
       symbol,
       treasuryId: treasury.treasuryId,
       decimals,
-      initialSupply,
+      initialSupplyRaw: initialSupply,
       supplyType: supplyType.toUpperCase() as 'FINITE' | 'INFINITE',
-      maxSupply: finalMaxSupply,
+      maxSupplyRaw: finalMaxSupply,
       adminKey: adminKey.publicKey,
     };
 
