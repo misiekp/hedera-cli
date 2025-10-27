@@ -134,7 +134,7 @@ export function safeParseTokenData(data: unknown) {
 
 // Command parameter validation schemas
 export const TokenCreateCommandSchema = z.object({
-  'token-name': z
+  tokenName: z
     .string()
     .min(1, 'Token name is required')
     .max(100, 'Token name must be 100 characters or less'),

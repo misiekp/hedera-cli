@@ -211,7 +211,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
 
   // Use validated parameters with defaults
   const validatedParams = validationResult.data;
-  const name = validatedParams['token-name'];
+  const name = validatedParams.tokenName;
   const symbol = validatedParams.symbol;
   const decimals = validatedParams.decimals || 0;
   const initialSupply = validatedParams.initialSupply || 1000000;
