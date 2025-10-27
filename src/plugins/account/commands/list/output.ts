@@ -2,7 +2,12 @@
  * List Accounts Command Output Schema and Template
  */
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import {
+  EntityIdSchema,
+  KeyTypeSchema,
+  NetworkSchema,
+  EvmAddressSchema,
+} from '../../../../core/schemas/common-schemas';
 
 /**
  * List Accounts Command Output Schema
@@ -10,27 +15,18 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 export const ListAccountsOutputSchema = z.object({
   accounts: z.array(
     z.object({
-      name: z.string(),
-      accountId: z.string(),
-      type: z.enum(['ECDSA', 'ED25519']),
-      network: z.string(),
-      evmAddress: z.string(),
-      keyRefId: z.string().optional(), // Only included when --private flag is used
+      name: z.string().describe('Account name or alias'),
+      accountId: EntityIdSchema,
+      type: KeyTypeSchema,
+      network: NetworkSchema,
+      evmAddress: EvmAddressSchema,
+      keyRefId: z.string().describe('Key reference ID').optional(), // Only included when --private flag is used
     }),
   ),
-  totalCount: z.number(),
+  totalCount: z.number().describe('Total number of accounts'),
 });
 
 export type ListAccountsOutput = z.infer<typeof ListAccountsOutputSchema>;
-
-// JSON Schema for manifest
-export const LIST_ACCOUNTS_OUTPUT_SCHEMA = zodToJsonSchema(
-  ListAccountsOutputSchema,
-  {
-    name: 'ListAccountsOutput',
-    $refStrategy: 'none',
-  },
-);
 
 /**
  * Human-readable template for list accounts output

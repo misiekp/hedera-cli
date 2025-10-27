@@ -2,31 +2,28 @@
  * Import Account Command Output Schema and Template
  */
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import {
+  EntityIdSchema,
+  KeyTypeSchema,
+  NetworkSchema,
+  TinybarBalanceSchema,
+  EvmAddressSchema,
+} from '../../../../core/schemas/common-schemas';
 
 /**
  * Import Account Command Output Schema
  */
 export const ImportAccountOutputSchema = z.object({
-  accountId: z.string(),
-  name: z.string(),
-  type: z.enum(['ECDSA', 'ED25519']),
-  alias: z.string().optional(),
-  network: z.string(),
-  balance: z.string(),
-  evmAddress: z.string(),
+  accountId: EntityIdSchema,
+  name: z.string().describe('Account name or alias'),
+  type: KeyTypeSchema,
+  alias: z.string().describe('Account alias').optional(),
+  network: NetworkSchema,
+  balance: TinybarBalanceSchema,
+  evmAddress: EvmAddressSchema,
 });
 
 export type ImportAccountOutput = z.infer<typeof ImportAccountOutputSchema>;
-
-// JSON Schema for manifest
-export const IMPORT_ACCOUNT_OUTPUT_SCHEMA = zodToJsonSchema(
-  ImportAccountOutputSchema,
-  {
-    name: 'ImportAccountOutput',
-    $refStrategy: 'none',
-  },
-);
 
 /**
  * Human-readable template for import account output

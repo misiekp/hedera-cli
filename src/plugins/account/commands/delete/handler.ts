@@ -10,7 +10,7 @@ import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { AliasType } from '../../../../core/services/alias/alias-service.interface';
 import { DeleteAccountOutput } from './output';
 
-export default function deleteAccountHandler(
+export default function deleteAccount(
   args: CommandHandlerArgs,
 ): CommandExecutionResult {
   const { api, logger } = args;

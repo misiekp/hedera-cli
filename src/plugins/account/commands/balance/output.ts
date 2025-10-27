@@ -2,34 +2,29 @@
  * Account Balance Command Output Schema and Template
  */
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import {
+  EntityIdSchema,
+  TinybarBalanceSchema,
+  TokenAmountSchema,
+} from '../../../../core/schemas/common-schemas';
 
 /**
  * Account Balance Command Output Schema
  */
 export const AccountBalanceOutputSchema = z.object({
-  accountId: z.string(),
-  hbarBalance: z.string(),
+  accountId: EntityIdSchema,
+  hbarBalance: TinybarBalanceSchema,
   tokenBalances: z
     .array(
       z.object({
-        tokenId: z.string(),
-        balance: z.string(),
+        tokenId: EntityIdSchema,
+        balance: TokenAmountSchema,
       }),
     )
     .optional(),
 });
 
 export type AccountBalanceOutput = z.infer<typeof AccountBalanceOutputSchema>;
-
-// JSON Schema for manifest
-export const ACCOUNT_BALANCE_OUTPUT_SCHEMA = zodToJsonSchema(
-  AccountBalanceOutputSchema,
-  {
-    name: 'AccountBalanceOutput',
-    $refStrategy: 'none',
-  },
-);
 
 /**
  * Human-readable template for account balance output

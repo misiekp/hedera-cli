@@ -200,7 +200,7 @@ export const makeMirrorMock = (
     jest.fn().mockResolvedValue(
       options.accountInfo ?? {
         accountId: '0.0.1234',
-        balance: { balance: 1000n, timestamp: '1234567890' },
+        balance: { balance: 1000, timestamp: '1234567890' },
         evmAddress: '0xabc',
         accountPublicKey: 'pubKey',
       },

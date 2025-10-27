@@ -9,7 +9,7 @@ import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { ListAccountsOutput } from './output';
 
-export default function listAccountsHandler(
+export default function listAccounts(
   args: CommandHandlerArgs,
 ): CommandExecutionResult {
   const { api, logger } = args;

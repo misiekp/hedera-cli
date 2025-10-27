@@ -2,29 +2,26 @@
  * View Account Command Output Schema and Template
  */
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import {
+  EntityIdSchema,
+  TinybarBalanceSchema,
+  EvmAddressSchema,
+  PublicKeySchema,
+  TimestampSchema,
+} from '../../../../core/schemas/common-schemas';
 
 /**
  * View Account Command Output Schema
  */
 export const ViewAccountOutputSchema = z.object({
-  accountId: z.string(),
-  balance: z.string(),
-  evmAddress: z.string().optional(),
-  publicKey: z.string().optional(),
-  balanceTimestamp: z.string(),
+  accountId: EntityIdSchema,
+  balance: TinybarBalanceSchema,
+  evmAddress: EvmAddressSchema.optional(),
+  publicKey: PublicKeySchema.optional(),
+  balanceTimestamp: TimestampSchema,
 });
 
 export type ViewAccountOutput = z.infer<typeof ViewAccountOutputSchema>;
-
-// JSON Schema for manifest
-export const VIEW_ACCOUNT_OUTPUT_SCHEMA = zodToJsonSchema(
-  ViewAccountOutputSchema,
-  {
-    name: 'ViewAccountOutput',
-    $refStrategy: 'none',
-  },
-);
 
 /**
  * Human-readable template for view account output

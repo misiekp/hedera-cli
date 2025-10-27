@@ -43,7 +43,7 @@ export default async function viewAccountHandler(
     // Prepare output data
     const outputData: ViewAccountOutput = {
       accountId: accountInfo.accountId,
-      balance: accountInfo.balance.balance.toString(),
+      balance: BigInt(accountInfo.balance.balance.toString()),
       ...(accountInfo.evmAddress && { evmAddress: accountInfo.evmAddress }),
       ...(accountInfo.accountPublicKey && {
         publicKey: accountInfo.accountPublicKey,
@@ -53,7 +53,9 @@ export default async function viewAccountHandler(
 
     return {
       status: 'success',
-      outputJson: JSON.stringify(outputData),
+      outputJson: JSON.stringify(outputData, (key, value): unknown =>
+        typeof value === 'bigint' ? value.toString() : value,
+      ),
     };
   } catch (error: unknown) {
     return {

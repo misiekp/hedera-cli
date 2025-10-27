@@ -10,7 +10,7 @@ import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { AccountBalanceOutput } from './output';
 
-export default async function getAccountBalanceHandler(
+export default async function getAccountBalance(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
   const { api, logger } = args;
@@ -46,7 +46,7 @@ export default async function getAccountBalanceHandler(
     // Prepare output data
     const outputData: AccountBalanceOutput = {
       accountId,
-      hbarBalance: hbarBalance.toString(),
+      hbarBalance: hbarBalance,
     };
 
     // Get token balances if not only HBAR
@@ -58,7 +58,7 @@ export default async function getAccountBalanceHandler(
           outputData.tokenBalances = tokenBalances.tokens.map(
             (token: TokenBalance) => ({
               tokenId: token.token_id,
-              balance: token.balance.toString(),
+              balance: BigInt(token.balance.toString()),
             }),
           );
         }
@@ -72,7 +72,9 @@ export default async function getAccountBalanceHandler(
 
     return {
       status: 'success',
-      outputJson: JSON.stringify(outputData),
+      outputJson: JSON.stringify(outputData, (key, value): unknown =>
+        typeof value === 'bigint' ? value.toString() : value,
+      ),
     };
   } catch (error: unknown) {
     return {

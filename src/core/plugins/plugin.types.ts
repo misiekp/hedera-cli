@@ -32,9 +32,11 @@ export interface PluginManifest {
  * Command output specification
  * Defines the schema and optional human-readable template for command output
  */
+import { z } from 'zod';
+
 export interface CommandOutputSpec {
-  /** JSON Schema for the command's output */
-  schema: unknown;
+  /** Zod schema for the command's output */
+  schema: z.ZodTypeAny;
   /** Optional human-readable Handlebars template string */
   humanTemplate?: string;
 }

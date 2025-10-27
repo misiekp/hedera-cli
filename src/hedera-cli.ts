@@ -46,10 +46,6 @@ program.hook('preAction', () => {
   setGlobalOutputMode({ json: globalFormat === 'json' });
 });
 
-export function getGlobalFormat(): 'human' | 'json' {
-  return globalFormat;
-}
-
 // Initialize the simplified plugin system
 async function initializeCLI() {
   try {

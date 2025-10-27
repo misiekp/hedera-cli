@@ -5,31 +5,31 @@
 import { PluginManifest } from '../../core/plugins/plugin.interface';
 import { ACCOUNT_JSON_SCHEMA, ACCOUNT_NAMESPACE } from './schema';
 import {
-  LIST_ACCOUNTS_OUTPUT_SCHEMA,
+  ListAccountsOutputSchema,
   LIST_ACCOUNTS_TEMPLATE,
 } from './commands/list';
 import {
-  CREATE_ACCOUNT_OUTPUT_SCHEMA,
+  CreateAccountOutputSchema,
   CREATE_ACCOUNT_TEMPLATE,
 } from './commands/create';
 import {
-  ACCOUNT_BALANCE_OUTPUT_SCHEMA,
+  AccountBalanceOutputSchema,
   ACCOUNT_BALANCE_TEMPLATE,
 } from './commands/balance';
 import {
-  CLEAR_ACCOUNTS_OUTPUT_SCHEMA,
+  ClearAccountsOutputSchema,
   CLEAR_ACCOUNTS_TEMPLATE,
 } from './commands/clear';
 import {
-  DELETE_ACCOUNT_OUTPUT_SCHEMA,
+  DeleteAccountOutputSchema,
   DELETE_ACCOUNT_TEMPLATE,
 } from './commands/delete';
 import {
-  VIEW_ACCOUNT_OUTPUT_SCHEMA,
+  ViewAccountOutputSchema,
   VIEW_ACCOUNT_TEMPLATE,
 } from './commands/view';
 import {
-  IMPORT_ACCOUNT_OUTPUT_SCHEMA,
+  ImportAccountOutputSchema,
   IMPORT_ACCOUNT_TEMPLATE,
 } from './commands/import';
 
@@ -75,7 +75,7 @@ export const accountPluginManifest: PluginManifest = {
       ],
       handler: './commands/create/handler',
       output: {
-        schema: CREATE_ACCOUNT_OUTPUT_SCHEMA,
+        schema: CreateAccountOutputSchema,
         humanTemplate: CREATE_ACCOUNT_TEMPLATE,
       },
     },
@@ -102,7 +102,7 @@ export const accountPluginManifest: PluginManifest = {
       ],
       handler: './commands/balance/handler',
       output: {
-        schema: ACCOUNT_BALANCE_OUTPUT_SCHEMA,
+        schema: AccountBalanceOutputSchema,
         humanTemplate: ACCOUNT_BALANCE_TEMPLATE,
       },
     },
@@ -121,7 +121,7 @@ export const accountPluginManifest: PluginManifest = {
       ],
       handler: './commands/list/handler',
       output: {
-        schema: LIST_ACCOUNTS_OUTPUT_SCHEMA,
+        schema: ListAccountsOutputSchema,
         humanTemplate: LIST_ACCOUNTS_TEMPLATE,
       },
     },
@@ -136,7 +136,7 @@ export const accountPluginManifest: PluginManifest = {
       ],
       handler: './commands/import/handler',
       output: {
-        schema: IMPORT_ACCOUNT_OUTPUT_SCHEMA,
+        schema: ImportAccountOutputSchema,
         humanTemplate: IMPORT_ACCOUNT_TEMPLATE,
       },
     },
@@ -147,7 +147,7 @@ export const accountPluginManifest: PluginManifest = {
       options: [],
       handler: './commands/clear/handler',
       output: {
-        schema: CLEAR_ACCOUNTS_OUTPUT_SCHEMA,
+        schema: ClearAccountsOutputSchema,
         humanTemplate: CLEAR_ACCOUNTS_TEMPLATE,
       },
     },
@@ -161,7 +161,7 @@ export const accountPluginManifest: PluginManifest = {
       ],
       handler: './commands/delete/handler',
       output: {
-        schema: DELETE_ACCOUNT_OUTPUT_SCHEMA,
+        schema: DeleteAccountOutputSchema,
         humanTemplate: DELETE_ACCOUNT_TEMPLATE,
       },
     },
@@ -179,7 +179,7 @@ export const accountPluginManifest: PluginManifest = {
       ],
       handler: './commands/view/handler',
       output: {
-        schema: VIEW_ACCOUNT_OUTPUT_SCHEMA,
+        schema: ViewAccountOutputSchema,
         humanTemplate: VIEW_ACCOUNT_TEMPLATE,
       },
     },
