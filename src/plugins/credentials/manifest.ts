@@ -49,12 +49,10 @@ const credentialsManifest: PluginManifest = {
     },
     {
       name: 'remove',
-      summary: 'Remove operator credentials',
-      description:
-        'Remove operator credentials by keyRefId or for a specific network',
+      summary: 'Remove credentials',
+      description: 'Remove credentials by keyRefId from KMS storage',
       options: [
-        { name: 'key-ref-id', short: 'k', type: 'string', required: false },
-        { name: 'network', short: 'N', type: 'string', required: false },
+        { name: 'key-ref-id', short: 'k', type: 'string', required: true },
       ],
       handler: 'commands/remove',
     },
