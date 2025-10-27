@@ -29,14 +29,14 @@ export function getOperatorHandler(args: CommandHandlerArgs): void {
 
     if (!operator) {
       logger.log(`⚠️  No operator configured for network: ${targetNetwork}`);
-      return;
+      process.exit(0);
     }
 
     const publicKey = api.kms.getPublicKey(operator.keyRefId);
 
     if (!publicKey) {
       logger.log(`❌ Public key not found for keyRefId: ${operator.keyRefId}`);
-      return;
+      process.exit(0);
     }
 
     logger.log(`✅ Operator found for network: ${targetNetwork}`);
@@ -45,7 +45,7 @@ export function getOperatorHandler(args: CommandHandlerArgs): void {
     logger.log(`   Public Key: ${publicKey}`);
   } catch (error) {
     logger.error(formatError('❌ Failed to get operator: ', error));
-    throw error;
+    process.exit(1);
   }
 
   process.exit(0);
