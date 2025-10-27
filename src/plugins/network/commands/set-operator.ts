@@ -89,7 +89,7 @@ export function setOperatorHandler(args: CommandHandlerArgs): void {
     logger.log(`   Public Key: ${resolvedPublicKey}`);
   } catch (error) {
     logger.error(formatError('❌ Failed to set operator: ', error));
-    throw error;
+    process.exit(1);
   }
 
   process.exit(0);
