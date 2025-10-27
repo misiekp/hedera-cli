@@ -17,6 +17,10 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
   const privateKey = args.args.key as string;
   const alias = (args.args.alias as string) || '';
 
+  // Check if alias already exists on the current network
+  const network = api.network.getCurrentNetwork();
+  api.alias.availableOrThrow(alias, network);
+
   // Generate a unique name for the account
   const name = alias || `imported-${accountId.replace(/\./g, '-')}`;
   logger.log(`Importing account: ${name} (${accountId})`);

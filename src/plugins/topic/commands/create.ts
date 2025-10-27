@@ -22,6 +22,10 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
   const alias = args.args.alias as string | undefined;
   const name = alias || `topic-${Date.now()}`;
 
+  // Check if alias already exists on the current network
+  const network = api.network.getCurrentNetwork();
+  api.alias.availableOrThrow(alias, network);
+
   if (memo) {
     logger.log(`Creating topic with memo: ${memo}`);
   }
