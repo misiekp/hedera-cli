@@ -63,6 +63,21 @@ export const networkPluginManifest: PluginManifest = {
       ],
       handler: './commands/set-operator',
     },
+    {
+      name: 'get-operator',
+      summary: 'Get operator for a network',
+      description: 'Get operator credentials for a specific network',
+      options: [
+        {
+          name: 'network',
+          short: 'n',
+          type: 'string',
+          required: false,
+          description: 'Target network (defaults to current network)',
+        },
+      ],
+      handler: './commands/get-operator',
+    },
   ],
 };
 
