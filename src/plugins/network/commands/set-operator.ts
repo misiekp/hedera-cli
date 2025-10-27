@@ -5,6 +5,34 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
 
+/**
+ * Resolve operator credentials from alias
+ */
+function resolveOperatorFromAlias(
+  alias: string,
+  targetNetwork: SupportedNetwork,
+  api: CommandHandlerArgs['api'],
+  logger: CommandHandlerArgs['logger'],
+): { accountId: string; keyRefId: string; publicKey: string } {
+  const aliasRecord = api.alias.resolve(alias, 'account', targetNetwork);
+
+  if (!aliasRecord) {
+    logger.error(`❌ Alias '${alias}' not found for network ${targetNetwork}`);
+    process.exit(1);
+  }
+
+  if (!aliasRecord.keyRefId) {
+    logger.error(`❌ No key found for account ${aliasRecord.entityId}`);
+    process.exit(1);
+  }
+
+  return {
+    accountId: aliasRecord.entityId!,
+    keyRefId: aliasRecord.keyRefId,
+    publicKey: aliasRecord.publicKey || '',
+  };
+}
+
 export function setOperatorHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
   const { operator, network } = args.args as {
@@ -30,28 +58,7 @@ export function setOperatorHandler(args: CommandHandlerArgs): void {
       publicKey: resolvedPublicKey,
     } = operator.includes(':')
       ? api.kms.parseAccountIdKeyPair(operator, 'account')
-      : (() => {
-          const aliasRecord = api.alias.resolve(
-            operator,
-            'account',
-            targetNetwork,
-          );
-          if (!aliasRecord) {
-            logger.error(
-              `❌ Alias '${operator}' not found for network ${targetNetwork}`,
-            );
-            process.exit(1);
-          }
-          if (!aliasRecord.keyRefId) {
-            logger.error(`❌ No key found for account ${aliasRecord.entityId}`);
-            process.exit(1);
-          }
-          return {
-            accountId: aliasRecord.entityId!,
-            keyRefId: aliasRecord.keyRefId,
-            publicKey: aliasRecord.publicKey || '',
-          };
-        })();
+      : resolveOperatorFromAlias(operator, targetNetwork, api, logger);
 
     if (operator.includes(':')) {
       logger.log(
