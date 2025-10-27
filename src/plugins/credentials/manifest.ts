@@ -49,7 +49,7 @@ const credentialsManifest: PluginManifest = {
       options: [
         { name: 'account-id', short: 'a', type: 'string', required: true },
         { name: 'private-key', short: 'p', type: 'string', required: true },
-        { name: 'network', short: 'N', type: 'string', required: false },
+        { name: 'network', short: 'n', type: 'string', required: false },
       ],
       handler: 'commands/set',
     },
