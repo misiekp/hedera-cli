@@ -318,7 +318,7 @@ describe('Token Schema Validation', () => {
 
     test('should reject invalid create parameters', () => {
       const invalidParams = {
-        name: '', // Invalid: empty name
+        'token-name': '', // Invalid: empty name
         symbol: 'TEST',
       };
 
