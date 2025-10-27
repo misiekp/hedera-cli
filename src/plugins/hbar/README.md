@@ -37,8 +37,8 @@ hcli hbar transfer -b 100000000 -f sender -t receiver -m "Payment"
 # Using long flags
 hcli hbar transfer \
   --balance 100000000 \
-  --from-id-or-name-or-alias myaccount \
-  --to-id-or-name-or-alias 0.0.123456 \
+  --from myaccount \
+  --to 0.0.123456 \
   --memo "Test transfer"
 
 # Using default operator (from env) as sender
@@ -48,8 +48,8 @@ hcli hbar transfer -b 50000000 -t receiver
 **Options:**
 
 - `-b, --balance <number>` - Amount in tinybars (required)
-- `-t, --to-id-or-name-or-alias <string>` - Recipient account (required)
-- `-f, --from-id-or-name-or-alias <string>` - Sender account (optional, defaults to operator from env)
+- `-t, --to <string>` - Recipient account (required)
+- `-f, --from <string>` - Sender account (optional, defaults to operator from env)
 - `-m, --memo <string>` - Transfer memo (optional)
 
 **Examples:**

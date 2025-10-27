@@ -42,7 +42,7 @@ export const accountPluginManifest: PluginManifest = {
           required: false,
           default: 0,
         },
-        { name: 'alias', short: 'n', type: 'string', required: false },
+        { name: 'name', short: 'n', type: 'string', required: false },
         { name: 'payer', short: 'p', type: 'string', required: false },
       ],
       handler: './index',
@@ -54,7 +54,7 @@ export const accountPluginManifest: PluginManifest = {
       options: [
         {
           // @TODO Find all long option names and rename
-          name: 'account-id-or-name-or-alias',
+          name: 'account',
           short: 'a',
           type: 'string',
           required: true,
@@ -92,7 +92,7 @@ export const accountPluginManifest: PluginManifest = {
       options: [
         { name: 'id', short: 'i', type: 'string', required: true },
         { name: 'key', short: 'k', type: 'string', required: false },
-        { name: 'alias', short: 'n', type: 'string', required: false },
+        { name: 'name', short: 'n', type: 'string', required: false },
       ],
       handler: './index',
     },
@@ -108,7 +108,7 @@ export const accountPluginManifest: PluginManifest = {
       summary: 'Delete an account',
       description: 'Delete an account from the address book',
       options: [
-        { name: 'name', short: 'N', type: 'string', required: false },
+        { name: 'name', short: 'n', type: 'string', required: false },
         { name: 'id', short: 'i', type: 'string', required: false },
       ],
       handler: './index',
@@ -119,7 +119,7 @@ export const accountPluginManifest: PluginManifest = {
       description: 'View detailed information about an account',
       options: [
         {
-          name: 'account-id-or-name-or-alias',
+          name: 'account',
           short: 'a',
           type: 'string',
           required: true,

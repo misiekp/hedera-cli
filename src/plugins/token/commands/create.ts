@@ -211,13 +211,13 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
 
   // Use validated parameters with defaults
   const validatedParams = validationResult.data;
-  const name = validatedParams.name;
+  const name = validatedParams['token-name'];
   const symbol = validatedParams.symbol;
   const decimals = validatedParams.decimals || 0;
   const initialSupply = validatedParams.initialSupply || 1000000;
   const supplyType = validatedParams.supplyType || 'INFINITE';
   const maxSupply = validatedParams.maxSupply;
-  const alias = validatedParams.alias;
+  const alias = validatedParams.name;
 
   // Check if alias already exists on the current network
   const network = api.network.getCurrentNetwork();

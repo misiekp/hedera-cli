@@ -14,7 +14,7 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const accountIdOrNameOrAlias = args.args['accountIdOrNameOrAlias'] as string;
+  const accountIdOrNameOrAlias = args.args['account'] as string;
   const onlyHbar = (args.args['only-hbar'] as boolean) || false;
   const tokenId = args.args['token-id'] as string;
 

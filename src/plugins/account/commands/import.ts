@@ -15,7 +15,7 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
   // Extract command arguments
   const accountId = args.args.id as string;
   const privateKey = args.args.key as string;
-  const alias = (args.args.alias as string) || '';
+  const alias = (args.args.name as string) || '';
 
   // Check if alias already exists on the current network
   const network = api.network.getCurrentNetwork();

@@ -6,12 +6,8 @@ export default async function transferHandler(
   const { api, logger } = args;
 
   const amount = Number(args.args.balance);
-  const to = args.args.toIdOrNameOrAlias
-    ? (args.args.toIdOrNameOrAlias as string)
-    : '';
-  let from = args.args.fromIdOrNameOrAlias
-    ? (args.args.fromIdOrNameOrAlias as string)
-    : '';
+  const to = args.args.to ? (args.args.to as string) : '';
+  let from = args.args.from ? (args.args.from as string) : '';
   const memo = args.args.memo ? (args.args.memo as string) : '';
 
   logger.log('[HBAR] Transfer command invoked');
@@ -22,7 +18,7 @@ export default async function transferHandler(
   }
 
   if (!to) {
-    throw new Error('--to-id-or-name-or-alias is required');
+    throw new Error('--to is required');
   }
 
   // Fallback to operator from env if from not provided

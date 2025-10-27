@@ -18,7 +18,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const balance =
     args.args.balance !== undefined ? (args.args.balance as number) : 10000;
   const autoAssociations = (args.args['auto-associations'] as number) || 0;
-  const alias = (args.args.alias as string) || '';
+  const alias = (args.args.name as string) || '';
 
   // Check if alias already exists on the current network
   const network = api.network.getCurrentNetwork();

@@ -13,7 +13,7 @@ export async function viewAccountHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const accountIdOrNameOrAlias = args.args['accountIdOrNameOrAlias'] as string;
+  const accountIdOrNameOrAlias = args.args['account'] as string;
 
   logger.log(`Viewing account details: ${accountIdOrNameOrAlias}`);
 

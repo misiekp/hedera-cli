@@ -54,11 +54,11 @@ export const topicPluginManifest: PluginManifest = {
           short: 's',
         },
         {
-          name: 'alias',
+          name: 'name',
           short: 'n',
           type: 'string',
           required: false,
-          description: 'Define the alias (name) for this topic',
+          description: 'Define the name for this topic',
         },
       ],
       handler: './index',

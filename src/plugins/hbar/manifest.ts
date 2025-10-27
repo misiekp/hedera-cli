@@ -29,14 +29,14 @@ export const hbarPluginManifest: PluginManifest = {
           description: 'Amount of tinybars to transfer',
         },
         {
-          name: 'to-id-or-name-or-alias',
+          name: 'to',
           short: 't',
           type: 'string',
           required: true,
           description: 'Account ID, name, or alias to transfer to',
         },
         {
-          name: 'from-id-or-name-or-alias',
+          name: 'from',
           short: 'f',
           type: 'string',
           required: false,

@@ -39,7 +39,7 @@ src/plugins/account/
 hcli account create \
   --balance 100000000 \
   --auto-associations 10 \
-  --alias myaccount
+  --name myaccount
 ```
 
 ### Account Import
@@ -48,14 +48,14 @@ hcli account create \
 hcli account import \
   --id 0.0.123456 \
   --key <private-key> \
-  --alias imported-account
+  --name imported-account
 ```
 
 ### Account Balance
 
 ```bash
-hcli account balance --account-id-or-name-or-alias myaccount
-hcli account balance --account-id-or-name-or-alias 0.0.123456 --only-hbar
+hcli account balance --account myaccount
+hcli account balance --account 0.0.123456 --only-hbar
 ```
 
 ### Account List
@@ -68,7 +68,7 @@ hcli account list --private  # Show key reference IDs
 ### Account View
 
 ```bash
-hcli account view --account-id-or-name-or-alias myaccount
+hcli account view --account myaccount
 ```
 
 ### Account Delete
@@ -126,7 +126,7 @@ interface AccountData {
 - Per-network aliases via `AliasService`
 - Aliases resolve to account IDs and key references
 - Example: `myaccount` → `0.0.123456` on testnet
-- Registered during `create` and `import` when `--alias` provided
+- Registered during `create` and `import` when `--name` provided
 
 ## 🔄 Migration from Commands
 
