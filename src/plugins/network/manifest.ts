@@ -3,6 +3,10 @@
  * Defines the network plugin
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { listHandler } from './commands/list';
+import { useHandler } from './commands/use';
+import { setOperatorHandler } from './commands/set-operator';
+import { getOperatorHandler } from './commands/get-operator';
 
 export const networkPluginManifest: PluginManifest = {
   name: 'network',
@@ -22,7 +26,7 @@ export const networkPluginManifest: PluginManifest = {
       description:
         'List all available networks with their configuration and health status',
       options: [],
-      handler: './commands/list',
+      handler: listHandler,
     },
     {
       name: 'use',
@@ -37,7 +41,7 @@ export const networkPluginManifest: PluginManifest = {
           description: 'Network name (testnet, mainnet, previewnet, localnet)',
         },
       ],
-      handler: './commands/use',
+      handler: useHandler,
     },
     {
       name: 'set-operator',
@@ -61,7 +65,7 @@ export const networkPluginManifest: PluginManifest = {
           description: 'Target network (defaults to current network)',
         },
       ],
-      handler: './commands/set-operator',
+      handler: setOperatorHandler,
     },
     {
       name: 'get-operator',
@@ -76,7 +80,7 @@ export const networkPluginManifest: PluginManifest = {
           description: 'Target network (defaults to current network)',
         },
       ],
-      handler: './commands/get-operator',
+      handler: getOperatorHandler,
     },
   ],
 };

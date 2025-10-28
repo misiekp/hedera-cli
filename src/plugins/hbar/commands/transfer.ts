@@ -1,6 +1,6 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 
-export default async function transferHandler(
+export async function hbarTransferHandler(
   args: CommandHandlerArgs,
 ): Promise<void> {
   const { api, logger } = args;

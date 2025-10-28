@@ -3,6 +3,8 @@
  * A plugin for managing operator credentials
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { listHandler } from './commands/list';
+import { removeHandler } from './commands/remove';
 
 const credentialsManifest: PluginManifest = {
   name: 'credentials',
@@ -45,7 +47,7 @@ const credentialsManifest: PluginManifest = {
       name: 'list',
       summary: 'List all credentials',
       description: 'Show all stored credentials',
-      handler: 'commands/list',
+      handler: listHandler,
     },
     {
       name: 'remove',
@@ -54,7 +56,7 @@ const credentialsManifest: PluginManifest = {
       options: [
         { name: 'key-ref-id', short: 'k', type: 'string', required: true },
       ],
-      handler: 'commands/remove',
+      handler: removeHandler,
     },
   ],
 };

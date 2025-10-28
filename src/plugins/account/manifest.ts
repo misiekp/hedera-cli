@@ -4,6 +4,13 @@
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
 import { ACCOUNT_JSON_SCHEMA, ACCOUNT_NAMESPACE } from './schema';
+import { createAccountHandler } from './commands/create';
+import { getAccountBalanceHandler } from './commands/balance';
+import { listAccountsHandler } from './commands/list';
+import { importAccountHandler } from './commands/import';
+import { clearAccountsHandler } from './commands/clear';
+import { deleteAccountHandler } from './commands/delete';
+import { viewAccountHandler } from './commands/view';
 
 export const accountPluginManifest: PluginManifest = {
   name: 'account',
@@ -45,7 +52,7 @@ export const accountPluginManifest: PluginManifest = {
         { name: 'alias', short: 'n', type: 'string', required: false },
         { name: 'payer', short: 'p', type: 'string', required: false },
       ],
-      handler: './index',
+      handler: createAccountHandler,
     },
     {
       name: 'balance',
@@ -68,7 +75,7 @@ export const accountPluginManifest: PluginManifest = {
         },
         { name: 'token-id', short: 't', type: 'string', required: false },
       ],
-      handler: './index',
+      handler: getAccountBalanceHandler,
     },
     {
       name: 'list',
@@ -83,7 +90,7 @@ export const accountPluginManifest: PluginManifest = {
           default: false,
         },
       ],
-      handler: './index',
+      handler: listAccountsHandler,
     },
     {
       name: 'import',
@@ -94,14 +101,14 @@ export const accountPluginManifest: PluginManifest = {
         { name: 'key', short: 'k', type: 'string', required: false },
         { name: 'alias', short: 'n', type: 'string', required: false },
       ],
-      handler: './index',
+      handler: importAccountHandler,
     },
     {
       name: 'clear',
       summary: 'Clear all accounts',
       description: 'Remove all account information from the address book',
       options: [],
-      handler: './index',
+      handler: clearAccountsHandler,
     },
     {
       name: 'delete',
@@ -111,7 +118,7 @@ export const accountPluginManifest: PluginManifest = {
         { name: 'name', short: 'N', type: 'string', required: false },
         { name: 'id', short: 'i', type: 'string', required: false },
       ],
-      handler: './index',
+      handler: deleteAccountHandler,
     },
     {
       name: 'view',
@@ -125,7 +132,7 @@ export const accountPluginManifest: PluginManifest = {
           required: true,
         },
       ],
-      handler: './index',
+      handler: viewAccountHandler,
     },
   ],
   stateSchemas: [

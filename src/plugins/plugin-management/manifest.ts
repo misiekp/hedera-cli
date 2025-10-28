@@ -3,6 +3,10 @@
  * A plugin for managing other plugins
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { addHandler } from './commands/add';
+import { removeHandler } from './commands/remove';
+import { listHandler } from './commands/list';
+import { infoHandler } from './commands/info';
 
 const pluginManagementManifest: PluginManifest = {
   name: 'plugin-management',
@@ -21,27 +25,27 @@ const pluginManagementManifest: PluginManifest = {
       summary: 'Add a plugin from path',
       description: 'Add a new plugin to the system from a file path',
       options: [{ name: 'path', short: 'p', type: 'string', required: true }],
-      handler: 'commands/add',
+      handler: addHandler,
     },
     {
       name: 'remove',
       summary: 'Remove a plugin',
       description: 'Remove a plugin from the system',
       options: [{ name: 'name', short: 'n', type: 'string', required: true }],
-      handler: 'commands/remove',
+      handler: removeHandler,
     },
     {
       name: 'list',
       summary: 'List all plugins',
       description: 'Show all loaded plugins',
-      handler: 'commands/list',
+      handler: listHandler,
     },
     {
       name: 'info',
       summary: 'Get plugin information',
       description: 'Show detailed information about a specific plugin',
       options: [{ name: 'name', short: 'n', type: 'string', required: true }],
-      handler: 'commands/info',
+      handler: infoHandler,
     },
   ],
 };
