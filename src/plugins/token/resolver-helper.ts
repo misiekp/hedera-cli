@@ -6,6 +6,7 @@
 import { CoreApi } from '../../core';
 import { SupportedNetwork } from '../../core/types/shared.types';
 import { validateAccountId } from '../../core/utils/account-id-validator';
+import { parseIdKeyPair } from '../../core/utils/id-key-parser';
 
 /**
  * Resolved treasury information
@@ -38,11 +39,7 @@ export function resolveTreasuryParameter(
 
   // Check if it's a treasury-id:treasury-key pair
   if (treasury.includes(':')) {
-    const parts = treasury.split(':');
-    if (parts.length !== 2) {
-      throw new Error('Invalid format. Expected treasury-id:treasury-key');
-    }
-    const [accountId, privateKey] = parts;
+    const { accountId, privateKey } = parseIdKeyPair(treasury);
     validateAccountId(accountId);
     const imported = api.kms.importPrivateKey(privateKey);
     return {
@@ -120,11 +117,7 @@ export function resolveAccountParameter(
 
   // Check if it's an account-id:account-key pair
   if (account.includes(':')) {
-    const parts = account.split(':');
-    if (parts.length !== 2) {
-      throw new Error('Invalid format. Expected account-id:account-key');
-    }
-    const [accountId, privateKey] = parts;
+    const { accountId, privateKey } = parseIdKeyPair(account);
     validateAccountId(accountId);
     const imported = api.kms.importPrivateKey(privateKey);
     return {

@@ -4,10 +4,11 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
-import { validateAccountId } from '../../../core/utils/account-id-validator';
 import { Logger } from '../../../core/services/logger/logger-service.interface';
+import { validateAccountId } from '../../../core/utils/account-id-validator';
 import { AliasService } from '../../../core/services/alias/alias-service.interface';
 import { KmsService } from '../../../core/services/kms/kms-service.interface';
+import { parseIdKeyPair } from '../../../core/utils/id-key-parser';
 
 /**
  * Resolve operator credentials from alias
@@ -41,11 +42,7 @@ function resolveOperatorFromIdKey(
   idKeyPair: string,
   kmsService: KmsService,
 ): { accountId: string; keyRefId: string; publicKey: string } {
-  const parts = idKeyPair.split(':');
-  if (parts.length !== 2) {
-    throw new Error('Invalid format. Expected account-id:private-key');
-  }
-  const [accountId, privateKey] = parts;
+  const { accountId, privateKey } = parseIdKeyPair(idKeyPair);
   validateAccountId(accountId);
   const imported = kmsService.importPrivateKey(privateKey);
   return {
