@@ -3,6 +3,10 @@
  */
 import { PluginManifest } from '../../core';
 import { TOPIC_JSON_SCHEMA, TOPIC_NAMESPACE } from './schema';
+import { createTopicHandler } from './commands/create';
+import { listTopicsHandler } from './commands/list';
+import { submitMessageHandler } from './commands/message-submit';
+import { findMessageHandler } from './commands/message-find';
 
 export const topicPluginManifest: PluginManifest = {
   name: 'topic',
@@ -61,14 +65,14 @@ export const topicPluginManifest: PluginManifest = {
           description: 'Define the alias (name) for this topic',
         },
       ],
-      handler: './index',
+      handler: createTopicHandler,
     },
     {
       name: 'list',
       summary: 'List all topics',
       description: 'List all topics stored in the state',
       options: [],
-      handler: './index',
+      handler: listTopicsHandler,
     },
     {
       name: 'submit-message',
@@ -90,7 +94,7 @@ export const topicPluginManifest: PluginManifest = {
           short: 'm',
         },
       ],
-      handler: './index',
+      handler: submitMessageHandler,
     },
     {
       name: 'find-message',
@@ -154,7 +158,7 @@ export const topicPluginManifest: PluginManifest = {
           description: 'The sequence number not equal to',
         },
       ],
-      handler: './index',
+      handler: findMessageHandler,
     },
   ],
   stateSchemas: [
