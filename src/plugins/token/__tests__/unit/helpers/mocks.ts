@@ -67,14 +67,6 @@ export const makeKmsMock = (
     keyRefId: 'mock-key-ref-id',
     publicKey: 'mock-public-key',
   }),
-  parseAccountIdKeyPair: jest.fn().mockImplementation((idKeyPair: string) => {
-    const [accountId] = idKeyPair.split(':');
-    return {
-      accountId,
-      keyRefId: 'imported-key-ref-id',
-      publicKey: 'mock-public-key',
-    };
-  }),
   getPublicKey: jest.fn().mockReturnValue('mock-public-key'),
   getSignerHandle: jest.fn(),
   findByPublicKey: jest.fn().mockImplementation((publicKey) => {

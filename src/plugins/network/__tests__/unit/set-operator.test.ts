@@ -37,9 +37,8 @@ describe('network plugin - set-operator command', () => {
 
     setOperatorHandler(args);
 
-    expect(kmsService.parseAccountIdKeyPair).toHaveBeenCalledWith(
-      '0.0.123456:3030020100300706052b8104000a04220420...',
-      'account',
+    expect(kmsService.importPrivateKey).toHaveBeenCalledWith(
+      '3030020100300706052b8104000a04220420...',
     );
     expect(networkService.setOperator).toHaveBeenCalledWith('testnet', {
       accountId: '0.0.123456',
@@ -258,15 +257,15 @@ describe('network plugin - set-operator command', () => {
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 
-  test('handles KMS parseAccountIdKeyPair errors', () => {
+  test('handles KMS importPrivateKey errors', () => {
     const logger = makeLogger();
     const networkService = makeNetworkMock('testnet');
     const kmsService = makeKmsMock();
     const aliasService = makeAliasMock();
 
     // Mock KMS error
-    kmsService.parseAccountIdKeyPair.mockImplementation(() => {
-      throw new Error('Invalid account-id:private-key format');
+    kmsService.importPrivateKey.mockImplementation(() => {
+      throw new Error('Invalid private key format');
     });
 
     const args = makeArgs(
