@@ -5,6 +5,8 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
 import { validateAccountId } from '../../../core/utils/account-id-validator';
+import { CoreApi } from '../../../core/core-api/core-api.interface';
+import { Logger } from '../../../core/services/logger/logger-service.interface';
 
 /**
  * Resolve operator credentials from alias
@@ -12,8 +14,8 @@ import { validateAccountId } from '../../../core/utils/account-id-validator';
 function resolveOperatorFromAlias(
   alias: string,
   targetNetwork: SupportedNetwork,
-  api: CommandHandlerArgs['api'],
-  logger: CommandHandlerArgs['logger'],
+  api: CoreApi,
+  logger: Logger,
 ): { accountId: string; keyRefId: string; publicKey: string } {
   const aliasRecord = api.alias.resolve(alias, 'account', targetNetwork);
 
@@ -36,7 +38,7 @@ function resolveOperatorFromAlias(
 
 function resolveOperatorFromIdKey(
   idKeyPair: string,
-  api: CommandHandlerArgs['api'],
+  api: CoreApi,
 ): { accountId: string; keyRefId: string; publicKey: string } {
   const parts = idKeyPair.split(':');
   if (parts.length !== 2) {
