@@ -113,7 +113,6 @@ export const makeNetworkServiceMock = (
   setOperator: jest.fn(),
   getOperator: jest.fn().mockReturnValue(null),
   removeOperator: jest.fn(),
-  findNetworksUsingKey: jest.fn().mockReturnValue([]),
 });
 
 /**

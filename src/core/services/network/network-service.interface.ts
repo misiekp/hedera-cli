@@ -54,11 +54,6 @@ export interface NetworkService {
    * Remove operator for a specific network
    */
   removeOperator(network: SupportedNetwork): void;
-
-  /**
-   * Find all networks using a specific keyRefId
-   */
-  findNetworksUsingKey(keyRefId: string): SupportedNetwork[];
 }
 
 // Network configuration types

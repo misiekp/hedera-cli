@@ -113,16 +113,4 @@ export class NetworkServiceImpl implements NetworkService {
     this.logger.debug(`[NETWORK] Removing operator for network ${network}`);
     this.state.delete(NAMESPACE, `${network}Operator`);
   }
-
-  findNetworksUsingKey(keyRefId: string): SupportedNetwork[] {
-    const availableNetworks = this.getAvailableNetworks();
-    return availableNetworks
-      .filter(
-        (network): network is SupportedNetwork => network in DEFAULT_NETWORKS,
-      )
-      .filter((network) => {
-        const operator = this.getOperator(network);
-        return operator?.keyRefId === keyRefId;
-      });
-  }
 }
