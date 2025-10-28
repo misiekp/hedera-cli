@@ -146,7 +146,7 @@ export const TokenCreateCommandSchema = z.object({
 
   treasury: z
     .string()
-    .min(1, 'Treasury is required (either alias or treasury-id:treasury-key)')
+    .min(1, 'Treasury is required (either name or treasury-id:treasury-key)')
     .optional(),
 
   decimals: z
@@ -197,16 +197,16 @@ export function safeValidateTokenCreateParams(data: unknown) {
   return TokenCreateCommandSchema.safeParse(data);
 }
 
-// TokenId or alias
-const tokenIdOrAlias = z.string().min(1, 'Token ID or alias is required');
+// TokenId or name
+const tokenIdOrName = z.string().min(1, 'Token ID or name is required');
 
 // Command parameter validation schema for associate command
 export const TokenAssociateCommandSchema = z.object({
-  token: tokenIdOrAlias,
+  token: tokenIdOrName,
 
   account: z
     .string()
-    .min(1, 'Account is required (either alias or account-id:account-key)'),
+    .min(1, 'Account is required (either name or account-id:account-key)'),
 });
 
 export type TokenAssociateCommandParams = z.infer<
@@ -231,17 +231,17 @@ export function safeValidateTokenAssociateParams(data: unknown) {
 
 // Command parameter validation schema for transfer command
 export const TokenTransferCommandSchema = z.object({
-  token: tokenIdOrAlias,
+  token: tokenIdOrName,
 
   from: z
     .string()
     .min(
       1,
-      'Invalid --from parameter. To use the default operator, omit this argument or specify a valid alias or account-id:private-key',
+      'Invalid --from parameter. To use the default operator, omit this argument or specify a valid name or account-id:private-key',
     )
     .optional(),
 
-  to: z.string().min(1, 'To account is required (either alias or account-id)'),
+  to: z.string().min(1, 'To account is required (either name or account-id)'),
 
   balance: z.number().positive('Balance must be a positive number'),
 });

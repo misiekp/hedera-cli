@@ -38,7 +38,7 @@ export function deleteAccountHandler(args: CommandHandlerArgs) {
       throw new Error('Either name or id must be provided');
     }
 
-    // Remove any aliases associated with this account on the current network
+    // Remove any names associated with this account on the current network
     const currentNetwork = api.network.getCurrentNetwork();
     const aliasesForAccount = api.alias
       .list({ network: currentNetwork, type: AliasType.Account })
@@ -46,7 +46,7 @@ export function deleteAccountHandler(args: CommandHandlerArgs) {
 
     for (const rec of aliasesForAccount) {
       api.alias.remove(rec.alias, currentNetwork);
-      logger.log(`🧹 Removed alias '${rec.alias}' on ${currentNetwork}`);
+      logger.log(`🧹 Removed name '${rec.alias}' on ${currentNetwork}`);
     }
 
     // Delete account from state

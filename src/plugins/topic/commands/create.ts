@@ -125,7 +125,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
 
       logger.log(`✅ Topic created successfully: ${topicData.topicId}`);
       logger.log(`   Network: ${topicData.network}`);
-      logger.log(`   Name (Alias): ${topicData.name}`);
+      logger.log(`   Name: ${topicData.name}`);
       if (topicData.memo) {
         logger.log(`   Memo: ${topicData.memo}`);
       }

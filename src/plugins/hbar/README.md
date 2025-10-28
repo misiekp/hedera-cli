@@ -28,7 +28,7 @@ src/plugins/hbar/
 
 ### HBAR Transfer
 
-Transfer HBAR (tinybars) between accounts with support for aliases and account IDs.
+Transfer HBAR (tinybars) between accounts with support for names and account IDs.
 
 ```bash
 # Using short flags
@@ -55,7 +55,7 @@ hcli hbar transfer -b 50000000 -t receiver
 **Examples:**
 
 ```bash
-# Transfer using aliases
+# Transfer using names
 hcli hbar transfer -b 1000000 -f alice -t bob
 
 # Transfer using account IDs
@@ -72,7 +72,7 @@ The plugin uses the Core API services:
 - `api.hbar` - HBAR transfer operations
 - `api.txExecution` - Transaction signing and execution
 - `api.kms` - Secure key management
-- `api.alias` - Alias resolution
+- `api.alias` - Name resolution
 - `api.state` - Account lookup in state
 - `api.network` - Network information
 - `api.logger` - Logging
@@ -81,7 +81,7 @@ The plugin uses the Core API services:
 
 The plugin intelligently determines which key to use for signing:
 
-1. **Alias with keyRefId** - Uses registered key for the alias
+1. **Name with keyRefId** - Uses registered key for the name
 2. **Account in state** - Looks up account by ID or name, uses its keyRefId
 3. **Default operator** - Falls back to operator credentials from env
 
@@ -115,10 +115,10 @@ Test coverage (71%):
 
 ## 🎯 Key Features
 
-- **Multi-format support**: Accepts aliases or raw account IDs
+- **Multi-format support**: Accepts names or raw account IDs
 - **Smart key resolution**: Automatically finds correct signing key
 - **Default operator fallback**: Uses env credentials when sender not specified
-- **Alias integration**: Works seamlessly with new alias system
+- **Name integration**: Works seamlessly with new name system
 - **Secure signing**: Leverages `keyRefId` system for key management
 
 ## 📝 Technical Details
@@ -127,7 +127,7 @@ Test coverage (71%):
 
 When resolving `--from` or `--to`:
 
-1. Try alias lookup via `api.alias.resolve()`
+1. Try name lookup via `api.alias.resolve()`
 2. Try account name in `account-accounts` state
 3. Try account ID in `account-accounts` state
 4. Use as raw account ID (operator will sign)

@@ -50,7 +50,7 @@ export const accountPluginManifest: PluginManifest = {
     {
       name: 'balance',
       summary: 'Get account balance',
-      description: 'Retrieve the balance for an account ID, name, or alias',
+      description: 'Retrieve the balance for an account ID or name',
       options: [
         {
           // @TODO Find all long option names and rename

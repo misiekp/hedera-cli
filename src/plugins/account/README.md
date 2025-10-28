@@ -92,7 +92,7 @@ The plugin uses the Core API services:
 - `api.state` - Namespaced state management
 - `api.network` - Network information
 - `api.kms` - Secure key management
-- `api.alias` - Alias registration and resolution
+- `api.alias` - Name registration and resolution
 - `api.mirror` - Mirror node queries
 - `api.logger` - Logging
 
@@ -121,10 +121,10 @@ interface AccountData {
 - Secure key retrieval through Core API
 - Keys isolated in credentials storage namespace
 
-## 🏷️ Alias Support
+## 🏷️ Name Support
 
-- Per-network aliases via `AliasService`
-- Aliases resolve to account IDs and key references
+- Per-network names via `AliasService`
+- Names resolve to account IDs and key references
 - Example: `myaccount` → `0.0.123456` on testnet
 - Registered during `create` and `import` when `--name` provided
 
@@ -151,7 +151,7 @@ npm test -- src/plugins/account/__tests__/unit
 Test coverage:
 
 - Account creation (happy path, failures)
-- Account import with aliases
+- Account import with names
 - Balance retrieval (HBAR only, with tokens, errors)
 - Account listing
 - Account view and deletion

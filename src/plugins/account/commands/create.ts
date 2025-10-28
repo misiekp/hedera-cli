@@ -27,7 +27,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const name = alias || `account-${Date.now()}`;
 
   // Generate a unique name for the account
-  logger.log(`Creating account with alias: ${alias}`);
+  logger.log(`Creating account with name: ${alias}`);
 
   try {
     // 1. Generate a new key pair for the account
@@ -79,7 +79,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
       logger.log(`   Name: ${accountData.name}`);
       logger.log(`   Type: ${accountData.type}`);
       if (alias) {
-        logger.log(`   Alias: ${alias}`);
+        logger.log(`   Name: ${alias}`);
       }
       logger.log(`   Network: ${accountData.network}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
