@@ -4,6 +4,7 @@
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
+import { validateAccountId } from '../../../core/utils/account-id-validator';
 
 /**
  * Resolve operator credentials from alias
@@ -33,6 +34,24 @@ function resolveOperatorFromAlias(
   };
 }
 
+function resolveOperatorFromIdKey(
+  idKeyPair: string,
+  api: CommandHandlerArgs['api'],
+): { accountId: string; keyRefId: string; publicKey: string } {
+  const parts = idKeyPair.split(':');
+  if (parts.length !== 2) {
+    throw new Error('Invalid format. Expected account-id:private-key');
+  }
+  const [accountId, privateKey] = parts;
+  validateAccountId(accountId);
+  const imported = api.kms.importPrivateKey(privateKey);
+  return {
+    accountId,
+    keyRefId: imported.keyRefId,
+    publicKey: imported.publicKey,
+  };
+}
+
 export function setOperatorHandler(args: CommandHandlerArgs): void {
   const { logger, api } = args;
   const { operator, network } = args.args as {
@@ -57,7 +76,7 @@ export function setOperatorHandler(args: CommandHandlerArgs): void {
       keyRefId: resolvedKeyRefId,
       publicKey: resolvedPublicKey,
     } = operator.includes(':')
-      ? api.kms.parseAccountIdKeyPair(operator, 'account')
+      ? resolveOperatorFromIdKey(operator, api)
       : resolveOperatorFromAlias(operator, targetNetwork, api, logger);
 
     if (operator.includes(':')) {
