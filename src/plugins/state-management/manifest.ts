@@ -2,7 +2,10 @@
  * State Management Plugin Manifest
  * A plugin for managing state data across all plugins
  */
-import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { PluginManifest } from '../../core';
+import { listHandler } from './commands/list';
+import { clearHandler } from './commands/clear';
+import { infoHandler } from './commands/info';
 
 const stateManagementManifest: PluginManifest = {
   name: 'state-management',
@@ -23,7 +26,7 @@ const stateManagementManifest: PluginManifest = {
       options: [
         { name: 'namespace', short: 'n', type: 'string', required: false },
       ],
-      handler: 'commands/list',
+      handler: listHandler,
     },
     {
       name: 'clear',
@@ -33,13 +36,13 @@ const stateManagementManifest: PluginManifest = {
         { name: 'namespace', short: 'n', type: 'string', required: false },
         { name: 'confirm', short: 'c', type: 'boolean', required: false },
       ],
-      handler: 'commands/clear',
+      handler: clearHandler,
     },
     {
       name: 'info',
       summary: 'Show state information',
       description: 'Display information about stored state data',
-      handler: 'commands/info',
+      handler: infoHandler,
     },
   ],
 };

@@ -3,6 +3,8 @@
  * Defines the network plugin
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { listHandler } from './commands/list';
+import { useHandler } from './commands/use';
 
 export const networkPluginManifest: PluginManifest = {
   name: 'network',
@@ -22,7 +24,7 @@ export const networkPluginManifest: PluginManifest = {
       description:
         'List all available networks with their configuration and health status',
       options: [],
-      handler: './commands/list',
+      handler: listHandler,
     },
     {
       name: 'use',
@@ -37,7 +39,7 @@ export const networkPluginManifest: PluginManifest = {
           description: 'Network name (testnet, mainnet, previewnet, localnet)',
         },
       ],
-      handler: './commands/use',
+      handler: useHandler,
     },
   ],
 };
