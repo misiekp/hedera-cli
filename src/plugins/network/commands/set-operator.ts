@@ -5,8 +5,9 @@ import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { SupportedNetwork } from '../../../core/types/shared.types';
 import { validateAccountId } from '../../../core/utils/account-id-validator';
-import { CoreApi } from '../../../core/core-api/core-api.interface';
 import { Logger } from '../../../core/services/logger/logger-service.interface';
+import { AliasService } from '../../../core/services/alias/alias-service.interface';
+import { KmsService } from '../../../core/services/kms/kms-service.interface';
 
 /**
  * Resolve operator credentials from alias
@@ -14,10 +15,10 @@ import { Logger } from '../../../core/services/logger/logger-service.interface';
 function resolveOperatorFromAlias(
   alias: string,
   targetNetwork: SupportedNetwork,
-  api: CoreApi,
+  aliasService: AliasService,
   logger: Logger,
 ): { accountId: string; keyRefId: string; publicKey: string } {
-  const aliasRecord = api.alias.resolve(alias, 'account', targetNetwork);
+  const aliasRecord = aliasService.resolve(alias, 'account', targetNetwork);
 
   if (!aliasRecord) {
     logger.error(`❌ Alias '${alias}' not found for network ${targetNetwork}`);
@@ -38,7 +39,7 @@ function resolveOperatorFromAlias(
 
 function resolveOperatorFromIdKey(
   idKeyPair: string,
-  api: CoreApi,
+  kmsService: KmsService,
 ): { accountId: string; keyRefId: string; publicKey: string } {
   const parts = idKeyPair.split(':');
   if (parts.length !== 2) {
@@ -46,7 +47,7 @@ function resolveOperatorFromIdKey(
   }
   const [accountId, privateKey] = parts;
   validateAccountId(accountId);
-  const imported = api.kms.importPrivateKey(privateKey);
+  const imported = kmsService.importPrivateKey(privateKey);
   return {
     accountId,
     keyRefId: imported.keyRefId,
@@ -78,8 +79,8 @@ export function setOperatorHandler(args: CommandHandlerArgs): void {
       keyRefId: resolvedKeyRefId,
       publicKey: resolvedPublicKey,
     } = operator.includes(':')
-      ? resolveOperatorFromIdKey(operator, api)
-      : resolveOperatorFromAlias(operator, targetNetwork, api, logger);
+      ? resolveOperatorFromIdKey(operator, api.kms)
+      : resolveOperatorFromAlias(operator, targetNetwork, api.alias, logger);
 
     if (operator.includes(':')) {
       logger.log(
