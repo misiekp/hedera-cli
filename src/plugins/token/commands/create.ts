@@ -208,8 +208,6 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
     return; // Ensure execution stops (for testing with mocked process.exit)
   }
 
-  console.log({ result: validationResult.data });
-
   // Initialize token state helper
   const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
