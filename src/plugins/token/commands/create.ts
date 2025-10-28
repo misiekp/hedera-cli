@@ -356,7 +356,7 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
         // @TODO take createdAt from transaction timestamp
         createdAt: new Date().toISOString(),
       });
-      logger.log(`   Alias registered: ${alias}`);
+      logger.log(`   Name registered: ${alias}`);
     }
 
     process.exit(0);

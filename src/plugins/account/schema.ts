@@ -20,7 +20,7 @@ export const AccountDataSchema = z.object({
 
   name: z
     .string()
-    .max(50, 'Alias must be 50 characters or less')
+    .max(50, 'Name must be 50 characters or less')
     .regex(
       /^[a-zA-Z0-9_-]+$/,
       'Name can only contain letters, numbers, underscores, and hyphens',
