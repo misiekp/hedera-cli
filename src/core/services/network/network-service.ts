@@ -108,9 +108,4 @@ export class NetworkServiceImpl implements NetworkService {
     );
     return operator || null;
   }
-
-  removeOperator(network: SupportedNetwork): void {
-    this.logger.debug(`[NETWORK] Removing operator for network ${network}`);
-    this.state.delete(NAMESPACE, `${network}Operator`);
-  }
 }

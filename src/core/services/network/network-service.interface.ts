@@ -49,11 +49,6 @@ export interface NetworkService {
   getOperator(
     network: SupportedNetwork,
   ): { accountId: string; keyRefId: string } | null;
-
-  /**
-   * Remove operator for a specific network
-   */
-  removeOperator(network: SupportedNetwork): void;
 }
 
 // Network configuration types
