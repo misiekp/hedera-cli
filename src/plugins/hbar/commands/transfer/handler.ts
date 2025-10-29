@@ -74,13 +74,12 @@ export async function transferHandler(
 
     let fromAccountId = from;
     let toAccountId = to;
-    let fromAlias;
 
     if (EntityIdSchema.safeParse(from).success) {
       fromAccountId = from;
       logger.log(`[HBAR] Using from as account ID: ${from}`);
     } else {
-      fromAlias = api.alias.resolve(from, 'account', currentNetwork);
+      const fromAlias = api.alias.resolve(from, 'account', currentNetwork);
       if (fromAlias) {
         fromAccountId = fromAlias.entityId || from;
         logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);
@@ -119,24 +118,9 @@ export async function transferHandler(
       memo,
     });
 
-    let fromKeyRefId = fromAlias?.keyRefId;
-    if (!fromKeyRefId) {
-      const accounts = api.state.list<{
-        accountId: string;
-        name: string;
-        keyRefId?: string;
-      }>('account-accounts');
-      const account = accounts.find(
-        (a) => a.accountId === from || a.name === from,
-      );
-      fromKeyRefId = account?.keyRefId;
-    }
-
-    const result = fromKeyRefId
-      ? await api.txExecution.signAndExecuteWith(transferResult.transaction, {
-          keyRefId: fromKeyRefId,
-        })
-      : await api.txExecution.signAndExecute(transferResult.transaction);
+    const result = await api.txExecution.signAndExecute(
+      transferResult.transaction,
+    );
 
     if (!result.success) {
       return {
