@@ -79,6 +79,7 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
 
     process.exit(0);
   } catch (error: unknown) {
+    console.dir({ error });
     logger.error(formatError('❌ Failed to get account balance', error));
     process.exit(1);
   }

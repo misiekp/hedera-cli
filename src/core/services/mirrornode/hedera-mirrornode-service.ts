@@ -22,6 +22,7 @@ import {
   TopicMessageQueryParams,
 } from './types';
 import { formatError } from '../../../utils/errors';
+import { BigNumber } from 'bignumber.js';
 
 export class HederaMirrornodeServiceDefaultImpl
   implements HederaMirrornodeService
@@ -60,7 +61,7 @@ export class HederaMirrornodeServiceDefaultImpl
     };
   }
 
-  async getAccountHBarBalance(accountId: string): Promise<bigint> {
+  async getAccountHBarBalance(accountId: string): Promise<BigNumber> {
     let account;
     try {
       account = await this.getAccount(accountId);
@@ -69,7 +70,7 @@ export class HederaMirrornodeServiceDefaultImpl
         formatError(`Failed to fetch hbar balance for ${accountId}: `, error),
       );
     }
-    return BigInt(account.balance.balance);
+    return new BigNumber(account.balance.balance);
   }
 
   async getAccountTokenBalances(
