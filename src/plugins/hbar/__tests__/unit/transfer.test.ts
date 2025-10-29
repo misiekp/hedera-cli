@@ -117,8 +117,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: 'sender',
-      toIdOrNameOrAlias: 'receiver',
+      fromIdOrNameOrAlias: '0.0.1001',
+      toIdOrNameOrAlias: '0.0.2002',
       memo: 'test-transfer',
     });
 
@@ -128,8 +128,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     expect(hbar.transferTinybar).toHaveBeenCalledWith({
       amount: 100000000,
-      from: 'sender',
-      to: 'receiver',
+      from: '0.0.1001',
+      to: '0.0.2002',
       memo: 'test-transfer',
     });
     expect(signing.signAndExecute).toHaveBeenCalled();
@@ -150,7 +150,9 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const result = await transferHandler(args);
     expect(result.status).toBe('failure');
-    expect(result.errorMessage).toContain('Invalid balance');
+    expect(result.errorMessage).toContain(
+      'Invalid balance: provide a positive number of tinybars',
+    );
   });
 
   test('returns failure when balance is negative', async () => {
@@ -235,8 +237,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: 'sender',
-      toIdOrNameOrAlias: 'receiver',
+      fromIdOrNameOrAlias: '0.0.1001',
+      toIdOrNameOrAlias: '0.0.2002',
       memo: 'test-transfer',
     });
 
@@ -267,7 +269,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     const args = makeArgs(api, logger, {
       balance: 50000000,
       fromIdOrNameOrAlias: '0.0.3000',
-      toIdOrNameOrAlias: 'receiver',
+      toIdOrNameOrAlias: '0.0.2002',
     });
 
     const result = await transferHandler(args);
@@ -277,8 +279,8 @@ describe('hbar plugin - transfer command (unit)', () => {
     expect(hbar.transferTinybar).toHaveBeenCalledWith({
       amount: 50000000,
       from: '0.0.3000',
-      to: 'receiver',
-      memo: '',
+      to: '0.0.2002',
+      memo: undefined,
     });
     expect(logger.log).toHaveBeenCalledWith(
       '[HBAR] Transfer submitted successfully, txId=0.0.3000@1234567890.987654321',
