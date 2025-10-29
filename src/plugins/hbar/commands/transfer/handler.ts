@@ -6,10 +6,52 @@
 import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
-import { EntityIdSchema } from '../../../../core/schemas/common-schemas';
+import {
+  AccountIdKeyPairSchema,
+  EntityIdSchema,
+} from '../../../../core/schemas/common-schemas';
 import { Status } from '../../../../core/shared/constants';
 import { TransferInputSchema, TransferOutput } from './output';
 import { AliasRecord } from '../../../../core/services/alias/alias-service.interface';
+
+/**
+ * Parse and validate an account-id:private-key pair
+ *
+ * @param idKeyPair - The colon-separated account-id:private-key string
+ * @param api - Core API instance for importing the key
+ * @returns Object with accountId, keyRefId, and publicKey
+ * @throws Error if the format is invalid or account ID doesn't match expected pattern
+ */
+function parseAccountIdKeyPair(
+  idKeyPair: string,
+  api: CommandHandlerArgs['api'],
+): { accountId: string; keyRefId: string; publicKey: string } {
+  const parts = idKeyPair.split(':');
+  if (parts.length !== 2) {
+    throw new Error(
+      'Invalid account format. Expected either an alias or account-id:account-key',
+    );
+  }
+
+  const [accountId, privateKey] = parts;
+
+  // Validate account ID format
+  const accountIdPattern = /^0\.0\.\d+$/;
+  if (!accountIdPattern.test(accountId)) {
+    throw new Error(
+      `Invalid account ID format: ${accountId}. Expected format: 0.0.123456`,
+    );
+  }
+
+  // Import the private key
+  const imported = api.kms.importPrivateKey(privateKey);
+
+  return {
+    accountId,
+    keyRefId: imported.keyRefId,
+    publicKey: imported.publicKey,
+  };
+}
 
 export async function transferHandler(
   args: CommandHandlerArgs,
@@ -78,9 +120,21 @@ export async function transferHandler(
     let fromAlias: AliasRecord | null;
     let fromKeyRefId: string | undefined;
 
-    if (EntityIdSchema.safeParse(from).success) {
-      fromAccountId = from;
-      logger.log(`[HBAR] Using from as account ID: ${from}`);
+    // Check if it's an account-id:private-key pair
+    if (AccountIdKeyPairSchema.safeParse(from).success) {
+      try {
+        const parsed = parseAccountIdKeyPair(from, api);
+        fromAccountId = parsed.accountId;
+        fromKeyRefId = parsed.keyRefId;
+        logger.log(
+          `[HBAR] Using from as account ID with private key: ${fromAccountId}`,
+        );
+      } catch (error) {
+        return {
+          status: Status.Failure,
+          errorMessage: `Invalid from account format: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        };
+      }
     } else {
       fromAlias = api.alias.resolve(from, 'account', currentNetwork);
       fromAccountId = fromAlias?.entityId;
@@ -88,7 +142,7 @@ export async function transferHandler(
       if (!fromAccountId || !fromKeyRefId) {
         return {
           status: Status.Failure,
-          errorMessage: `Invalid from account: ${from} is neither a valid account ID nor a known account name`,
+          errorMessage: `Invalid from account: ${from} is neither a valid account-id:private-key pair, nor a known account name`,
         };
       }
       logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);

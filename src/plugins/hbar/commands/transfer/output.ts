@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  AccountIdKeyPairSchema,
   EntityIdSchema,
   NetworkSchema,
   TinybarSchema,
@@ -17,9 +18,9 @@ export const TransferInputSchema = z.object({
     .min(1)
     .describe('Account ID, name, or alias to transfer to'),
   fromIdOrNameOrAlias: z
-    .string()
+    .union([AccountIdKeyPairSchema, z.string().min(1)])
     .optional()
-    .describe('Account ID, name, or alias to transfer from'),
+    .describe('Account ID:privateKey pair, name, or alias to transfer from'),
   memo: z.string().optional().describe('Memo for the transfer'),
 });
 
