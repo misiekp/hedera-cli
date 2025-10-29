@@ -11,7 +11,8 @@ import {
   EntityIdSchema,
 } from '../../../../core/schemas/common-schemas';
 import { Status } from '../../../../core/shared/constants';
-import { TransferInputSchema, TransferOutput } from './output';
+import { TransferInputSchema } from '../../schema';
+import { TransferOutput } from './output';
 import { AliasRecord } from '../../../../core/services/alias/alias-service.interface';
 
 /**
@@ -71,10 +72,10 @@ export async function transferHandler(
             'Invalid balance: provide a positive number of tinybars',
         };
       }
-      if (firstError.path[0] === 'toIdOrNameOrAlias') {
+      if (firstError.path[0] === 'to') {
         return {
           status: Status.Failure,
-          errorMessage: '--to-id-or-name-or-alias is required',
+          errorMessage: '--to is required',
         };
       }
       return {
@@ -85,8 +86,8 @@ export async function transferHandler(
 
     const validatedInput = validationResult.data;
     const amount = validatedInput.balance;
-    const to = validatedInput.toIdOrNameOrAlias;
-    const fromInput = validatedInput.fromIdOrNameOrAlias;
+    const to = validatedInput.to;
+    const fromInput = validatedInput.from;
     const memo = validatedInput.memo;
 
     if (fromInput && fromInput === to) {

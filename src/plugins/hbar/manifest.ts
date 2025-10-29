@@ -34,7 +34,7 @@ export const hbarPluginManifest: PluginManifest = {
           short: 't',
           type: 'string',
           required: true,
-          description: 'AccountID or name to transfer to',
+          description: 'Account ID or name to transfer to',
         },
         {
           name: 'from',

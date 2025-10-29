@@ -204,7 +204,7 @@ export const EvmAddressSchema = z
 export const AccountIdKeyPairSchema = z
   .string()
   .regex(
-    /^0\.0\.[1-9][0-9]*:(?:[0-9a-fA-F]{64}|30[0-9a-fA-F]{120,})$/,
+    /^0\.0\.[1-9][0-9]*:(?:[0-9a-fA-F]{64}|30[0-9a-fA-F]{100,})$/,
     'Account ID with private key must be in format 0.0.{number}:{hex|der_key}',
   )
   .describe('Account ID with private key in format 0.0.{number}:{private_key}');

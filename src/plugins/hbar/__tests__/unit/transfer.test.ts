@@ -118,8 +118,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
       memo: 'test-transfer',
     });
 
@@ -145,8 +145,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: NaN,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
     const result = await transferHandler(args);
@@ -161,8 +161,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: -100,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
     const result = await transferHandler(args);
@@ -174,8 +174,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 0,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
     const result = await transferHandler(args);
@@ -197,8 +197,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
     const result = await transferHandler(args);
@@ -219,8 +219,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100,
-      fromIdOrNameOrAlias: 'same-account',
-      toIdOrNameOrAlias: 'same-account',
+      from: 'same-account',
+      to: 'same-account',
     });
 
     const result = await transferHandler(args);
@@ -238,14 +238,30 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
       memo: 'test-transfer',
     });
 
     const result = await transferHandler(args);
     expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Network connection failed');
+  });
+
+  test('returns failure when from is just account ID without private key', async () => {
+    const { api, logger } = setupTransferTest({ accounts: [] });
+
+    const args = makeArgs(api, logger, {
+      balance: 100,
+      from: '0.0.1001', // Just account ID, no private key
+      to: '0.0.2002',
+    });
+
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Failure);
+    expect(result.errorMessage).toContain(
+      'Invalid from account: 0.0.1001 is neither a valid account-id:private-key pair, nor a known account name',
+    );
   });
 
   test('uses default credentials as from when not provided', async () => {
@@ -269,8 +285,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 50000000,
-      fromIdOrNameOrAlias: '0.0.3000',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.3000:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
     const result = await transferHandler(args);
