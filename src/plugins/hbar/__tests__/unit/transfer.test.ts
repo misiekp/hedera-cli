@@ -1,4 +1,4 @@
-import transferHandler from '../../commands/transfer';
+import { hbarTransferHandler as transferHandler } from '../../commands/transfer';
 import { ZustandAccountStateHelper } from '../../../account/zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HbarService } from '../../../../core/services/hbar/hbar-service.interface';

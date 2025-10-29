@@ -4,6 +4,11 @@
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
 import { TOKEN_JSON_SCHEMA, TOKEN_NAMESPACE } from './schema';
+import { transferTokenHandler } from './commands/transfer';
+import { createTokenHandler } from './commands/create';
+import { associateTokenHandler } from './commands/associate';
+import { createTokenFromFileHandler } from './commands/createFromFile';
+import { listTokensHandler } from './commands/list';
 
 export const tokenPluginManifest: PluginManifest = {
   name: 'token',
@@ -47,11 +52,11 @@ export const tokenPluginManifest: PluginManifest = {
           type: 'string',
           required: false,
           description:
-            'Source account: either an alias or account-id:private-key pair',
+            'Source account: either a name or account-id:private-key pair',
         },
         { name: 'balance', short: 'b', type: 'number', required: true },
       ],
-      handler: './commands/transfer',
+      handler: transferTokenHandler,
     },
     {
       name: 'create',
@@ -99,7 +104,7 @@ export const tokenPluginManifest: PluginManifest = {
           description: 'Optional name to register for the token',
         },
       ],
-      handler: './commands/create',
+      handler: createTokenHandler,
     },
     {
       name: 'associate',
@@ -122,7 +127,7 @@ export const tokenPluginManifest: PluginManifest = {
             'Account: either an alias or account-id:account-key pair',
         },
       ],
-      handler: './commands/associate',
+      handler: associateTokenHandler,
     },
     {
       name: 'create-from-file',
@@ -133,7 +138,7 @@ export const tokenPluginManifest: PluginManifest = {
         { name: 'file', short: 'f', type: 'string', required: true },
         { name: 'args', short: 'a', type: 'string', required: false },
       ],
-      handler: './commands/createFromFile',
+      handler: createTokenFromFileHandler,
     },
     {
       name: 'list',
@@ -158,7 +163,7 @@ export const tokenPluginManifest: PluginManifest = {
             'Filter tokens by network (defaults to current active network)',
         },
       ],
-      handler: './commands/list',
+      handler: listTokensHandler,
     },
   ],
   stateSchemas: [

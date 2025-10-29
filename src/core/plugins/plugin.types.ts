@@ -36,7 +36,7 @@ export interface CommandSpec {
   summary: string;
   description: string;
   options?: CommandOption[];
-  handler: string;
+  handler: CommandHandler;
 }
 
 /**
