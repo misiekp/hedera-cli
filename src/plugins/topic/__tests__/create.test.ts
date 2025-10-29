@@ -1,17 +1,15 @@
-import { createTopicHandler } from '../commands/create';
+import createTopicHandler from '../commands/create/handler';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
 import type { CoreApi } from '../../../core/core-api/core-api.interface';
 import type { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
+import type { CreateTopicOutput } from '../commands/create/output';
 import {
   makeLogger,
   makeArgs,
   makeNetworkMock,
   makeKmsMock,
   makeAliasMock,
-  setupExitSpy,
 } from '../../../../__tests__/helpers/plugin';
-
-let exitSpy: jest.SpyInstance;
 
 jest.mock('../zustand-state-helper', () => ({
   ZustandTopicStateHelper: jest.fn(),
@@ -56,14 +54,6 @@ const makeApiMocks = ({
   return { topicTransactions, signing, networkMock, kms, alias };
 };
 
-beforeAll(() => {
-  exitSpy = setupExitSpy();
-});
-
-afterAll(() => {
-  exitSpy.mockRestore();
-});
-
 describe('topic plugin - create command', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -101,7 +91,16 @@ describe('topic plugin - create command', () => {
       memo: 'Test topic memo',
     });
 
-    await createTopicHandler(args);
+    const result = await createTopicHandler(args);
+
+    expect(result.status).toBe('success');
+    expect(result.outputJson).toBeDefined();
+
+    const output: CreateTopicOutput = JSON.parse(result.outputJson!);
+    expect(output.topicId).toBe('0.0.9999');
+    expect(output.memo).toBe('Test topic memo');
+    expect(output.network).toBe('testnet');
+    expect(output.transactionId).toBe('tx-123');
 
     expect(topicTransactions.createTopic).toHaveBeenCalledWith({
       memo: 'Test topic memo',
@@ -117,10 +116,6 @@ describe('topic plugin - create command', () => {
         network: 'testnet',
       }),
     );
-    expect(logger.log).toHaveBeenCalledWith(
-      '✅ Topic created successfully: 0.0.9999',
-    );
-    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
   test('creates topic successfully with admin and submit keys', async () => {
@@ -160,7 +155,15 @@ describe('topic plugin - create command', () => {
       submitKey,
     });
 
-    await createTopicHandler(args);
+    const result = await createTopicHandler(args);
+
+    expect(result.status).toBe('success');
+    expect(result.outputJson).toBeDefined();
+
+    const output: CreateTopicOutput = JSON.parse(result.outputJson!);
+    expect(output.topicId).toBe('0.0.8888');
+    expect(output.adminKeyPresent).toBe(true);
+    expect(output.submitKeyPresent).toBe(true);
 
     expect(topicTransactions.createTopic).toHaveBeenCalledWith({
       memo: 'Test topic',
@@ -185,7 +188,6 @@ describe('topic plugin - create command', () => {
         network: 'testnet',
       }),
     );
-    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
   test('creates topic successfully without memo', async () => {
@@ -218,7 +220,14 @@ describe('topic plugin - create command', () => {
 
     const args = makeArgs(api, logger, {});
 
-    await createTopicHandler(args);
+    const result = await createTopicHandler(args);
+
+    expect(result.status).toBe('success');
+    expect(result.outputJson).toBeDefined();
+
+    const output: CreateTopicOutput = JSON.parse(result.outputJson!);
+    expect(output.topicId).toBe('0.0.7777');
+    expect(output.memo).toBeUndefined();
 
     expect(topicTransactions.createTopic).toHaveBeenCalledWith({
       memo: undefined,
@@ -233,10 +242,9 @@ describe('topic plugin - create command', () => {
         network: 'testnet',
       }),
     );
-    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
-  test('logs error and exits when signAndExecute returns failure', async () => {
+  test('returns failure when signAndExecute returns failure', async () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveTopic: jest.fn() }));
 
@@ -264,15 +272,13 @@ describe('topic plugin - create command', () => {
 
     const args = makeArgs(api, logger, { memo: 'Failed topic' });
 
-    await createTopicHandler(args);
+    const result = await createTopicHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to create topic'),
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toBe('Failed to create topic');
   });
 
-  test('logs error and exits when createTopic throws', async () => {
+  test('returns failure when createTopic throws', async () => {
     const logger = makeLogger();
     MockedHelper.mockImplementation(() => ({ saveTopic: jest.fn() }));
 
@@ -295,11 +301,10 @@ describe('topic plugin - create command', () => {
 
     const args = makeArgs(api, logger, { memo: 'Error topic' });
 
-    await createTopicHandler(args);
+    const result = await createTopicHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to create topic'),
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toContain('Failed to create topic');
+    expect(result.errorMessage).toContain('network error');
   });
 });
