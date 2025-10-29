@@ -13,12 +13,12 @@ export async function viewAccountHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const accountIdOrNameOrAlias = args.args['accountIdOrNameOrAlias'] as string;
+  const accountIdOrNameOrAlias = args.args['account'] as string;
 
   logger.log(`Viewing account details: ${accountIdOrNameOrAlias}`);
 
   try {
-    // Resolve account identifier (could be name, account ID, or alias)
+    // Resolve account identifier (could be name or account ID)
     let accountId = accountIdOrNameOrAlias;
 
     // First check if it's a stored account name
@@ -28,7 +28,7 @@ export async function viewAccountHandler(args: CommandHandlerArgs) {
       logger.log(`Found account in state: ${account.name}`);
     } else {
       // For now, assume it's an account ID
-      // TODO: Add proper alias resolution here
+      // TODO: Add proper name resolution here
       logger.log(`Using as account ID: ${accountIdOrNameOrAlias}`);
     }
 

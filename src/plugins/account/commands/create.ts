@@ -18,7 +18,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const balance =
     args.args.balance !== undefined ? (args.args.balance as number) : 10000;
   const autoAssociations = (args.args['auto-associations'] as number) || 0;
-  const alias = (args.args.alias as string) || '';
+  const alias = (args.args.name as string) || '';
 
   // Check if alias already exists on the current network
   const network = api.network.getCurrentNetwork();
@@ -27,7 +27,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const name = alias || `account-${Date.now()}`;
 
   // Generate a unique name for the account
-  logger.log(`Creating account with alias: ${alias}`);
+  logger.log(`Creating account with name: ${alias}`);
 
   try {
     // 1. Generate a new key pair for the account
@@ -79,7 +79,7 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
       logger.log(`   Name: ${accountData.name}`);
       logger.log(`   Type: ${accountData.type}`);
       if (alias) {
-        logger.log(`   Alias: ${alias}`);
+        logger.log(`   Name: ${alias}`);
       }
       logger.log(`   Network: ${accountData.network}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);

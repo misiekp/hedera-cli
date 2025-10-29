@@ -19,7 +19,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
   const adminKey = args.args.adminKey as string | undefined;
   const submitKey = args.args.submitKey as string | undefined;
 
-  const alias = args.args.alias as string | undefined;
+  const alias = args.args.name as string | undefined;
   const name = alias || `topic-${Date.now()}`;
 
   // Check if alias already exists on the current network
@@ -125,7 +125,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
 
       logger.log(`✅ Topic created successfully: ${topicData.topicId}`);
       logger.log(`   Network: ${topicData.network}`);
-      logger.log(`   Name (Alias): ${topicData.name}`);
+      logger.log(`   Name: ${topicData.name}`);
       if (topicData.memo) {
         logger.log(`   Memo: ${topicData.memo}`);
       }

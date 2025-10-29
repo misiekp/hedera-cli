@@ -61,7 +61,7 @@ export function setOperatorHandler(args: CommandHandlerArgs): void {
 
   if (!operator) {
     logger.error(
-      '❌ Must specify --operator (alias or account-id:private-key format)',
+      '❌ Must specify --operator (name or account-id:private-key format)',
     );
     process.exit(1);
   }

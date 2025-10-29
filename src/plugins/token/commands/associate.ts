@@ -41,7 +41,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
   if (!resolvedToken) {
     throw new Error(
       `Failed to resolve token parameter: ${tokenIdOrAlias}. ` +
-        `Expected format: token-alias OR token-id`,
+        `Expected format: token-name OR token-id`,
     );
   }
 
@@ -59,7 +59,7 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
   if (!resolvedAccount) {
     throw new Error(
       `Failed to resolve account parameter: ${accountIdOrAlias}. ` +
-        `Expected format: account-alias OR account-id:account-key`,
+        `Expected format: account-name OR account-id:account-key`,
     );
   }
 

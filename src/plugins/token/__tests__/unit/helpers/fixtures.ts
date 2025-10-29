@@ -324,7 +324,7 @@ export const validCustomFee = {
  * Schema Test Data - Valid Token Create Parameters
  */
 export const validTokenCreateParams = {
-  name: 'TestToken',
+  tokenName: 'TestToken',
   symbol: 'TEST',
   decimals: 2,
   initialSupply: 1000,
@@ -337,7 +337,7 @@ export const validTokenCreateParams = {
  * Schema Test Data - Minimal Valid Create Parameters
  */
 export const minimalTokenCreateParams = {
-  name: 'TestToken',
+  tokenName: 'TestToken',
   symbol: 'TEST',
 };
 
@@ -449,7 +449,7 @@ export const makeTokenCreateCommandArgs = (params: {
   args?: Record<string, any>;
 }) => ({
   args: {
-    name: 'TestToken',
+    tokenName: 'TestToken',
     symbol: 'TEST',
     decimals: 2,
     initialSupply: 1000,

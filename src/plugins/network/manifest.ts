@@ -55,7 +55,7 @@ export const networkPluginManifest: PluginManifest = {
           type: 'string',
           required: true,
           description:
-            'Operator credentials: alias or account-id:private-key pair',
+            'Operator credentials: name or account-id:private-key pair',
         },
         {
           name: 'network',

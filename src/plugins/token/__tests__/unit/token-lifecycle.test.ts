@@ -140,7 +140,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 1: Create Token
       const createArgs: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           decimals: 2,
           initialSupply: 1000,
@@ -307,7 +307,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 1: Create Token (success)
       const createArgs: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           treasuryKey,
           adminKey: 'admin-key',
@@ -424,7 +424,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Step 1: Create Token
       const createArgs: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           treasuryKey,
           adminKey: 'admin-key',
@@ -518,7 +518,7 @@ describe('Token Lifecycle Integration', () => {
       // Act - Execute operations
       const createArgs: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           treasuryKey: 'treasury-key',
           adminKey: 'admin-key',

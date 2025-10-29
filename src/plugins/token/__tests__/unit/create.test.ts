@@ -128,7 +128,7 @@ describe('createTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
         },
         api,
@@ -195,7 +195,7 @@ describe('createTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
         },
         api,
@@ -255,7 +255,7 @@ describe('createTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           adminKey: 'test-admin-key',
         },
@@ -291,7 +291,7 @@ describe('createTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           adminKey: 'test-admin-key',
         },
@@ -359,7 +359,7 @@ describe('createTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           adminKey: 'test-admin-key',
         },

@@ -45,7 +45,7 @@ export const topicPluginManifest: PluginManifest = {
           required: false,
           default: false,
           description:
-            'Pass an admin key as alias or private key (ECDSA) for the topic',
+            'Pass an admin key as name or private key (ECDSA) for the topic',
           short: 'a',
         },
         {
@@ -54,15 +54,15 @@ export const topicPluginManifest: PluginManifest = {
           required: false,
           default: false,
           description:
-            'Pass a submit key as alias or private key (ECDSA) for the topic',
+            'Pass a submit key as name or private key (ECDSA) for the topic',
           short: 's',
         },
         {
-          name: 'alias',
+          name: 'name',
           short: 'n',
           type: 'string',
           required: false,
-          description: 'Define the alias (name) for this topic',
+          description: 'Define the name for this topic',
         },
       ],
       handler: createTopicHandler,

@@ -198,7 +198,7 @@ describe('network plugin - set-operator command', () => {
     setOperatorHandler(args);
 
     expect(logger.error).toHaveBeenCalledWith(
-      '❌ Must specify --operator (alias or account-id:private-key format)',
+      '❌ Must specify --operator (name or account-id:private-key format)',
     );
     expect(exitSpy).toHaveBeenCalledWith(1);
   });

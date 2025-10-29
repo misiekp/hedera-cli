@@ -98,7 +98,7 @@ export interface PluginContext {
 ## Key Policies
 
 - Plugins import Core types only and receive instances via handler args (DI). They do not construct or import runtime singletons.
-- Command conflicts resolved by namespacing; canonical id `pluginName:cmd`. Commands are called as `<pluginName> <cmd>` (e.g., `myplugin create`). Aliases allowed if conflict-free.
+- Command conflicts resolved by namespacing; canonical id `pluginName:cmd`. Commands are called as `<pluginName> <cmd>` (e.g., `myplugin create`). Names allowed if conflict-free.
 - Plugin lifecycle: `init()` called during plugin registration, `teardown()` called on CLI exit or plugin removal.
 - Error taxonomy standardized with exit codes for consistent UX and automation.
 

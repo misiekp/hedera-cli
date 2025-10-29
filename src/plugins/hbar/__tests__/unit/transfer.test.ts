@@ -117,8 +117,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: 'sender',
-      toIdOrNameOrAlias: 'receiver',
+      from: 'sender',
+      to: 'receiver',
       memo: 'test-transfer',
     });
 
@@ -142,8 +142,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: NaN,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001',
+      to: '0.0.2002',
     });
 
     await expect(transferHandler(args)).rejects.toThrow(
@@ -156,8 +156,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: -100,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001',
+      to: '0.0.2002',
     });
 
     await expect(transferHandler(args)).rejects.toThrow(
@@ -170,8 +170,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 0,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001',
+      to: '0.0.2002',
     });
 
     await expect(transferHandler(args)).rejects.toThrow(
@@ -194,8 +194,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001',
+      to: '0.0.2002',
     });
 
     await transferHandler(args);
@@ -215,8 +215,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100,
-      fromIdOrNameOrAlias: 'same-account',
-      toIdOrNameOrAlias: 'same-account',
+      from: 'same-account',
+      to: 'same-account',
     });
 
     await expect(transferHandler(args)).rejects.toThrow(
@@ -234,8 +234,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: 'sender',
-      toIdOrNameOrAlias: 'receiver',
+      from: 'sender',
+      to: 'receiver',
       memo: 'test-transfer',
     });
 
@@ -265,8 +265,8 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 50000000,
-      fromIdOrNameOrAlias: '0.0.3000',
-      toIdOrNameOrAlias: 'receiver',
+      from: '0.0.3000',
+      to: 'receiver',
     });
 
     await transferHandler(args);

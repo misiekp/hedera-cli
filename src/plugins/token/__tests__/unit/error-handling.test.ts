@@ -67,7 +67,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           adminKey: 'admin-key',
         },
@@ -169,7 +169,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
         },
         api,
@@ -233,7 +233,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           adminKey: 'admin-key',
         },
@@ -461,7 +461,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'ExistingToken', // Duplicate name
+          tokenName: 'ExistingToken', // Duplicate name
           symbol: 'TEST',
           adminKey: 'admin-key',
         },
@@ -604,7 +604,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           treasuryKey: 'test-key',
           adminKey: 'admin-key',
@@ -645,7 +645,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           adminKey: 'admin-key',
         },
@@ -750,7 +750,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           treasuryKey: 'test-key',
           adminKey: 'admin-key',
@@ -781,7 +781,7 @@ describe('Token Plugin Error Handling', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          name: 'TestToken',
+          tokenName: 'TestToken',
           symbol: 'TEST',
           treasuryKey: 'test-key',
           adminKey: 'admin-key',

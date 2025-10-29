@@ -82,7 +82,7 @@ The plugin supports flexible account parameter formats:
 
 - **Account ID only**: `0.0.123456` (for destination accounts)
 - **Account ID with key**: `0.0.123456:private-key` (for source accounts that need signing)
-- **Account alias**: `alice` (resolved via alias service)
+- **Account name**: `alice` (resolved via alias service)
 
 ## 🔧 Core API Integration
 
@@ -91,7 +91,7 @@ The plugin uses the Core API services:
 - `api.tokens` - Token transaction creation and management
 - `api.txExecution` - Transaction signing and execution
 - `api.kms` - Account credentials and key management
-- `api.alias` - Account alias resolution
+- `api.alias` - Account name resolution
 - `api.state` - Namespaced state management
 - `api.network` - Network information
 - `api.logger` - Logging
