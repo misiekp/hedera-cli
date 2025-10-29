@@ -1,0 +1,63 @@
+/**
+ * State Info Command Handler
+ * Handles displaying state information using the Core API
+ * Follows ADR-003 contract: returns CommandExecutionResult
+ */
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { formatError } from '../../../../utils/errors';
+import { StateInfoOutput } from './output';
+import { NamespaceInfo } from '../../schema';
+
+export default function stateInfo(
+  args: CommandHandlerArgs,
+): CommandExecutionResult {
+  const { api, logger } = args;
+
+  logger.log('ℹ️  Getting state information...');
+
+  try {
+    const namespaces = api.state.getNamespaces();
+    let totalEntries = 0;
+    let totalSize = 0;
+    const namespaceInfoList: NamespaceInfo[] = [];
+
+    const storageDirectory = api.state.getStorageDirectory();
+    const isInitialized = api.state.isInitialized();
+
+    for (const ns of namespaces) {
+      const data = api.state.list<unknown>(ns) || [];
+      const entryCount = data.length;
+      const size = JSON.stringify(data).length;
+
+      totalEntries += entryCount;
+      totalSize += size;
+
+      namespaceInfoList.push({
+        name: ns,
+        entryCount,
+        size,
+        lastModified: new Date().toISOString(), // TODO: Get actual last modified time
+      });
+    }
+
+    // Prepare output data
+    const outputData: StateInfoOutput = {
+      storageDirectory,
+      isInitialized,
+      totalEntries,
+      totalSize,
+      namespaces: namespaceInfoList,
+    };
+
+    return {
+      status: 'success',
+      outputJson: JSON.stringify(outputData),
+    };
+  } catch (error: unknown) {
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to get state information', error),
+    };
+  }
+}
