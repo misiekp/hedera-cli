@@ -9,6 +9,7 @@ import { formatError } from '../../../../utils/errors';
 import { EntityIdSchema } from '../../../../core/schemas/common-schemas';
 import { Status } from '../../../../core/shared/constants';
 import { TransferInputSchema, TransferOutput } from './output';
+import { AliasRecord } from '../../../../core/services/alias/alias-service.interface';
 
 export async function transferHandler(
   args: CommandHandlerArgs,
@@ -72,23 +73,25 @@ export async function transferHandler(
 
     const currentNetwork = api.network.getCurrentNetwork();
 
-    let fromAccountId = from;
+    let fromAccountId: string | undefined;
     let toAccountId = to;
+    let fromAlias: AliasRecord | null;
+    let fromKeyRefId: string | undefined;
 
     if (EntityIdSchema.safeParse(from).success) {
       fromAccountId = from;
       logger.log(`[HBAR] Using from as account ID: ${from}`);
     } else {
-      const fromAlias = api.alias.resolve(from, 'account', currentNetwork);
-      if (fromAlias) {
-        fromAccountId = fromAlias.entityId || from;
-        logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);
-      } else {
+      fromAlias = api.alias.resolve(from, 'account', currentNetwork);
+      fromAccountId = fromAlias?.entityId;
+      fromKeyRefId = fromAlias?.keyRefId;
+      if (!fromAccountId || !fromKeyRefId) {
         return {
           status: Status.Failure,
-          errorMessage: `Invalid from account: ${from} is neither a valid account ID nor a known alias`,
+          errorMessage: `Invalid from account: ${from} is neither a valid account ID nor a known account name`,
         };
       }
+      logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);
     }
 
     if (EntityIdSchema.safeParse(to).success) {
@@ -118,9 +121,11 @@ export async function transferHandler(
       memo,
     });
 
-    const result = await api.txExecution.signAndExecute(
-      transferResult.transaction,
-    );
+    const result = fromKeyRefId
+      ? await api.txExecution.signAndExecuteWith(transferResult.transaction, {
+          keyRefId: fromKeyRefId,
+        })
+      : await api.txExecution.signAndExecute(transferResult.transaction);
 
     if (!result.success) {
       return {
