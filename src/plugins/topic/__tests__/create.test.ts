@@ -1,8 +1,8 @@
 import createTopicHandler from '../commands/create/handler';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import type { CoreApi } from '../../../core/core-api/core-api.interface';
-import type { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
-import type { CreateTopicOutput } from '../commands/create/output';
+import type { CoreApi } from '../../../core';
+import type { TransactionResult } from '../../../core';
+import type { CreateTopicOutput } from '../commands/create';
 import {
   makeLogger,
   makeArgs,
@@ -10,7 +10,7 @@ import {
   makeKmsMock,
   makeAliasMock,
 } from '../../../../__tests__/helpers/plugin';
-import { Status } from '@hashgraph/sdk';
+import { Status } from '../../../core/shared/constants';
 
 jest.mock('../zustand-state-helper', () => ({
   ZustandTopicStateHelper: jest.fn(),

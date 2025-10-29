@@ -69,6 +69,73 @@ function decodeMessageData(message: string, consensusTimestamp: string) {
 }
 
 /**
+ * Transform a single message API response to output format
+ * @param message - Raw message from mirror node API
+ * @returns Formatted message object with decoded content
+ */
+function transformMessageToOutput(message: {
+  sequence_number: number;
+  message: string;
+  consensus_timestamp: string;
+}) {
+  const { decodedMessage, timestamp } = decodeMessageData(
+    message.message,
+    message.consensus_timestamp,
+  );
+
+  return {
+    sequenceNumber: message.sequence_number,
+    message: decodedMessage,
+    timestamp,
+    consensusTimestamp: message.consensus_timestamp,
+  };
+}
+
+/**
+ * Fetch a single message by sequence number
+ * @param api - API instance
+ * @param topicId - The topic ID to query
+ * @param sequenceNumber - Specific sequence number to fetch
+ * @returns Array containing single formatted message
+ */
+async function fetchSingleMessage(
+  api: CommandHandlerArgs['api'],
+  topicId: string,
+  sequenceNumber: number,
+): Promise<FindMessagesOutput['messages']> {
+  const response = await api.mirror.getTopicMessage({
+    topicId,
+    sequenceNumber,
+  });
+
+  return [transformMessageToOutput(response)];
+}
+
+/**
+ * Fetch multiple messages using a filter
+ * @param api - API instance
+ * @param topicId - The topic ID to query
+ * @param filter - Filter criteria for sequence numbers
+ * @returns Array of formatted messages in reverse order
+ */
+async function fetchFilteredMessages(
+  api: CommandHandlerArgs['api'],
+  topicId: string,
+  filter: Filter,
+): Promise<FindMessagesOutput['messages']> {
+  const response = await api.mirror.getTopicMessages({
+    topicId,
+    filter: {
+      field: 'sequenceNumber',
+      operation: filter.operation,
+      value: filter.value,
+    },
+  });
+
+  return response.messages.map(transformMessageToOutput).reverse();
+}
+
+/**
  * Default export handler function for finding messages
  * @param args - Command handler arguments from CLI core
  * @returns Promise resolving to CommandExecutionResult with structured output
@@ -100,69 +167,27 @@ export default async function findMessageHandler(
   logger.log(`Finding messages in topic: ${topicId}`);
 
   try {
-    let messages: FindMessagesOutput['messages'] = [];
+    let messages: FindMessagesOutput['messages'];
 
     // Step 2: Query messages based on provided parameters
     if (sequenceNumber) {
       // Fetch single message by sequence number
-      const response = await api.mirror.getTopicMessage({
-        topicId,
-        sequenceNumber,
-      });
-
-      const { decodedMessage, timestamp } = decodeMessageData(
-        response.message,
-        response.consensus_timestamp,
-      );
-
-      // Wrap single message in array for unified schema
-      messages = [
-        {
-          sequenceNumber: response.sequence_number,
-          message: decodedMessage,
-          timestamp,
-          consensusTimestamp: response.consensus_timestamp,
-        },
-      ];
+      messages = await fetchSingleMessage(api, topicId, sequenceNumber);
     } else {
       // Try to build filter from other sequence number parameters
-      const activeFilter = buildSequenceNumberFilter(args.args);
+      const filter = buildSequenceNumberFilter(args.args);
 
-      if (activeFilter) {
-        // Fetch multiple messages with filter
-        const response = await api.mirror.getTopicMessages({
-          topicId,
-          filter: {
-            field: 'sequenceNumber',
-            operation: activeFilter.operation,
-            value: activeFilter.value,
-          },
-        });
-
-        // Transform messages to output format
-        messages = response.messages
-          .map((msg) => {
-            const { decodedMessage, timestamp } = decodeMessageData(
-              msg.message,
-              msg.consensus_timestamp,
-            );
-
-            return {
-              sequenceNumber: msg.sequence_number,
-              message: decodedMessage,
-              timestamp,
-              consensusTimestamp: msg.consensus_timestamp,
-            };
-          })
-          .reverse();
-      } else {
-        // No sequence number or filter provided
+      if (!filter) {
+        // No sequence number or filter provided - early return
         return {
           status: 'failure',
           errorMessage:
             'No sequence number or filter provided. Use --sequence-number or filter options (--sequence-number-gt, --sequence-number-gte, etc.)',
         };
       }
+
+      // Fetch multiple messages with filter
+      messages = await fetchFilteredMessages(api, topicId, filter);
     }
 
     // Step 3: Prepare structured output data
