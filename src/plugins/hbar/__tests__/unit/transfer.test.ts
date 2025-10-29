@@ -1,4 +1,4 @@
-import transferHandler from '../../commands/transfer';
+import { transferHandler } from '../../commands/transfer';
 import { ZustandAccountStateHelper } from '../../../account/zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HbarService } from '../../../../core/services/hbar/hbar-service.interface';
@@ -122,7 +122,9 @@ describe('hbar plugin - transfer command (unit)', () => {
       memo: 'test-transfer',
     });
 
-    await transferHandler(args);
+    const result = await transferHandler(args);
+    expect(result.status).toBe('success');
+    expect(result.outputJson).toBeDefined();
 
     expect(hbar.transferTinybar).toHaveBeenCalledWith({
       amount: 100000000,
@@ -137,7 +139,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     );
   });
 
-  test('throws error when balance is invalid', async () => {
+  test('returns failure when balance is invalid', async () => {
     const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
@@ -146,12 +148,12 @@ describe('hbar plugin - transfer command (unit)', () => {
       toIdOrNameOrAlias: '0.0.2002',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toContain('Invalid balance');
   });
 
-  test('throws error when balance is negative', async () => {
+  test('returns failure when balance is negative', async () => {
     const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
@@ -160,12 +162,11 @@ describe('hbar plugin - transfer command (unit)', () => {
       toIdOrNameOrAlias: '0.0.2002',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe('failure');
   });
 
-  test('throws error when balance is zero', async () => {
+  test('returns failure when balance is zero', async () => {
     const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
@@ -174,12 +175,11 @@ describe('hbar plugin - transfer command (unit)', () => {
       toIdOrNameOrAlias: '0.0.2002',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe('failure');
   });
 
-  test('throws error when no accounts available and from/to missing', async () => {
+  test('succeeds when valid params provided (no default accounts check)', async () => {
     const { api, logger } = setupTransferTest({
       accounts: [],
       transferImpl: jest.fn().mockResolvedValue({
@@ -198,13 +198,14 @@ describe('hbar plugin - transfer command (unit)', () => {
       toIdOrNameOrAlias: '0.0.2002',
     });
 
-    await transferHandler(args);
+    const result = await transferHandler(args);
+    expect(result.status).toBe('success');
 
     // This test should actually succeed now since we're providing valid parameters
     expect(logger.log).toHaveBeenCalledWith('[HBAR] Transfer command invoked');
   });
 
-  test('throws error when from equals to', async () => {
+  test('returns failure when from equals to', async () => {
     const sameAccount = makeAccountData({
       name: 'same-account',
       accountId: '0.0.1001',
@@ -219,12 +220,12 @@ describe('hbar plugin - transfer command (unit)', () => {
       toIdOrNameOrAlias: 'same-account',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Cannot transfer to the same account',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toContain('Cannot transfer');
   });
 
-  test('throws error when transferTinybar fails', async () => {
+  test('returns failure when transferTinybar fails', async () => {
     const { api, logger } = setupTransferTest({
       transferImpl: jest
         .fn()
@@ -239,9 +240,9 @@ describe('hbar plugin - transfer command (unit)', () => {
       memo: 'test-transfer',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Network connection failed',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toContain('Network connection failed');
   });
 
   test('uses default credentials as from when not provided', async () => {
@@ -269,7 +270,8 @@ describe('hbar plugin - transfer command (unit)', () => {
       toIdOrNameOrAlias: 'receiver',
     });
 
-    await transferHandler(args);
+    const result = await transferHandler(args);
+    expect(result.status).toBe('success');
 
     // The transfer command uses the default operator from the signing service
     expect(hbar.transferTinybar).toHaveBeenCalledWith({

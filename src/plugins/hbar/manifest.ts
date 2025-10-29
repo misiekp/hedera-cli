@@ -3,6 +3,7 @@
  * Defines the hbar plugin and its commands
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { TransferOutputSchema, TRANSFER_TEMPLATE } from './commands/transfer';
 
 export const hbarPluginManifest: PluginManifest = {
   name: 'hbar',
@@ -51,7 +52,11 @@ export const hbarPluginManifest: PluginManifest = {
           description: 'Memo for the transfer',
         },
       ],
-      handler: './commands/transfer',
+      handler: './commands/transfer/handler',
+      output: {
+        schema: TransferOutputSchema,
+        humanTemplate: TRANSFER_TEMPLATE,
+      },
     },
   ],
 };
