@@ -11,9 +11,12 @@ import {
 } from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
 import { processBalanceInput } from '../../../core/utils/process-balance-input';
+import { ZustandTokenStateHelper } from '../zustand-state-helper';
 
 export async function transferTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
+
+  const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
   // Validate command parameters
   const validationResult = safeValidateTokenTransferParams(args.args);
@@ -54,6 +57,15 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   const isRawUnits = String(userBalanceInput).trim().endsWith('t');
   if (!isRawUnits) {
     try {
+      const tokenInfoStorage = tokenState.getToken(tokenId);
+
+      if (tokenInfoStorage) {
+        tokenDecimals = tokenInfoStorage.decimals;
+      } else {
+        const tokenInfoMirror = await api.mirror.getTokenInfo(tokenId);
+        tokenDecimals = parseInt(tokenInfoMirror.decimals) || 0;
+      }
+
       const tokenInfo = await api.mirror.getTokenInfo(tokenId);
       tokenDecimals = parseInt(tokenInfo.decimals) || 0;
     } catch (error) {
@@ -62,7 +74,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
     }
   }
 
-  // Convert balance input: fine units (default) or raw units (with 't' suffix)
+  // Convert balance input: display units (default) or raw units (with 't' suffix)
   const rawAmount = processBalanceInput(userBalanceInput, tokenDecimals);
 
   // Resolve from parameter (alias or account-id:private-key) if provided
@@ -120,17 +132,17 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   const toAccountId = resolvedToAccount.accountId;
 
   logger.log(
-    `Transferring ${rawAmount} tokens of ${tokenId} from ${fromAccountId} to ${toAccountId}`,
+    `Transferring ${rawAmount.toString()} tokens of ${tokenId} from ${fromAccountId} to ${toAccountId}`,
   );
 
   try {
     // 1. Create transfer transaction using Core API
-    // Convert fine units to raw token units
+    // Convert display units to base token units
     const transferTransaction = api.token.createTransferTransaction({
       tokenId,
       fromAccountId,
       toAccountId,
-      amount: Number(rawAmount),
+      amount: rawAmount.toNumber(),
     });
 
     // 2. Sign and execute transaction using the from account key
@@ -147,7 +159,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
       logger.log(`   Token ID: ${tokenId}`);
       logger.log(`   From: ${fromAccountId}`);
       logger.log(`   To: ${toAccountId}`);
-      logger.log(`   Amount: ${rawAmount}`);
+      logger.log(`   Amount: ${rawAmount.toString()}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
       // 3. Optionally update token state if needed

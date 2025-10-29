@@ -28,7 +28,7 @@ export const hbarPluginManifest: PluginManifest = {
           type: 'string',
           required: true,
           description:
-            'Amount in HBAR (fine units by default, add "t" for tinybar). Default: fine units. Example: "1" = 1 HBAR, "100t" = 100 tinybar',
+            'Amount in HBAR (display units by default, add "t" for tinybar). Default: display units. Example: "1" = 1 HBAR, "100t" = 100 tinybar',
         },
         {
           name: 'to-id-or-name-or-alias',

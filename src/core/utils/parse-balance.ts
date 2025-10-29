@@ -1,20 +1,22 @@
+import BigNumber from 'bignumber.js';
+
 /**
  * Parses a human-readable decimal balance to raw integer representation.
  *
  * @param balance - Human-readable balance (string, number, or BigInt)
  * @param decimals - Token decimal places (default: 8)
- * @returns Raw balance as bigint
+ * @returns Raw balance as BigNumber
  *
  * @example
- * parseBalance('1', 8)        // 100000000n
- * parseBalance('1.5', 6)      // 1500000n
- * parseBalance('0.999999', 6) // 999999n
+ * parseBalance('1', 8)        // BigNumber(100000000)
+ * parseBalance('1.5', 6)      // BigNumber(1500000)
+ * parseBalance('0.999999', 6) // BigNumber(999999)
  */
 
 export function parseBalance(
   balance: string | number | bigint,
   decimals: number = 8,
-): bigint {
+): BigNumber {
   // Validate decimals
   if (decimals < 0) {
     throw new Error(
@@ -22,10 +24,10 @@ export function parseBalance(
     );
   }
 
-  // Convert to string
+  // Convert to string for validation
   const balanceStr = String(balance).trim();
 
-  // Check for NaN
+  // Check for NaN string
   if (balanceStr === 'NaN') {
     throw new Error(`Invalid balance: "NaN". Must be a valid decimal number.`);
   }
@@ -42,22 +44,31 @@ export function parseBalance(
     throw new Error(`Invalid balance: "${balance}".`);
   }
 
-  // Split integer and decimal parts
-  const [integerStr, decimalStr = ''] = balanceStr.split('.');
+  // Parse into BigNumber
+  const bn = new BigNumber(balanceStr);
 
-  // Validate decimal places don't exceed allowed
-  if (decimalStr.length > decimals) {
+  // Validate using BigNumber methods
+  if (bn.isNaN()) {
+    throw new Error(
+      `Invalid balance: "${balance}". Must be a valid decimal number.`,
+    );
+  }
+
+  if (bn.isNegative()) {
+    throw new Error(
+      `Invalid balance: "${balance}". Balance cannot be negative.`,
+    );
+  }
+
+  // Check decimal places don't exceed allowed
+  const actualDecimals = bn.decimalPlaces();
+  if (actualDecimals !== null && actualDecimals > decimals) {
     throw new Error(`Invalid balance: "${balance}". Too many decimal places.`);
   }
 
-  // String concatenation instead of multiplying by 10**decimals avoids
-  // floating-point precision errors and ensures exact decimal handling
-  const result = BigInt(integerStr + decimalStr.padEnd(decimals, '0'));
-
-  // Ensure non-zero
-  if (result === 0n) {
-    throw new Error(`Invalid balance: "${balance}". Must be positive.`);
-  }
+  // Convert to raw units by multiplying by 10^decimals
+  // This replaces string concatenation with pure BigNumber arithmetic
+  const result = bn.shiftedBy(decimals);
 
   return result;
 }

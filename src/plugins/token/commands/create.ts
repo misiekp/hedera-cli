@@ -217,11 +217,14 @@ export async function createTokenHandler(args: CommandHandlerArgs) {
   const symbol = validatedParams.symbol;
   const decimals = validatedParams.decimals || 0;
   const rawInitialSupply = validatedParams.initialSupply || 1000000;
-  // Convert fine units to raw token units
-  const initialSupply = Number(processBalanceInput(rawInitialSupply, decimals));
+  // Convert display units to raw token units
+  const initialSupply = processBalanceInput(
+    rawInitialSupply,
+    decimals,
+  ).toNumber();
   const supplyType = validatedParams.supplyType || 'INFINITE';
   const maxSupply = validatedParams.maxSupply
-    ? Number(processBalanceInput(validatedParams.maxSupply, decimals))
+    ? processBalanceInput(validatedParams.maxSupply, decimals).toNumber()
     : undefined;
   const alias = validatedParams.alias;
 

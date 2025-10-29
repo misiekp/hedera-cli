@@ -60,7 +60,7 @@ export const tokenPluginManifest: PluginManifest = {
           type: 'string',
           required: true,
           description:
-            'Amount to transfer. Default: fine units (with decimals applied). Append "t" for raw base units (e.g., "100t")',
+            'Amount to transfer. Default: display units (with decimals applied). Append "t" for raw base units (e.g., "100t")',
         },
       ],
       handler: transferTokenHandler,
@@ -94,7 +94,7 @@ export const tokenPluginManifest: PluginManifest = {
           required: false,
           default: 1000000,
           description:
-            'Initial supply amount. Default: fine units (with decimals applied). Append "t" for raw base units (e.g., "1000t")',
+            'Initial supply amount. Default: display units (with decimals applied). Append "t" for raw base units (e.g., "1000t")',
         },
         {
           name: 'supply-type',

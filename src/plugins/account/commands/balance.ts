@@ -2,6 +2,7 @@
  * Account Balance Command Handler
  * Handles account balance retrieval using the Core API
  */
+import BigNumber from 'bignumber.js';
 import { TokenBalance } from '../../../../types';
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
@@ -40,12 +41,18 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
     const hbarBalance = await api.mirror.getAccountHBarBalance(accountId);
 
     if (onlyHbar) {
-      const hbarDisplay = normalizeBalance(hbarBalance, 8);
+      const hbarDisplay = normalizeBalance(
+        new BigNumber(hbarBalance.toString()),
+        8,
+      );
       logger.log(
         `💰 Hbar Balance: ${hbarDisplay} HBAR (${hbarBalance.toString()} tinybar)`,
       );
     } else {
-      const hbarDisplay = normalizeBalance(hbarBalance, 8);
+      const hbarDisplay = normalizeBalance(
+        new BigNumber(hbarBalance.toString()),
+        8,
+      );
       logger.log(
         `💰 Account Balance: ${hbarDisplay} HBAR (${hbarBalance.toString()} tinybar)`,
       );
@@ -60,9 +67,6 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
             tokenBalances.tokens.forEach((token: TokenBalance) => {
               logger.log(`   ${token.token_id}: ${token.balance}`);
             });
-            logger.log(
-              `   Note: Token balances shown in raw base units. Use token decimals with normalizeBalance() to see display values.`,
-            );
           } else {
             logger.log(`   No token balances found`);
           }

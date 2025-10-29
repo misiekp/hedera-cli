@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { processBalanceInput } from '../../../core/utils/process-balance-input';
 
@@ -6,15 +7,19 @@ export async function hbarTransferHandler(
 ): Promise<void> {
   const { api, logger } = args;
 
-  let amount: bigint;
+  let amount: BigNumber;
   try {
-    // Convert balance input: fine units (default) or raw units (with 't' suffix)
+    // Convert balance input: display units (default) or base units (with 't' suffix)
     // HBAR uses 8 decimals
     amount = processBalanceInput(args.args.balance as string | number, 8);
   } catch (error) {
     throw new Error(
       `Invalid balance parameter: ${error instanceof Error ? error.message : String(error)}`,
     );
+  }
+
+  if (amount.lte(0)) {
+    throw new Error('Invalid balance');
   }
 
   const to = args.args.toIdOrNameOrAlias
@@ -75,14 +80,14 @@ export async function hbarTransferHandler(
   }
 
   logger.log(
-    `[HBAR] Transferring ${amount} tinybars from ${fromAccountId} to ${toAccountId}`,
+    `[HBAR] Transferring ${amount.toString()} tinybars from ${fromAccountId} to ${toAccountId}`,
   );
 
   if (api.hbar) {
     // Create the transfer transaction
     // Convert HBAR to tinybar (8 decimals: multiply by 10^8)
     const transferResult = await api.hbar.transferTinybar({
-      amount: Number(amount),
+      amount: amount.toNumber(),
       from: fromAccountId,
       to: toAccountId,
       memo,

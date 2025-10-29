@@ -42,7 +42,7 @@ export const accountPluginManifest: PluginManifest = {
           required: false,
           default: 10000,
           description:
-            'Initial HBAR balance. Default: fine units. Add "t" for raw tinybar. Default: 10000 fine units (1000000000 tinybar)',
+            'Initial HBAR balance. Default: display units. Add "t" for base units. Default: 10000 display units (1000000000 tinybar)',
         },
         {
           name: 'auto-associations',

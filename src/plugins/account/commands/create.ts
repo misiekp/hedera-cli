@@ -23,9 +23,9 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   let balance: number;
 
   try {
-    // Convert balance input: fine units (default) or raw units (with 't' suffix)
+    // Convert balance input: display units (default) or base units (with 't' suffix)
     // HBAR uses 8 decimals
-    balance = Number(processBalanceInput(rawBalance, 8));
+    balance = processBalanceInput(rawBalance, 8).toNumber();
   } catch (error) {
     logger.error(
       `Invalid balance parameter: ${error instanceof Error ? error.message : String(error)}`,
