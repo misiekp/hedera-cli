@@ -111,13 +111,6 @@ export async function transferHandler(
       `[HBAR] Transferring ${amount} tinybars from ${fromAccountId} to ${toAccountId}`,
     );
 
-    if (!api.hbar) {
-      return {
-        status: 'failure',
-        errorMessage: 'Core API hbar module not available',
-      };
-    }
-
     const transferResult = await api.hbar.transferTinybar({
       amount,
       from: fromAccountId,
