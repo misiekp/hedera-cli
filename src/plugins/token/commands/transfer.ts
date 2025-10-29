@@ -43,7 +43,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   if (!resolvedToken) {
     throw new Error(
       `Failed to resolve token parameter: ${tokenIdOrAlias}. ` +
-        `Expected format: token-alias OR token-id`,
+        `Expected format: token-name OR token-id`,
     );
   }
 
@@ -77,7 +77,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   // Convert balance input: display units (default) or raw units (with 't' suffix)
   const rawAmount = processBalanceInput(userBalanceInput, tokenDecimals);
 
-  // Resolve from parameter (alias or account-id:private-key) if provided
+  // Resolve from parameter (name or account-id:private-key) if provided
 
   let resolvedFromAccount = resolveAccountParameter(from, api, network);
 
@@ -125,7 +125,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   if (!resolvedToAccount) {
     throw new Error(
       `Failed to resolve to account parameter: ${to}. ` +
-        `Expected format: account-alias OR account-id`,
+        `Expected format: account-name OR account-id`,
     );
   }
 

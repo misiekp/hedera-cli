@@ -15,9 +15,9 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
   // Extract command arguments
   const accountId = args.args.id as string;
   const privateKey = args.args.key as string;
-  const alias = (args.args.alias as string) || '';
+  const alias = (args.args.name as string) || '';
 
-  // Check if alias already exists on the current network
+  // Check if name already exists on the current network
   const network = api.network.getCurrentNetwork();
   api.alias.availableOrThrow(alias, network);
 
@@ -31,7 +31,7 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
       throw new Error(`Account with name '${name}' already exists`);
     }
 
-    // No alias resolution needed for import
+    // No name resolution needed for import
 
     // Get account info from mirror node
     const accountInfo = await api.mirror.getAccount(accountId);
@@ -41,7 +41,7 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
       `account:${name}`,
     ]);
 
-    // Register alias if provided
+    // Register name if provided
     if (alias) {
       api.alias.register({
         alias,
@@ -82,7 +82,7 @@ export async function importAccountHandler(args: CommandHandlerArgs) {
     logger.log(`   Type: ${account.type}`);
     logger.log(`   Network: ${account.network}`);
     if (alias) {
-      logger.log(`   Alias: ${alias}`);
+      logger.log(`   Name: ${alias}`);
     }
     logger.log(`   Balance: ${accountInfo.balance.balance} tinybars`);
 

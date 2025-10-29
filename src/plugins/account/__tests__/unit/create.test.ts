@@ -95,7 +95,7 @@ describe('account plugin - create command (unit)', () => {
     const args = makeArgs(api, logger, {
       balance: 5000,
       'auto-associations': 3,
-      alias: 'myAccount',
+      name: 'myAccount',
     });
 
     await createAccountHandler(args);

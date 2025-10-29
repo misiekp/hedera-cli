@@ -60,7 +60,7 @@ const accountSchema = z
 const treasurySchema = z.union([
   z
     .string()
-    .min(1, 'Treasury is required (either alias or treasury-id:treasury-key)'),
+    .min(1, 'Treasury is required (either name or treasury-id:treasury-key)'),
   accountSchema,
 ]);
 

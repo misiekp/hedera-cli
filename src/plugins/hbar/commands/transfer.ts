@@ -22,18 +22,14 @@ export async function hbarTransferHandler(
     throw new Error('Invalid balance');
   }
 
-  const to = args.args.toIdOrNameOrAlias
-    ? (args.args.toIdOrNameOrAlias as string)
-    : '';
-  let from = args.args.fromIdOrNameOrAlias
-    ? (args.args.fromIdOrNameOrAlias as string)
-    : '';
+  const to = args.args.to ? (args.args.to as string) : '';
+  let from = args.args.from ? (args.args.from as string) : '';
   const memo = args.args.memo ? (args.args.memo as string) : '';
 
   logger.log('[HBAR] Transfer command invoked');
 
   if (!to) {
-    throw new Error('--to-id-or-name-or-alias is required');
+    throw new Error('--to is required');
   }
 
   // Fallback to operator from env if from not provided
@@ -54,7 +50,7 @@ export async function hbarTransferHandler(
     throw new Error('Cannot transfer to the same account');
   }
 
-  // Get current network for alias resolution
+  // Get current network for name resolution
   const currentNetwork = api.network.getCurrentNetwork();
 
   // Resolve from/to using alias service
@@ -65,7 +61,7 @@ export async function hbarTransferHandler(
   const fromAlias = api.alias.resolve(from, 'account', currentNetwork);
   if (fromAlias) {
     fromAccountId = fromAlias.entityId || from;
-    logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);
+    logger.log(`[HBAR] Resolved from name: ${from} -> ${fromAccountId}`);
   } else {
     logger.log(`[HBAR] Using from as account ID: ${from}`);
   }
@@ -74,7 +70,7 @@ export async function hbarTransferHandler(
   const toAlias = api.alias.resolve(to, 'account', currentNetwork);
   if (toAlias) {
     toAccountId = toAlias.entityId || to;
-    logger.log(`[HBAR] Resolved to alias: ${to} -> ${toAccountId}`);
+    logger.log(`[HBAR] Resolved to name: ${to} -> ${toAccountId}`);
   } else {
     logger.log(`[HBAR] Using to as account ID: ${to}`);
   }
@@ -94,7 +90,7 @@ export async function hbarTransferHandler(
     });
 
     // Sign and execute the transaction
-    // Try to get keyRefId: first from alias, then from state by accountId/name
+    // Try to get keyRefId: first from name, then from state by accountId/name
     let fromKeyRefId = fromAlias?.keyRefId;
     if (!fromKeyRefId) {
       const accounts = api.state.list<{

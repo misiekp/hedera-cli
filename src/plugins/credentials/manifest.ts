@@ -3,7 +3,6 @@
  * A plugin for managing operator credentials
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
-import { setHandler } from './commands/set';
 import { listHandler } from './commands/list';
 import { removeHandler } from './commands/remove';
 
@@ -45,18 +44,6 @@ const credentialsManifest: PluginManifest = {
   ],
   commands: [
     {
-      name: 'set',
-      summary: 'Set operator credentials',
-      description:
-        'Set the default operator credentials for signing transactions',
-      options: [
-        { name: 'account-id', short: 'a', type: 'string', required: true },
-        { name: 'private-key', short: 'p', type: 'string', required: true },
-        { name: 'network', short: 'n', type: 'string', required: false },
-      ],
-      handler: setHandler,
-    },
-    {
       name: 'list',
       summary: 'List all credentials',
       description: 'Show all stored credentials',
@@ -65,7 +52,7 @@ const credentialsManifest: PluginManifest = {
     {
       name: 'remove',
       summary: 'Remove credentials',
-      description: 'Remove credentials for a specific keyRefId',
+      description: 'Remove credentials by keyRefId from KMS storage',
       options: [
         { name: 'key-ref-id', short: 'k', type: 'string', required: true },
       ],

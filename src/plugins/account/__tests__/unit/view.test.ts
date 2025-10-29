@@ -44,7 +44,7 @@ describe('account plugin - view command', () => {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: 'acc1' });
+    const args = makeArgs(api, logger, { account: 'acc1' });
 
     await viewAccountHandler(args);
 
@@ -67,7 +67,7 @@ describe('account plugin - view command', () => {
       mirror: mirrorMock as HederaMirrornodeService,
       logger,
     };
-    const args = makeArgs(api, logger, { accountIdOrNameOrAlias: '0.0.2222' });
+    const args = makeArgs(api, logger, { account: '0.0.2222' });
 
     await viewAccountHandler(args);
 

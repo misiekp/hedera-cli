@@ -31,19 +31,19 @@ export const hbarPluginManifest: PluginManifest = {
             'Amount in HBAR (display units by default, add "t" for tinybar). Default: display units. Example: "1" = 1 HBAR, "100t" = 100 tinybar',
         },
         {
-          name: 'to-id-or-name-or-alias',
+          name: 'to',
           short: 't',
           type: 'string',
           required: true,
-          description: 'Account ID, name, or alias to transfer to',
+          description: 'Account ID or name to transfer to',
         },
         {
-          name: 'from-id-or-name-or-alias',
+          name: 'from',
           short: 'f',
           type: 'string',
           required: false,
           description:
-            'Account ID, name, or alias to transfer from (defaults to operator from env)',
+            'Account ID or name to transfer from (defaults to operator from env)',
         },
         {
           name: 'memo',

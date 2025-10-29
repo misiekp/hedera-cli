@@ -135,7 +135,7 @@ export function safeParseTokenData(data: unknown) {
 // Command parameter validation schemas
 export const TokenCreateCommandSchema = z
   .object({
-    name: z
+    tokenName: z
       .string()
       .min(1, 'Token name is required')
       .max(100, 'Token name must be 100 characters or less'),
@@ -147,7 +147,7 @@ export const TokenCreateCommandSchema = z
 
     treasury: z
       .string()
-      .min(1, 'Treasury is required (either alias or treasury-id:treasury-key)')
+      .min(1, 'Treasury is required (either name or treasury-id:treasury-key)')
       .optional(),
 
     decimals: z
@@ -174,7 +174,7 @@ export const TokenCreateCommandSchema = z
 
     adminKey: z.string().min(1, 'Admin key is required').optional(),
 
-    alias: z.string().min(1, 'Alias must be at least 1 character').optional(),
+    name: z.string().min(1, 'Name must be at least 1 character').optional(),
   })
   // @TODO Move this validation into shared file in core for reuse
   .superRefine((val, ctx) => {
@@ -216,16 +216,16 @@ export function safeValidateTokenCreateParams(data: unknown) {
   return TokenCreateCommandSchema.safeParse(data);
 }
 
-// TokenId or alias
-const tokenIdOrAlias = z.string().min(1, 'Token ID or alias is required');
+// TokenId or name
+const tokenIdOrName = z.string().min(1, 'Token ID or name is required');
 
 // Command parameter validation schema for associate command
 export const TokenAssociateCommandSchema = z.object({
-  token: tokenIdOrAlias,
+  token: tokenIdOrName,
 
   account: z
     .string()
-    .min(1, 'Account is required (either alias or account-id:account-key)'),
+    .min(1, 'Account is required (either name or account-id:account-key)'),
 });
 
 export type TokenAssociateCommandParams = z.infer<
@@ -250,17 +250,17 @@ export function safeValidateTokenAssociateParams(data: unknown) {
 
 // Command parameter validation schema for transfer command
 export const TokenTransferCommandSchema = z.object({
-  token: tokenIdOrAlias,
+  token: tokenIdOrName,
 
   from: z
     .string()
     .min(
       1,
-      'Invalid --from parameter. To use the default operator, omit this argument or specify a valid alias or account-id:private-key',
+      'Invalid --from parameter. To use the default operator, omit this argument or specify a valid name or account-id:private-key',
     )
     .optional(),
 
-  to: z.string().min(1, 'To account is required (either alias or account-id)'),
+  to: z.string().min(1, 'To account is required (either name or account-id)'),
 
   // @TODO Add validation to allow only int(1), float(2.25) or base units(1000t)
   balance: z.union([z.number().positive(), z.string().min(1)]),

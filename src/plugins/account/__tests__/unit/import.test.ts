@@ -59,7 +59,7 @@ describe('account plugin - import command', () => {
     const args = makeArgs(api, logger, {
       id: '0.0.9999',
       key: 'privKey',
-      alias: 'imported',
+      name: 'imported',
     });
 
     await importAccountHandler(args);
