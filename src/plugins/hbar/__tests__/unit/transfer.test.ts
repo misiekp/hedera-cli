@@ -3,6 +3,7 @@ import { ZustandAccountStateHelper } from '../../../account/zustand-state-helper
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HbarService } from '../../../../core/services/hbar/hbar-service.interface';
 import type { AccountData } from '../../../account/schema';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeAccountData,
@@ -123,7 +124,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     expect(hbar.transferTinybar).toHaveBeenCalledWith({
@@ -149,7 +150,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain(
       'Invalid balance: provide a positive number of tinybars',
     );
@@ -165,7 +166,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
   });
 
   test('returns failure when balance is zero', async () => {
@@ -178,7 +179,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
   });
 
   test('succeeds when valid params provided (no default accounts check)', async () => {
@@ -201,7 +202,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     // This test should actually succeed now since we're providing valid parameters
     expect(logger.log).toHaveBeenCalledWith('[HBAR] Transfer command invoked');
@@ -223,7 +224,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Cannot transfer');
   });
 
@@ -243,7 +244,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Network connection failed');
   });
 
@@ -273,7 +274,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const result = await transferHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     // The transfer command uses the default operator from the signing service
     expect(hbar.transferTinybar).toHaveBeenCalledWith({

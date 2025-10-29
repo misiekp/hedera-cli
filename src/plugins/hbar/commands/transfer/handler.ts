@@ -7,6 +7,7 @@ import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
 import { EntityIdSchema } from '../../../../core/schemas/common-schemas';
+import { Status } from '../../../../core/shared/constants';
 import { TransferInputSchema, TransferOutput } from './output';
 
 export async function transferHandler(
@@ -22,19 +23,19 @@ export async function transferHandler(
       const firstError = validationResult.error.issues[0];
       if (firstError.path[0] === 'balance') {
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage:
             'Invalid balance: provide a positive number of tinybars',
         };
       }
       if (firstError.path[0] === 'toIdOrNameOrAlias') {
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage: '--to-id-or-name-or-alias is required',
         };
       }
       return {
-        status: 'failure',
+        status: Status.Failure,
         errorMessage: 'Invalid input',
       };
     }
@@ -47,7 +48,7 @@ export async function transferHandler(
 
     if (fromInput && fromInput === to) {
       return {
-        status: 'failure',
+        status: Status.Failure,
         errorMessage: 'Cannot transfer to the same account',
       };
     }
@@ -61,7 +62,7 @@ export async function transferHandler(
         logger.log(`[HBAR] Using default operator as from: ${from}`);
       } else {
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage:
             `No --from provided and no default operator configured for network ${currentNetwork}. ` +
             'Provide --from <accountId|name|alias> for the current network.',
@@ -85,7 +86,7 @@ export async function transferHandler(
         logger.log(`[HBAR] Resolved from alias: ${from} -> ${fromAccountId}`);
       } else {
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage: `Invalid from account: ${from} is neither a valid account ID nor a known alias`,
         };
       }
@@ -101,7 +102,7 @@ export async function transferHandler(
         logger.log(`[HBAR] Resolved to alias: ${to} -> ${toAccountId}`);
       } else {
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage: `Invalid to account: ${to} is neither a valid account ID nor a known alias`,
         };
       }
@@ -139,7 +140,7 @@ export async function transferHandler(
 
     if (!result.success) {
       return {
-        status: 'failure',
+        status: Status.Failure,
         errorMessage: `Transfer failed: ${result.receipt?.status?.status ?? 'UNKNOWN'}`,
       };
     }
@@ -161,14 +162,14 @@ export async function transferHandler(
     };
 
     return {
-      status: 'success',
+      status: Status.Success,
       outputJson: JSON.stringify(outputData, (_key: string, value: unknown) =>
         typeof value === 'bigint' ? value.toString() : value,
       ),
     };
   } catch (error) {
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Transfer failed', error),
     };
   }
