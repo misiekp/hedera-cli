@@ -6,7 +6,7 @@ import {
   EntityIdSchema,
   NetworkSchema,
   IsoTimestampSchema,
-} from '../../../../core/schemas/common-schemas';
+} from '../../../../core/schemas';
 
 /**
  * List Topics Command Output Schema

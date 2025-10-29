@@ -1,7 +1,6 @@
 /**
  * Topic List Command Handler
  * Handles listing topics from state
- * Follows ADR-003 contract: returns CommandExecutionResult
  */
 import { CommandHandlerArgs } from '../../../../core';
 import { CommandExecutionResult } from '../../../../core';

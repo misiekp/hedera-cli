@@ -7,7 +7,7 @@ import {
   NetworkSchema,
   TransactionIdSchema,
   IsoTimestampSchema,
-} from '../../../../core/schemas/common-schemas';
+} from '../../../../core/schemas';
 
 /**
  * Create Topic Command Output Schema

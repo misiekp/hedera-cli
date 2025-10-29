@@ -1,7 +1,6 @@
 /**
  * Topic Message Submit Command Handler
  * Handles submitting messages to topics
- * Follows ADR-003 contract: returns CommandExecutionResult
  */
 import { CommandHandlerArgs } from '../../../../core';
 import { CommandExecutionResult } from '../../../../core';

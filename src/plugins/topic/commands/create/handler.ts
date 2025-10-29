@@ -1,7 +1,6 @@
 /**
  * Topic Create Command Handler
  * Handles topic creation using the Core API
- * Follows ADR-003 contract: returns CommandExecutionResult
  */
 import { CommandHandlerArgs } from '../../../../core';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';

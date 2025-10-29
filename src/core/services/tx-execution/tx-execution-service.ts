@@ -76,8 +76,6 @@ export class TxExecutionServiceImpl implements TxExecutionService {
       const response: TransactionResponse = await transaction.execute(client);
       const receipt: TransactionReceipt = await response.getReceipt(client);
 
-      console.log({ receipt });
-
       this.logger.debug(
         `[TX-EXECUTION] Transaction executed successfully: ${response.transactionId.toString()}`,
       );
@@ -145,7 +143,6 @@ export class TxExecutionServiceImpl implements TxExecutionService {
     const response: TransactionResponse = await transaction.execute(client);
     const receipt: TransactionReceipt = await response.getReceipt(client);
 
-    // Extract topic ID for topic creation transactions
     // Extract IDs from receipt based on transaction type
     let accountId: string | undefined;
     let tokenId: string | undefined;

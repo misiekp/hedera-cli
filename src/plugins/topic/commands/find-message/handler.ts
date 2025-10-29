@@ -1,10 +1,9 @@
 /**
  * Topic Message Find Command Handler
  * Handles finding messages in topics using mirror node
- * Follows ADR-003 contract: returns CommandExecutionResult
  */
-import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
-import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { CommandHandlerArgs } from '../../../../core';
+import { CommandExecutionResult } from '../../../../core';
 import { formatError } from '../../../../utils/errors';
 import { Filter } from '../../../../../types';
 import { FindMessagesOutput } from './output';
