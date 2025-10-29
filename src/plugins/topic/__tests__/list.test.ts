@@ -1,9 +1,10 @@
 import listTopicsHandler from '../commands/list/handler';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import type { CoreApi } from '../../../core/core-api/core-api.interface';
+import type { CoreApi } from '../../../core';
 import type { TopicData } from '../schema';
-import type { ListTopicsOutput } from '../commands/list/output';
+import type { ListTopicsOutput } from '../commands/list';
 import { makeLogger, makeArgs } from '../../../../__tests__/helpers/plugin';
+import { Status } from '@hashgraph/sdk';
 
 jest.mock('../zustand-state-helper', () => ({
   ZustandTopicStateHelper: jest.fn(),
@@ -36,9 +37,9 @@ describe('topic plugin - list command', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListTopicsOutput = JSON.parse(result.outputJson!);
@@ -60,9 +61,9 @@ describe('topic plugin - list command', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListTopicsOutput = JSON.parse(result.outputJson!);
@@ -96,9 +97,9 @@ describe('topic plugin - list command', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { keys: true });
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListTopicsOutput = JSON.parse(result.outputJson!);
@@ -111,36 +112,37 @@ describe('topic plugin - list command', () => {
   test('filters topics by network', async () => {
     const logger = makeLogger();
 
+    const MAINNET_TOPIC = makeTopicData({
+      topicId: '0.0.4444',
+      memo: 'Mainnet Topic',
+      name: 'Mainnet Topic',
+      network: 'mainnet',
+    });
+
+    const TESTNET_TOPIC = makeTopicData({
+      topicId: '0.0.5555',
+      memo: 'Testnet Topic',
+      name: 'Testnet Topic',
+      network: 'testnet',
+    });
+
     MockedHelper.mockImplementation(() => ({
-      listTopics: jest.fn().mockReturnValue([
-        makeTopicData({
-          topicId: '0.0.4444',
-          memo: 'Mainnet Topic',
-          name: 'Mainnet Topic',
-          network: 'mainnet',
-        }),
-        makeTopicData({
-          topicId: '0.0.5555',
-          memo: 'Testnet Topic',
-          name: 'Testnet Topic',
-          network: 'testnet',
-        }),
-      ]),
+      listTopics: jest.fn().mockReturnValue([MAINNET_TOPIC, TESTNET_TOPIC]),
     }));
 
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { network: 'mainnet' });
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListTopicsOutput = JSON.parse(result.outputJson!);
     // Should only include mainnet topic after filtering in handler
     expect(output.totalCount).toBe(1);
-    expect(output.topics[0].name).toBe('Mainnet Topic');
-    expect(output.topics[0].network).toBe('mainnet');
+    expect(output.topics[0].name).toBe(MAINNET_TOPIC.name);
+    expect(output.topics[0].network).toBe(MAINNET_TOPIC.network);
   });
 
   test('returns empty list when no topics match network filter', async () => {
@@ -160,9 +162,9 @@ describe('topic plugin - list command', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { network: 'mainnet' });
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListTopicsOutput = JSON.parse(result.outputJson!);
@@ -202,9 +204,9 @@ describe('topic plugin - list command', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListTopicsOutput = JSON.parse(result.outputJson!);
@@ -232,9 +234,9 @@ describe('topic plugin - list command', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListTopicsOutput = JSON.parse(result.outputJson!);
@@ -253,7 +255,7 @@ describe('topic plugin - list command', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = await listTopicsHandler(args);
+    const result = listTopicsHandler(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain('Failed to list topics');

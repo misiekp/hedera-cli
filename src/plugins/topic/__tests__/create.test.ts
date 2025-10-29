@@ -10,6 +10,7 @@ import {
   makeKmsMock,
   makeAliasMock,
 } from '../../../../__tests__/helpers/plugin';
+import { Status } from '@hashgraph/sdk';
 
 jest.mock('../zustand-state-helper', () => ({
   ZustandTopicStateHelper: jest.fn(),
@@ -93,7 +94,7 @@ describe('topic plugin - create command', () => {
 
     const result = await createTopicHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: CreateTopicOutput = JSON.parse(result.outputJson!);
@@ -157,7 +158,7 @@ describe('topic plugin - create command', () => {
 
     const result = await createTopicHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: CreateTopicOutput = JSON.parse(result.outputJson!);
@@ -222,7 +223,7 @@ describe('topic plugin - create command', () => {
 
     const result = await createTopicHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: CreateTopicOutput = JSON.parse(result.outputJson!);
