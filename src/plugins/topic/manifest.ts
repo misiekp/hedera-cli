@@ -4,6 +4,21 @@
 import { PluginManifest } from '../../core';
 import { TOPIC_JSON_SCHEMA, TOPIC_NAMESPACE } from './schema';
 
+// Import output specifications from each command
+import {
+  CreateTopicOutputSchema,
+  CREATE_TOPIC_TEMPLATE,
+} from './commands/create';
+import { ListTopicsOutputSchema, LIST_TOPICS_TEMPLATE } from './commands/list';
+import {
+  SubmitMessageOutputSchema,
+  SUBMIT_MESSAGE_TEMPLATE,
+} from './commands/submit-message';
+import {
+  FindMessagesOutputSchema,
+  FIND_MESSAGES_TEMPLATE,
+} from './commands/find-message';
+
 export const topicPluginManifest: PluginManifest = {
   name: 'topic',
   version: '1.0.0',
@@ -61,14 +76,30 @@ export const topicPluginManifest: PluginManifest = {
           description: 'Define the alias (name) for this topic',
         },
       ],
-      handler: './index',
+      handler: './commands/create/handler',
+      output: {
+        schema: CreateTopicOutputSchema,
+        humanTemplate: CREATE_TOPIC_TEMPLATE,
+      },
     },
     {
       name: 'list',
       summary: 'List all topics',
       description: 'List all topics stored in the state',
-      options: [],
-      handler: './index',
+      options: [
+        {
+          name: 'network',
+          type: 'string',
+          required: false,
+          description: 'Filter topics by network',
+          short: 'n',
+        },
+      ],
+      handler: './commands/list/handler',
+      output: {
+        schema: ListTopicsOutputSchema,
+        humanTemplate: LIST_TOPICS_TEMPLATE,
+      },
     },
     {
       name: 'submit-message',
@@ -90,7 +121,11 @@ export const topicPluginManifest: PluginManifest = {
           short: 'm',
         },
       ],
-      handler: './index',
+      handler: './commands/submit-message/handler',
+      output: {
+        schema: SubmitMessageOutputSchema,
+        humanTemplate: SUBMIT_MESSAGE_TEMPLATE,
+      },
     },
     {
       name: 'find-message',
@@ -154,7 +189,11 @@ export const topicPluginManifest: PluginManifest = {
           description: 'The sequence number not equal to',
         },
       ],
-      handler: './index',
+      handler: './commands/find-message/handler',
+      output: {
+        schema: FindMessagesOutputSchema,
+        humanTemplate: FIND_MESSAGES_TEMPLATE,
+      },
     },
   ],
   stateSchemas: [

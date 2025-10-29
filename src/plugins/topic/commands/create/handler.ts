@@ -2,26 +2,36 @@
  * Topic Create Command Handler
  * Handles topic creation using the Core API
  */
-import { CommandHandlerArgs } from '../../../core';
-import { formatError } from '../../../utils/errors';
-import { ZustandTopicStateHelper } from '../zustand-state-helper';
-import { AliasRecord } from '../../../core/services/alias/alias-service.interface';
+import { CommandHandlerArgs } from '../../../../core';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { formatError } from '../../../../utils/errors';
+import { ZustandTopicStateHelper } from '../../zustand-state-helper';
+import { AliasRecord } from '../../../../core/services/alias/alias-service.interface';
+import { CreateTopicOutput } from './output';
 
-export async function createTopicHandler(args: CommandHandlerArgs) {
+/**
+ * Default export handler function for topic creation
+ * @param args - Command handler arguments from CLI core
+ * @returns Promise resolving to CommandExecutionResult with structured output
+ */
+export default async function createTopicHandler(
+  args: CommandHandlerArgs,
+): Promise<CommandExecutionResult> {
   const { api, logger } = args;
 
-  // Initialize Zustand state helper
+  // Initialize Zustand state helper for topic state management
   const topicState = new ZustandTopicStateHelper(api.state, logger);
 
-  // Extract command arguments
+  // Extract and validate command arguments
   const memo = args.args.memo as string | undefined;
-
   const adminKey = args.args.adminKey as string | undefined;
   const submitKey = args.args.submitKey as string | undefined;
-
   const alias = args.args.alias as string | undefined;
+
+  // Generate default name if alias not provided
   const name = alias || `topic-${Date.now()}`;
 
+  // Log progress indicator (not final output)
   if (memo) {
     logger.log(`Creating topic with memo: ${memo}`);
   }
@@ -29,7 +39,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
   try {
     const currentNetwork = api.network.getCurrentNetwork();
 
-    // 1. Find and resolve aliases
+    // Step 1: Resolve admin and submit key aliases to account references
     let topicAdminKeyAlias: AliasRecord | undefined = undefined;
     let topicSubmitKeyAlias: AliasRecord | undefined = undefined;
 
@@ -57,14 +67,14 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
       }
     }
 
-    // 2. Create transaction using Core API
+    // Step 2: Create topic transaction using Core API
     const topicCreateResult = api.topic.createTopic({
       memo,
       adminKey: topicAdminKeyAlias?.publicKey || adminKey,
       submitKey: topicSubmitKeyAlias?.publicKey || submitKey,
     });
 
-    // 3. Ensure key exist in credentials
+    // Step 3: Import keys into KMS if they were provided directly (not via alias)
     let adminKeyRefId: string | undefined = topicAdminKeyAlias?.keyRefId;
     let submitKeyRefId: string | undefined = topicSubmitKeyAlias?.keyRefId;
 
@@ -78,9 +88,8 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
       submitKeyRefId = keyRefId;
     }
 
+    // Step 4: Sign and execute transaction (with admin key if present)
     let result;
-
-    // 4. Sign and execute transaction
     if (topicAdminKeyAlias?.publicKey || adminKey) {
       result = await api.txExecution.signAndExecuteWith(
         topicCreateResult.transaction,
@@ -95,7 +104,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
     }
 
     if (result.success) {
-      // 3. Store topic in state with real data using state helper
+      // Step 5: Store topic metadata in state
       const topicData = {
         name,
         topicId: result.topicId || '(unknown)',
@@ -107,6 +116,7 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
         updatedAt: new Date().toISOString(),
       };
 
+      // Step 6: Register alias if provided
       if (alias) {
         api.alias.register({
           alias,
@@ -117,24 +127,38 @@ export async function createTopicHandler(args: CommandHandlerArgs) {
         });
       }
 
+      // Step 7: Save topic to state
       topicState.saveTopic(String(result.topicId), topicData);
 
-      logger.log(`✅ Topic created successfully: ${topicData.topicId}`);
-      logger.log(`   Network: ${topicData.network}`);
-      logger.log(`   Name (Alias): ${topicData.name}`);
-      if (topicData.memo) {
-        logger.log(`   Memo: ${topicData.memo}`);
-      }
-      logger.log(`   Admin key: ${Boolean(topicData.adminKeyRefId)}`);
-      logger.log(`   Submit key: ${Boolean(topicData.submitKeyRefId)}`);
-      logger.log(`   Transaction ID: ${result.transactionId}`);
+      // Step 8: Prepare structured output data
+      const outputData: CreateTopicOutput = {
+        topicId: topicData.topicId,
+        name: topicData.name,
+        network: topicData.network,
+        memo: memo, // Only include if present
+        adminKeyPresent: Boolean(topicData.adminKeyRefId),
+        submitKeyPresent: Boolean(topicData.submitKeyRefId),
+        transactionId: result.transactionId || '',
+        createdAt: topicData.createdAt,
+      };
 
-      process.exit(0);
+      // Return success result with JSON output
+      return {
+        status: 'success',
+        outputJson: JSON.stringify(outputData),
+      };
     } else {
-      throw new Error('Failed to create topic');
+      // Transaction execution failed
+      return {
+        status: 'failure',
+        errorMessage: 'Failed to create topic',
+      };
     }
   } catch (error: unknown) {
-    logger.error(formatError('❌ Failed to create topic', error));
-    process.exit(1);
+    // Catch and format any errors
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to create topic', error),
+    };
   }
 }

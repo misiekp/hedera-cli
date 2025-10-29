@@ -1,17 +1,15 @@
-import { submitMessageHandler } from '../commands/message-submit';
+import submitMessageHandler from '../commands/submit-message/handler';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
 import type { CoreApi } from '../../../core/core-api/core-api.interface';
 import type { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
 import type { TopicData } from '../schema';
+import type { SubmitMessageOutput } from '../commands/submit-message/output';
 import {
   makeLogger,
   makeArgs,
   makeNetworkMock,
   makeAliasMock,
-  setupExitSpy,
 } from '../../../../__tests__/helpers/plugin';
-
-let exitSpy: jest.SpyInstance;
 
 jest.mock('../zustand-state-helper', () => ({
   ZustandTopicStateHelper: jest.fn(),
@@ -70,14 +68,6 @@ const makeApiMocks = ({
   return { topicTransactions, signing, networkMock, alias };
 };
 
-beforeAll(() => {
-  exitSpy = setupExitSpy();
-});
-
-afterAll(() => {
-  exitSpy.mockRestore();
-});
-
 describe('topic plugin - message-submit command', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -118,20 +108,22 @@ describe('topic plugin - message-submit command', () => {
       message: 'Hello, World!',
     });
 
-    await submitMessageHandler(args);
+    const result = await submitMessageHandler(args);
+
+    expect(result.status).toBe('success');
+    expect(result.outputJson).toBeDefined();
+
+    const output: SubmitMessageOutput = JSON.parse(result.outputJson!);
+    expect(output.topicId).toBe('0.0.1234');
+    expect(output.message).toBe('Hello, World!');
+    expect(output.sequenceNumber).toBe(5);
+    expect(output.transactionId).toBe('tx-123');
 
     expect(loadTopicMock).toHaveBeenCalledWith('0.0.1234');
     expect(topicTransactions.submitMessage).toHaveBeenCalledWith({
       topicId: '0.0.1234',
       message: 'Hello, World!',
     });
-    expect(logger.log).toHaveBeenCalledWith(
-      '✅ Message submitted successfully',
-    );
-    expect(logger.log).toHaveBeenCalledWith('   Topic ID: 0.0.1234');
-    expect(logger.log).toHaveBeenCalledWith('   Message: "Hello, World!"');
-    expect(logger.log).toHaveBeenCalledWith('   Sequence Number: 5');
-    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
   test('submits message successfully with submit key', async () => {
@@ -171,19 +163,21 @@ describe('topic plugin - message-submit command', () => {
       message: 'Signed message',
     });
 
-    await submitMessageHandler(args);
+    const result = await submitMessageHandler(args);
+
+    expect(result.status).toBe('success');
+    expect(result.outputJson).toBeDefined();
+
+    const output: SubmitMessageOutput = JSON.parse(result.outputJson!);
+    expect(output.sequenceNumber).toBe(10);
 
     expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
       {},
       { keyRefId: submitKeyRefId },
     );
-    expect(logger.log).toHaveBeenCalledWith(
-      '✅ Message submitted successfully',
-    );
-    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
-  test('throws error when topic not found', async () => {
+  test('returns failure when topic not found', async () => {
     const logger = makeLogger();
     const loadTopicMock = jest.fn().mockReturnValue(null);
     MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
@@ -204,15 +198,53 @@ describe('topic plugin - message-submit command', () => {
       message: 'Test message',
     });
 
-    await submitMessageHandler(args);
+    const result = await submitMessageHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to submit message'),
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toContain('Topic not found');
   });
 
-  test('logs error and exits when signAndExecute returns failure', async () => {
+  test('returns failure when sequence number is missing', async () => {
+    const logger = makeLogger();
+    const topicData = makeTopicData({
+      topicId: '0.0.1234',
+    });
+    const loadTopicMock = jest.fn().mockReturnValue(topicData);
+    MockedHelper.mockImplementation(() => ({ loadTopic: loadTopicMock }));
+
+    const { topicTransactions, signing, networkMock, alias } = makeApiMocks({
+      submitMessageImpl: jest.fn().mockReturnValue({
+        transaction: {},
+      }),
+      signAndExecuteImpl: jest.fn().mockResolvedValue({
+        transactionId: 'tx-123',
+        success: true,
+        topicSequenceNumber: undefined, // Missing sequence number
+        receipt: {} as any,
+      } as TransactionResult),
+    });
+
+    const api: Partial<CoreApi> = {
+      topic: topicTransactions,
+      txExecution: signing,
+      network: networkMock,
+      alias: alias as any,
+      state: {} as any,
+      logger,
+    };
+
+    const args = makeArgs(api, logger, {
+      topicId: '0.0.1234',
+      message: 'Test message',
+    });
+
+    const result = await submitMessageHandler(args);
+
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toContain('sequence number not returned');
+  });
+
+  test('returns failure when signAndExecute returns failure', async () => {
     const logger = makeLogger();
     const topicData = makeTopicData({
       topicId: '0.0.1234',
@@ -245,15 +277,13 @@ describe('topic plugin - message-submit command', () => {
       message: 'Failed message',
     });
 
-    await submitMessageHandler(args);
+    const result = await submitMessageHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to submit message'),
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toBe('Failed to submit message');
   });
 
-  test('logs error and exits when submitMessage throws', async () => {
+  test('returns failure when submitMessage throws', async () => {
     const logger = makeLogger();
     const topicData = makeTopicData({
       topicId: '0.0.1234',
@@ -281,11 +311,10 @@ describe('topic plugin - message-submit command', () => {
       message: 'Error message',
     });
 
-    await submitMessageHandler(args);
+    const result = await submitMessageHandler(args);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('❌ Failed to submit message'),
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(result.status).toBe('failure');
+    expect(result.errorMessage).toContain('Failed to submit message');
+    expect(result.errorMessage).toContain('network error');
   });
 });
