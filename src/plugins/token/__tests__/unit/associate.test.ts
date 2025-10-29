@@ -6,10 +6,10 @@ import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interfa
 import { associateTokenHandler } from '../../commands/associate';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
 import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
+import type { AssociateTokenOutput } from '../../commands/associate';
 import {
   makeLogger,
   makeApiMocks,
-  mockProcessExitThrows,
   mockZustandTokenStateHelper,
 } from './helpers/mocks';
 
@@ -18,16 +18,10 @@ jest.mock('../../zustand-state-helper', () => ({
 }));
 
 const MockedHelper = ZustandTokenStateHelper as jest.Mock;
-const { setupExit, cleanupExit } = mockProcessExitThrows();
 
 describe('associateTokenHandler', () => {
   beforeEach(() => {
-    setupExit();
     mockZustandTokenStateHelper(MockedHelper);
-  });
-
-  afterEach(() => {
-    cleanupExit();
   });
 
   describe('success scenarios', () => {
@@ -74,10 +68,19 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+
+      const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.accountId).toBe('0.0.789012');
+      expect(output.associated).toBe(true);
+      expect(output.transactionId).toBe('0.0.123@1234567890.123456789');
 
       expect(
         tokenTransactions.createTokenAssociationTransaction,
@@ -138,10 +141,19 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+
+      const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.accountId).toBe('0.0.789012');
+      expect(output.associated).toBe(true);
+      expect(output.transactionId).toBe('0.0.123@1234567890.123456789');
 
       expect(alias.resolve).toHaveBeenCalledWith('alice', 'account', 'testnet');
       expect(
@@ -190,7 +202,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:test-account-key',
         },
         api,
@@ -199,21 +211,30 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+
+      const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.accountId).toBe('0.0.789012');
+      expect(output.associated).toBe(true);
+      expect(output.transactionId).toBe('0.0.123@1234567890.123456789');
     });
   });
 
   describe('validation scenarios', () => {
-    test('should throw error when account parameter is missing', async () => {
+    test('should return failure result when account parameter is missing', async () => {
       // Arrange
       const { api } = makeApiMocks();
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           // account missing
         },
         api,
@@ -222,13 +243,17 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toContain('account: Required');
+      expect(result.outputJson).toBeUndefined();
     });
 
-    test('should throw error when tokenId is missing', async () => {
+    test('should return failure result when tokenId is missing', async () => {
       // Arrange
       const { api } = makeApiMocks();
       const logger = makeLogger();
@@ -243,19 +268,23 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toContain('token: Required');
+      expect(result.outputJson).toBeUndefined();
     });
 
-    test('should throw error when account parameter is empty', async () => {
+    test('should return failure result when account parameter is empty', async () => {
       // Arrange
       const { api } = makeApiMocks();
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '',
         },
         api,
@@ -264,10 +293,14 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toContain('Invalid command parameters');
+      expect(result.outputJson).toBeUndefined();
     });
   });
 
@@ -315,13 +348,14 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to associate token: Token association failed',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBe('Token association failed');
+      expect(result.outputJson).toBeUndefined();
     });
 
     test('should handle token transaction service error', async () => {
@@ -345,7 +379,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:test-account-key',
         },
         api,
@@ -354,10 +388,14 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toContain('Failed to associate token');
+      expect(result.outputJson).toBeUndefined();
     });
 
     test('should handle signing service error', async () => {
@@ -386,7 +424,7 @@ describe('associateTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           account: '0.0.789012:test-account-key',
         },
         api,
@@ -395,10 +433,14 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toContain('Failed to associate token');
+      expect(result.outputJson).toBeUndefined();
     });
   });
 
@@ -446,10 +488,19 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+
+      const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.accountId).toBe('0.0.789012');
+      expect(output.associated).toBe(true);
+      expect(output.transactionId).toBe('0.0.123@1234567890.123456789');
 
       // Assert - Verify state helper was initialized
       expect(MockedHelper).toHaveBeenCalledWith(api.state, logger);
@@ -521,10 +572,19 @@ describe('associateTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(associateTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await associateTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+
+      const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.accountId).toBe('0.0.789012');
+      expect(output.associated).toBe(true);
+      expect(output.transactionId).toBe('0.0.123@1234567890.123456789');
 
       // Assert - Verify state helper was initialized
       expect(MockedHelper).toHaveBeenCalledWith(api.state, logger);

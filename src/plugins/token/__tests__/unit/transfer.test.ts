@@ -4,22 +4,11 @@
  */
 import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { transferTokenHandler } from '../../commands/transfer';
+import type { TransferTokenOutput } from '../../commands/transfer';
 import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import { makeLogger, makeApiMocks } from './helpers/mocks';
 
-let exitSpy: jest.SpyInstance;
-
 describe('transferTokenHandler', () => {
-  beforeEach(() => {
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`Process.exit(${code})`);
-    });
-  });
-
-  afterEach(() => {
-    exitSpy.mockRestore();
-  });
-
   describe('success scenarios', () => {
     test('should transfer tokens between accounts using account-id:private-key format', async () => {
       // Arrange
@@ -70,18 +59,20 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      // The transfer will call process.exit(0) on success, which our mock turns into a thrown error
-      // The command has a try-catch that catches this and calls process.exit(1)
-      // So we need to expect process.exit(1) to be thrown
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+
+      const output = JSON.parse(result.outputJson!) as TransferTokenOutput;
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.from).toBe('0.0.345678');
+      expect(output.to).toBe('0.0.789012');
+      expect(output.amount).toBe('100');
+      expect(output.transactionId).toBe('0.0.123@1234567890.123456789');
 
       expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
         tokenId: '0.0.123456',
@@ -145,15 +136,20 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+
+      const output = JSON.parse(result.outputJson!) as TransferTokenOutput;
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.from).toBe('0.0.345678');
+      expect(output.to).toBe('0.0.789012');
+      expect(output.amount).toBe('100');
+      expect(output.transactionId).toBe('0.0.123@1234567890.123456789');
 
       expect(alias.resolve).toHaveBeenCalledWith('alice', 'account', 'testnet');
       expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
@@ -225,15 +221,19 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+      expect(result.errorMessage).toBeUndefined();
+
+      // Verify the transfer succeeded
+      const output = JSON.parse(result.outputJson!);
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.to).toBe('0.0.789012');
 
       expect(alias.resolve).toHaveBeenCalledWith('bob', 'account', 'testnet');
       expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
@@ -251,7 +251,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 0, // Zero amount - should fail validation
@@ -262,31 +262,57 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Invalid command parameters:',
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('balance: Balance must be a positive number'),
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.errorMessage).toContain('Invalid command parameters');
+      expect(result.outputJson).toBeUndefined();
     });
   });
 
   describe('validation scenarios', () => {
-    test('should throw error when from parameter is missing', async () => {
+    test('should handle missing from parameter (uses default operator)', async () => {
       // Arrange
-      const { api } = makeApiMocks({});
+      const mockTransferTransaction = { test: 'transfer-transaction' };
+      const mockSignResult: TransactionResult = {
+        success: true,
+        transactionId: '0.0.123@1234567890.123456789',
+        receipt: {} as any,
+      };
+
+      const {
+        api,
+        tokenTransactions: _tokenTransactions,
+        signing: _signing,
+        kms: _kms,
+      } = makeApiMocks({
+        tokenTransactions: {
+          createTransferTransaction: jest
+            .fn()
+            .mockReturnValue(mockTransferTransaction),
+        },
+        signing: {
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        kms: {
+          importPrivateKey: jest.fn().mockReturnValue({
+            keyRefId: 'imported-key-ref-id',
+            publicKey: 'imported-public-key',
+          }),
+        },
+      });
+
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           balance: 100,
-          // from missing
+          // from missing - should use default operator
         },
         api,
         state: {} as any,
@@ -294,10 +320,19 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+      expect(result.errorMessage).toBeUndefined();
+
+      // Verify the transfer succeeded
+      const output = JSON.parse(result.outputJson!);
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.to).toBe('0.0.789012');
     });
 
     test('should throw error when to parameter is missing', async () => {
@@ -306,7 +341,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           from: '0.0.345678:test-from-key',
           balance: 100,
           // to missing
@@ -317,10 +352,14 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.outputJson).toBeUndefined();
     });
 
     test('should throw error when tokenId is missing', async () => {
@@ -340,10 +379,14 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.outputJson).toBeUndefined();
     });
 
     test('should handle negative amount gracefully', async () => {
@@ -352,7 +395,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: -50, // Negative amount
@@ -363,10 +406,14 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.outputJson).toBeUndefined();
     });
   });
 
@@ -382,14 +429,18 @@ describe('transferTokenHandler', () => {
 
       const {
         api,
-        tokens: _tokens,
+        tokenTransactions: _tokenTransactions,
         signing: _signing,
         kms: _kms,
       } = makeApiMocks({
-        createTransferImpl: jest
-          .fn()
-          .mockResolvedValue(mockTransferTransaction),
-        signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        tokenTransactions: {
+          createTransferTransaction: jest
+            .fn()
+            .mockResolvedValue(mockTransferTransaction),
+        },
+        signing: {
+          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -412,14 +463,14 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.outputJson).toBeUndefined();
     });
 
     test('should handle token transaction service error', async () => {
@@ -429,9 +480,11 @@ describe('transferTokenHandler', () => {
         tokens: _tokens,
         kms: _kms,
       } = makeApiMocks({
-        createTransferImpl: jest
-          .fn()
-          .mockRejectedValue(new Error('Network error')),
+        tokens: {
+          createTransferTransaction: jest.fn().mockImplementation(() => {
+            throw new Error('Network error');
+          }),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -443,7 +496,7 @@ describe('transferTokenHandler', () => {
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
-          tokenId: '0.0.123456',
+          token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
           balance: 100,
@@ -454,10 +507,15 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
+
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.errorMessage).toContain('Network error');
+      expect(result.outputJson).toBeUndefined();
     });
 
     test('should handle signing service error', async () => {
@@ -502,14 +560,15 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Invalid key',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.errorMessage).toContain('Invalid key');
+      expect(result.outputJson).toBeUndefined();
     });
 
     test('should handle large amount transfers', async () => {
@@ -523,11 +582,11 @@ describe('transferTokenHandler', () => {
 
       const {
         api,
-        tokens,
+        tokenTransactions: _tokenTransactions,
         signing: _signing,
         kms: _kms,
       } = makeApiMocks({
-        tokens: {
+        tokenTransactions: {
           createTransferTransaction: jest
             .fn()
             .mockReturnValue(mockTransferTransaction),
@@ -557,22 +616,28 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+      expect(result.errorMessage).toBeUndefined();
 
-      expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
-        tokenId: '0.0.123456',
-        fromAccountId: '0.0.345678',
-        toAccountId: '0.0.789012',
-        amount: 999999999,
-      });
+      // Verify the transfer succeeded
+      const output = JSON.parse(result.outputJson!);
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.to).toBe('0.0.789012');
+
+      expect(_tokenTransactions.createTransferTransaction).toHaveBeenCalledWith(
+        {
+          tokenId: '0.0.123456',
+          fromAccountId: '0.0.345678',
+          toAccountId: '0.0.789012',
+          amount: 999999999,
+        },
+      );
     });
   });
 
@@ -588,11 +653,11 @@ describe('transferTokenHandler', () => {
 
       const {
         api,
-        tokens: _tokens,
+        tokenTransactions: _tokenTransactions,
         signing: _signing,
         kms: _kms,
       } = makeApiMocks({
-        tokens: {
+        tokenTransactions: {
           createTransferTransaction: jest
             .fn()
             .mockReturnValue(mockTransferTransaction),
@@ -622,19 +687,19 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+      expect(result.errorMessage).toBeUndefined();
 
-      expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('✅ Token transfer successful!'),
-      );
+      // Verify the transfer succeeded
+      const output = JSON.parse(result.outputJson!);
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.to).toBe('0.0.789012');
     });
   });
 
@@ -650,11 +715,11 @@ describe('transferTokenHandler', () => {
 
       const {
         api,
-        tokens,
+        tokenTransactions: _tokenTransactions,
         signing: _signing,
         kms: _kms,
       } = makeApiMocks({
-        tokens: {
+        tokenTransactions: {
           createTransferTransaction: jest
             .fn()
             .mockReturnValue(mockTransferTransaction),
@@ -684,62 +749,40 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.outputJson).toBeDefined();
+      expect(result.errorMessage).toBeUndefined();
 
-      expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
-        tokenId: '0.0.123456',
-        fromAccountId: '0.0.345678',
-        toAccountId: '0.0.345678',
-        amount: 100,
-      });
+      // Verify the transfer succeeded
+      const output = JSON.parse(result.outputJson!);
+      expect(output.tokenId).toBe('0.0.123456');
+      expect(output.to).toBe('0.0.345678');
+
+      expect(_tokenTransactions.createTransferTransaction).toHaveBeenCalledWith(
+        {
+          tokenId: '0.0.123456',
+          fromAccountId: '0.0.345678',
+          toAccountId: '0.0.345678',
+          amount: 100,
+        },
+      );
     });
 
     test('should handle decimal amounts', async () => {
       // Arrange
-      const mockTransferTransaction = { test: 'transfer-transaction' };
-      const mockSignResult: TransactionResult = {
-        success: true,
-        transactionId: '0.0.123@1234567890.123456789',
-        receipt: {} as any,
-      };
-
-      const {
-        api,
-        tokens,
-        signing: _signing,
-        kms: _kms,
-      } = makeApiMocks({
-        tokens: {
-          createTransferTransaction: jest
-            .fn()
-            .mockReturnValue(mockTransferTransaction),
-        },
-        signing: {
-          signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
-        },
-        kms: {
-          importPrivateKey: jest.fn().mockReturnValue({
-            keyRefId: 'imported-key-ref-id',
-            publicKey: 'imported-public-key',
-          }),
-        },
-      });
-
+      const { api } = makeApiMocks({});
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
         args: {
           token: '0.0.123456',
           to: '0.0.789012',
           from: '0.0.345678:test-from-key',
-          balance: 100.5, // Decimal amount
+          balance: 100.5, // Decimal amount - should be rejected
         },
         api,
         state: {} as any,
@@ -747,22 +790,15 @@ describe('transferTokenHandler', () => {
         logger,
       };
 
-      // Act & Assert
-      await expect(transferTokenHandler(args)).rejects.toThrow(
-        'Process.exit(1)',
-      );
+      // Act
+      const result = await transferTokenHandler(args);
 
-      // Verify the transfer succeeded (the error logged is from process.exit(0) being caught)
-      expect(logger.error).toHaveBeenCalledWith(
-        '❌ Failed to transfer token: Process.exit(0)',
-      );
-
-      expect(tokens.createTransferTransaction).toHaveBeenCalledWith({
-        tokenId: '0.0.123456',
-        fromAccountId: '0.0.345678',
-        toAccountId: '0.0.789012',
-        amount: 100.5,
-      });
+      // Assert - ADR-003 compliance: check CommandExecutionResult
+      expect(result).toBeDefined();
+      expect(result.status).toBe('failure');
+      expect(result.errorMessage).toBeDefined();
+      expect(result.errorMessage).toContain('cannot be converted to a BigInt');
+      expect(result.outputJson).toBeUndefined();
     });
   });
 });
