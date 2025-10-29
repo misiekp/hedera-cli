@@ -88,13 +88,6 @@ export const topicPluginManifest: PluginManifest = {
       description: 'List all topics stored in the state',
       options: [
         {
-          name: 'keys',
-          type: 'boolean',
-          required: false,
-          description: 'Show key information for topics',
-          short: 'k',
-        },
-        {
           name: 'network',
           type: 'string',
           required: false,
