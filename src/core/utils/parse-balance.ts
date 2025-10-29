@@ -29,7 +29,9 @@ export function parseBalance(
 
   // Check for NaN string
   if (balanceStr === 'NaN') {
-    throw new Error(`Invalid balance: "NaN". Must be a valid decimal number.`);
+    throw new Error(
+      `Unable to parse balance: "${balance}", balance after parsing is Not a Number.`,
+    );
   }
 
   // Check for negative
@@ -50,7 +52,7 @@ export function parseBalance(
   // Validate using BigNumber methods
   if (bn.isNaN()) {
     throw new Error(
-      `Invalid balance: "${balance}". Must be a valid decimal number.`,
+      `Unable to parse balance: "${balance}", balance after parsing is Not a Number.`,
     );
   }
 

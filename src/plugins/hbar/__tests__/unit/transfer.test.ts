@@ -147,7 +147,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance parameter: Invalid balance: "NaN". Must be a valid decimal number.',
+      'Invalid balance parameter: Unable to parse balance: "NaN", balance after parsing is Not a Number.',
     );
   });
 
