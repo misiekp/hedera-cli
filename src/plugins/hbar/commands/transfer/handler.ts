@@ -36,9 +36,8 @@ function parseAccountIdKeyPair(
 
   const [accountId, privateKey] = parts;
 
-  // Validate account ID format
-  const accountIdPattern = /^0\.0\.\d+$/;
-  if (!accountIdPattern.test(accountId)) {
+  // Validate account ID format using shared schema
+  if (!EntityIdSchema.safeParse(accountId).success) {
     throw new Error(
       `Invalid account ID format: ${accountId}. Expected format: 0.0.123456`,
     );
