@@ -129,6 +129,9 @@ describe('Token Plugin Error Handling', () => {
             throw new Error('Network unreachable');
           }),
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -322,6 +325,9 @@ describe('Token Plugin Error Handling', () => {
           createTransferTransaction: jest
             .fn()
             .mockResolvedValue(mockTransferTransaction),
+        },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),
@@ -680,6 +686,9 @@ describe('Token Plugin Error Handling', () => {
           createTransferTransaction: jest
             .fn()
             .mockResolvedValue(mockTransferTransaction),
+        },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(_mockSignResult),

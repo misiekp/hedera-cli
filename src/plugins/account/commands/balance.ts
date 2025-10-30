@@ -2,10 +2,12 @@
  * Account Balance Command Handler
  * Handles account balance retrieval using the Core API
  */
+import BigNumber from 'bignumber.js';
 import { TokenBalance } from '../../../../types';
 import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { normalizeBalance } from '../../../core/utils/normalize-balance';
 
 export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -39,9 +41,21 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
     const hbarBalance = await api.mirror.getAccountHBarBalance(accountId);
 
     if (onlyHbar) {
-      logger.log(`💰 Hbar Balance: ${hbarBalance.toString()} tinybars`);
+      const hbarDisplay = normalizeBalance(
+        new BigNumber(hbarBalance.toString()),
+        8,
+      );
+      logger.log(
+        `💰 Hbar Balance: ${hbarDisplay} HBAR (${hbarBalance.toString()} tinybar)`,
+      );
     } else {
-      logger.log(`💰 Account Balance: ${hbarBalance.toString()} tinybars`);
+      const hbarDisplay = normalizeBalance(
+        new BigNumber(hbarBalance.toString()),
+        8,
+      );
+      logger.log(
+        `💰 Account Balance: ${hbarDisplay} HBAR (${hbarBalance.toString()} tinybar)`,
+      );
 
       // Get token balances if not only HBAR
       if (!tokenId) {
@@ -49,7 +63,7 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
           const tokenBalances =
             await api.mirror.getAccountTokenBalances(accountId);
           if (tokenBalances.tokens && tokenBalances.tokens.length > 0) {
-            logger.log(`🪙 Token Balances:`);
+            logger.log(`🪙 Token Balances (in raw units):`);
             tokenBalances.tokens.forEach((token: TokenBalance) => {
               logger.log(`   ${token.token_id}: ${token.balance}`);
             });
@@ -65,6 +79,7 @@ export async function getAccountBalanceHandler(args: CommandHandlerArgs) {
 
     process.exit(0);
   } catch (error: unknown) {
+    console.dir({ error });
     logger.error(formatError('❌ Failed to get account balance', error));
     process.exit(1);
   }

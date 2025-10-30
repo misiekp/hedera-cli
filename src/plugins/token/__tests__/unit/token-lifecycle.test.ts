@@ -121,6 +121,9 @@ describe('Token Lifecycle Integration', () => {
               });
             }),
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 2 }),
+        },
         alias: {
           resolve: jest.fn().mockImplementation((alias, type) => {
             // Mock key alias resolution for test keys
@@ -143,7 +146,8 @@ describe('Token Lifecycle Integration', () => {
           tokenName: 'TestToken',
           symbol: 'TEST',
           decimals: 2,
-          initialSupply: 1000,
+          initialSupply: '1000',
+          maxSupply: '1000',
           supplyType: 'FINITE',
           treasury: `${_treasuryAccountId}:${treasuryKey}`,
           adminKey: 'admin-key',
@@ -197,9 +201,9 @@ describe('Token Lifecycle Integration', () => {
         name: 'TestToken',
         symbol: 'TEST',
         decimals: 2,
-        initialSupply: 1000,
+        initialSupplyRaw: 100000,
         supplyType: 'FINITE',
-        maxSupply: 1000,
+        maxSupplyRaw: 100000,
         treasuryId: _treasuryAccountId,
         adminKey: 'admin-key',
       });
@@ -215,7 +219,7 @@ describe('Token Lifecycle Integration', () => {
         tokenId: token,
         fromAccountId: _treasuryAccountId,
         toAccountId: userAccountId,
-        amount: 100,
+        amount: 10000,
       });
 
       // These operations will not succeed due to process.exit(1), so we can't verify the success calls

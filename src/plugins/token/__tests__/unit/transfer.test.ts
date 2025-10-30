@@ -48,6 +48,9 @@ describe('transferTokenHandler', () => {
         alias: {
           resolve: jest.fn().mockReturnValue(null), // No alias resolution needed for account-id:key format
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }), // Default token decimals
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -87,7 +90,7 @@ describe('transferTokenHandler', () => {
         tokenId: '0.0.123456',
         fromAccountId: '0.0.345678',
         toAccountId: '0.0.789012',
-        amount: 100,
+        amount: 100000000,
       });
       expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockTransferTransaction,
@@ -126,6 +129,9 @@ describe('transferTokenHandler', () => {
             keyRefId: 'alias-key-ref-id',
           }),
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
         kms: {
           getPublicKey: jest.fn().mockReturnValue('alias-public-key'),
         },
@@ -160,7 +166,7 @@ describe('transferTokenHandler', () => {
         tokenId: '0.0.123456',
         fromAccountId: '0.0.345678',
         toAccountId: '0.0.789012',
-        amount: 100,
+        amount: 100000000,
       });
       expect(signing.signAndExecuteWith).toHaveBeenCalledWith(
         mockTransferTransaction,
@@ -203,6 +209,9 @@ describe('transferTokenHandler', () => {
             return null;
           }),
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -240,13 +249,17 @@ describe('transferTokenHandler', () => {
         tokenId: '0.0.123456',
         fromAccountId: '0.0.345678',
         toAccountId: '0.0.789012',
-        amount: 100,
+        amount: 100000000,
       });
     });
 
     test('should reject zero amount transfer', async () => {
       // Arrange
-      const { api } = makeApiMocks({});
+      const { api } = makeApiMocks({
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
+      });
 
       const logger = makeLogger();
       const args: CommandHandlerArgs = {
@@ -271,7 +284,7 @@ describe('transferTokenHandler', () => {
         '❌ Invalid command parameters:',
       );
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('balance: Balance must be a positive number'),
+        expect.stringContaining('balance: Number must be greater than 0'),
       );
     });
   });
@@ -390,6 +403,9 @@ describe('transferTokenHandler', () => {
           .fn()
           .mockResolvedValue(mockTransferTransaction),
         signAndExecuteImpl: jest.fn().mockResolvedValue(mockSignResult),
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -480,6 +496,9 @@ describe('transferTokenHandler', () => {
             .fn()
             .mockRejectedValue(new Error('Invalid key')),
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -535,6 +554,9 @@ describe('transferTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -571,7 +593,7 @@ describe('transferTokenHandler', () => {
         tokenId: '0.0.123456',
         fromAccountId: '0.0.345678',
         toAccountId: '0.0.789012',
-        amount: 999999999,
+        amount: 999999999000000,
       });
     });
   });
@@ -596,6 +618,9 @@ describe('transferTokenHandler', () => {
           createTransferTransaction: jest
             .fn()
             .mockReturnValue(mockTransferTransaction),
+        },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
@@ -662,6 +687,9 @@ describe('transferTokenHandler', () => {
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
         },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
+        },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
             keyRefId: 'imported-key-ref-id',
@@ -698,7 +726,7 @@ describe('transferTokenHandler', () => {
         tokenId: '0.0.123456',
         fromAccountId: '0.0.345678',
         toAccountId: '0.0.345678',
-        amount: 100,
+        amount: 100000000,
       });
     });
 
@@ -724,6 +752,9 @@ describe('transferTokenHandler', () => {
         },
         signing: {
           signAndExecuteWith: jest.fn().mockResolvedValue(mockSignResult),
+        },
+        mirror: {
+          getTokenInfo: jest.fn().mockResolvedValue({ decimals: 6 }),
         },
         kms: {
           importPrivateKey: jest.fn().mockReturnValue({
@@ -761,7 +792,7 @@ describe('transferTokenHandler', () => {
         tokenId: '0.0.123456',
         fromAccountId: '0.0.345678',
         toAccountId: '0.0.789012',
-        amount: 100.5,
+        amount: 100500000,
       });
     });
   });

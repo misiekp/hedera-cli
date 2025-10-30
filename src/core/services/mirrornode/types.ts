@@ -57,7 +57,7 @@ export interface TokenInfo {
   token_id: string;
   symbol: string;
   name: string;
-  decimals: number;
+  decimals: string;
   total_supply: string;
   max_supply: string;
   treasury: string;

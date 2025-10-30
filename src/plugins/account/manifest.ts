@@ -2,7 +2,7 @@
  * Account Plugin Manifest
  * Defines the account plugin according to ADR-001
  */
-import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { PluginManifest } from '../../core';
 import { ACCOUNT_JSON_SCHEMA, ACCOUNT_NAMESPACE } from './schema';
 import { createAccountHandler } from './commands/create';
 import { getAccountBalanceHandler } from './commands/balance';
@@ -38,9 +38,11 @@ export const accountPluginManifest: PluginManifest = {
         {
           name: 'balance',
           short: 'b',
-          type: 'number',
+          type: 'string',
           required: false,
           default: 10000,
+          description:
+            'Initial HBAR balance. Default: display units. Add "t" for base units. Default: 10000 display units (1000000000 tinybar)',
         },
         {
           name: 'auto-associations',

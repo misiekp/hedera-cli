@@ -102,7 +102,7 @@ describe('account plugin - create command (unit)', () => {
 
     expect(kms.createLocalPrivateKey).toHaveBeenCalled();
     expect(account.createAccount).toHaveBeenCalledWith({
-      balance: 5000,
+      balanceRaw: 500000000000,
       maxAutoAssociations: 3,
       publicKey: 'pub-key-test',
       keyType: 'ECDSA',

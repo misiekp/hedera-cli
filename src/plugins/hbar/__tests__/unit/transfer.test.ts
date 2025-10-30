@@ -116,7 +116,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const args = makeArgs(api, logger, {
-      balance: 100000000,
+      balance: 1,
       from: 'sender',
       to: 'receiver',
       memo: 'test-transfer',
@@ -147,7 +147,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
+      'Invalid balance parameter: Unable to parse balance: "NaN", balance after parsing is Not a Number.',
     );
   });
 
@@ -161,12 +161,22 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
+      'Invalid balance parameter: Invalid balance: "-100". Balance cannot be negative.',
     );
   });
 
   test('throws error when balance is zero', async () => {
-    const { api, logger } = setupTransferTest({ accounts: [] });
+    const { api, logger } = setupTransferTest({
+      transferImpl: jest.fn().mockResolvedValue({
+        transaction: {},
+      }),
+      signAndExecuteImpl: jest.fn().mockResolvedValue({
+        success: true,
+        transactionId: 'test-tx',
+        receipt: {} as any,
+      }),
+      accounts: [],
+    });
 
     const args = makeArgs(api, logger, {
       balance: 0,
@@ -174,9 +184,7 @@ describe('hbar plugin - transfer command (unit)', () => {
       to: '0.0.2002',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
-    );
+    await expect(transferHandler(args)).rejects.toThrow('Invalid balance');
   });
 
   test('throws error when no accounts available and from/to missing', async () => {
@@ -264,7 +272,7 @@ describe('hbar plugin - transfer command (unit)', () => {
     });
 
     const args = makeArgs(api, logger, {
-      balance: 50000000,
+      balance: 0.5,
       from: '0.0.3000',
       to: 'receiver',
     });

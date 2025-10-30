@@ -2,7 +2,7 @@
  * Token Transfer Command Handler
  * Handles token transfer operations using the Core API
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { CommandHandlerArgs } from '../../../core';
 import { safeValidateTokenTransferParams } from '../schema';
 import {
   resolveAccountParameter,
@@ -10,9 +10,13 @@ import {
   resolveTokenParameter,
 } from '../resolver-helper';
 import { formatError } from '../../../utils/errors';
+import { processBalanceInput } from '../../../core/utils/process-balance-input';
+import { ZustandTokenStateHelper } from '../zustand-state-helper';
 
 export async function transferTokenHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
+
+  const tokenState = new ZustandTokenStateHelper(api.state, logger);
 
   // Validate command parameters
   const validationResult = safeValidateTokenTransferParams(args.args);
@@ -30,7 +34,6 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   const tokenIdOrAlias = validatedParams.token;
   const from = validatedParams.from;
   const to = validatedParams.to;
-  const amount = validatedParams.balance;
 
   const network = api.network.getCurrentNetwork();
 
@@ -45,6 +48,34 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   }
 
   const tokenId = resolvedToken.tokenId;
+
+  // Get token decimals from API (needed for balance conversion)
+  let tokenDecimals = 0;
+  const userBalanceInput = validatedParams.balance;
+
+  // Only fetch decimals if user input doesn't have 't' suffix (raw units)
+  const isRawUnits = String(userBalanceInput).trim().endsWith('t');
+  if (!isRawUnits) {
+    try {
+      const tokenInfoStorage = tokenState.getToken(tokenId);
+
+      if (tokenInfoStorage) {
+        tokenDecimals = tokenInfoStorage.decimals;
+      } else {
+        const tokenInfoMirror = await api.mirror.getTokenInfo(tokenId);
+        tokenDecimals = parseInt(tokenInfoMirror.decimals) || 0;
+      }
+
+      const tokenInfo = await api.mirror.getTokenInfo(tokenId);
+      tokenDecimals = parseInt(tokenInfo.decimals) || 0;
+    } catch (error) {
+      logger.error(`Failed to fetch token decimals for ${tokenId}`);
+      process.exit(1);
+    }
+  }
+
+  // Convert balance input: display units (default) or raw units (with 't' suffix)
+  const rawAmount = processBalanceInput(userBalanceInput, tokenDecimals);
 
   // Resolve from parameter (name or account-id:private-key) if provided
 
@@ -101,16 +132,17 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
   const toAccountId = resolvedToAccount.accountId;
 
   logger.log(
-    `Transferring ${amount} tokens of ${tokenId} from ${fromAccountId} to ${toAccountId}`,
+    `Transferring ${rawAmount.toString()} tokens of ${tokenId} from ${fromAccountId} to ${toAccountId}`,
   );
 
   try {
     // 1. Create transfer transaction using Core API
+    // Convert display units to base token units
     const transferTransaction = api.token.createTransferTransaction({
       tokenId,
       fromAccountId,
       toAccountId,
-      amount,
+      amount: rawAmount.toNumber(),
     });
 
     // 2. Sign and execute transaction using the from account key
@@ -127,7 +159,7 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
       logger.log(`   Token ID: ${tokenId}`);
       logger.log(`   From: ${fromAccountId}`);
       logger.log(`   To: ${toAccountId}`);
-      logger.log(`   Amount: ${amount}`);
+      logger.log(`   Amount: ${rawAmount.toString()}`);
       logger.log(`   Transaction ID: ${result.transactionId}`);
 
       // 3. Optionally update token state if needed

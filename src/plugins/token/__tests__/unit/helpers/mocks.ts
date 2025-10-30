@@ -153,6 +153,7 @@ interface ApiMocksConfig {
   kms?: Partial<jest.Mocked<KmsService>>;
   alias?: Partial<jest.Mocked<AliasService>>;
   state?: Partial<jest.Mocked<StateService>>;
+  mirror?: Record<string, jest.Mock>;
   network?: string;
   createTransferImpl?: jest.Mock;
   signAndExecuteImpl?: jest.Mock;
@@ -180,7 +181,7 @@ export const makeApiMocks = (config?: ApiMocksConfig) => {
     kms,
     alias,
     state,
-    mirror: {} as unknown as any,
+    mirror: (config?.mirror || {}) as unknown as any,
     network: {
       getCurrentNetwork: jest
         .fn()

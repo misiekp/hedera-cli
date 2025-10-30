@@ -350,11 +350,11 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
       symbol: tokenDefinition.symbol,
       treasuryId: treasury.treasuryId,
       decimals: tokenDefinition.decimals,
-      initialSupply: tokenDefinition.initialSupply,
+      initialSupplyRaw: tokenDefinition.initialSupply,
       supplyType: tokenDefinition.supplyType.toUpperCase() as
         | 'FINITE'
         | 'INFINITE',
-      maxSupply: tokenDefinition.maxSupply,
+      maxSupplyRaw: tokenDefinition.maxSupply,
       adminKey: tokenDefinition.keys.adminKey,
       customFees: tokenDefinition.customFees.map((fee) => ({
         type: fee.type,

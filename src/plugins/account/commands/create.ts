@@ -7,6 +7,7 @@ import type { AccountData } from '../schema';
 import { AliasType } from '../../../core/services/alias/alias-service.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
+import { processBalanceInput } from '../../../core/utils/process-balance-input';
 
 export async function createAccountHandler(args: CommandHandlerArgs) {
   const { api, logger } = args;
@@ -15,8 +16,24 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const accountState = new ZustandAccountStateHelper(api.state, logger);
 
   // Extract command arguments
-  const balance =
-    args.args.balance !== undefined ? (args.args.balance as number) : 10000;
+  const rawBalance =
+    args.args.balance !== undefined
+      ? (args.args.balance as string | number)
+      : 10000;
+  let balance: number;
+
+  try {
+    // Convert balance input: display units (default) or base units (with 't' suffix)
+    // HBAR uses 8 decimals
+    balance = processBalanceInput(rawBalance, 8).toNumber();
+  } catch (error) {
+    logger.error(
+      `Invalid balance parameter: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    process.exit(1);
+    return;
+  }
+
   const autoAssociations = (args.args['auto-associations'] as number) || 0;
   const alias = (args.args.name as string) || '';
 
@@ -34,8 +51,9 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
     const { keyRefId, publicKey } = api.kms.createLocalPrivateKey();
 
     // 2. Create transaction using Core API
+    // Convert HBAR to tinybar (8 decimals: multiply by 10^8)
     const accountCreateResult = await api.account.createAccount({
-      balance,
+      balanceRaw: balance,
       maxAutoAssociations: autoAssociations,
       publicKey,
       keyType: 'ECDSA',

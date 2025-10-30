@@ -54,7 +54,14 @@ export const tokenPluginManifest: PluginManifest = {
           description:
             'Source account: either a name or account-id:private-key pair',
         },
-        { name: 'balance', short: 'b', type: 'number', required: true },
+        {
+          name: 'balance',
+          short: 'b',
+          type: 'string',
+          required: true,
+          description:
+            'Amount to transfer. Default: display units (with decimals applied). Append "t" for raw base units (e.g., "100t")',
+        },
       ],
       handler: transferTokenHandler,
     },
@@ -83,9 +90,11 @@ export const tokenPluginManifest: PluginManifest = {
         {
           name: 'initial-supply',
           short: 'i',
-          type: 'number',
+          type: 'string',
           required: false,
           default: 1000000,
+          description:
+            'Initial supply amount. Default: display units (with decimals applied). Append "t" for raw base units (e.g., "1000t")',
         },
         {
           name: 'supply-type',
@@ -93,8 +102,9 @@ export const tokenPluginManifest: PluginManifest = {
           short: 'S',
           required: false,
           default: 'INFINITE',
+          description: 'Set supply type: INFINITE(default) or FINITE',
         },
-        { name: 'max-supply', short: 'm', type: 'number', required: false },
+        { name: 'max-supply', short: 'm', type: 'string', required: false },
         { name: 'admin-key', short: 'a', type: 'string', required: false },
         {
           name: 'name',

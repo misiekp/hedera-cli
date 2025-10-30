@@ -32,9 +32,9 @@ export interface TokenCreateParams {
   symbol: string;
   treasuryId: string;
   decimals: number;
-  initialSupply: number;
+  initialSupplyRaw: number;
   supplyType: 'FINITE' | 'INFINITE';
-  maxSupply?: number; // Required for FINITE supply type
+  maxSupplyRaw?: number; // Required for FINITE supply type
   adminKey: string;
   customFees?: CustomFee[];
 }
