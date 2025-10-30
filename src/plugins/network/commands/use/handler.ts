@@ -3,6 +3,7 @@ import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
 import { UseNetworkOutput } from './output';
 import { SupportedNetwork } from '../../../../core/types/shared.types';
+import { Status } from '../../../../core/shared/constants';
 
 export function useHandler(args: CommandHandlerArgs): CommandExecutionResult {
   const { logger, api } = args;
@@ -10,7 +11,7 @@ export function useHandler(args: CommandHandlerArgs): CommandExecutionResult {
   const network = args.args.network as SupportedNetwork | undefined;
   if (!network) {
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: 'Network name is required. Use --network <name>',
     };
   }
@@ -23,10 +24,10 @@ export function useHandler(args: CommandHandlerArgs): CommandExecutionResult {
     const output: UseNetworkOutput = {
       activeNetwork: network,
     };
-    return { status: 'success', outputJson: JSON.stringify(output) };
+    return { status: Status.Success, outputJson: JSON.stringify(output) };
   } catch (error) {
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Failed to switch network', error),
     };
   }

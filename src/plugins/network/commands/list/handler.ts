@@ -1,6 +1,7 @@
 import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
+import { Status } from '../../../../core/shared/constants';
 import {
   checkMirrorNodeHealth,
   checkRpcHealth,
@@ -48,13 +49,13 @@ export async function listHandler(
     };
 
     return {
-      status: 'success',
+      status: Status.Success,
       outputJson: JSON.stringify(output),
     };
   } catch (error) {
     const errorMessage = formatError('Failed to list networks', error);
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage,
     };
   }

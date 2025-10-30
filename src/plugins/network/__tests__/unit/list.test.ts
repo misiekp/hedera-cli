@@ -6,6 +6,7 @@ import {
   makeNetworkMock,
 } from '../../../../../__tests__/helpers/plugin';
 import { isJsonOutput } from '../../../../utils/output';
+import { Status } from '../../../../core/shared/constants';
 import {
   checkMirrorNodeHealth,
   checkRpcHealth,
@@ -61,7 +62,7 @@ describe('network plugin - list command', () => {
 
     const result = await listHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
   });
 
@@ -79,7 +80,7 @@ describe('network plugin - list command', () => {
     const args = makeArgs({ network: networkService }, logger, {});
 
     const result = await listHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     expect(mockedCheckMirrorNodeHealth).toHaveBeenCalledWith(
       'https://testnet.mirrornode.hedera.com/api/v1',
@@ -95,7 +96,7 @@ describe('network plugin - list command', () => {
     const args = makeArgs({ network: networkService }, logger, {});
 
     const result = await listHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     expect(mockedCheckMirrorNodeHealth).toHaveBeenCalledTimes(1);
     expect(mockedCheckRpcHealth).toHaveBeenCalledTimes(1);
@@ -127,7 +128,7 @@ describe('network plugin - list command', () => {
 
     const result = await listHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
   });
 
@@ -141,7 +142,7 @@ describe('network plugin - list command', () => {
 
     const result = await listHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Failed to list networks');
   });
 
@@ -163,7 +164,7 @@ describe('network plugin - list command', () => {
     const args = makeArgs({ network: networkService }, logger, {});
 
     const result = await listHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
   });
 
   test('returns success on happy path', async () => {
@@ -173,7 +174,7 @@ describe('network plugin - list command', () => {
 
     const result = await listHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
   });
 
   test('includes operator information in output', async () => {
@@ -191,7 +192,7 @@ describe('network plugin - list command', () => {
     const args = makeArgs({ network: networkService }, logger, {});
 
     const result = await listHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     const parsed = JSON.parse(result.outputJson as string);
     expect(parsed.networks.some((n: any) => n.operatorId === '0.0.1001')).toBe(
@@ -206,7 +207,7 @@ describe('network plugin - list command', () => {
     const args = makeArgs({ network: networkService }, logger, {});
 
     const result = await listHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     const parsed = JSON.parse(result.outputJson as string);
     expect(parsed.networks.some((n: any) => !n.operatorId)).toBe(true);

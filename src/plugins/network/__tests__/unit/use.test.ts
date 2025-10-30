@@ -6,6 +6,7 @@ import {
   makeNetworkMock,
 } from '../../../../../__tests__/helpers/plugin';
 import { isJsonOutput } from '../../../../utils/output';
+import { Status } from '../../../../core/shared/constants';
 
 jest.mock('../../../../utils/output', () => ({
   isJsonOutput: jest.fn(),
@@ -51,7 +52,7 @@ describe('network plugin - use command', () => {
     const result = useHandler(args);
 
     expect(networkService.switchNetwork).toHaveBeenCalledWith('mainnet');
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
   });
 
   test('returns failure for invalid network', () => {
@@ -67,7 +68,7 @@ describe('network plugin - use command', () => {
 
     const result = useHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Failed to switch network');
   });
 
@@ -86,7 +87,7 @@ describe('network plugin - use command', () => {
     const result = useHandler(args);
 
     expect(networkService.switchNetwork).toHaveBeenCalledWith('previewnet');
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
   });
 
@@ -100,7 +101,7 @@ describe('network plugin - use command', () => {
     });
 
     const result = useHandler(args);
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     expect(logger.verbose).toHaveBeenCalledWith(
       'Switching to network: mainnet',
@@ -115,7 +116,7 @@ describe('network plugin - use command', () => {
 
     const result = useHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Network name is required');
   });
 
@@ -129,7 +130,7 @@ describe('network plugin - use command', () => {
     });
 
     const res1 = useHandler(argsToMainnet);
-    expect(res1.status).toBe('success');
+    expect(res1.status).toBe(Status.Success);
 
     expect(networkService.switchNetwork).toHaveBeenCalledWith('mainnet');
 
@@ -140,7 +141,7 @@ describe('network plugin - use command', () => {
     });
 
     const res2 = useHandler(argsToPreviewnet);
-    expect(res2.status).toBe('success');
+    expect(res2.status).toBe(Status.Success);
 
     expect(networkService.switchNetwork).toHaveBeenCalledWith('previewnet');
   });
