@@ -3,6 +3,11 @@
  * Defines the network plugin
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import {
+  ListNetworksOutputSchema,
+  LIST_NETWORKS_TEMPLATE,
+} from './commands/list';
+import { UseNetworkOutputSchema, USE_NETWORK_TEMPLATE } from './commands/use';
 
 export const networkPluginManifest: PluginManifest = {
   name: 'network',
@@ -22,7 +27,11 @@ export const networkPluginManifest: PluginManifest = {
       description:
         'List all available networks with their configuration and health status',
       options: [],
-      handler: './commands/list',
+      handler: './commands/list/handler',
+      output: {
+        schema: ListNetworksOutputSchema,
+        humanTemplate: LIST_NETWORKS_TEMPLATE,
+      },
     },
     {
       name: 'use',
@@ -31,13 +40,17 @@ export const networkPluginManifest: PluginManifest = {
       options: [
         {
           name: 'network',
-          short: 'N',
+          short: 'n',
           type: 'string',
           required: true,
           description: 'Network name (testnet, mainnet, previewnet, localnet)',
         },
       ],
-      handler: './commands/use',
+      handler: './commands/use/handler',
+      output: {
+        schema: UseNetworkOutputSchema,
+        humanTemplate: USE_NETWORK_TEMPLATE,
+      },
     },
   ],
 };
