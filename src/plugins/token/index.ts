@@ -4,7 +4,7 @@
  */
 export { tokenPluginManifest } from './manifest';
 
-// Export command handlers
+// Export command handlers and schemas
 export { transferTokenHandler } from './commands/transfer';
 export { createTokenHandler } from './commands/create';
 export { associateTokenHandler } from './commands/associate';

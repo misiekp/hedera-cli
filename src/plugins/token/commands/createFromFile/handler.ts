@@ -1,19 +1,22 @@
 /**
  * Token Create From File Command Handler
  * Handles token creation from JSON file definitions using the Core API
+ * Follows ADR-003 contract: returns CommandExecutionResult
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { CoreApi } from '../../../core/core-api/core-api.interface';
-import { Logger } from '../../../core/services/logger/logger-service.interface';
-import { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
-import { SupportedNetwork } from '../../../core/types/shared.types';
-import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import { TokenData } from '../schema';
-import { resolveTreasuryParameter } from '../resolver-helper';
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { CoreApi } from '../../../../core/core-api/core-api.interface';
+import { Logger } from '../../../../core/services/logger/logger-service.interface';
+import { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
+import { SupportedNetwork } from '../../../../core/types/shared.types';
+import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import { TokenData } from '../../schema';
+import { resolveTreasuryParameter } from '../../resolver-helper';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { z } from 'zod';
-import { formatError, toErrorMessage } from '../../../utils/errors';
+import { formatError, toErrorMessage } from '../../../../utils/errors';
+import { CreateTokenFromFileOutput } from './output';
 
 // Import the token file schema from the original commands
 const accountIdRegex = /^\d+\.\d+\.\d+$/;
@@ -319,7 +322,9 @@ async function processTokenAssociations(
   return successfulAssociations;
 }
 
-export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
+export default async function createTokenFromFileHandler(
+  args: CommandHandlerArgs,
+): Promise<CommandExecutionResult> {
   const { api, logger } = args;
 
   // Initialize token state helper
@@ -406,11 +411,37 @@ export async function createTokenFromFileHandler(args: CommandHandlerArgs) {
       // Note: In a full implementation, you'd store these in the state or dynamic variables system
     }
 
-    process.exit(0);
-  } catch (error) {
-    logger.error(formatError('❌ Failed to create token from file', error));
-    process.exit(1);
+    // Prepare output data
+    const outputData: CreateTokenFromFileOutput = {
+      tokenId: result.tokenId,
+      name: tokenDefinition.name,
+      symbol: tokenDefinition.symbol,
+      treasuryId: treasury.treasuryId,
+      decimals: tokenDefinition.decimals,
+      initialSupply: tokenDefinition.initialSupply.toString(),
+      supplyType: tokenDefinition.supplyType.toUpperCase() as
+        | 'FINITE'
+        | 'INFINITE',
+      transactionId: result.transactionId,
+      network,
+      associations: successfulAssociations.map((assoc) => ({
+        accountId: assoc.accountId,
+        name: assoc.name,
+        success: true,
+        transactionId: result.transactionId, // Use the token creation transaction ID for now
+      })),
+    };
+
+    return {
+      status: 'success',
+      outputJson: JSON.stringify(outputData),
+    };
+  } catch (error: unknown) {
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to create token from file', error),
+    };
   }
 }
 
-export default createTokenFromFileHandler;
+export { createTokenFromFileHandler };

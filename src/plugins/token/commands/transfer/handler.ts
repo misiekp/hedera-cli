@@ -1,28 +1,34 @@
 /**
  * Token Transfer Command Handler
  * Handles token transfer operations using the Core API
+ * Follows ADR-003 contract: returns CommandExecutionResult
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { safeValidateTokenTransferParams } from '../schema';
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { safeValidateTokenTransferParams } from '../../schema';
 import {
   resolveAccountParameter,
   resolveDestinationAccountParameter,
   resolveTokenParameter,
-} from '../resolver-helper';
-import { formatError } from '../../../utils/errors';
+} from '../../resolver-helper';
+import { formatError } from '../../../../utils/errors';
+import { TransferTokenOutput } from './output';
 
-export async function transferTokenHandler(args: CommandHandlerArgs) {
+export default async function transferTokenHandler(
+  args: CommandHandlerArgs,
+): Promise<CommandExecutionResult> {
   const { api, logger } = args;
 
   // Validate command parameters
   const validationResult = safeValidateTokenTransferParams(args.args);
   if (!validationResult.success) {
-    logger.error('❌ Invalid command parameters:');
-    validationResult.error.errors.forEach((error) => {
-      logger.error(`   - ${error.path.join('.')}: ${error.message}`);
-    });
-    process.exit(1);
-    return; // Ensure execution stops (for testing with mocked process.exit)
+    const errorMessages = validationResult.error.errors.map(
+      (error) => `${error.path.join('.')}: ${error.message}`,
+    );
+    return {
+      status: 'failure',
+      errorMessage: `Invalid command parameters:\n${errorMessages.join('\n')}`,
+    };
   }
 
   // Use validated parameters
@@ -133,14 +139,33 @@ export async function transferTokenHandler(args: CommandHandlerArgs) {
       // 3. Optionally update token state if needed
       // (e.g., update associations, balances, etc.)
 
-      process.exit(0);
+      // Prepare output data
+      const outputData: TransferTokenOutput = {
+        transactionId: result.transactionId,
+        tokenId,
+        from: fromAccountId,
+        to: toAccountId,
+        amount: BigInt(amount),
+      };
+
+      return {
+        status: 'success',
+        outputJson: JSON.stringify(outputData, (key, value): unknown =>
+          typeof value === 'bigint' ? value.toString() : value,
+        ),
+      };
     } else {
-      throw new Error('Token transfer failed');
+      return {
+        status: 'failure',
+        errorMessage: 'Token transfer failed',
+      };
     }
-  } catch (error) {
-    logger.error(formatError('❌ Failed to transfer token', error));
-    process.exit(1);
+  } catch (error: unknown) {
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to transfer token', error),
+    };
   }
 }
 
-export default transferTokenHandler;
+export { transferTokenHandler };

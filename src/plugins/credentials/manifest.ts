@@ -1,8 +1,22 @@
 /**
  * Credentials Management Plugin Manifest
  * A plugin for managing operator credentials
+ * Updated for ADR-003 compliance
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import {
+  SetCredentialsOutputSchema,
+  SET_CREDENTIALS_TEMPLATE,
+} from './commands/set/output';
+import {
+  ListCredentialsOutputSchema,
+  LIST_CREDENTIALS_TEMPLATE,
+} from './commands/list/output';
+import {
+  RemoveCredentialsOutputSchema,
+  REMOVE_CREDENTIALS_TEMPLATE,
+} from './commands/remove/output';
+import { CREDENTIALS_JSON_SCHEMA, CREDENTIALS_NAMESPACE } from './schema';
 
 const credentialsManifest: PluginManifest = {
   name: 'credentials',
@@ -17,26 +31,9 @@ const credentialsManifest: PluginManifest = {
   capabilities: ['credentials:manage', 'credentials:set', 'credentials:list'],
   stateSchemas: [
     {
-      namespace: 'credentials',
+      namespace: CREDENTIALS_NAMESPACE,
       version: 1,
-      jsonSchema: {
-        type: 'object',
-        properties: {
-          accountId: { type: 'string' },
-          privateKey: { type: 'string' },
-          network: { type: 'string' },
-          isDefault: { type: 'boolean' },
-          createdAt: { type: 'string' },
-        },
-        required: [
-          'accountId',
-          'privateKey',
-          'network',
-          'isDefault',
-          'createdAt',
-        ],
-        additionalProperties: false,
-      },
+      jsonSchema: CREDENTIALS_JSON_SCHEMA,
       scope: 'profile',
     },
   ],
@@ -51,13 +48,21 @@ const credentialsManifest: PluginManifest = {
         { name: 'private-key', short: 'p', type: 'string', required: true },
         { name: 'network', short: 'n', type: 'string', required: false },
       ],
-      handler: 'commands/set',
+      handler: './commands/set/handler',
+      output: {
+        schema: SetCredentialsOutputSchema,
+        humanTemplate: SET_CREDENTIALS_TEMPLATE,
+      },
     },
     {
       name: 'list',
       summary: 'List all credentials',
       description: 'Show all stored credentials',
-      handler: 'commands/list',
+      handler: './commands/list/handler',
+      output: {
+        schema: ListCredentialsOutputSchema,
+        humanTemplate: LIST_CREDENTIALS_TEMPLATE,
+      },
     },
     {
       name: 'remove',
@@ -66,7 +71,11 @@ const credentialsManifest: PluginManifest = {
       options: [
         { name: 'key-ref-id', short: 'k', type: 'string', required: true },
       ],
-      handler: 'commands/remove',
+      handler: './commands/remove/handler',
+      output: {
+        schema: RemoveCredentialsOutputSchema,
+        humanTemplate: REMOVE_CREDENTIALS_TEMPLATE,
+      },
     },
   ],
 };

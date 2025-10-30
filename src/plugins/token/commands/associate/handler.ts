@@ -1,28 +1,34 @@
 /**
  * Token Associate Command Handler
  * Handles token association operations using the Core API
+ * Follows ADR-003 contract: returns CommandExecutionResult
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import { safeValidateTokenAssociateParams } from '../schema';
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import { safeValidateTokenAssociateParams } from '../../schema';
 import {
   resolveAccountParameter,
   resolveTokenParameter,
-} from '../resolver-helper';
-import { formatError } from '../../../utils/errors';
+} from '../../resolver-helper';
+import { formatError } from '../../../../utils/errors';
+import { AssociateTokenOutput } from './output';
 
-export async function associateTokenHandler(args: CommandHandlerArgs) {
+export default async function associateTokenHandler(
+  args: CommandHandlerArgs,
+): Promise<CommandExecutionResult> {
   const { api, logger } = args;
 
   // Validate command parameters
   const validationResult = safeValidateTokenAssociateParams(args.args);
   if (!validationResult.success) {
-    logger.error('❌ Invalid command parameters:');
-    validationResult.error.errors.forEach((error) => {
-      logger.error(`   - ${error.path.join('.')}: ${error.message}`);
-    });
-    process.exit(1);
-    return; // Ensure execution stops (for testing with mocked process.exit)
+    const errorMessages = validationResult.error.errors.map(
+      (error) => `${error.path.join('.')}: ${error.message}`,
+    );
+    return {
+      status: 'failure',
+      errorMessage: `Invalid command parameters:\n${errorMessages.join('\n')}`,
+    };
   }
 
   // Initialize token state helper
@@ -104,14 +110,30 @@ export async function associateTokenHandler(args: CommandHandlerArgs) {
       tokenState.addTokenAssociation(tokenId, accountId, accountName);
       logger.log(`   Association saved to token state`);
 
-      process.exit(0);
+      // Prepare output data
+      const outputData: AssociateTokenOutput = {
+        transactionId: result.transactionId,
+        accountId,
+        tokenId,
+        associated: true,
+      };
+
+      return {
+        status: 'success',
+        outputJson: JSON.stringify(outputData),
+      };
     } else {
-      throw new Error('Token association failed');
+      return {
+        status: 'failure',
+        errorMessage: 'Token association failed',
+      };
     }
-  } catch (error) {
-    logger.error(formatError('❌ Failed to associate token', error));
-    process.exit(1);
+  } catch (error: unknown) {
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to associate token', error),
+    };
   }
 }
 
-export default associateTokenHandler;
+export { associateTokenHandler };

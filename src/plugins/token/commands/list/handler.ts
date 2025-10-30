@@ -1,13 +1,16 @@
 /**
  * Token List Command Handler
  * Handles listing tokens from state for the current network
+ * Follows ADR-003 contract: returns CommandExecutionResult
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
-import { ZustandTokenStateHelper } from '../zustand-state-helper';
-import { TokenData } from '../schema';
-import { formatError } from '../../../utils/errors';
-import { SupportedNetwork } from '../../../core/types/shared.types';
-import { CoreApi } from '../../../core';
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import { TokenData } from '../../schema';
+import { formatError } from '../../../../utils/errors';
+import { SupportedNetwork } from '../../../../core/types/shared.types';
+import { CoreApi } from '../../../../core';
+import { ListTokensOutput } from './output';
 
 /**
  * Resolves the token alias from the alias service
@@ -135,7 +138,9 @@ function displayStatistics(
   }
 }
 
-export function listTokensHandler(args: CommandHandlerArgs) {
+export default function listTokensHandler(
+  args: CommandHandlerArgs,
+): CommandExecutionResult {
   const { api, logger } = args;
 
   // Initialize token state helper
@@ -193,8 +198,25 @@ export function listTokensHandler(args: CommandHandlerArgs) {
       } else {
         logger.log(`\nNo tokens found for current network: ${currentNetwork}`);
       }
-      process.exit(0);
-      return;
+
+      const outputData: ListTokensOutput = {
+        tokens: [],
+        count: 0,
+        network: targetNetwork as SupportedNetwork,
+        stats: {
+          total: 0,
+          withKeys: 0,
+          byNetwork: {},
+          bySupplyType: {},
+          withAssociations: 0,
+          totalAssociations: 0,
+        },
+      };
+
+      return {
+        status: 'success',
+        outputJson: JSON.stringify(outputData),
+      };
     }
 
     // Display header
@@ -208,8 +230,8 @@ export function listTokensHandler(args: CommandHandlerArgs) {
     }
     logger.log('──────────────────────────────────────');
 
-    // Display each token
-    tokens.forEach((token, index) => {
+    // Display each token and prepare output data
+    const tokensList = tokens.map((token, index) => {
       // Resolve alias for this token
       const alias = resolveTokenAlias(api, token.tokenId, token.network);
 
@@ -220,17 +242,62 @@ export function listTokensHandler(args: CommandHandlerArgs) {
       if (index < tokens.length - 1) {
         logger.log('');
       }
+
+      // Prepare token data for output
+      return {
+        tokenId: token.tokenId,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        supplyType: token.supplyType,
+        treasuryId: token.treasuryId,
+        network: token.network,
+        alias: alias || undefined,
+        keys:
+          showKeys && token.keys
+            ? {
+                adminKey: token.keys.adminKey || null,
+                supplyKey: token.keys.supplyKey || null,
+                wipeKey: token.keys.wipeKey || null,
+                kycKey: token.keys.kycKey || null,
+                freezeKey: token.keys.freezeKey || null,
+                pauseKey: token.keys.pauseKey || null,
+                feeScheduleKey: token.keys.feeScheduleKey || null,
+                treasuryKey: token.keys.treasuryKey || null,
+              }
+            : undefined,
+      };
     });
 
-    // Display statistics
+    // Get statistics
     const stats = tokenState.getTokensWithStats();
     displayStatistics(stats, logger);
 
-    process.exit(0);
+    // Prepare output data
+    const outputData: ListTokensOutput = {
+      tokens: tokensList,
+      count: tokens.length,
+      network: targetNetwork as SupportedNetwork,
+      stats: {
+        total: stats.total,
+        withKeys: 0, // Will need to calculate this
+        byNetwork: stats.byNetwork,
+        bySupplyType: stats.bySupplyType,
+        withAssociations: stats.withAssociations,
+        totalAssociations: stats.totalAssociations,
+      },
+    };
+
+    return {
+      status: 'success',
+      outputJson: JSON.stringify(outputData),
+    };
   } catch (error: unknown) {
-    logger.error(formatError('❌ Failed to list tokens', error));
-    process.exit(1);
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to list tokens', error),
+    };
   }
 }
 
-export default listTokensHandler;
+export { listTokensHandler };
