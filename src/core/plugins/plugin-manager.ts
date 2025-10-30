@@ -49,6 +49,12 @@ export class PluginManager {
       }
     }
 
+    // Register all namespaces with the state service
+    const namespaces = this.getAllNamespaces();
+    if (namespaces.length > 0) {
+      this.coreApi.state.registerNamespaces(namespaces);
+    }
+
     logger.log(`✅ Plugin system ready`);
   }
 
@@ -88,6 +94,23 @@ export class PluginManager {
       path: plugin.path,
       status: plugin.status,
     }));
+  }
+
+  /**
+   * Get all namespaces from loaded plugins
+   */
+  getAllNamespaces(): string[] {
+    const namespaces = new Set<string>();
+
+    for (const plugin of this.loadedPlugins.values()) {
+      if (plugin.status === 'loaded' && plugin.manifest.stateSchemas) {
+        for (const schema of plugin.manifest.stateSchemas) {
+          namespaces.add(schema.namespace);
+        }
+      }
+    }
+
+    return Array.from(namespaces);
   }
 
   /**

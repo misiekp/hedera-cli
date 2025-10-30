@@ -129,6 +129,9 @@ export const makeStateServiceMock = (
   subscribe: jest.fn(),
   getActions: jest.fn(),
   getState: jest.fn(),
+  registerNamespaces: jest.fn(),
+  getStorageDirectory: jest.fn().mockReturnValue('/mock/storage/dir'),
+  isInitialized: jest.fn().mockReturnValue(true),
   ...overrides,
 });
 

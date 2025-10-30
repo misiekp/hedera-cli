@@ -18,6 +18,50 @@ export class TemplateFormatter {
       return a === b;
     });
 
+    // Helper for greater than comparison
+    Handlebars.registerHelper('gt', function (a: unknown, b: unknown) {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return a > b;
+      }
+      if (typeof a === 'string' && typeof b === 'string') {
+        return a > b;
+      }
+      return false;
+    });
+
+    // Helper for less than comparison
+    Handlebars.registerHelper('lt', function (a: unknown, b: unknown) {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return a < b;
+      }
+      if (typeof a === 'string' && typeof b === 'string') {
+        return a < b;
+      }
+      return false;
+    });
+
+    // Helper for greater than or equal comparison
+    Handlebars.registerHelper('gte', function (a: unknown, b: unknown) {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return a >= b;
+      }
+      if (typeof a === 'string' && typeof b === 'string') {
+        return a >= b;
+      }
+      return false;
+    });
+
+    // Helper for less than or equal comparison
+    Handlebars.registerHelper('lte', function (a: unknown, b: unknown) {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return a <= b;
+      }
+      if (typeof a === 'string' && typeof b === 'string') {
+        return a <= b;
+      }
+      return false;
+    });
+
     // Helper for adding 1 (for 1-based indexing)
     Handlebars.registerHelper('add1', function (value: number) {
       return value + 1;
