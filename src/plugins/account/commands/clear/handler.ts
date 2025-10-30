@@ -9,7 +9,7 @@ import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { ClearAccountsOutput } from './output';
 
-export default function clearAccounts(
+export function clearAccounts(
   args: CommandHandlerArgs,
 ): CommandExecutionResult {
   const { api, logger } = args;

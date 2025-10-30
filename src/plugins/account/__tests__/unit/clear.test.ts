@@ -1,6 +1,6 @@
 import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
-import clearAccountsHandler from '../../commands/clear/handler';
+import { clearAccounts } from '../../commands/clear/handler';
 import type { ClearAccountsOutput } from '../../commands/clear';
 import { makeLogger } from '../../../../../__tests__/helpers/plugin';
 
@@ -34,7 +34,7 @@ describe('account plugin - clear command (ADR-003)', () => {
       args: {},
     };
 
-    const result = clearAccountsHandler(args as CommandHandlerArgs);
+    const result = clearAccounts(args as CommandHandlerArgs);
 
     expect(MockedHelper).toHaveBeenCalledWith(args.api!.state, logger);
     expect(listAccountsMock).toHaveBeenCalledTimes(1);
@@ -64,7 +64,7 @@ describe('account plugin - clear command (ADR-003)', () => {
       args: {},
     };
 
-    const result = clearAccountsHandler(args as CommandHandlerArgs);
+    const result = clearAccounts(args as CommandHandlerArgs);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBeDefined();

@@ -9,9 +9,7 @@ import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { ListAccountsOutput } from './output';
 
-export default function listAccounts(
-  args: CommandHandlerArgs,
-): CommandExecutionResult {
+export function listAccounts(args: CommandHandlerArgs): CommandExecutionResult {
   const { api, logger } = args;
 
   // Initialize Zustand state helper

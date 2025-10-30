@@ -11,7 +11,7 @@ import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { CreateAccountOutput } from './output';
 
-export default async function createAccount(
+export async function createAccount(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
   const { api, logger } = args;
