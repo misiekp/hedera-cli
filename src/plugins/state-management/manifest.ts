@@ -13,7 +13,7 @@ import {
 } from './commands/backup';
 import { StateStatsOutputSchema, STATE_STATS_TEMPLATE } from './commands/stats';
 
-const stateManagementManifest: PluginManifest = {
+export const stateManagementManifest: PluginManifest = {
   name: 'state-management',
   version: '1.0.0',
   displayName: 'State Management',

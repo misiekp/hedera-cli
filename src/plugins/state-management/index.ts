@@ -8,7 +8,7 @@ import { stateInfo } from './commands/info/handler';
 import { stateBackup } from './commands/backup/handler';
 import { stateStats } from './commands/stats/handler';
 
-export { default as stateManagementManifest } from './manifest';
+export { stateManagementManifest } from './manifest';
 
 // Export command handlers
 export { listState, clearState, stateInfo, stateBackup, stateStats };
