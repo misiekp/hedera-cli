@@ -12,6 +12,7 @@ import type { AliasService } from '../../src/core/services/alias/alias-service.i
 import type { TxExecutionService } from '../../src/core/services/tx-execution/tx-execution-service.interface';
 import type { HederaMirrornodeService } from '../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { AccountData } from '../../src/plugins/account/schema';
+import BigNumber from 'bignumber.js';
 
 /**
  * Create a mocked Logger instance
@@ -191,7 +192,9 @@ export const makeMirrorMock = (
     getAccountImpl?: jest.Mock;
   } = {},
 ): Partial<HederaMirrornodeService> => ({
-  getAccountHBarBalance: jest.fn().mockResolvedValue(options.hbarBalance ?? 0n),
+  getAccountHBarBalance: jest
+    .fn()
+    .mockResolvedValue(new BigNumber((options.hbarBalance ?? 0n).toString())),
   getAccountTokenBalances: options.tokenError
     ? jest.fn().mockRejectedValue(options.tokenError)
     : jest.fn().mockResolvedValue({ tokens: options.tokenBalances ?? [] }),
