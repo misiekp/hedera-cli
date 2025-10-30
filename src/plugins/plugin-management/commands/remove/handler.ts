@@ -8,9 +8,7 @@ import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
 import { RemovePluginOutput } from './output';
 
-export default function removePlugin(
-  args: CommandHandlerArgs,
-): CommandExecutionResult {
+export function removePlugin(args: CommandHandlerArgs): CommandExecutionResult {
   const { logger } = args;
   const { name } = args.args as { name: string };
 

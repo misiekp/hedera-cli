@@ -8,7 +8,7 @@ import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
 import { PluginInfoOutput } from './output';
 
-export default function getPluginInfo(
+export function getPluginInfo(
   args: CommandHandlerArgs,
 ): CommandExecutionResult {
   const { logger } = args;
