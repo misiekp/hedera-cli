@@ -1,4 +1,4 @@
-import submitMessageHandler from '../commands/submit-message/handler';
+import { submitMessage } from '../commands/submit-message/handler';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
 import type { CoreApi } from '../../../core/core-api/core-api.interface';
 import type { TransactionResult } from '../../../core/services/tx-execution/tx-execution-service.interface';
@@ -108,7 +108,7 @@ describe('topic plugin - message-submit command', () => {
       message: 'Hello, World!',
     });
 
-    const result = await submitMessageHandler(args);
+    const result = await submitMessage(args);
 
     expect(result.status).toBe('success');
     expect(result.outputJson).toBeDefined();
@@ -163,7 +163,7 @@ describe('topic plugin - message-submit command', () => {
       message: 'Signed message',
     });
 
-    const result = await submitMessageHandler(args);
+    const result = await submitMessage(args);
 
     expect(result.status).toBe('success');
     expect(result.outputJson).toBeDefined();
@@ -198,7 +198,7 @@ describe('topic plugin - message-submit command', () => {
       message: 'Test message',
     });
 
-    const result = await submitMessageHandler(args);
+    const result = await submitMessage(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain('Topic not found');
@@ -238,7 +238,7 @@ describe('topic plugin - message-submit command', () => {
       message: 'Test message',
     });
 
-    const result = await submitMessageHandler(args);
+    const result = await submitMessage(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain('sequence number not returned');
@@ -277,7 +277,7 @@ describe('topic plugin - message-submit command', () => {
       message: 'Failed message',
     });
 
-    const result = await submitMessageHandler(args);
+    const result = await submitMessage(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBe('Failed to submit message');
@@ -311,7 +311,7 @@ describe('topic plugin - message-submit command', () => {
       message: 'Error message',
     });
 
-    const result = await submitMessageHandler(args);
+    const result = await submitMessage(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain('Failed to submit message');

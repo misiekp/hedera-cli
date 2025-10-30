@@ -4,7 +4,7 @@
  */
 export { topicPluginManifest } from './manifest';
 
-export { default as createHandler } from './commands/create/handler';
-export { default as listHandler } from './commands/list/handler';
-export { default as submitMessageHandler } from './commands/submit-message/handler';
-export { default as findMessageHandler } from './commands/find-message/handler';
+export { createTopic } from './commands/create/handler';
+export { listTopics } from './commands/list/handler';
+export { submitMessage } from './commands/submit-message/handler';
+export { findMessage } from './commands/find-message/handler';

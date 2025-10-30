@@ -14,7 +14,7 @@ import { CreateTopicOutput } from './output';
  * @param args - Command handler arguments from CLI core
  * @returns Promise resolving to CommandExecutionResult with structured output
  */
-export default async function createTopicHandler(
+export async function createTopic(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
   const { api, logger } = args;

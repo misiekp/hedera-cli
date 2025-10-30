@@ -1,4 +1,4 @@
-import findMessageHandler from '../commands/find-message/handler';
+import { findMessage } from '../commands/find-message/handler';
 import type { CoreApi } from '../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { FindMessagesOutput } from '../commands/find-message/output';
@@ -72,7 +72,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumber: 5,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     expect(result.outputJson).toBeDefined();
@@ -117,7 +117,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberGt: 5,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     expect(result.outputJson).toBeDefined();
@@ -168,7 +168,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberGte: 5,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -216,7 +216,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberLt: 3,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -255,7 +255,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberLte: 3,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -294,7 +294,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberEq: 5,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -336,7 +336,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberNe: 2,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -368,7 +368,7 @@ describe('topic plugin - message-find command', () => {
       topicId: '0.0.5678',
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain(
@@ -397,7 +397,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumber: 5,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain('Failed to find messages');
@@ -425,7 +425,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberGte: 5,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain('Failed to find messages');
@@ -454,7 +454,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberGte: 1000,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -486,7 +486,7 @@ describe('topic plugin - message-find command', () => {
       sequenceNumberLt: 10,
     });
 
-    const result = await findMessageHandler(args);
+    const result = await findMessage(args);
 
     expect(result.status).toBe('success');
 
