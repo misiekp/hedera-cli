@@ -1,0 +1,49 @@
+/**
+ * List Plugins Command Handler
+ * Handles listing all available plugins
+ * Follows ADR-003 contract: returns CommandExecutionResult
+ */
+import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
+import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { formatError } from '../../../../utils/errors';
+import { ListPluginsOutput } from './output';
+
+export default function getPluginList(
+  args: CommandHandlerArgs,
+): CommandExecutionResult {
+  const { logger } = args;
+
+  logger.log('📋 Getting plugin list...');
+
+  try {
+    // Note: In a real implementation, this would use the plugin manager
+    // For now, we'll return mock data
+    const outputData: ListPluginsOutput = {
+      plugins: [
+        {
+          name: 'account',
+          displayName: 'Hedera Account Management',
+          version: '1.0.0',
+          status: 'loaded',
+        },
+        {
+          name: 'plugin-management',
+          displayName: 'Plugin Management',
+          version: '1.0.0',
+          status: 'loaded',
+        },
+      ],
+      count: 2,
+    };
+
+    return {
+      status: 'success',
+      outputJson: JSON.stringify(outputData),
+    };
+  } catch (error: unknown) {
+    return {
+      status: 'failure',
+      errorMessage: formatError('Failed to list plugins', error),
+    };
+  }
+}
