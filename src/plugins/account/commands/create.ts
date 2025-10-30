@@ -2,45 +2,41 @@
  * Account Create Command Handler
  * Handles account creation using the Core API
  */
-import { CommandHandlerArgs } from '../../../core/plugins/plugin.interface';
+import { CommandHandlerArgs } from '../../../core';
 import type { AccountData } from '../schema';
 import { AliasType } from '../../../core/services/alias/alias-service.interface';
 import { formatError } from '../../../utils/errors';
 import { ZustandAccountStateHelper } from '../zustand-state-helper';
 import { processBalanceInput } from '../../../core/utils/process-balance-input';
-import { CoreApi } from '../../../core';
 import { Hbar } from '@hashgraph/sdk';
 
-type OperatorBalanceResult = {
-  sufficient: boolean;
-  balance: string;
-};
+/**
+ * Validates that an account has sufficient balance for an operation.
+ * This is a pure validation function with no external dependencies.
+ *
+ * @param availableBalance - Available balance in tinybars
+ * @param requiredBalance - Required balance in tinybars
+ * @param context - Context for error message (account type and ID)
+ * @throws Error if balance is insufficient
+ */
+function validateSufficientBalance(
+  availableBalance: BigNumber,
+  requiredBalance: BigNumber,
+  context: { accountType: string; accountId: string },
+): void {
+  const isBalanceSufficient = availableBalance.gt(requiredBalance);
 
-async function checkIfEnoughBalance(
-  api: CoreApi,
-  requestedBalance: number,
-): Promise<OperatorBalanceResult> {
-  const network = api.network.getCurrentNetwork();
-  const operator = api.network.getOperator(network);
+  if (!isBalanceSufficient) {
+    // Convert to HBAR only for display purposes
+    const requiredHbar = Hbar.fromTinybars(requiredBalance).toString();
+    const availableHbar = Hbar.fromTinybars(availableBalance).toString();
 
-  if (!operator) {
-    // This should never happen as the CLI ensures an operator is set before executing commands
-    throw new Error('Default operator not set.');
+    throw new Error(
+      `Insufficient balance in ${context.accountType} account ${context.accountId}.\n` +
+        `   Required balance:  ${requiredHbar}\n` +
+        `   Available balance: ${availableHbar}`,
+    );
   }
-
-  const balanceTinyBars = await api.mirror.getAccountHBarBalance(
-    operator.accountId,
-  );
-
-  const balance = Hbar.fromTinybars(balanceTinyBars).toBigNumber();
-
-  const hbarBalance = balance.toString();
-  const isBalanceSufficient = balance.gt(requestedBalance);
-
-  return {
-    sufficient: isBalanceSufficient,
-    balance: hbarBalance,
-  };
 }
 
 export async function createAccountHandler(args: CommandHandlerArgs) {
@@ -54,12 +50,12 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
     args.args.balance !== undefined
       ? (args.args.balance as string | number)
       : 10000;
-  let balance: number;
+  let balance: BigNumber;
 
   try {
     // Convert balance input: display units (default) or base units (with 't' suffix)
     // HBAR uses 8 decimals
-    balance = processBalanceInput(rawBalance, 8).toNumber();
+    balance = processBalanceInput(rawBalance, 8);
   } catch (error) {
     logger.error(
       `Invalid balance parameter: ${error instanceof Error ? error.message : String(error)}`,
@@ -75,16 +71,24 @@ export async function createAccountHandler(args: CommandHandlerArgs) {
   const network = api.network.getCurrentNetwork();
   api.alias.availableOrThrow(alias, network);
 
-  const operatorBalance = await checkIfEnoughBalance(api, balance);
-
-  if (!operatorBalance.sufficient) {
-    logger.log(
-      `Insufficient balance in operator account to create a new account.
-            Requested balance: ${balance}
-            Operator balance: ${operatorBalance.balance}`,
+  // Check operator account and fetch balance
+  const operator = api.network.getOperator(network);
+  if (!operator) {
+    throw new Error(
+      'No operator account configured. ' +
+        'Please configure operator credentials before creating accounts.',
     );
-    process.exit(1);
   }
+
+  const operatorBalance = await api.mirror.getAccountHBarBalance(
+    operator.accountId,
+  );
+
+  // Validate operator has sufficient balance to create the account
+  validateSufficientBalance(operatorBalance, balance, {
+    accountType: 'operator',
+    accountId: operator.accountId,
+  });
 
   const name = alias || `account-${Date.now()}`;
 

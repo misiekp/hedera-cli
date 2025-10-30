@@ -13,6 +13,7 @@ import {
   makeMirrorMock,
   setupExitSpy,
 } from '../../../../../__tests__/helpers/plugin';
+import BigNumber from 'bignumber.js';
 
 let exitSpy: jest.SpyInstance;
 
@@ -25,10 +26,10 @@ const MockedHelper = ZustandAccountStateHelper as jest.Mock;
 /**
  * Balance constants for testing (in Tinybars)
  * These represent realistic Hbar amounts:
- * - OPERATOR_SUFFICIENT_BALANCE: 1000 Hbar (1000 * 10^8 tinybars)
+ * - OPERATOR_SUFFICIENT_BALANCE: 100000 Hbar (100000 * 10^8 tinybars)
  * - ACCOUNT_REQUEST_BALANCE: 10 Hbar (typical account creation)
  */
-const OPERATOR_SUFFICIENT_BALANCE = 100_000_000_000n; // 1000 Hbar in tinybars
+const OPERATOR_SUFFICIENT_BALANCE = 10_000_000_000_000n; // 100000 Hbar in tinybars
 const OPERATOR_ACCOUNT_ID = '0.0.123';
 const OPERATOR_KEY_REF_ID = 'kr_operator_test';
 
@@ -138,7 +139,7 @@ describe('account plugin - create command (unit)', () => {
 
     expect(kms.createLocalPrivateKey).toHaveBeenCalled();
     expect(account.createAccount).toHaveBeenCalledWith({
-      balanceRaw: 500000000000,
+      balanceRaw: new BigNumber(500000000000),
       maxAutoAssociations: 3,
       publicKey: 'pub-key-test',
       keyType: 'ECDSA',
