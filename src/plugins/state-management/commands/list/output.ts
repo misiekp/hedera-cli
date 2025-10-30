@@ -38,7 +38,7 @@ export const LIST_STATE_TEMPLATE = `
 {{/if}}
 
 {{#each namespaces}}
-{{@index}}. {{name}}
+{{add1 @index}}. {{name}}
    Entries: {{entryCount}}
    Size: {{size}} bytes
    Last Modified: {{lastModified}}

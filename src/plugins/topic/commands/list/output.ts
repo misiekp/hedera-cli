@@ -48,7 +48,7 @@ export const LIST_TOPICS_TEMPLATE = `
 Found {{totalCount}} topic(s):
 ──────────────────────────────────────
 {{#each topics}}
-{{@index}}. {{name}}
+{{add1 @index}}. {{name}}
    Topic ID: {{topicId}}
    Network: {{network}}
 {{#if memo}}

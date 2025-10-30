@@ -61,7 +61,7 @@ export const CREATE_TOKEN_FROM_FILE_TEMPLATE = `
 {{#if associations.length}}
 🔗 Token Associations ({{associations.length}}):
 {{#each associations}}
-   {{@index}}. {{name}} ({{accountId}}) - {{#if success}}✅ Success{{else}}❌ Failed{{/if}}{{#if transactionId}} - {{transactionId}}{{/if}}
+   {{add1 @index}}. {{name}} ({{accountId}}) - {{#if success}}✅ Success{{else}}❌ Failed{{/if}}{{#if transactionId}} - {{transactionId}}{{/if}}
 {{/each}}
 {{/if}}
 `.trim();

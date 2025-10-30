@@ -39,7 +39,7 @@ export const LIST_CREDENTIALS_TEMPLATE = `
 🔐 Found {{totalCount}} stored credential(s):
 
 {{#each credentials}}
-{{@index}}. Key Reference ID: {{keyRefId}}
+{{add1 @index}}. Key Reference ID: {{keyRefId}}
    Type: {{type}}
    Public Key: {{publicKey}}
 {{#if labels}}

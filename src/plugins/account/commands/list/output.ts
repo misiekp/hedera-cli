@@ -38,7 +38,7 @@ export const LIST_ACCOUNTS_TEMPLATE = `
 📝 Found {{totalCount}} account(s):
 
 {{#each accounts}}
-{{@index}}. Name: {{name}}
+{{add1 @index}}. Name: {{name}}
    Account ID: {{accountId}}
    Type: {{type}}
    Network: {{network}}
