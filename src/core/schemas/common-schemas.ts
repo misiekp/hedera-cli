@@ -197,6 +197,19 @@ export const EvmAddressSchema = z
   .describe('EVM-compatible address');
 
 /**
+ * Account ID with Private Key
+ * Format: accountId:privateKey
+ * Example: 0.0.123456:302e020100301006072a8648ce3d020106052b8104000a04220420...
+ */
+export const AccountIdKeyPairSchema = z
+  .string()
+  .regex(
+    /^0\.0\.[1-9][0-9]*:(?:[0-9a-fA-F]{64}|30[0-9a-fA-F]{100,})$/,
+    'Account ID with private key must be in format 0.0.{number}:{hex|der_key}',
+  )
+  .describe('Account ID with private key in format 0.0.{number}:{private_key}');
+
+/**
  * Network name
  * Supported Hedera network names
  */
@@ -347,6 +360,7 @@ export const COMMON_ZOD_SCHEMAS = {
   tokenBalance: TokenBalanceSchema,
   tinybarBalance: TinybarBalanceSchema,
   evmAddress: EvmAddressSchema,
+  accountIdKeyPair: AccountIdKeyPairSchema,
   publicKey: PublicKeySchema,
   network: NetworkSchema,
   keyType: KeyTypeSchema,
@@ -378,6 +392,7 @@ export type EvmDecimal = z.infer<typeof EvmDecimalSchema>;
 export type EntityId = z.infer<typeof EntityIdSchema>;
 export type Timestamp = z.infer<typeof TimestampSchema>;
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
+export type AccountIdKeyPair = z.infer<typeof AccountIdKeyPairSchema>;
 export type TokenAmount = z.infer<typeof TokenAmountSchema>;
 export type TokenBalance = z.infer<typeof TokenBalanceSchema>;
 export type TinybarBalance = z.infer<typeof TinybarBalanceSchema>;

@@ -1,8 +1,9 @@
-import transferHandler from '../../commands/transfer';
+import { transferHandler } from '../../commands/transfer';
 import { ZustandAccountStateHelper } from '../../../account/zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HbarService } from '../../../../core/services/hbar/hbar-service.interface';
 import type { AccountData } from '../../../account/schema';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeAccountData,
@@ -117,17 +118,19 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: 'sender',
-      toIdOrNameOrAlias: 'receiver',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
       memo: 'test-transfer',
     });
 
-    await transferHandler(args);
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Success);
+    expect(result.outputJson).toBeDefined();
 
     expect(hbar.transferTinybar).toHaveBeenCalledWith({
       amount: 100000000,
-      from: 'sender',
-      to: 'receiver',
+      from: '0.0.1001',
+      to: '0.0.2002',
       memo: 'test-transfer',
     });
     expect(signing.signAndExecute).toHaveBeenCalled();
@@ -137,49 +140,49 @@ describe('hbar plugin - transfer command (unit)', () => {
     );
   });
 
-  test('throws error when balance is invalid', async () => {
+  test('returns failure when balance is invalid', async () => {
     const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
       balance: NaN,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Failure);
+    expect(result.errorMessage).toContain(
       'Invalid balance: provide a positive number of tinybars',
     );
   });
 
-  test('throws error when balance is negative', async () => {
+  test('returns failure when balance is negative', async () => {
     const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
       balance: -100,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Failure);
   });
 
-  test('throws error when balance is zero', async () => {
+  test('returns failure when balance is zero', async () => {
     const { api, logger } = setupTransferTest({ accounts: [] });
 
     const args = makeArgs(api, logger, {
       balance: 0,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Invalid balance: provide a positive number of tinybars',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Failure);
   });
 
-  test('throws error when no accounts available and from/to missing', async () => {
+  test('succeeds when valid params provided (no default accounts check)', async () => {
     const { api, logger } = setupTransferTest({
       accounts: [],
       transferImpl: jest.fn().mockResolvedValue({
@@ -194,17 +197,18 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100,
-      fromIdOrNameOrAlias: '0.0.1001',
-      toIdOrNameOrAlias: '0.0.2002',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
-    await transferHandler(args);
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Success);
 
     // This test should actually succeed now since we're providing valid parameters
     expect(logger.log).toHaveBeenCalledWith('[HBAR] Transfer command invoked');
   });
 
-  test('throws error when from equals to', async () => {
+  test('returns failure when from equals to', async () => {
     const sameAccount = makeAccountData({
       name: 'same-account',
       accountId: '0.0.1001',
@@ -215,16 +219,16 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100,
-      fromIdOrNameOrAlias: 'same-account',
-      toIdOrNameOrAlias: 'same-account',
+      from: 'same-account',
+      to: 'same-account',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Cannot transfer to the same account',
-    );
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Failure);
+    expect(result.errorMessage).toContain('Cannot transfer');
   });
 
-  test('throws error when transferTinybar fails', async () => {
+  test('returns failure when transferTinybar fails', async () => {
     const { api, logger } = setupTransferTest({
       transferImpl: jest
         .fn()
@@ -234,13 +238,29 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 100000000,
-      fromIdOrNameOrAlias: 'sender',
-      toIdOrNameOrAlias: 'receiver',
+      from: '0.0.1001:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
       memo: 'test-transfer',
     });
 
-    await expect(transferHandler(args)).rejects.toThrow(
-      'Network connection failed',
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Failure);
+    expect(result.errorMessage).toContain('Network connection failed');
+  });
+
+  test('returns failure when from is just account ID without private key', async () => {
+    const { api, logger } = setupTransferTest({ accounts: [] });
+
+    const args = makeArgs(api, logger, {
+      balance: 100,
+      from: '0.0.1001', // Just account ID, no private key
+      to: '0.0.2002',
+    });
+
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Failure);
+    expect(result.errorMessage).toContain(
+      'Invalid from account: 0.0.1001 is neither a valid account-id:private-key pair, nor a known account name',
     );
   });
 
@@ -265,18 +285,19 @@ describe('hbar plugin - transfer command (unit)', () => {
 
     const args = makeArgs(api, logger, {
       balance: 50000000,
-      fromIdOrNameOrAlias: '0.0.3000',
-      toIdOrNameOrAlias: 'receiver',
+      from: '0.0.3000:302e020100301006072a8648ce3d020106052b8104000a04220420abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      to: '0.0.2002',
     });
 
-    await transferHandler(args);
+    const result = await transferHandler(args);
+    expect(result.status).toBe(Status.Success);
 
     // The transfer command uses the default operator from the signing service
     expect(hbar.transferTinybar).toHaveBeenCalledWith({
       amount: 50000000,
       from: '0.0.3000',
-      to: 'receiver',
-      memo: '',
+      to: '0.0.2002',
+      memo: undefined,
     });
     expect(logger.log).toHaveBeenCalledWith(
       '[HBAR] Transfer submitted successfully, txId=0.0.3000@1234567890.987654321',

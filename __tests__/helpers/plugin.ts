@@ -12,6 +12,7 @@ import type { AliasService } from '../../src/core/services/alias/alias-service.i
 import type { TxExecutionService } from '../../src/core/services/tx-execution/tx-execution-service.interface';
 import type { HederaMirrornodeService } from '../../src/core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { OutputService } from '../../src/core/services/output/output-service.interface';
+import type { HbarService } from '../../src/core/services/hbar/hbar-service.interface';
 import type { AccountData } from '../../src/plugins/account/schema';
 
 /**
@@ -66,7 +67,7 @@ export const makeArgs = (
     logger,
     alias: makeAliasMock(),
     kms: makeKmsMock(),
-    hbar: undefined,
+    hbar: makeHbarMock(),
     output: makeOutputMock(),
     ...api,
   },
@@ -205,6 +206,13 @@ export const makeMirrorMock = (
         accountPublicKey: 'pubKey',
       },
     ),
+});
+
+/**
+ * Create a mocked HbarService
+ */
+export const makeHbarMock = (): jest.Mocked<HbarService> => ({
+  transferTinybar: jest.fn(),
 });
 
 /**

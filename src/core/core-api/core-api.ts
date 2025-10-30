@@ -44,7 +44,7 @@ export class CoreApiImplementation implements CoreApi {
   public logger: Logger;
   public alias: AliasService;
   public kms: KmsService;
-  public hbar?: HbarService;
+  public hbar: HbarService;
   public output: OutputService;
 
   constructor(config: CoreApiConfig) {

@@ -3,6 +3,7 @@
  * Defines the hbar plugin and its commands
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
+import { TransferOutputSchema, TRANSFER_TEMPLATE } from './commands/transfer';
 
 export const hbarPluginManifest: PluginManifest = {
   name: 'hbar',
@@ -29,19 +30,19 @@ export const hbarPluginManifest: PluginManifest = {
           description: 'Amount of tinybars to transfer',
         },
         {
-          name: 'to-id-or-name-or-alias',
+          name: 'to',
           short: 't',
           type: 'string',
           required: true,
-          description: 'Account ID, name, or alias to transfer to',
+          description: 'Account ID or name to transfer to',
         },
         {
-          name: 'from-id-or-name-or-alias',
+          name: 'from',
           short: 'f',
           type: 'string',
           required: false,
           description:
-            'Account ID, name, or alias to transfer from (defaults to operator from env)',
+            'AccountID:privateKey pair or account name to transfer from (defaults to operator)',
         },
         {
           name: 'memo',
@@ -51,7 +52,11 @@ export const hbarPluginManifest: PluginManifest = {
           description: 'Memo for the transfer',
         },
       ],
-      handler: './commands/transfer',
+      handler: './commands/transfer/handler',
+      output: {
+        schema: TransferOutputSchema,
+        humanTemplate: TRANSFER_TEMPLATE,
+      },
     },
   ],
 };

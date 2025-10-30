@@ -75,7 +75,7 @@ export interface CoreApi {
   /**
    * HBAR operations
    */
-  hbar?: HbarService;
+  hbar: HbarService;
 
   /**
    * Output handling and formatting
