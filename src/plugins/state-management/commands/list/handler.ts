@@ -9,9 +9,7 @@ import { formatError } from '../../../../utils/errors';
 import { ListStateOutput } from './output';
 import { NamespaceInfo } from '../../schema';
 
-export default function listState(
-  args: CommandHandlerArgs,
-): CommandExecutionResult {
+export function listState(args: CommandHandlerArgs): CommandExecutionResult {
   const { api, logger } = args;
 
   // Extract command arguments

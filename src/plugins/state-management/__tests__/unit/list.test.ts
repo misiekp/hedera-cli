@@ -1,7 +1,7 @@
 /**
  * Unit Tests for State List Command
  */
-import listState from '../../commands/list/handler';
+import { listState } from '../../commands/list/handler';
 import {
   makeArgs,
   makeLogger,

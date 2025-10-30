@@ -1,7 +1,7 @@
 /**
  * Unit Tests for State Clear Command
  */
-import clearState from '../../commands/clear/handler';
+import { clearState } from '../../commands/clear/handler';
 import {
   makeArgs,
   makeLogger,

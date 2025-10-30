@@ -1,7 +1,7 @@
 /**
  * Unit Tests for State Backup Command
  */
-import stateBackup from '../../commands/backup/handler';
+import { stateBackup } from '../../commands/backup/handler';
 import {
   makeArgs,
   makeLogger,
