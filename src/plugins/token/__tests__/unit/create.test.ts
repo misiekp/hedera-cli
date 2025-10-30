@@ -4,7 +4,7 @@
  * Updated for ADR-003 compliance
  */
 import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
-import { createTokenHandler } from '../../commands/create';
+import { createToken } from '../../commands/create';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
 import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import {
@@ -80,7 +80,7 @@ describe('createTokenHandler', () => {
       const args = makeTokenCreateCommandArgs({ api, logger });
 
       // Act
-      await createTokenHandler(args);
+      await createToken(args);
 
       // Assert
       expect(api.kms.importPrivateKey).toHaveBeenCalledWith('test-private-key');
@@ -134,7 +134,7 @@ describe('createTokenHandler', () => {
       };
 
       // Act
-      await createTokenHandler(args);
+      await createToken(args);
 
       // Assert
       expect(api.network.getOperator).toHaveBeenCalled();
@@ -174,7 +174,7 @@ describe('createTokenHandler', () => {
       };
 
       // Act
-      await createTokenHandler(args);
+      await createToken(args);
 
       // Assert
       // ADR-003 compliance: logger.error calls are no longer expected
@@ -204,7 +204,7 @@ describe('createTokenHandler', () => {
       };
 
       // Act
-      await createTokenHandler(args);
+      await createToken(args);
 
       // Assert
       // ADR-003 compliance: logger.error calls are no longer expected
@@ -267,7 +267,7 @@ describe('createTokenHandler', () => {
       };
 
       // Act
-      await createTokenHandler(args);
+      await createToken(args);
 
       // Assert
       // ADR-003 compliance: logger.error calls are no longer expected
@@ -305,7 +305,7 @@ describe('createTokenHandler', () => {
       };
 
       // Act
-      await createTokenHandler(args);
+      await createToken(args);
 
       // Assert
       // Expect failure result instead of process.exit
@@ -374,7 +374,7 @@ describe('createTokenHandler', () => {
       };
 
       // Act
-      await createTokenHandler(args);
+      await createToken(args);
 
       // Assert
       expect(MockedHelper).toHaveBeenCalledWith(api.state, logger);

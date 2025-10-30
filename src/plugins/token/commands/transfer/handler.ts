@@ -14,7 +14,7 @@ import {
 import { formatError } from '../../../../utils/errors';
 import { TransferTokenOutput } from './output';
 
-export default async function transferTokenHandler(
+export async function transferToken(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
   const { api, logger } = args;
@@ -167,5 +167,3 @@ export default async function transferTokenHandler(
     };
   }
 }
-
-export { transferTokenHandler };

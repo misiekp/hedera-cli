@@ -2,7 +2,7 @@
  * Create Token From File Command Exports
  * For use by tests and external consumers
  */
-export { default as createTokenFromFileHandler } from './handler';
+export { createTokenFromFile } from './handler';
 export type { CreateTokenFromFileOutput } from './output';
 export {
   CreateTokenFromFileOutputSchema,
