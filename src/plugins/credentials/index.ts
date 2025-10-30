@@ -6,7 +6,7 @@ import { listCredentials } from './commands/list/handler';
 import { removeCredentials } from './commands/remove/handler';
 import { setCredentials } from './commands/set/handler';
 
-export { default as credentialsManifest } from './manifest';
+export { credentialsManifest } from './manifest';
 
 // Export command handlers
 export { listCredentials, removeCredentials, setCredentials };
