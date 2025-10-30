@@ -8,7 +8,7 @@ import { SupportedNetwork } from '../../../../core/types/shared.types';
 import { formatError } from '../../../../utils/errors';
 import { SetCredentialsOutput } from './output';
 
-export default function setCredentials(
+export function setCredentials(
   args: CommandHandlerArgs,
 ): CommandExecutionResult {
   const { logger, api } = args;

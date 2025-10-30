@@ -2,11 +2,11 @@
  * Credentials Plugin Index
  * Exports the credentials plugin manifest and command handlers
  */
-import listHandler from './commands/list/handler';
-import removeHandler from './commands/remove/handler';
-import setHandler from './commands/set/handler';
+import { listCredentials } from './commands/list/handler';
+import { removeCredentials } from './commands/remove/handler';
+import { setCredentials } from './commands/set/handler';
 
 export { default as credentialsManifest } from './manifest';
 
 // Export command handlers
-export { listHandler, removeHandler, setHandler };
+export { listCredentials, removeCredentials, setCredentials };

@@ -7,7 +7,7 @@ import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
 import { RemoveCredentialsOutput } from './output';
 
-export default function removeCredentials(
+export function removeCredentials(
   args: CommandHandlerArgs,
 ): CommandExecutionResult {
   const { logger, api } = args;
