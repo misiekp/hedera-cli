@@ -11,7 +11,7 @@ import { SupportedNetwork } from '../../../../core/types/shared.types';
 export async function listHandler(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
-  const { logger, api } = args;
+  const { api } = args;
 
   try {
     const networkNames = api.network.getAvailableNetworks();
@@ -52,10 +52,10 @@ export async function listHandler(
       outputJson: JSON.stringify(output),
     };
   } catch (error) {
-    logger.error(formatError('Failed to list networks', error));
+    const errorMessage = formatError('Failed to list networks', error);
     return {
       status: 'failure',
-      errorMessage: formatError('Failed to list networks', error),
+      errorMessage,
     };
   }
 }
