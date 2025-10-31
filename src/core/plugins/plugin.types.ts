@@ -102,8 +102,7 @@ export interface CommandExecutionResult {
  */
 export type CommandHandler = (
   args: CommandHandlerArgs,
-) => // TODO: Remove void types once all commands have been migrated to ADR-003 contract
-void | Promise<void> | CommandExecutionResult | Promise<CommandExecutionResult>;
+) => Promise<CommandExecutionResult>;
 
 /**
  * Plugin state schema
