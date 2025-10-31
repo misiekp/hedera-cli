@@ -205,16 +205,8 @@ export class ZustandGenericStateServiceImpl implements StateService {
       // Extract namespace names from storage filenames
       files.forEach((file) => {
         if (file.endsWith('-storage.json')) {
-          const parts = file.split('-');
-          if (parts.length >= 3) {
-            // Remove the last two parts ('suffix' and 'storage.json')
-            const namespace = parts.slice(0, -2).join('-');
-            namespaces.add(namespace);
-          } else if (parts.length === 2) {
-            // Handle simple case: {namespace}-storage.json
-            const namespace = parts[0];
-            namespaces.add(namespace);
-          }
+          const namespace = file.replace(/-storage\.json$/, '');
+          namespaces.add(namespace);
         }
       });
 
