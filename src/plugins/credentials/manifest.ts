@@ -18,7 +18,7 @@ import {
 } from './commands/remove/output';
 import { CREDENTIALS_JSON_SCHEMA, CREDENTIALS_NAMESPACE } from './schema';
 
-const credentialsManifest: PluginManifest = {
+export const credentialsManifest: PluginManifest = {
   name: 'credentials',
   version: '1.0.0',
   displayName: 'Credentials Management',

@@ -14,7 +14,7 @@ import {
 import { formatError } from '../../../../utils/errors';
 import { AssociateTokenOutput } from './output';
 
-export default async function associateTokenHandler(
+export async function associateToken(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
   const { api, logger } = args;
@@ -135,5 +135,3 @@ export default async function associateTokenHandler(
     };
   }
 }
-
-export { associateTokenHandler };

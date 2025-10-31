@@ -1,4 +1,4 @@
-import listAccountsHandler from '../../commands/list/handler';
+import { listAccounts } from '../../commands/list/handler';
 import type { ListAccountsOutput } from '../../commands/list';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
@@ -29,7 +29,7 @@ describe('account plugin - list command (ADR-003)', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = listAccountsHandler(args);
+    const result = listAccounts(args);
 
     expect(result.status).toBe('success');
     expect(result.outputJson).toBeDefined();
@@ -53,7 +53,7 @@ describe('account plugin - list command (ADR-003)', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = listAccountsHandler(args);
+    const result = listAccounts(args);
 
     expect(result.status).toBe('success');
     expect(result.outputJson).toBeDefined();
@@ -80,7 +80,7 @@ describe('account plugin - list command (ADR-003)', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, { private: true });
 
-    const result = listAccountsHandler(args);
+    const result = listAccounts(args);
 
     expect(result.status).toBe('success');
     expect(result.outputJson).toBeDefined();
@@ -106,7 +106,7 @@ describe('account plugin - list command (ADR-003)', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger };
     const args = makeArgs(api, logger, {});
 
-    const result = listAccountsHandler(args);
+    const result = listAccounts(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBeDefined();

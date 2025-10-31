@@ -1,7 +1,7 @@
 /**
  * Unit Tests for State Stats Command
  */
-import stateStats from '../../commands/stats/handler';
+import { stateStats } from '../../commands/stats/handler';
 import {
   makeArgs,
   makeLogger,

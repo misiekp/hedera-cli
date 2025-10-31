@@ -81,8 +81,6 @@ export const myPluginManifest: PluginManifest = {
     console.log('[MY PLUGIN] Cleaning up...');
   },
 };
-
-export default myPluginManifest;
 ```
 
 ### 2. Command Handlers
@@ -123,8 +121,6 @@ export async function createHandler(args: CommandHandlerArgs): Promise<void> {
     process.exit(1);
   }
 }
-
-export default createHandler;
 ```
 
 ### 3. State Management

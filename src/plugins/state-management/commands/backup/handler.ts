@@ -11,9 +11,7 @@ import { BackupPayload } from '../../../../core/types/shared.types';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export default function stateBackup(
-  args: CommandHandlerArgs,
-): CommandExecutionResult {
+export function stateBackup(args: CommandHandlerArgs): CommandExecutionResult {
   const { api, logger } = args;
 
   // Extract command arguments

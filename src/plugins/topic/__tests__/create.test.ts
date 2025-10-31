@@ -1,4 +1,4 @@
-import createTopicHandler from '../commands/create/handler';
+import { createTopic } from '../commands/create/handler';
 import { ZustandTopicStateHelper } from '../zustand-state-helper';
 import type { CoreApi } from '../../../core';
 import type { TransactionResult } from '../../../core';
@@ -92,7 +92,7 @@ describe('topic plugin - create command', () => {
       memo: 'Test topic memo',
     });
 
-    const result = await createTopicHandler(args);
+    const result = await createTopic(args);
 
     expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
@@ -156,7 +156,7 @@ describe('topic plugin - create command', () => {
       submitKey,
     });
 
-    const result = await createTopicHandler(args);
+    const result = await createTopic(args);
 
     expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
@@ -221,7 +221,7 @@ describe('topic plugin - create command', () => {
 
     const args = makeArgs(api, logger, {});
 
-    const result = await createTopicHandler(args);
+    const result = await createTopic(args);
 
     expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
@@ -273,7 +273,7 @@ describe('topic plugin - create command', () => {
 
     const args = makeArgs(api, logger, { memo: 'Failed topic' });
 
-    const result = await createTopicHandler(args);
+    const result = await createTopic(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBe('Failed to create topic');
@@ -302,7 +302,7 @@ describe('topic plugin - create command', () => {
 
     const args = makeArgs(api, logger, { memo: 'Error topic' });
 
-    const result = await createTopicHandler(args);
+    const result = await createTopic(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toContain('Failed to create topic');

@@ -1,4 +1,4 @@
-import deleteAccountHandler from '../../commands/delete/handler';
+import { deleteAccount } from '../../commands/delete/handler';
 import type { DeleteAccountOutput } from '../../commands/delete';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
@@ -40,7 +40,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { name: 'acc1' });
 
-    const result = deleteAccountHandler(args);
+    const result = deleteAccount(args);
 
     expect(deleteAccountMock).toHaveBeenCalledWith('acc1');
     expect(result.status).toBe('success');
@@ -68,7 +68,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { id: '0.0.2222' });
 
-    const result = deleteAccountHandler(args);
+    const result = deleteAccount(args);
 
     expect(deleteAccountMock).toHaveBeenCalledWith('acc2');
     expect(result.status).toBe('success');
@@ -99,7 +99,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     };
     const args = makeArgs(api, logger, {});
 
-    const result = deleteAccountHandler(args);
+    const result = deleteAccount(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBeDefined();
@@ -126,7 +126,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     };
     const args = makeArgs(api, logger, { name: 'missingAcc' });
 
-    const result = deleteAccountHandler(args);
+    const result = deleteAccount(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBeDefined();
@@ -157,7 +157,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     };
     const args = makeArgs(api, logger, { id: '0.0.4444' });
 
-    const result = deleteAccountHandler(args);
+    const result = deleteAccount(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBeDefined();
@@ -189,7 +189,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     };
     const args = makeArgs(api, logger, { name: 'acc5' });
 
-    const result = deleteAccountHandler(args);
+    const result = deleteAccount(args);
 
     expect(result.status).toBe('failure');
     expect(result.errorMessage).toBeDefined();
@@ -220,7 +220,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const api: Partial<CoreApi> = { state: {} as any, logger, alias, network };
     const args = makeArgs(api, logger, { name: 'acc-alias' });
 
-    const result = deleteAccountHandler(args);
+    const result = deleteAccount(args);
 
     // Ensure list was requested with the correct filters
     expect(alias.list).toHaveBeenCalledWith({

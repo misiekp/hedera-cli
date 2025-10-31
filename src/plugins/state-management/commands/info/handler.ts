@@ -9,9 +9,7 @@ import { formatError } from '../../../../utils/errors';
 import { StateInfoOutput } from './output';
 import { NamespaceInfo } from '../../schema';
 
-export default function stateInfo(
-  args: CommandHandlerArgs,
-): CommandExecutionResult {
+export function stateInfo(args: CommandHandlerArgs): CommandExecutionResult {
   const { api, logger } = args;
 
   logger.log('ℹ️  Getting state information...');

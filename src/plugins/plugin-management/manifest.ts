@@ -20,7 +20,7 @@ import {
   PLUGIN_INFO_TEMPLATE,
 } from './commands/info/output';
 
-const pluginManagementManifest: PluginManifest = {
+export const pluginManagementManifest: PluginManifest = {
   name: 'plugin-management',
   version: '1.0.0',
   displayName: 'Plugin Management',

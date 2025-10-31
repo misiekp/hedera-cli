@@ -8,9 +8,7 @@ import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
 import { formatError } from '../../../../utils/errors';
 import { ClearStateOutput } from './output';
 
-export default function clearState(
-  args: CommandHandlerArgs,
-): CommandExecutionResult {
+export function clearState(args: CommandHandlerArgs): CommandExecutionResult {
   const { api, logger } = args;
 
   // Extract command arguments

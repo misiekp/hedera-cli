@@ -10,7 +10,7 @@ import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { AccountBalanceOutput } from './output';
 
-export default async function getAccountBalance(
+export async function getAccountBalance(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
   const { api, logger } = args;

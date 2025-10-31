@@ -4,10 +4,10 @@
  */
 import { tokenPluginManifest } from '../../manifest';
 import {
-  transferTokenHandler,
-  createTokenHandler,
-  associateTokenHandler,
-  createTokenFromFileHandler,
+  transferToken,
+  createToken,
+  associateToken,
+  createTokenFromFile,
 } from '../../index';
 
 describe('Token Plugin Structure', () => {
@@ -42,16 +42,16 @@ describe('Token Plugin Structure', () => {
   });
 
   test('command handlers should be exported', () => {
-    expect(transferTokenHandler).toBeDefined();
-    expect(createTokenHandler).toBeDefined();
-    expect(associateTokenHandler).toBeDefined();
-    expect(createTokenFromFileHandler).toBeDefined();
+    expect(transferToken).toBeDefined();
+    expect(createToken).toBeDefined();
+    expect(associateToken).toBeDefined();
+    expect(createTokenFromFile).toBeDefined();
   });
 
   test('command handlers should be functions', () => {
-    expect(typeof transferTokenHandler).toBe('function');
-    expect(typeof createTokenHandler).toBe('function');
-    expect(typeof associateTokenHandler).toBe('function');
-    expect(typeof createTokenFromFileHandler).toBe('function');
+    expect(typeof transferToken).toBe('function');
+    expect(typeof createToken).toBe('function');
+    expect(typeof associateToken).toBe('function');
+    expect(typeof createTokenFromFile).toBe('function');
   });
 });

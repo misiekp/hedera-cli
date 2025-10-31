@@ -9,7 +9,7 @@ import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { ViewAccountOutput } from './output';
 
-export default async function viewAccountHandler(
+export async function viewAccount(
   args: CommandHandlerArgs,
 ): Promise<CommandExecutionResult> {
   const { api, logger } = args;

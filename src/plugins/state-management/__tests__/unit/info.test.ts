@@ -1,7 +1,7 @@
 /**
  * Unit Tests for State Info Command
  */
-import stateInfo from '../../commands/info/handler';
+import { stateInfo } from '../../commands/info/handler';
 import {
   makeArgs,
   makeLogger,
