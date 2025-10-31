@@ -18,6 +18,10 @@ import {
   FindMessagesOutputSchema,
   FIND_MESSAGES_TEMPLATE,
 } from './commands/find-message';
+import { createTopic } from './commands/create/handler';
+import { listTopics } from './commands/list/handler';
+import { submitMessage } from './commands/submit-message/handler';
+import { findMessage } from './commands/find-message/handler';
 
 export const topicPluginManifest: PluginManifest = {
   name: 'topic',
@@ -76,7 +80,7 @@ export const topicPluginManifest: PluginManifest = {
           description: 'Define the alias (name) for this topic',
         },
       ],
-      handler: './commands/create/handler',
+      handler: createTopic,
       output: {
         schema: CreateTopicOutputSchema,
         humanTemplate: CREATE_TOPIC_TEMPLATE,
@@ -95,7 +99,7 @@ export const topicPluginManifest: PluginManifest = {
           short: 'n',
         },
       ],
-      handler: './commands/list/handler',
+      handler: listTopics,
       output: {
         schema: ListTopicsOutputSchema,
         humanTemplate: LIST_TOPICS_TEMPLATE,
@@ -121,7 +125,7 @@ export const topicPluginManifest: PluginManifest = {
           short: 'm',
         },
       ],
-      handler: './commands/submit-message/handler',
+      handler: submitMessage,
       output: {
         schema: SubmitMessageOutputSchema,
         humanTemplate: SUBMIT_MESSAGE_TEMPLATE,
@@ -189,7 +193,7 @@ export const topicPluginManifest: PluginManifest = {
           description: 'The sequence number not equal to',
         },
       ],
-      handler: './commands/find-message/handler',
+      handler: findMessage,
       output: {
         schema: FindMessagesOutputSchema,
         humanTemplate: FIND_MESSAGES_TEMPLATE,

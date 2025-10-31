@@ -4,6 +4,7 @@
  */
 import { PluginManifest } from '../../core/plugins/plugin.interface';
 import { TransferOutputSchema, TRANSFER_TEMPLATE } from './commands/transfer';
+import { transferHandler } from './commands/transfer/handler';
 
 export const hbarPluginManifest: PluginManifest = {
   name: 'hbar',
@@ -52,7 +53,7 @@ export const hbarPluginManifest: PluginManifest = {
           description: 'Memo for the transfer',
         },
       ],
-      handler: './commands/transfer/handler',
+      handler: transferHandler,
       output: {
         schema: TransferOutputSchema,
         humanTemplate: TRANSFER_TEMPLATE,

@@ -7,10 +7,9 @@ import * as path from 'path';
 import { Command } from 'commander';
 import { CoreApi } from '../core-api/core-api.interface';
 import { CommandHandlerArgs, PluginManifest } from './plugin.interface';
-import { CommandSpec, CommandHandler } from './plugin.types';
+import { CommandSpec } from './plugin.types';
 import { formatError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
-import { kebabToCamel } from '../utils/kebab-to-camel';
 
 interface LoadedPlugin {
   manifest: PluginManifest;
@@ -283,30 +282,7 @@ export class PluginManager {
       logger: this.coreApi.logger,
     };
 
-    const handlerPath = commandSpec.handler;
-    if (!handlerPath) {
-      throw new Error(`No handler specified for command ${commandSpec.name}`);
-    }
-
-    const fullHandlerPath = path.resolve(plugin.path, handlerPath + '.js');
-    const handlerModule = (await import(fullHandlerPath)) as Record<
-      string,
-      unknown
-    >;
-
-    // handle for dash commands handlers like `submit-message` -> `submitMessage`
-    const fixedName = kebabToCamel(commandSpec.name);
-
-    const handler =
-      (handlerModule.default as CommandHandler) ||
-      (handlerModule[fixedName + 'Handler'] as CommandHandler);
-
-    if (typeof handler !== 'function') {
-      throw new Error(`Handler for ${commandSpec.name} is not a function`);
-    }
-
-    // Execute handler
-    const result = await handler(handlerArgs);
+    const result = await commandSpec.handler(handlerArgs);
 
     // ADR-003: If command has output spec, expect handler to return result
     if (commandSpec.output) {

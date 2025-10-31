@@ -8,6 +8,8 @@ import {
   LIST_NETWORKS_TEMPLATE,
 } from './commands/list';
 import { UseNetworkOutputSchema, USE_NETWORK_TEMPLATE } from './commands/use';
+import { listHandler } from './commands/list/handler';
+import { useHandler } from './commands/use/handler';
 
 export const networkPluginManifest: PluginManifest = {
   name: 'network',
@@ -27,7 +29,7 @@ export const networkPluginManifest: PluginManifest = {
       description:
         'List all available networks with their configuration and health status',
       options: [],
-      handler: './commands/list/handler',
+      handler: listHandler,
       output: {
         schema: ListNetworksOutputSchema,
         humanTemplate: LIST_NETWORKS_TEMPLATE,
@@ -46,7 +48,7 @@ export const networkPluginManifest: PluginManifest = {
           description: 'Network name (testnet, mainnet, previewnet, localnet)',
         },
       ],
-      handler: './commands/use/handler',
+      handler: useHandler,
       output: {
         schema: UseNetworkOutputSchema,
         humanTemplate: USE_NETWORK_TEMPLATE,
