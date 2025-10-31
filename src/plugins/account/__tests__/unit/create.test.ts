@@ -4,6 +4,7 @@ import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { AccountService } from '../../../../core/services/account/account-transaction-service.interface';
 import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeArgs,
@@ -120,7 +121,7 @@ describe('account plugin - create command (ADR-003)', () => {
     );
 
     // Verify ADR-003 result
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: CreateAccountOutput = JSON.parse(result.outputJson!);
@@ -167,7 +168,7 @@ describe('account plugin - create command (ADR-003)', () => {
 
     const result = await createAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBe('Failed to create account');
   });
 
@@ -194,7 +195,7 @@ describe('account plugin - create command (ADR-003)', () => {
 
     const result = await createAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to create account');
     expect(result.errorMessage).toContain('network error');

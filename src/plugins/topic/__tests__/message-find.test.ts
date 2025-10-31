@@ -2,6 +2,7 @@ import findMessageHandler from '../commands/find-message/handler';
 import type { CoreApi } from '../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../core/services/mirrornode/hedera-mirrornode-service.interface';
 import type { FindMessagesOutput } from '../commands/find-message/output';
+import { Status } from '../../../core/shared/constants';
 import {
   makeLogger,
   makeArgs,
@@ -74,7 +75,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -119,7 +120,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
@@ -170,7 +171,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
     expect(output.totalCount).toBe(2);
     expect(output.messages).toHaveLength(2);
@@ -218,7 +219,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
     expect(output.totalCount).toBe(2);
 
@@ -257,7 +258,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
     expect(output.totalCount).toBe(1);
 
@@ -296,7 +297,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
     expect(output.totalCount).toBe(1);
 
@@ -338,7 +339,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
     expect(output.totalCount).toBe(2);
 
@@ -370,7 +371,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain(
       'No sequence number or filter provided',
     );
@@ -399,7 +400,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Failed to find messages');
     expect(result.errorMessage).toContain('network error');
   });
@@ -427,7 +428,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Failed to find messages');
     expect(result.errorMessage).toContain('network error');
   });
@@ -456,7 +457,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     const output: FindMessagesOutput = JSON.parse(result.outputJson!);
     expect(output.totalCount).toBe(0);
     expect(output.messages).toEqual([]);
@@ -488,7 +489,7 @@ describe('topic plugin - message-find command', () => {
 
     const result = await findMessageHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
 
     // Should use the first non-empty filter (gt)
     expect(mirror.getTopicMessages).toHaveBeenCalledWith({

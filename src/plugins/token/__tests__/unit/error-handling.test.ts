@@ -8,6 +8,7 @@ import { associateTokenHandler } from '../../commands/associate';
 import { transferTokenHandler } from '../../commands/transfer';
 import { createTokenFromFileHandler } from '../../commands/createFromFile';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import { Status } from '../../../../core/shared/constants';
 import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import {
   makeLogger,
@@ -75,7 +76,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain(
         'Failed to create token: Network timeout',
       );
@@ -111,7 +112,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain(
         'Failed to associate token: Connection refused',
       );
@@ -157,7 +158,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain(
         'Failed to transfer token: Network unreachable',
       );
@@ -264,7 +265,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
       // ADR-003 compliance: logger.error calls are no longer expected
@@ -318,7 +319,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
       // ADR-003 compliance: logger.error calls are no longer expected
@@ -372,7 +373,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -407,7 +408,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -454,7 +455,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -510,7 +511,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
       // ADR-003 compliance: logger.error calls are no longer expected
@@ -537,7 +538,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -561,7 +562,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -585,7 +586,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -664,7 +665,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -707,7 +708,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -755,7 +756,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -816,7 +817,7 @@ describe('Token Plugin Error Handling', () => {
       const result = await createTokenHandler(args);
 
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.outputJson).toBeUndefined();
     });
@@ -850,7 +851,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
       expect(result.errorMessage).toBeUndefined();
     });
@@ -900,7 +901,7 @@ describe('Token Plugin Error Handling', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBeDefined();
       expect(result.errorMessage).toContain('Token association failed');
       expect(result.outputJson).toBeUndefined();

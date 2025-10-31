@@ -2,6 +2,7 @@
  * Unit Tests for State Info Command
  */
 import stateInfo from '../../commands/info/handler';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeArgs,
   makeLogger,
@@ -37,7 +38,7 @@ describe('State Info Command', () => {
 
       const result = stateInfo(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -59,7 +60,7 @@ describe('State Info Command', () => {
 
       const result = stateInfo(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -77,7 +78,7 @@ describe('State Info Command', () => {
 
       const result = stateInfo(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -95,7 +96,7 @@ describe('State Info Command', () => {
 
       const result = stateInfo(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -122,7 +123,7 @@ describe('State Info Command', () => {
 
       const result = stateInfo(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to get state information');
       expect(result.outputJson).toBeUndefined();
     });
@@ -138,7 +139,7 @@ describe('State Info Command', () => {
 
       const result = stateInfo(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to get state information');
       expect(result.outputJson).toBeUndefined();
     });
@@ -151,7 +152,7 @@ describe('State Info Command', () => {
 
       const result = stateInfo(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(() => JSON.parse(result.outputJson!)).not.toThrow();
     });
 

@@ -7,6 +7,7 @@ import { createTokenHandler } from '../../commands/create';
 import { associateTokenHandler } from '../../commands/associate';
 import { transferTokenHandler } from '../../commands/transfer';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeApiMocks,
@@ -147,7 +148,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(createResult).toBeDefined();
-      expect(createResult.status).toBe('success');
+      expect(createResult.status).toBe(Status.Success);
       expect(createResult.outputJson).toBeDefined();
       expect(createResult.errorMessage).toBeUndefined();
 
@@ -167,7 +168,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(associateResult).toBeDefined();
-      expect(associateResult.status).toBe('success');
+      expect(associateResult.status).toBe(Status.Success);
       expect(associateResult.outputJson).toBeDefined();
       expect(associateResult.errorMessage).toBeUndefined();
 
@@ -189,7 +190,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(transferResult).toBeDefined();
-      expect(transferResult.status).toBe('success');
+      expect(transferResult.status).toBe(Status.Success);
       expect(transferResult.outputJson).toBeDefined();
       expect(transferResult.errorMessage).toBeUndefined();
 
@@ -328,7 +329,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(createResult).toBeDefined();
-      expect(createResult.status).toBe('success');
+      expect(createResult.status).toBe(Status.Success);
       expect(createResult.outputJson).toBeDefined();
       expect(createResult.errorMessage).toBeUndefined();
 
@@ -348,7 +349,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(associateResult).toBeDefined();
-      expect(associateResult.status).toBe('success');
+      expect(associateResult.status).toBe(Status.Success);
       expect(associateResult.outputJson).toBeDefined();
       expect(associateResult.errorMessage).toBeUndefined();
 
@@ -453,7 +454,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(createResult).toBeDefined();
-      expect(createResult.status).toBe('success');
+      expect(createResult.status).toBe(Status.Success);
       expect(createResult.outputJson).toBeDefined();
       expect(createResult.errorMessage).toBeUndefined();
 
@@ -559,7 +560,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(createResult).toBeDefined();
-      expect(createResult.status).toBe('failure');
+      expect(createResult.status).toBe(Status.Failure);
       expect(createResult.errorMessage).toBeDefined();
       expect(createResult.outputJson).toBeUndefined();
 
@@ -578,7 +579,7 @@ describe('Token Lifecycle Integration', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(associateResult).toBeDefined();
-      expect(associateResult.status).toBe('failure');
+      expect(associateResult.status).toBe(Status.Failure);
       expect(associateResult.errorMessage).toBeDefined();
       expect(associateResult.outputJson).toBeUndefined();
 

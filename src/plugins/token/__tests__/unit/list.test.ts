@@ -1,5 +1,6 @@
 import { listTokensHandler } from '../../commands/list';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeApiMocks,
@@ -43,7 +44,7 @@ describe('token plugin - list command', () => {
 
     // ADR-003 compliance: check CommandExecutionResult
     expect(result).toBeDefined();
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
     expect(result.errorMessage).toBeUndefined();
 
@@ -73,7 +74,7 @@ describe('token plugin - list command', () => {
 
     // ADR-003 compliance: check CommandExecutionResult
     expect(result).toBeDefined();
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
     expect(result.errorMessage).toBeUndefined();
 
@@ -308,7 +309,7 @@ describe('token plugin - list command', () => {
 
     // ADR-003 compliance: check CommandExecutionResult
     expect(result).toBeDefined();
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to list tokens');
     expect(result.outputJson).toBeUndefined();
