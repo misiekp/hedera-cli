@@ -80,16 +80,11 @@ export interface PluginContext {
 }
 
 /**
- * Command execution status
- */
-export type CommandStatus = Status;
-
-/**
  * Command execution result
  * Returned by handlers that follow ADR-003 contract
  */
 export interface CommandExecutionResult {
-  status: CommandStatus;
+  status: Status;
   /** Optional, present when status !== 'success'; intended for humans */
   errorMessage?: string;
   /** JSON string conforming to the manifest-declared output schema */
