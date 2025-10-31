@@ -12,7 +12,7 @@ export { ListPluginsOutputSchema };
 export const LIST_PLUGINS_TEMPLATE = `📋 Available Plugins ({{count}}):
 
 {{#each plugins}}
-{{@index}}.
+{{add1 @index}}.
    Name: {{name}}
    Display Name: {{displayName}}
    Version: {{version}}

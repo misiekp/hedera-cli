@@ -88,7 +88,7 @@ export const LIST_TOKENS_TEMPLATE = `
 📄 Found {{count}} token(s){{#if network}} on {{network}}{{/if}}:
 
 {{#each tokens}}
-{{@index}}. {{symbol}} ({{name}})
+{{add1 @index}}. {{symbol}} ({{name}})
    Token ID: {{tokenId}}
    Treasury: {{treasuryId}}
    Supply Type: {{supplyType}}

@@ -41,7 +41,7 @@ No messages found in topic {{topicId}}
 Found {{totalCount}} message(s) in topic {{topicId}}
 ──────────────────────────────────────
 {{#each messages}}
-{{@index}}. Sequence #{{sequenceNumber}}
+{{add1 @index}}. Sequence #{{sequenceNumber}}
    Message: "{{message}}"
    Timestamp: {{timestamp}}
 {{#unless @last}}
