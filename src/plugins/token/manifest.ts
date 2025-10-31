@@ -22,6 +22,11 @@ import {
   CreateTokenFromFileOutputSchema,
   CREATE_TOKEN_FROM_FILE_TEMPLATE,
 } from './commands/createFromFile';
+import { transferToken } from './commands/transfer/handler';
+import { createToken } from './commands/create/handler';
+import { associateToken } from './commands/associate/handler';
+import { createTokenFromFile } from './commands/createFromFile/handler';
+import { listTokens } from './commands/list/handler';
 
 export const tokenPluginManifest: PluginManifest = {
   name: 'token',
@@ -69,7 +74,7 @@ export const tokenPluginManifest: PluginManifest = {
         },
         { name: 'balance', short: 'b', type: 'number', required: true },
       ],
-      handler: './commands/transfer/handler',
+      handler: transferToken,
       output: {
         schema: TransferTokenOutputSchema,
         humanTemplate: TRANSFER_TOKEN_TEMPLATE,
@@ -121,7 +126,7 @@ export const tokenPluginManifest: PluginManifest = {
           description: 'Optional alias to register for the token',
         },
       ],
-      handler: './commands/create/handler',
+      handler: createToken,
       output: {
         schema: CreateTokenOutputSchema,
         humanTemplate: CREATE_TOKEN_TEMPLATE,
@@ -148,7 +153,7 @@ export const tokenPluginManifest: PluginManifest = {
             'Account: either an alias or account-id:account-key pair',
         },
       ],
-      handler: './commands/associate/handler',
+      handler: associateToken,
       output: {
         schema: AssociateTokenOutputSchema,
         humanTemplate: ASSOCIATE_TOKEN_TEMPLATE,
@@ -163,7 +168,7 @@ export const tokenPluginManifest: PluginManifest = {
         { name: 'file', short: 'f', type: 'string', required: true },
         { name: 'args', short: 'a', type: 'string', required: false },
       ],
-      handler: './commands/createFromFile/handler',
+      handler: createTokenFromFile,
       output: {
         schema: CreateTokenFromFileOutputSchema,
         humanTemplate: CREATE_TOKEN_FROM_FILE_TEMPLATE,
@@ -192,7 +197,7 @@ export const tokenPluginManifest: PluginManifest = {
             'Filter tokens by network (defaults to current active network)',
         },
       ],
-      handler: './commands/list/handler',
+      handler: listTokens,
       output: {
         schema: ListTokensOutputSchema,
         humanTemplate: LIST_TOKENS_TEMPLATE,

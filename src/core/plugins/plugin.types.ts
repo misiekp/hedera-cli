@@ -49,11 +49,8 @@ export interface CommandSpec {
   summary: string;
   description: string;
   options?: CommandOption[];
-  handler: string;
-  /** Describes the handler's output (schema and optional template)
-   * TODO: Make this field mandatory once all commands have been migrated to ADR-003 contract
-   */
-  output?: CommandOutputSpec;
+  handler: CommandHandler;
+  output: CommandOutputSpec;
 }
 
 /**
@@ -102,8 +99,7 @@ export interface CommandExecutionResult {
  */
 export type CommandHandler = (
   args: CommandHandlerArgs,
-) => // TODO: Remove void types once all commands have been migrated to ADR-003 contract
-void | Promise<void> | CommandExecutionResult | Promise<CommandExecutionResult>;
+) => CommandExecutionResult | Promise<CommandExecutionResult>;
 
 /**
  * Plugin state schema

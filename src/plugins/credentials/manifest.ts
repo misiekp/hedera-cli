@@ -17,6 +17,9 @@ import {
   REMOVE_CREDENTIALS_TEMPLATE,
 } from './commands/remove/output';
 import { CREDENTIALS_JSON_SCHEMA, CREDENTIALS_NAMESPACE } from './schema';
+import { setCredentials } from './commands/set/handler';
+import { listCredentials } from './commands/list/handler';
+import { removeCredentials } from './commands/remove/handler';
 
 export const credentialsManifest: PluginManifest = {
   name: 'credentials',
@@ -48,7 +51,7 @@ export const credentialsManifest: PluginManifest = {
         { name: 'private-key', short: 'p', type: 'string', required: true },
         { name: 'network', short: 'n', type: 'string', required: false },
       ],
-      handler: './commands/set/handler',
+      handler: setCredentials,
       output: {
         schema: SetCredentialsOutputSchema,
         humanTemplate: SET_CREDENTIALS_TEMPLATE,
@@ -58,7 +61,7 @@ export const credentialsManifest: PluginManifest = {
       name: 'list',
       summary: 'List all credentials',
       description: 'Show all stored credentials',
-      handler: './commands/list/handler',
+      handler: listCredentials,
       output: {
         schema: ListCredentialsOutputSchema,
         humanTemplate: LIST_CREDENTIALS_TEMPLATE,
@@ -71,7 +74,7 @@ export const credentialsManifest: PluginManifest = {
       options: [
         { name: 'key-ref-id', short: 'k', type: 'string', required: true },
       ],
-      handler: './commands/remove/handler',
+      handler: removeCredentials,
       output: {
         schema: RemoveCredentialsOutputSchema,
         humanTemplate: REMOVE_CREDENTIALS_TEMPLATE,
