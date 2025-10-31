@@ -18,6 +18,7 @@ import {
   makeApiMocks,
   makeTransactionResult,
 } from './helpers/mocks';
+import { Status } from '../../../../core/shared/constants';
 
 jest.mock('../../zustand-state-helper', () => ({
   ZustandTokenStateHelper: jest.fn(),
@@ -372,11 +373,11 @@ describe('ADR-003 Compliance - Token Plugin', () => {
           expect(result).toHaveProperty('status');
           expect(['success', 'failure', 'partial']).toContain(result.status);
 
-          if (result.status === 'success') {
+          if (result.status === Status.Success) {
             expect(result).toHaveProperty('outputJson');
           }
 
-          if (result.status !== 'success') {
+          if (result.status !== Status.Success) {
             expect(result).toHaveProperty('errorMessage');
           }
         } catch (error) {

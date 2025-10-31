@@ -7,6 +7,7 @@ import { StateService } from '../services/state/state-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { CommandHandlerArgs } from './plugin.interface';
+import { Status } from '../shared/constants';
 
 /**
  * Plugin manifest structure
@@ -81,7 +82,7 @@ export interface PluginContext {
 /**
  * Command execution status
  */
-export type CommandStatus = 'success' | 'failure' | 'partial';
+export type CommandStatus = Status;
 
 /**
  * Command execution result

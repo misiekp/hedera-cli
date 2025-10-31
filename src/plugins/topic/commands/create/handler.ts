@@ -4,6 +4,7 @@
  */
 import { CommandHandlerArgs } from '../../../../core';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { Status } from '../../../../core/shared/constants';
 import { formatError } from '../../../../utils/errors';
 import { ZustandTopicStateHelper } from '../../zustand-state-helper';
 import { AliasRecord } from '../../../../core/services/alias/alias-service.interface';
@@ -144,20 +145,20 @@ export default async function createTopicHandler(
 
       // Return success result with JSON output
       return {
-        status: 'success',
+        status: Status.Success,
         outputJson: JSON.stringify(outputData),
       };
     } else {
       // Transaction execution failed
       return {
-        status: 'failure',
+        status: Status.Failure,
         errorMessage: 'Failed to create topic',
       };
     }
   } catch (error: unknown) {
     // Catch and format any errors
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Failed to create topic', error),
     };
   }
