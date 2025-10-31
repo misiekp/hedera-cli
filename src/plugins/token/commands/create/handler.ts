@@ -5,6 +5,7 @@
  */
 import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { Status } from '../../../../core/shared/constants';
 import { CoreApi } from '../../../../core';
 import { Logger } from '../../../../core';
 import { TransactionResult } from '../../../../core';
@@ -207,7 +208,7 @@ export default async function createTokenHandler(
       (error) => `${error.path.join('.')}: ${error.message}`,
     );
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: `Invalid command parameters:\n${errorMessages.join('\n')}`,
     };
   }
@@ -376,12 +377,12 @@ export default async function createTokenHandler(
     };
 
     return {
-      status: 'success',
+      status: Status.Success,
       outputJson: JSON.stringify(outputData),
     };
   } catch (error: unknown) {
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Failed to create token', error),
     };
   }

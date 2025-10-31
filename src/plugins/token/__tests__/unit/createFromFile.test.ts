@@ -6,6 +6,7 @@ import type { CommandHandlerArgs } from '../../../../core/plugins/plugin.interfa
 import { createTokenFromFileHandler } from '../../commands/createFromFile';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
 import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeApiMocks,
@@ -145,7 +146,7 @@ describe('createTokenFromFileHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
       expect(result.errorMessage).toBeUndefined();
 
@@ -234,7 +235,7 @@ describe('createTokenFromFileHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
       expect(result.errorMessage).toBeUndefined();
 
@@ -325,7 +326,7 @@ describe('createTokenFromFileHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
       expect(result.errorMessage).toBeUndefined();
 
@@ -362,7 +363,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to create token from file');
       expect(result.outputJson).toBeUndefined();
 
@@ -396,7 +397,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to create token from file');
       expect(result.outputJson).toBeUndefined();
 
@@ -430,7 +431,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to create token from file');
       expect(result.outputJson).toBeUndefined();
 
@@ -481,7 +482,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Invalid token definition file');
       expect(result.outputJson).toBeUndefined();
 
@@ -521,7 +522,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Invalid token definition file');
       expect(result.outputJson).toBeUndefined();
 
@@ -558,7 +559,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Invalid token definition file');
       expect(result.outputJson).toBeUndefined();
 
@@ -595,7 +596,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Invalid token definition file');
       expect(result.outputJson).toBeUndefined();
 
@@ -661,7 +662,7 @@ describe('createTokenFromFileHandler', () => {
 
       // ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to create token from file');
       expect(result.outputJson).toBeUndefined();
 
@@ -739,7 +740,7 @@ describe('createTokenFromFileHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
       expect(result.errorMessage).toBeUndefined();
 
@@ -816,7 +817,7 @@ describe('createTokenFromFileHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
       expect(result.errorMessage).toBeUndefined();
 

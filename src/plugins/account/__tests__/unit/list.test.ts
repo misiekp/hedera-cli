@@ -2,6 +2,7 @@ import listAccountsHandler from '../../commands/list/handler';
 import type { ListAccountsOutput } from '../../commands/list';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeAccountData,
@@ -31,7 +32,7 @@ describe('account plugin - list command (ADR-003)', () => {
 
     const result = listAccountsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListAccountsOutput = JSON.parse(result.outputJson!);
@@ -55,7 +56,7 @@ describe('account plugin - list command (ADR-003)', () => {
 
     const result = listAccountsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListAccountsOutput = JSON.parse(result.outputJson!);
@@ -82,7 +83,7 @@ describe('account plugin - list command (ADR-003)', () => {
 
     const result = listAccountsHandler(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ListAccountsOutput = JSON.parse(result.outputJson!);
@@ -108,7 +109,7 @@ describe('account plugin - list command (ADR-003)', () => {
 
     const result = listAccountsHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to list accounts');
     expect(result.errorMessage).toContain('db error');

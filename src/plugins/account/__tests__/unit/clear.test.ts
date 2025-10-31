@@ -3,6 +3,7 @@ import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import clearAccountsHandler from '../../commands/clear/handler';
 import type { ClearAccountsOutput } from '../../commands/clear';
 import { makeLogger } from '../../../../../__tests__/helpers/plugin';
+import { Status } from '../../../../core/shared/constants';
 
 jest.mock('../../zustand-state-helper', () => ({
   ZustandAccountStateHelper: jest.fn(),
@@ -41,7 +42,7 @@ describe('account plugin - clear command (ADR-003)', () => {
     expect(clearAccountsMock).toHaveBeenCalledTimes(1);
     expect(logger.log).toHaveBeenCalledWith('Clearing all accounts...');
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ClearAccountsOutput = JSON.parse(result.outputJson!);
@@ -66,7 +67,7 @@ describe('account plugin - clear command (ADR-003)', () => {
 
     const result = clearAccountsHandler(args as CommandHandlerArgs);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to clear accounts');
     expect(result.errorMessage).toContain('db error');

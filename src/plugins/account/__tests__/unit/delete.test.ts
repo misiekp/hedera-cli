@@ -2,6 +2,7 @@ import deleteAccountHandler from '../../commands/delete/handler';
 import type { DeleteAccountOutput } from '../../commands/delete';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeAccountData,
@@ -43,7 +44,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const result = deleteAccountHandler(args);
 
     expect(deleteAccountMock).toHaveBeenCalledWith('acc1');
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: DeleteAccountOutput = JSON.parse(result.outputJson!);
@@ -71,7 +72,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     const result = deleteAccountHandler(args);
 
     expect(deleteAccountMock).toHaveBeenCalledWith('acc2');
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: DeleteAccountOutput = JSON.parse(result.outputJson!);
@@ -101,7 +102,7 @@ describe('account plugin - delete command (ADR-003)', () => {
 
     const result = deleteAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Either name or id must be provided');
   });
@@ -128,7 +129,7 @@ describe('account plugin - delete command (ADR-003)', () => {
 
     const result = deleteAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain(
       "Account with name 'missingAcc' not found",
@@ -159,7 +160,7 @@ describe('account plugin - delete command (ADR-003)', () => {
 
     const result = deleteAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain(
       "Account with ID '0.0.4444' not found",
@@ -191,7 +192,7 @@ describe('account plugin - delete command (ADR-003)', () => {
 
     const result = deleteAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to delete account');
     expect(result.errorMessage).toContain('db error');
@@ -247,7 +248,7 @@ describe('account plugin - delete command (ADR-003)', () => {
     );
 
     // Verify ADR-003 result
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: DeleteAccountOutput = JSON.parse(result.outputJson!);

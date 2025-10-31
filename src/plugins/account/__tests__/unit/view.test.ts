@@ -3,6 +3,7 @@ import type { ViewAccountOutput } from '../../commands/view';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeAccountData,
@@ -50,7 +51,7 @@ describe('account plugin - view command (ADR-003)', () => {
     expect(logger.log).toHaveBeenCalledWith('Found account in state: acc1');
     expect(mirrorMock.getAccount).toHaveBeenCalledWith('0.0.1111');
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ViewAccountOutput = JSON.parse(result.outputJson!);
@@ -87,7 +88,7 @@ describe('account plugin - view command (ADR-003)', () => {
     );
     expect(mirrorMock.getAccount).toHaveBeenCalledWith('0.0.2222');
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ViewAccountOutput = JSON.parse(result.outputJson!);
@@ -113,7 +114,7 @@ describe('account plugin - view command (ADR-003)', () => {
 
     const result = await viewAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to view account');
     expect(result.errorMessage).toContain('mirror down');
@@ -138,7 +139,7 @@ describe('account plugin - view command (ADR-003)', () => {
 
     const result = await viewAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to view account');
     expect(result.errorMessage).toContain('state error');

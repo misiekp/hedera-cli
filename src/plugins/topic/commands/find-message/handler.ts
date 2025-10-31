@@ -4,6 +4,7 @@
  */
 import { CommandHandlerArgs } from '../../../../core';
 import { CommandExecutionResult } from '../../../../core';
+import { Status } from '../../../../core/shared/constants';
 import { formatError } from '../../../../utils/errors';
 import { Filter } from '../../../../../types';
 import { FindMessagesOutput } from './output';
@@ -180,7 +181,7 @@ export default async function findMessageHandler(
       if (!filter) {
         // No sequence number or filter provided - early return
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage:
             'No sequence number or filter provided. Use --sequence-number or filter options (--sequence-number-gt, --sequence-number-gte, etc.)',
         };
@@ -199,13 +200,13 @@ export default async function findMessageHandler(
 
     // Return success result with JSON output
     return {
-      status: 'success',
+      status: Status.Success,
       outputJson: JSON.stringify(outputData),
     };
   } catch (error: unknown) {
     // Catch and format any errors
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Failed to find messages', error),
     };
   }

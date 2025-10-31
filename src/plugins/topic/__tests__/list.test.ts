@@ -257,7 +257,7 @@ describe('topic plugin - list command', () => {
 
     const result = listTopicsHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Failed to list topics');
     expect(result.errorMessage).toContain('db error');
   });

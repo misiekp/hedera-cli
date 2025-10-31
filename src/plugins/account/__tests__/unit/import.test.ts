@@ -3,6 +3,7 @@ import type { ImportAccountOutput } from '../../commands/import';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import type { CoreApi } from '../../../../core/core-api/core-api.interface';
 import type { HederaMirrornodeService } from '../../../../core/services/mirrornode/hedera-mirrornode-service.interface';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeArgs,
@@ -78,7 +79,7 @@ describe('account plugin - import command (ADR-003)', () => {
       }),
     );
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     const output: ImportAccountOutput = JSON.parse(result.outputJson!);
@@ -119,7 +120,7 @@ describe('account plugin - import command (ADR-003)', () => {
 
     const result = await importAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain(
       "Account with name 'test' already exists",
@@ -157,7 +158,7 @@ describe('account plugin - import command (ADR-003)', () => {
 
     const result = await importAccountHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBeDefined();
     expect(result.errorMessage).toContain('Failed to import account');
     expect(result.errorMessage).toContain('mirror down');

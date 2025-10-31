@@ -2,6 +2,7 @@
  * Unit Tests for State Clear Command
  */
 import clearState from '../../commands/clear/handler';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeArgs,
   makeLogger,
@@ -29,7 +30,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -50,7 +51,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain(
         'This will clear all data in namespace: accounts',
       );
@@ -67,7 +68,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -83,7 +84,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -101,7 +102,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain(
         'This will clear ALL state data across all plugins',
       );
@@ -115,7 +116,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -138,7 +139,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to clear state data');
       expect(result.outputJson).toBeUndefined();
     });
@@ -156,7 +157,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to clear state data');
       expect(result.outputJson).toBeUndefined();
     });
@@ -169,7 +170,7 @@ describe('State Clear Command', () => {
 
       const result = clearState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(() => JSON.parse(result.outputJson!)).not.toThrow();
     });
 

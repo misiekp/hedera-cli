@@ -5,6 +5,7 @@
  */
 import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { Status } from '../../../../core/shared/constants';
 import { CoreApi } from '../../../../core/core-api/core-api.interface';
 import { Logger } from '../../../../core/services/logger/logger-service.interface';
 import { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
@@ -433,12 +434,12 @@ export default async function createTokenFromFileHandler(
     };
 
     return {
-      status: 'success',
+      status: Status.Success,
       outputJson: JSON.stringify(outputData),
     };
   } catch (error: unknown) {
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Failed to create token from file', error),
     };
   }

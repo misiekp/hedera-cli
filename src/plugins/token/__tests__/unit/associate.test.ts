@@ -7,6 +7,7 @@ import { associateTokenHandler } from '../../commands/associate';
 import { ZustandTokenStateHelper } from '../../zustand-state-helper';
 import type { TransactionResult } from '../../../../core/services/tx-execution/tx-execution-service.interface';
 import type { AssociateTokenOutput } from '../../commands/associate';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeLogger,
   makeApiMocks,
@@ -73,7 +74,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
@@ -146,7 +147,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
@@ -216,7 +217,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
@@ -248,7 +249,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('account: Required');
       expect(result.outputJson).toBeUndefined();
     });
@@ -273,7 +274,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('token: Required');
       expect(result.outputJson).toBeUndefined();
     });
@@ -298,7 +299,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Invalid command parameters');
       expect(result.outputJson).toBeUndefined();
     });
@@ -353,7 +354,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toBe('Token association failed');
       expect(result.outputJson).toBeUndefined();
     });
@@ -393,7 +394,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to associate token');
       expect(result.outputJson).toBeUndefined();
     });
@@ -438,7 +439,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to associate token');
       expect(result.outputJson).toBeUndefined();
     });
@@ -493,7 +494,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;
@@ -577,7 +578,7 @@ describe('associateTokenHandler', () => {
 
       // Assert - ADR-003 compliance: check CommandExecutionResult
       expect(result).toBeDefined();
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!) as AssociateTokenOutput;

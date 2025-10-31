@@ -33,7 +33,6 @@ export type {
   CommandOutputSpec,
   PluginContext,
   PluginStateSchema,
-  CommandStatus,
   CommandExecutionResult,
   CommandHandler,
 } from './plugins/plugin.types';

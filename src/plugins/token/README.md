@@ -147,13 +147,15 @@ This plugin migrates the following commands from the old architecture:
 The plugin includes comprehensive tests following ADR-003 patterns:
 
 ```typescript
+import { Status } from '../../../core/shared/constants';
+
 // Example ADR-003 compliant test
 describe('Token Plugin ADR-003 Compliance', () => {
   test('token create command returns CommandExecutionResult', async () => {
     const result = await createTokenHandler(mockArgs);
 
     // Assert structure
-    expect(result.status).toBe('success');
+    expect(result.status).toBe(Status.Success);
     expect(result.outputJson).toBeDefined();
 
     // Assert output format

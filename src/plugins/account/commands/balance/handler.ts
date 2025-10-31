@@ -6,6 +6,7 @@
 import { TokenBalance } from '../../../../../types';
 import { CommandHandlerArgs } from '../../../../core/plugins/plugin.interface';
 import { CommandExecutionResult } from '../../../../core/plugins/plugin.types';
+import { Status } from '../../../../core/shared/constants';
 import { formatError } from '../../../../utils/errors';
 import { ZustandAccountStateHelper } from '../../zustand-state-helper';
 import { AccountBalanceOutput } from './output';
@@ -64,21 +65,21 @@ export default async function getAccountBalance(
         }
       } catch (error: unknown) {
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage: formatError('Could not fetch token balances', error),
         };
       }
     }
 
     return {
-      status: 'success',
+      status: Status.Success,
       outputJson: JSON.stringify(outputData, (key, value): unknown =>
         typeof value === 'bigint' ? value.toString() : value,
       ),
     };
   } catch (error: unknown) {
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Failed to get account balance', error),
     };
   }

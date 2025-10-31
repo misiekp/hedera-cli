@@ -2,6 +2,7 @@
  * Unit Tests for State List Command
  */
 import listState from '../../commands/list/handler';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeArgs,
   makeLogger,
@@ -26,7 +27,7 @@ describe('State List Command', () => {
 
       const result = listState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -43,7 +44,7 @@ describe('State List Command', () => {
 
       const result = listState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -60,7 +61,7 @@ describe('State List Command', () => {
 
       const result = listState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -77,7 +78,7 @@ describe('State List Command', () => {
 
       const result = listState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -101,7 +102,7 @@ describe('State List Command', () => {
 
       const result = listState(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to list state data');
       expect(result.outputJson).toBeUndefined();
     });
@@ -119,7 +120,7 @@ describe('State List Command', () => {
 
       const result = listState(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to list state data');
       expect(result.outputJson).toBeUndefined();
     });
@@ -132,7 +133,7 @@ describe('State List Command', () => {
 
       const result = listState(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(() => JSON.parse(result.outputJson!)).not.toThrow();
     });
 

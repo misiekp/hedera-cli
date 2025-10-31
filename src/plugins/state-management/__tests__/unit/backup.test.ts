@@ -2,6 +2,7 @@
  * Unit Tests for State Backup Command
  */
 import stateBackup from '../../commands/backup/handler';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeArgs,
   makeLogger,
@@ -43,7 +44,7 @@ describe('State Backup Command', () => {
 
       const result = stateBackup(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -60,7 +61,7 @@ describe('State Backup Command', () => {
 
       const result = stateBackup(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -74,7 +75,7 @@ describe('State Backup Command', () => {
 
       const result = stateBackup(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -118,7 +119,7 @@ describe('State Backup Command', () => {
 
       const result = stateBackup(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to create backup');
       expect(result.outputJson).toBeUndefined();
     });
@@ -133,7 +134,7 @@ describe('State Backup Command', () => {
 
       const result = stateBackup(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to create backup');
       expect(result.outputJson).toBeUndefined();
     });
@@ -150,7 +151,7 @@ describe('State Backup Command', () => {
 
       const result = stateBackup(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to create backup');
       expect(result.outputJson).toBeUndefined();
     });
@@ -163,7 +164,7 @@ describe('State Backup Command', () => {
 
       const result = stateBackup(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(() => JSON.parse(result.outputJson!)).not.toThrow();
     });
 

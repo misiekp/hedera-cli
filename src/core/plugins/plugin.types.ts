@@ -7,6 +7,7 @@ import { StateService } from '../services/state/state-service.interface';
 import { ConfigService } from '../services/config/config-service.interface';
 import { Logger } from '../services/logger/logger-service.interface';
 import { CommandHandlerArgs } from './plugin.interface';
+import { Status } from '../shared/constants';
 
 /**
  * Plugin manifest structure
@@ -79,16 +80,11 @@ export interface PluginContext {
 }
 
 /**
- * Command execution status
- */
-export type CommandStatus = 'success' | 'failure' | 'partial';
-
-/**
  * Command execution result
  * Returned by handlers that follow ADR-003 contract
  */
 export interface CommandExecutionResult {
-  status: CommandStatus;
+  status: Status;
   /** Optional, present when status !== 'success'; intended for humans */
   errorMessage?: string;
   /** JSON string conforming to the manifest-declared output schema */

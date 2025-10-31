@@ -2,6 +2,7 @@
  * Unit Tests for State Stats Command
  */
 import stateStats from '../../commands/stats/handler';
+import { Status } from '../../../../core/shared/constants';
 import {
   makeArgs,
   makeLogger,
@@ -26,7 +27,7 @@ describe('State Stats Command', () => {
 
       const result = stateStats(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -43,7 +44,7 @@ describe('State Stats Command', () => {
 
       const result = stateStats(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -64,7 +65,7 @@ describe('State Stats Command', () => {
 
       const result = stateStats(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(result.outputJson).toBeDefined();
 
       const output = JSON.parse(result.outputJson!);
@@ -106,7 +107,7 @@ describe('State Stats Command', () => {
 
       const result = stateStats(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to get statistics');
       expect(result.outputJson).toBeUndefined();
     });
@@ -124,7 +125,7 @@ describe('State Stats Command', () => {
 
       const result = stateStats(args);
 
-      expect(result.status).toBe('failure');
+      expect(result.status).toBe(Status.Failure);
       expect(result.errorMessage).toContain('Failed to get statistics');
       expect(result.outputJson).toBeUndefined();
     });
@@ -137,7 +138,7 @@ describe('State Stats Command', () => {
 
       const result = stateStats(args);
 
-      expect(result.status).toBe('success');
+      expect(result.status).toBe(Status.Success);
       expect(() => JSON.parse(result.outputJson!)).not.toThrow();
     });
 

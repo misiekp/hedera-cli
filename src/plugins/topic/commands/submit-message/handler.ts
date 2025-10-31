@@ -4,6 +4,7 @@
  */
 import { CommandHandlerArgs } from '../../../../core';
 import { CommandExecutionResult } from '../../../../core';
+import { Status } from '../../../../core/shared/constants';
 import type { TransactionResult } from '../../../../core';
 import { formatError } from '../../../../utils/errors';
 import { ZustandTopicStateHelper } from '../../zustand-state-helper';
@@ -49,7 +50,7 @@ export default async function submitMessageHandler(
 
     if (!topicData) {
       return {
-        status: 'failure',
+        status: Status.Failure,
         errorMessage: `Topic not found with ID or alias: ${topicId}`,
       };
     }
@@ -80,7 +81,7 @@ export default async function submitMessageHandler(
       // Step 5: Validate that sequence number is present (required field)
       if (!txResult.topicSequenceNumber) {
         return {
-          status: 'failure',
+          status: Status.Failure,
           errorMessage:
             'Message submitted but sequence number not returned by network',
         };
@@ -97,20 +98,20 @@ export default async function submitMessageHandler(
 
       // Return success result with JSON output
       return {
-        status: 'success',
+        status: Status.Success,
         outputJson: JSON.stringify(outputData),
       };
     } else {
       // Transaction execution failed
       return {
-        status: 'failure',
+        status: Status.Failure,
         errorMessage: 'Failed to submit message',
       };
     }
   } catch (error: unknown) {
     // Catch and format any errors
     return {
-      status: 'failure',
+      status: Status.Failure,
       errorMessage: formatError('Failed to submit message', error),
     };
   }

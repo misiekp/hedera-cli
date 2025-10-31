@@ -275,7 +275,7 @@ describe('topic plugin - create command', () => {
 
     const result = await createTopicHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toBe('Failed to create topic');
   });
 
@@ -304,7 +304,7 @@ describe('topic plugin - create command', () => {
 
     const result = await createTopicHandler(args);
 
-    expect(result.status).toBe('failure');
+    expect(result.status).toBe(Status.Failure);
     expect(result.errorMessage).toContain('Failed to create topic');
     expect(result.errorMessage).toContain('network error');
   });
