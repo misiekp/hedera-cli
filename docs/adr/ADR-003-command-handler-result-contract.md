@@ -37,11 +37,16 @@ Introduce a result-oriented contract for command handlers and shift output, vali
 ### Command Handler Result Type
 
 ```ts
-export type CommandStatus = 'success' | 'failure' | 'partial';
+export enum Status {
+  Success = 'success',
+  Failure = 'failure',
+}
+
+export type CommandStatus = Status;
 
 export interface CommandExecutionResult {
   status: CommandStatus;
-  /** Optional, present when status !== 'success'; intended for humans */
+  /** Optional, present when status !== Status.Success; intended for humans */
   errorMessage?: string;
   /** JSON string conforming to the manifest-declared output schema */
   outputJson?: string;
@@ -50,7 +55,7 @@ export interface CommandExecutionResult {
 
 Notes:
 
-- `partial` allows handlers to indicate that some work was completed but not all; the CLI will map this to a distinct exit code.
+- `CommandStatus` uses the `Status` enum from `src/core/shared/constants.ts` for type safety and consistency.
 - `outputJson` must be a JSON string; the CLI is the sole owner of parsing/validation/formatting.
 
 ### Plugin Manifest Additions
@@ -108,8 +113,8 @@ Plugins may throw these as-is. The CLI will map them to exit codes and user-frie
 
 ### Exit Code Policy
 
-- 0 – Success (`status: 'success'`)
-- 1 – Handler-declared failure (`status: 'failure'` or Core exception)
+- 0 – Success (`status: Status.Success`)
+- 1 – Handler-declared failure (`status: Status.Failure` or Core exception)
 
 Exit codes within ranges may be refined later; the mapping lives centrally in Core/CLI.
 

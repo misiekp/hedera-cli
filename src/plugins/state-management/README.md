@@ -6,7 +6,7 @@ A plugin for managing state data across all plugins in the Hedera CLI. This plug
 
 This plugin is fully compliant with [ADR-003: Result-Oriented Command Handler Contract](../docs/adr/ADR-003-command-handler-result-contract.md). All commands return structured `CommandExecutionResult` objects with:
 
-- **Status**: `success`, `failure`, or `partial`
+- **Status**: Uses `Status` enum from `src/core/shared/constants.ts` (`Status.Success` or `Status.Failure`)
 - **Output JSON**: Validated against Zod schemas
 - **Human Templates**: Handlebars templates for user-friendly output
 - **Error Messages**: Detailed error information when operations fail

@@ -631,6 +631,7 @@ const TRANSACTION_ID_JSON_SCHEMA = zodToJsonSchema(TransactionIdSchema);
 
 ```typescript
 import { MyCommandOutputSchema } from './output';
+import { Status } from '../../core/shared/constants';
 
 export async function myCommandHandler(args: CommandHandlerArgs) {
   // ... command logic ...
@@ -645,7 +646,7 @@ export async function myCommandHandler(args: CommandHandlerArgs) {
   try {
     const validatedResult = MyCommandOutputSchema.parse(result);
     return {
-      status: 'success',
+      status: Status.Success,
       outputJson: JSON.stringify(validatedResult),
     };
   } catch (error) {
